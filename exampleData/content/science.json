@@ -1,0 +1,89 @@
+{
+    "subject": "Science",
+    "grade": 10,
+    "topics": [
+        {
+            "name": "Physics",
+            "subtopics": [
+                {
+                    "name": "Motion and Forces",
+                    "concepts": [
+                        {
+                            "name": "Newton's Laws of Motion",
+                            "summary": "Newton's three laws of motion describe the relationship between forces acting on a body and the motion of that body. They are fundamental principles that explain how objects move and interact with each other.",
+                            "steps": [
+                                "State Newton's First Law (Law of Inertia)",
+                                "Explain Newton's Second Law (F=ma)",
+                                "Describe Newton's Third Law (Action-Reaction)",
+                                "Apply the laws to real-world examples"
+                            ],
+                            "questions": [
+                                {
+                                    "question": "What is Newton's First Law of Motion?",
+                                    "acceptable_answers": [
+                                        "An object at rest stays at rest, and an object in motion stays in motion unless acted upon by an external force",
+                                        "Objects maintain their state of motion unless a force acts on them",
+                                        "The law of inertia states that objects resist changes in their motion"
+                                    ],
+                                    "hints": [
+                                        "Think about what happens to objects when no force acts on them",
+                                        "Consider why objects eventually stop moving",
+                                        "Remember that inertia is the tendency to maintain motion"
+                                    ]
+                                },
+                                {
+                                    "question": "What does Newton's Second Law state?",
+                                    "acceptable_answers": [
+                                        "Force equals mass times acceleration (F=ma)",
+                                        "The acceleration of an object is directly proportional to the force applied",
+                                        "The greater the force, the greater the acceleration, for a given mass"
+                                    ],
+                                    "hints": [
+                                        "Consider the relationship between force and motion",
+                                        "Think about how mass affects acceleration",
+                                        "Remember that force causes acceleration"
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Biology",
+            "subtopics": [
+                {
+                    "name": "Cell Biology",
+                    "concepts": [
+                        {
+                            "name": "Cell Structure",
+                            "summary": "Cells are the basic units of life. They contain various organelles that perform specific functions necessary for the cell's survival. Understanding cell structure is fundamental to understanding how living organisms function.",
+                            "steps": [
+                                "Identify the main parts of a cell",
+                                "Explain the function of each organelle",
+                                "Compare plant and animal cells",
+                                "Describe how organelles work together"
+                            ],
+                            "questions": [
+                                {
+                                    "question": "What are the main parts of a cell?",
+                                    "acceptable_answers": [
+                                        "Cell membrane, cytoplasm, nucleus, and organelles",
+                                        "The nucleus, cell membrane, and various organelles",
+                                        "The basic components including membrane, nucleus, and cytoplasm"
+                                    ],
+                                    "hints": [
+                                        "Think about the essential parts needed for life",
+                                        "Consider what protects the cell",
+                                        "Remember that cells need to control their functions"
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+} 
