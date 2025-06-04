@@ -1,4 +1,4 @@
-# NEBedu - Nepali Grade 10 AI Learning Companion 🤖📚
+# NEBedu - AI Learning Companion 🤖📚
 
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
