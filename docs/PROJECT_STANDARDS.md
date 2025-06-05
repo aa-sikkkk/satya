@@ -67,11 +67,16 @@ NEBedu/
 ```json
 {
   "type": "object",
-  "required": ["subject", "topics"],
+  "required": ["subject", "grade", "topics"],
   "properties": {
     "subject": {
       "type": "string",
       "enum": ["Computer Science", "Science", "English"]
+    },
+    "grade": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 12
     },
     "topics": {
       "type": "array",
@@ -91,17 +96,25 @@ NEBedu/
                   "type": "array",
                   "items": {
                     "type": "object",
-                    "required": ["name", "questions"],
+                    "required": ["name", "summary", "steps", "questions"],
                     "properties": {
                       "name": {"type": "string"},
+                      "summary": {"type": "string"},
+                      "steps": {
+                        "type": "array",
+                        "items": {"type": "string"}
+                      },
                       "questions": {
                         "type": "array",
                         "items": {
                           "type": "object",
-                          "required": ["text", "answer", "hints"],
+                          "required": ["question", "acceptable_answers", "hints"],
                           "properties": {
-                            "text": {"type": "string"},
-                            "answer": {"type": "string"},
+                            "question": {"type": "string"},
+                            "acceptable_answers": {
+                              "type": "array",
+                              "items": {"type": "string"}
+                            },
                             "hints": {
                               "type": "array",
                               "items": {"type": "string"}
