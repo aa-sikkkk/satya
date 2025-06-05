@@ -22,6 +22,9 @@ graph TD
     F --> G
     K --> G
 ```
+
+![architecture](https://github.com/user-attachments/assets/37d57fde-2f5e-4800-9769-31b61e684e1a)
+
 *Figure 1: NEBedu System Architecture Diagram*
 
 ### 1. Data Acquisition and Processing Pipeline
