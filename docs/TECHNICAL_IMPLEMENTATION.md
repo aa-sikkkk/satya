@@ -4,25 +4,6 @@
 
 This document provides a detailed technical overview of the NEBedu project's system architecture, elucidating the structure, function, and interaction of its core components. The architecture is designed to support an offline-first, AI-enhanced learning experience with efficient data processing and community-driven content management, optimized for low-resource computing environments.
 
-```mermaid
-graph TD
-    A[Web Crawler Module] --> B(Content Processing and Cleaning Pipeline)
-    B --> C(Structured JSON Dataset Generator)
-    C --> D[Dataset JSON (Cleaned and Structured)]
-    D --> E[NLP Training Module (Google Colab + Huggingface)]
-    E --> F[Export Model (PyTorch/ONX) For Offline Use]
-    F --> G[CLI Learning Application (Offline Use)]
-    G --> H[Students Interacts with questions, hints, answers, etc]
-    H --> I[Local Logging of Response, time, hints used]
-    I --> J[Logging Manager (Local Storage)]
-    J --> G
-    C --> K[JSON Content Repository]
-    K --> L[Community Editor (CLI JSON editor, Validation, Version Control)]
-    L --> K
-    F --> G
-    K --> G
-```
-
 ![architecture](https://github.com/user-attachments/assets/37d57fde-2f5e-4800-9769-31b61e684e1a)
 
 *Figure 1: NEBedu System Architecture Diagram*
@@ -242,23 +223,11 @@ NEBedu/
 ├── docs/
 │   ├── TECHNICAL_IMPLEMENTATION.md
 │   ├── content-explanation.md
-│   ├── FILE_REQUIREMENTS.md
 │   ├── PROJECT_OVERVIEW.md
 │   ├── PROJECT_STANDARDS.md
-│   ├── architecture.drawio.png
-│   ├── PROJECT_MEMORY.md
-│   ├── ACCOUNT_SWITCH_CHECKLIST.md
-│   └── PROJECT_CONTINUATION.md
-│
-├── data/                       # Root for data content
-│   ├── content/
-│   └── raw_content/
-│
-├── tools/                      # Utility scripts (e.g., setup.py, download_model.py)
-├── requirements.txt            # Project dependencies
-├── requirements-dev.txt        # Development dependencies
-├── .gitignore                  # Git ignore file
-└── README.md                   # Project README
+│   ├── architecture.png
+│   ├── TEACHER_GUIDE.md
+│   ├── STUDENT_GUIDE.md
 ```
 
 ## 🔧 Implementation Details
@@ -487,18 +456,6 @@ python scripts/data_collection/crawler.py
 - Model fallback
 - Browser configuration
 
-## [2024-06-XX] Reverse Engineering Workflow for Data Processing
-
-1. Define or obtain a gold standard output JSON for the target schema.
-2. Compare raw input and gold standard output to deduce transformation rules.
-3. Update processor.py (or equivalent) to implement these rules.
-4. Validate the processor output against the gold standard using scripts or tools.
-5. Iterate until the output matches the gold standard exactly.
-6. Use validation scripts and regression tests for future updates.
-
-Account switch: technical documentation continuity maintained.
-
-This document serves as a comprehensive reference for the NEBedu project implementation. It should be updated as the project evolves and new features are added.
 
 ## System Architecture (Updated)
 - **CLI App**: Student-facing, uses Hugging Face models for Q&A, tracks progress, and adapts learning.
@@ -514,7 +471,7 @@ This document serves as a comprehensive reference for the NEBedu project impleme
 3. **content/**: Final, validated JSON files. Only these are used by the app and teacher tools.
 
 ## Content Editor Utilities
-- Functions to add/remove topics, concepts, questions.
+- Functions to add/remove topics, concepts, and questions.
 - Validates content against schema before saving.
 - Only operates on files in `content/`.
 
