@@ -141,7 +141,6 @@ python teacher_tools/content_editor/main.py
   - Size: ~260MB
   - RAM Usage: ~1GB
   - Inference Time: <100ms
-  - Accuracy: 85% on test set
 
 - **T5-small (Hints)**
   - Size: ~150MB
@@ -235,7 +234,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Google Colab](https://colab.research.google.com/) for training infrastructure
 - All contributors and teachers who have helped shape this project
 
-## 📞 Support
+## Support
 
 For support, please:
 1. Check the [documentation](docs/)
