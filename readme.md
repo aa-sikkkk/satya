@@ -159,29 +159,72 @@ python teacher_tools/content_editor/main.py
 ### Content Structure
 ```json
 {
-  "subject": "Computer Science",
-  "topics": [
-    {
-      "name": "Programming",
-      "subtopics": [
-        {
-          "name": "Python Basics",
-          "concepts": [
-            {
-              "name": "Variables",
-              "questions": [
-                {
-                  "text": "What is a variable?",
-                  "answer": "A variable is a container for storing data values.",
-                  "hints": ["Think about storage", "Like a box"]
+  "type": "object",
+  "required": ["subject", "grade", "topics"],
+  "properties": {
+    "subject": {
+      "type": "string",
+      "enum": ["Computer Science", "Science", "English"]
+    },
+    "grade": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 12
+    },
+    "topics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "subtopics"],
+        "properties": {
+          "name": {"type": "string"},
+          "subtopics": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "concepts"],
+              "properties": {
+                "name": {"type": "string"},
+                "concepts": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["name", "summary", "steps", "questions"],
+                    "properties": {
+                      "name": {"type": "string"},
+                      "summary": {"type": "string"},
+                      "steps": {
+                        "type": "array",
+                        "items": {"type": "string"}
+                      },
+                      "questions": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "required": ["question", "acceptable_answers", "hints"],
+                          "properties": {
+                            "question": {"type": "string"},
+                            "acceptable_answers": {
+                              "type": "array",
+                              "items": {"type": "string"}
+                            },
+                            "hints": {
+                              "type": "array",
+                              "items": {"type": "string"}
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
-              ]
+              }
             }
-          ]
+          }
         }
-      ]
+      }
     }
-  ]
+  }
 }
 ```
 
