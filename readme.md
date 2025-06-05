@@ -86,7 +86,7 @@ NEBedu/
 │
 ├── tests/                      # Test suite
 ├── docs/                       # Documentation
-└── tools/                      # Utility scripts
+
 ```
 
 ## 🚀 Installation
