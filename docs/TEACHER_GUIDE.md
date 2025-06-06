@@ -17,7 +17,7 @@ The Community Editor (CLI JSON editor) allows you to view, edit, and validate th
 To start the Content Editor, open your terminal in the project directory and run:
 
 ```bash
-python teacher_tools/content_editor/main.py
+python -m teacher_tools.content_editor.content_editor_cli
 ```
 
 Once started, you will see a menu with options:
