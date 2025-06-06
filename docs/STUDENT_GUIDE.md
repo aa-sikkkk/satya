@@ -18,6 +18,8 @@ To start the NEBedu learning application, open your terminal or command prompt a
 python -m student_app.interface.cli_interface
 ```
 
+https://github.com/user-attachments/assets/7d6d42e0-c1ee-4f3b-9bbc-692cbabe46ec
+
 The application will load and present you with the main menu or the available subjects.
 
 ## 4. Navigating Content
