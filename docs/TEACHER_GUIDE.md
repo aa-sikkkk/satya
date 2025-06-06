@@ -38,7 +38,7 @@ The analytics tools allow you to generate reports on student performance.
 To use the analytics CLI, open your terminal in the project directory and run:
 
 ```bash
-python teacher_tools/analytics/analytics_cli.py
+python -m teacher_tools.analytics.analytics_cli
 ```
 
 This will launch an interactive command-line interface where you can select from the following options:
@@ -57,7 +57,7 @@ The Content Editor automatically validates changes against the JSON schema when 
 To run the standards validator, open your terminal in the project directory and execute:
 
 ```bash
-python scripts/validation/validate_standards.py
+python -m scripts.validation.validate_standards
 ```
 
 This script will report any errors or warnings related to code quality, documentation, naming conventions, and content structure based on the rules defined in `docs/PROJECT_STANDARDS.md`.
@@ -68,7 +68,6 @@ Ensure the content also adheres to the [Content Quality Standards](docs/content-
 
 The NEBedu content is community-editable. You can contribute to improving the content by making changes using the Content Editor and submitting them via the version control system (Git).
 
-*(Briefly explain the process of committing changes and creating a pull request if applicable)*
 
 ## 7. Troubleshooting
 
