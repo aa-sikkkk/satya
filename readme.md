@@ -118,21 +118,17 @@ NEBedu/
    pip install -r requirements.txt
    ```
 
-4. **Run Setup Script**
-   ```bash
-   python tools/setup.py
-   ```
 
 ## 💻 Usage
 
 ### Student Mode
 ```bash
-python student_app/main.py
+python -m student_app.interface.cli_interface
 ```
 
 ### Teacher Mode
 ```bash
-python teacher_tools/content_editor/main.py
+python -m teacher_tools.content_editor.content_editor_cli
 ```
 
 ## 🧠 AI Models
