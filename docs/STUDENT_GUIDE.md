@@ -15,7 +15,7 @@ Your teacher or system administrator will likely install NEBedu for you. If you 
 To start the NEBedu learning application, open your terminal or command prompt and run:
 
 ```bash
-python student_app/main.py
+python -m student_app.interface.cli_interface
 ```
 
 The application will load and present you with the main menu or the available subjects.
