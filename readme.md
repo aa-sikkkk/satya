@@ -1,9 +1,14 @@
 # NEBedu - AI Learning Companion 🤖📚
+<div align="center">
+   <img height="160" width="200" src="https://github.com/user-attachments/assets/211583f9-13b7-4e01-adad-d25a46659ee6">
+</div>
 
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Offline First](https://img.shields.io/badge/Offline-First-green)](https://github.com/yourusername/NEBedu)
-![mNEB](https://github.com/user-attachments/assets/d46e8944-8166-4f63-89c8-d4cf7aa0a6ad)
+
+
+
 
 An offline-first, community-editable AI learning companion for Grade 10 students in Nepal, focusing on Computer Science, Science, and English subjects. Built with lightweight AI models and structured educational content, designed to work in low-resource environments.
 
