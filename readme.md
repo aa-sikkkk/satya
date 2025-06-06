@@ -33,6 +33,8 @@ An offline-first, community-editable AI learning companion for Grade 10 students
 - 🔄 Offline-first functionality
 - 🎯 Adaptive learning paths
 
+https://github.com/user-attachments/assets/7d6d42e0-c1ee-4f3b-9bbc-692cbabe46ec
+
 ### For Teachers
 - 📝 Content management and editing
 - 📊 Student progress analytics
