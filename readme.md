@@ -1,9 +1,15 @@
 # NEBedu - AI Learning Companion 🤖📚
+<div align="center">
+   <img height="180" width="180" src="https://github.com/user-attachments/assets/daa5d212-12b8-49e7-8d72-f8a57a7b0b46">
+</div>
 
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Offline First](https://img.shields.io/badge/Offline-First-green)](https://github.com/yourusername/NEBedu)
-![mNEB](https://github.com/user-attachments/assets/d46e8944-8166-4f63-89c8-d4cf7aa0a6ad)
+
+
+
+
 
 An offline-first, community-editable AI learning companion for Grade 10 students in Nepal, focusing on Computer Science, Science, and English subjects. Built with lightweight AI models and structured educational content, designed to work in low-resource environments.
 
@@ -27,6 +33,8 @@ An offline-first, community-editable AI learning companion for Grade 10 students
 - 📊 Progress tracking and analytics
 - 🔄 Offline-first functionality
 - 🎯 Adaptive learning paths
+
+https://github.com/user-attachments/assets/7d6d42e0-c1ee-4f3b-9bbc-692cbabe46ec
 
 ### For Teachers
 - 📝 Content management and editing
@@ -118,21 +126,17 @@ NEBedu/
    pip install -r requirements.txt
    ```
 
-4. **Run Setup Script**
-   ```bash
-   python tools/setup.py
-   ```
 
 ## 💻 Usage
 
 ### Student Mode
 ```bash
-python student_app/main.py
+python -m student_app.interface.cli_interface
 ```
 
 ### Teacher Mode
 ```bash
-python teacher_tools/content_editor/main.py
+python -m teacher_tools.content_editor.content_editor_cli
 ```
 
 ## 🧠 AI Models
@@ -276,6 +280,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - [Hugging Face](https://huggingface.co/) for DistilBERT and T5-small models
 - [Google Colab](https://colab.research.google.com/) for training infrastructure
+- [Curriculum Development Centre](http://lib.moecdc.gov.np/elibrary/pages/view.php?ref=3726&k=) and [ReadersNepal](Readersnepal.com) for Providing the necessary resources for this project.
 - All contributors and teachers who have helped shape this project
 
 ## Support
