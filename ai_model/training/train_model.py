@@ -42,7 +42,7 @@ class NEBeduMultiTaskTrainer:
     - Hint Generation: T5-small generative model
     - Step Recommendation: DistilBERT classification head
     """
-    def __init__(self, qna_model_name="distilbert-base-uncased", t5_model_name="t5-small", output_dir="models/neb_edu"):
+    def __init__(self, qna_model_name="distilbert-base-uncased", t5_model_name="t5-small", output_dir="ai_model/exported_model"):
         self.qna_model_name = qna_model_name
         self.t5_model_name = t5_model_name
         self.output_dir = output_dir
@@ -268,7 +268,7 @@ def main():
     parser.add_argument(
         "--output-dir",
         type=str,
-        default="models/neb_edu",
+        default="ai_model/exported_model",
         help="Directory to save trained models"
     )
     parser.add_argument(

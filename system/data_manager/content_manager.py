@@ -10,6 +10,7 @@ import json
 import logging
 import shutil
 import datetime
+import difflib
 from typing import Dict, List, Optional, Any
 from jsonschema import validate, ValidationError
 from student_app.progress import progress_manager
@@ -99,7 +100,7 @@ class ContentManager:
         subjects (Dict[str, Dict]): Loaded subject content
     """
     
-    def __init__(self, content_dir: str):
+    def __init__(self, content_dir: str = "scripts/data_collection/data/content"):
         """
         Initialize the content manager.
         
@@ -475,3 +476,144 @@ class ContentManager:
                     print(f"    First concept keys: {list(topic['concepts'][0].keys())}")
                 if topic.get('subtopics'):
                     print(f"    First subtopic keys: {list(topic['subtopics'][0].keys())}")
+
+    def search_content(self, query: str) -> List[Dict[str, Any]]:
+        """
+        Search through all content for relevant information.
+        
+        Args:
+            query (str): The search query
+            
+        Returns:
+            List[Dict[str, Any]]: List of matching content items with subject, topic, concept, and summary
+        """
+        results = []
+        query = query.lower()
+        
+        for subject in self.get_all_subjects():
+            subject_content = self.get_subject(subject)
+            if not subject_content:
+                continue
+                
+            for topic in subject_content.get("topics", []):
+                topic_name = topic.get("name", "")
+                
+                # Search in topic-level concepts
+                for concept in topic.get("concepts", []):
+                    if self._content_matches_query(concept, query):
+                        results.append({
+                            "subject": subject,
+                            "topic": topic_name,
+                            "concept": concept.get("name", ""),
+                            "summary": concept.get("summary", "")
+                        })
+                
+                # Search in subtopics
+                for subtopic in topic.get("subtopics", []):
+                    self._search_in_subtopic(subtopic, subject, topic_name, query, results)
+                    
+        return results
+        
+    def _search_in_subtopic(self, subtopic: Dict, subject: str, topic: str, query: str, results: List[Dict]) -> None:
+        """
+        Recursively search through a subtopic and its nested subtopics.
+        
+        Args:
+            subtopic (Dict): The subtopic to search
+            subject (str): The subject name
+            topic (str): The topic name
+            query (str): The search query
+            results (List[Dict]): List to append results to
+        """
+        # Search in concepts
+        for concept in subtopic.get("concepts", []):
+            if self._content_matches_query(concept, query):
+                results.append({
+                    "subject": subject,
+                    "topic": topic,
+                    "concept": concept.get("name", ""),
+                    "summary": concept.get("summary", "")
+                })
+        
+        # Recursively search in nested subtopics
+        for nested_subtopic in subtopic.get("subtopics", []):
+            self._search_in_subtopic(nested_subtopic, subject, topic, query, results)
+            
+    def _content_matches_query(self, content: Dict, query: str) -> bool:
+        """
+        Check if content matches the search query using fuzzy matching.
+        """
+        # Fuzzy match threshold
+        threshold = 0.6
+        query_lc = query.lower()
+        # Check in name
+        name = content.get("name", "").lower()
+        if difflib.SequenceMatcher(None, query_lc, name).ratio() > threshold:
+            return True
+        # Check in summary
+        summary = content.get("summary", "").lower()
+        if difflib.SequenceMatcher(None, query_lc, summary).ratio() > threshold:
+            return True
+        # Search in steps
+        for step in content.get("steps", []):
+            if difflib.SequenceMatcher(None, query_lc, step.lower()).ratio() > threshold:
+                return True
+        # Search in questions
+        for question in content.get("questions", []):
+            if isinstance(question, dict):
+                qtext = question.get("question", "").lower()
+                if difflib.SequenceMatcher(None, query_lc, qtext).ratio() > threshold:
+                    return True
+                for answer in question.get("acceptable_answers", []):
+                    if difflib.SequenceMatcher(None, query_lc, answer.lower()).ratio() > threshold:
+                        return True
+            elif isinstance(question, str):
+                if difflib.SequenceMatcher(None, query_lc, question.lower()).ratio() > threshold:
+                    return True
+        # Fallback: keyword logic
+        keywords = query_lc.split()
+        if all(word in name for word in keywords):
+            return True
+        if all(word in summary for word in keywords):
+            return True
+        for step in content.get("steps", []):
+            if all(word in step.lower() for word in keywords):
+                return True
+        for question in content.get("questions", []):
+            if isinstance(question, dict):
+                if all(word in question.get("question", "").lower() for word in keywords):
+                    return True
+                for answer in question.get("acceptable_answers", []):
+                    if all(word in answer.lower() for word in keywords):
+                        return True
+            elif isinstance(question, str):
+                if all(word in question.lower() for word in keywords):
+                    return True
+        return False
+
+    def get_default_context(self) -> str:
+        """
+        Get a default context for when no specific content is found.
+        This is used as a fallback when the search returns no results.
+        
+        Returns:
+            str: A default context string
+        """
+        # Try to find a general introduction concept in any subject
+        for subject in self.get_all_subjects():
+            subject_content = self.get_subject(subject)
+            if not subject_content:
+                continue
+                
+            for topic in subject_content.get("topics", []):
+                for concept in topic.get("concepts", []):
+                    if "introduction" in concept.get("name", "").lower():
+                        return concept.get("summary", "")
+                        
+        # If no introduction found, return a generic context
+        return "This is a learning system for Grade 10 students. Please ask a specific question about your subjects."
+
+def get_most_relevant_sentence(summary, question):
+    sentences = summary.split('. ')
+    best = max(sentences, key=lambda s: difflib.SequenceMatcher(None, s.lower(), question.lower()).ratio())
+    return best

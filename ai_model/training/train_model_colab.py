@@ -42,7 +42,7 @@ class NEBeduMultiTaskTrainer:
     - Hint Generation: T5-small generative model
     - Step Recommendation: DistilBERT classification head
     """
-    def __init__(self, qna_model_name="distilbert-base-uncased", t5_model_name="t5-small", output_dir="models/neb_edu"):
+    def __init__(self, qna_model_name="distilbert-base-uncased", t5_model_name="t5-small", output_dir="ai_model/exported_model"):
         self.qna_model_name = qna_model_name
         self.t5_model_name = t5_model_name
         self.output_dir = output_dir
@@ -259,8 +259,8 @@ def train_in_colab():
     """Main training function for Colab environment."""
     try:
         os.makedirs('data/content', exist_ok=True)
-        os.makedirs('models/neb_edu', exist_ok=True)
-        trainer = NEBeduMultiTaskTrainer(output_dir='models/neb_edu')
+        os.makedirs('ai_model/exported_model', exist_ok=True)
+        trainer = NEBeduMultiTaskTrainer(output_dir='ai_model/exported_model')
         # QnA
         qna_dataset = trainer.prepare_qna_dataset('data/content')
         trainer.train_qna(qna_dataset, epochs=3, batch_size=8)
@@ -282,7 +282,7 @@ def verify_training_completion():
     print("="*50)
     
     # Check QnA model
-    qna_path = "models/neb_edu/qna"
+    qna_path = "ai_model/exported_model/qna"
     if os.path.exists(qna_path):
         print("\n✅ QnA Model files found:")
         for file in os.listdir(qna_path):
@@ -291,7 +291,7 @@ def verify_training_completion():
         print("\n❌ QnA Model files not found!")
     
     # Check Hint model
-    hint_path = "models/neb_edu/hint"
+    hint_path = "ai_model/exported_model/hint"
     if os.path.exists(hint_path):
         print("\n✅ Hint Model files found:")
         for file in os.listdir(hint_path):
