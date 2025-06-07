@@ -280,6 +280,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - [Hugging Face](https://huggingface.co/) for DistilBERT and T5-small models
 - [Google Colab](https://colab.research.google.com/) for training infrastructure
+- [Curriculum Development Centre](http://lib.moecdc.gov.np/elibrary/pages/view.php?ref=3726&k=) and [ReadersNepal](Readersnepal.com) for Providing the necessary resources for this project.
 - All contributors and teachers who have helped shape this project
 
 ## Support
