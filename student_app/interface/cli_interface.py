@@ -30,7 +30,11 @@ from system.security.security_utils import validate_username, sanitize_filepath,
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('nebedu.log'),  # Log to file instead of console
+        logging.NullHandler()  # Prevent logs from being displayed
+    ]
 )
 logger = logging.getLogger(__name__)
 

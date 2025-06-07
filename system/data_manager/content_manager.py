@@ -16,7 +16,13 @@ from jsonschema import validate, ValidationError
 from student_app.progress import progress_manager
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    handlers=[
+        logging.FileHandler('nebedu.log'),  # Log to file instead of console
+        logging.NullHandler()  # Prevent logs from being displayed
+    ]
+)
 logger = logging.getLogger(__name__)
 
 # Maximally flexible concept schema: only 'name' is required, all else is optional, and 'questions' can be any array of objects or strings

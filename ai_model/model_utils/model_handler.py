@@ -35,15 +35,8 @@ file_handler.setLevel(logging.DEBUG)
 file_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 file_handler.setFormatter(file_formatter)
 
-# Create console handler
-console_handler = logging.StreamHandler(sys.stdout)
-console_handler.setLevel(logging.INFO)
-console_formatter = logging.Formatter('%(levelname)s - %(message)s')
-console_handler.setFormatter(console_formatter)
-
-# Add handlers to logger
+# Add only file handler to logger
 logger.addHandler(file_handler)
-logger.addHandler(console_handler)
 logger.setLevel(logging.DEBUG)
 
 # Log startup with more details
