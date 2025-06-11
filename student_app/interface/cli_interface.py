@@ -33,7 +33,7 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.FileHandler('nebedu.log'),  # Log to file instead of console
-        logging.NullHandler()  # Prevent logs from being displayed
+        logging.StreamHandler()  # Also log to console for debugging
     ]
 )
 logger = logging.getLogger(__name__)
@@ -97,10 +97,30 @@ class CLIInterface:
             model_path (str): Path to model directory
         """
         self.content_manager = ContentManager(content_dir)
-        self.model_handler = ModelHandler(model_path)
+        
+        # Ensure model path exists
+        if not os.path.exists(model_path):
+            raise FileNotFoundError(f"Model directory not found: {model_path}")
+            
+        # Initialize model handler with proper path
+        try:
+            self.model_handler = ModelHandler(model_path)
+            # Pre-load the model to catch any initialization errors
+            self.model_handler.phi2_handler.load_model()
+            logger.info("Model loaded successfully")
+        except Exception as e:
+            logger.error(f"Failed to initialize model: {str(e)}")
+            console.print(Panel(
+                "[red]Error: Could not initialize the AI model. Please check the model files and try again.[/red]",
+                title="Model Error",
+                border_style="red"
+            ))
+            raise
+            
         self.session = PromptSession(key_bindings=bindings)
         self.username = self._prompt_username()
         self._show_welcome_message()
+        self._show_model_info()
         
     def _show_welcome_message(self) -> None:
         """Display welcome message and quick start guide."""
@@ -172,6 +192,32 @@ Type 'back' to return to previous menu
         
         help_text = help_texts.get(context, help_texts["main"])
         console.print(Panel(Markdown(help_text), title="Help", border_style="cyan"))
+        
+    def _show_model_info(self) -> None:
+        """Display information about the current AI model."""
+        try:
+            model_info = self.model_handler.get_model_info()
+            if not model_info:
+                raise ValueError("No model information available")
+                
+            console.print(Panel(
+                f"[bold cyan]Current AI Model:[/bold cyan] {model_info.get('name', 'Phi-2')}\n"
+                f"[bold]Version:[/bold] {model_info.get('version', '1.0')}\n"
+                f"[bold]Quantization:[/bold] {model_info.get('quantization', 'Q4_K_M')}\n"
+                f"[bold]Context Size:[/bold] {model_info.get('context_size', 2048)}\n"
+                f"[bold]Threads:[/bold] {model_info.get('threads', 4)}\n"
+                f"[bold]Temperature:[/bold] {model_info.get('temperature', 0.7)}\n"
+                f"[bold]Top P:[/bold] {model_info.get('top_p', 0.9)}",
+                title="AI Model Information",
+                border_style="cyan"
+            ))
+        except Exception as e:
+            logger.error(f"Error getting model info: {str(e)}")
+            console.print(Panel(
+                "[yellow]Could not retrieve model information. The model may not be properly loaded.[/yellow]",
+                title="Model Warning",
+                border_style="yellow"
+            ))
         
     def _prompt_username(self) -> str:
         """
@@ -356,6 +402,10 @@ Type 'back' to return to previous menu
     def _handle_free_text_question(self, question: str) -> None:
         """Handle free-text questions using the AI model."""
         try:
+            # Ensure model is loaded
+            if not self.model_handler.phi2_handler.llm:
+                self.model_handler.phi2_handler.load_model()
+                
             with console.status("[bold green]Thinking...[/bold green]"):
                 log_resource_usage("Before model inference")
                 
@@ -389,8 +439,15 @@ Type 'back' to return to previous menu
                                 logger.info(f"Using focused context: {context}")
                                 try:
                                     answer, confidence = self.model_handler.get_answer(question, context)
+                                    if not answer or len(answer.strip()) == 0:
+                                        raise ValueError("Model generated empty answer")
                                 except Exception as e:
                                     logger.error(f"Model inference error: {str(e)}")
+                                    console.print(Panel(
+                                        "I'm having trouble generating an answer. Let me show you the relevant content instead:",
+                                        title="Model Error",
+                                        border_style="yellow"
+                                    ))
                                     answer = context
                                     confidence = 0.8
                         else:
@@ -400,8 +457,15 @@ Type 'back' to return to previous menu
                             logger.info(f"Using focused context: {context}")
                             try:
                                 answer, confidence = self.model_handler.get_answer(question, context)
+                                if not answer or len(answer.strip()) == 0:
+                                    raise ValueError("Model generated empty answer")
                             except Exception as e:
                                 logger.error(f"Model inference error: {str(e)}")
+                                console.print(Panel(
+                                    "I'm having trouble generating an answer. Let me show you the relevant content instead:",
+                                    title="Model Error",
+                                    border_style="yellow"
+                                ))
                                 answer = context
                                 confidence = 0.8
                     else:
@@ -414,10 +478,16 @@ Type 'back' to return to previous menu
                         ))
                         try:
                             answer, confidence = self.model_handler.get_answer(question, context)
+                            if not answer or len(answer.strip()) == 0:
+                                raise ValueError("Model generated empty answer")
                         except Exception as e:
                             logger.error(f"Model inference error: {str(e)}")
-                            answer = context
-                            confidence = 0.8
+                            console.print(Panel(
+                                "I'm having trouble generating an answer. Please try rephrasing your question or ask about a specific topic.",
+                                title="Model Error",
+                                border_style="yellow"
+                            ))
+                            return
                 except Exception as e:
                     logger.error(f"Error searching content: {str(e)}")
                     console.print("[red]Error searching content. Please try again.[/red]")
@@ -486,7 +556,17 @@ Type 'back' to return to previous menu
                     
         except Exception as e:
             logger.error(f"Error in _handle_free_text_question: {str(e)}")
-            console.print("[red]I'm having trouble processing your question. Please try again.[/red]")
+            console.print(Panel(
+                "[red]I'm having trouble processing your question. Please try again.[/red]",
+                title="Error",
+                border_style="red"
+            ))
+        finally:
+            # Clean up model resources
+            try:
+                self.model_handler.phi2_handler.cleanup()
+            except Exception as e:
+                logger.error(f"Error cleaning up model: {str(e)}")
             
     def start(self) -> None:
         """Start the CLI interface."""
@@ -502,6 +582,7 @@ Type 'back' to return to previous menu
                         "Export Progress",
                         "Import Progress",
                         "Reset Progress",
+                        "Switch Model",
                         "Exit"
                     ]
                 )
@@ -517,6 +598,8 @@ Type 'back' to return to previous menu
                     self._import_progress()
                 elif choice == "Reset Progress":
                     self._reset_progress()
+                elif choice == "Switch Model":
+                    self._switch_model()
                 else:
                     if Confirm.ask("Are you sure you want to exit?"):
                         console.print("[bold green]Thank you for using NEBedu. Goodbye![/bold green]")
@@ -758,8 +841,53 @@ Type 'back' to return to previous menu
             log_resource_usage("After progress reset")
             console.print("[green]Progress has been reset.[/green]")
 
+    def _switch_model(self) -> None:
+        """Switch between available AI models."""
+        try:
+            # Get available models
+            available_models = self.model_handler.get_available_models()
+            if not available_models:
+                console.print("[yellow]No other models available.[/yellow]")
+                return
+
+            # Show current model
+            current_model = self.model_handler.get_model_info()['name']
+            console.print(f"\n[bold]Current Model:[/bold] {current_model}")
+
+            # Create menu for model selection
+            model_choice = self._create_menu(
+                "Select a Model",
+                available_models
+            )
+
+            # Switch to selected model
+            if Confirm.ask(f"Switch to {model_choice}?"):
+                self.model_handler.switch_model(model_choice)
+                console.print(f"[green]Switched to {model_choice}[/green]")
+                self._show_model_info()
+        except Exception as e:
+            logger.error(f"Error switching model: {str(e)}")
+            console.print("[red]Failed to switch model. Please try again.[/red]")
+
 if __name__ == "__main__":
-    content_dir = "scripts/data_collection/data/content"
-    model_path = "ai_model/exported_model"
-    cli = CLIInterface(content_dir, model_path)
-    cli.start() 
+    try:
+        # Use absolute paths
+        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        content_dir = os.path.join(base_dir, "scripts", "data_collection", "data", "content")
+        model_path = os.path.join(base_dir, "ai_model", "exported_model")
+        
+        # Verify paths exist
+        if not os.path.exists(content_dir):
+            raise FileNotFoundError(f"Content directory not found: {content_dir}")
+        if not os.path.exists(model_path):
+            raise FileNotFoundError(f"Model directory not found: {model_path}")
+            
+        cli = CLIInterface(content_dir, model_path)
+        cli.start()
+    except Exception as e:
+        console.print(Panel(
+            f"[red]Error initializing application: {str(e)}[/red]",
+            title="Fatal Error",
+            border_style="red"
+        ))
+        sys.exit(1) 
