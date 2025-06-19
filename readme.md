@@ -48,6 +48,7 @@ https://github.com/user-attachments/assets/7d6d42e0-c1ee-4f3b-9bbc-692cbabe46ec
 1. **AI Engine**
    - DistilBERT for Q&A (optimized for 4GB RAM)
    - T5-small for hint generation
+   - **Phi 2 for advanced reasoning and adaptive learning**
    - Offline model inference
    - Caching system for performance
 
@@ -62,6 +63,8 @@ https://github.com/user-attachments/assets/7d6d42e0-c1ee-4f3b-9bbc-692cbabe46ec
    - File operation safety
    - Access control
    - Audit logging
+
+---
 
 ## 📁 Project Structure
 
@@ -143,14 +146,19 @@ python -m teacher_tools.content_editor.content_editor_cli
 
 ### Model Specifications
 - **DistilBERT (Q&A)**
-  - Size: ~260MB
-  - RAM Usage: ~1GB
-  - Inference Time: <100ms
+  - Size: ~507MB
+  - RAM Usage: ~1.0GB
+  - Inference Time: ~5.2 seconds
 
 - **T5-small (Hints)**
-  - Size: ~150MB
+  - Size: ~462MB
   - RAM Usage: ~500MB
-  - Inference Time: <200ms
+  - Inference Time: ~5.3 seconds
+
+- **Phi 2 (Advanced Reasoning and Adaptive Learning)**
+  - Size: ~1.66GB
+  - RAM Usage: ~2.3GB
+  - Inference Time: ~16.56–30.51 seconds (depending on complexity)
 
 ### Training Process
 1. Data collection and preprocessing
