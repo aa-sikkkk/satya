@@ -26,6 +26,7 @@ from ai_model.model_utils.model_handler import ModelHandler
 from student_app.progress import progress_manager
 from system.performance.performance_utils import timeit, log_resource_usage
 from system.security.security_utils import validate_username, sanitize_filepath, log_security_event, validate_content_input
+from student_app.learning.openai_proxy_client import OpenAIProxyClient
 
 # Configure logging
 logging.basicConfig(
@@ -86,6 +87,7 @@ class CLIInterface:
         model_handler (ModelHandler): Handler for AI model
         session (PromptSession): Interactive prompt session
         username (str): The entered username
+        openai_client (OpenAIProxyClient): Client for OpenAI proxy
     """
     
     def __init__(self, content_dir: str, model_path: str):
@@ -121,6 +123,10 @@ class CLIInterface:
         self.username = self._prompt_username()
         self._show_welcome_message()
         self._show_model_info()
+        # Configure OpenAI proxy client with environment variables or defaults
+        proxy_url = os.getenv("OPENAI_PROXY_URL")
+        proxy_api_key = os.getenv("OPENAI_PROXY_KEY")
+        self.openai_client = OpenAIProxyClient(proxy_url=proxy_url, api_key=proxy_api_key)
         
     def _show_welcome_message(self) -> None:
         """Display welcome message and quick start guide."""
@@ -522,7 +528,18 @@ Type 'back' to return to previous menu
                 title="Answer",
                 border_style="green"
             ))
-            
+
+            # Offer to ask OpenAI if confidence is low or on user request
+            if confidence < 0.7:
+                if Confirm.ask("Would you like to ask OpenAI (online) for another answer?"):
+                    with console.status("[bold blue]Contacting OpenAI proxy...[/bold blue]"):
+                        openai_answer = self.openai_client.ask(question, user_id=self.username)
+                    console.print(Panel(
+                        f"[bold blue]{openai_answer}[/bold blue]",
+                        title="OpenAI Answer (Online)",
+                        border_style="blue"
+                    ))
+
             # Show hints
             try:
                 if 'hints' in locals() and hints:
@@ -578,6 +595,7 @@ Type 'back' to return to previous menu
                     [
                         "Browse Subjects",
                         "Ask a Question",
+                        "Search with OpenAI (Online)",
                         "View Progress",
                         "Export Progress",
                         "Import Progress",
@@ -590,6 +608,8 @@ Type 'back' to return to previous menu
                     self._browse_subjects()
                 elif choice == "Ask a Question":
                     self._ask_question()
+                elif choice == "Search with OpenAI (Online)":
+                    self._search_with_openai()
                 elif choice == "View Progress":
                     self._view_progress()
                 elif choice == "Export Progress":
@@ -868,6 +888,20 @@ Type 'back' to return to previous menu
         except Exception as e:
             logger.error(f"Error switching model: {str(e)}")
             console.print("[red]Failed to switch model. Please try again.[/red]")
+
+    def _search_with_openai(self) -> None:
+        """Prompt the user for a question and search using the OpenAI proxy."""
+        while True:
+            question = Prompt.ask("Enter your question for OpenAI (or 'back' to return)")
+            if question.strip().lower() == 'back':
+                break
+            with console.status("[bold blue]Contacting OpenAI proxy...[/bold blue]"):
+                answer = self.openai_client.ask(question, user_id=self.username)
+            console.print(Panel(
+                f"[bold blue]{answer}[/bold blue]",
+                title="OpenAI Answer (Online)",
+                border_style="blue"
+            ))
 
 if __name__ == "__main__":
     try:

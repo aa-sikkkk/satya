@@ -7,10 +7,6 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Offline First](https://img.shields.io/badge/Offline-First-green)](https://github.com/yourusername/NEBedu)
 
-
-
-
-
 An offline-first, community-editable AI learning companion for Grade 10 students in Nepal, focusing on Computer Science, Science, and English subjects. Built with lightweight AI models and structured educational content, designed to work in low-resource environments.
 
 ## 📋 Table of Contents
@@ -21,9 +17,11 @@ An offline-first, community-editable AI learning companion for Grade 10 students
 - [Usage](#-usage)
 - [AI Models](#-ai-models)
 - [Content Management](#-content-management)
+- [OpenAI Proxy Integration (Online Q&A)](#openai-proxy-integration-online-qa)
 - [Development](#-development)
 - [Contributing](#-contributing)
 - [License](#-license)
+- [FAQ](#faq)
 
 ## ✨ Features
 
@@ -33,6 +31,7 @@ An offline-first, community-editable AI learning companion for Grade 10 students
 - 📊 Progress tracking and analytics
 - 🔄 Offline-first functionality
 - 🎯 Adaptive learning paths
+- 🌐 **Search with OpenAI (Online):** Ask any question and get an answer from OpenAI (if enabled by your school/teacher)
 
 https://github.com/user-attachments/assets/7d6d42e0-c1ee-4f3b-9bbc-692cbabe46ec
 
@@ -51,6 +50,7 @@ https://github.com/user-attachments/assets/7d6d42e0-c1ee-4f3b-9bbc-692cbabe46ec
    - **Phi 2 for advanced reasoning and adaptive learning**
    - Offline model inference
    - Caching system for performance
+   - **OpenAI Proxy Integration for online Q&A**
 
 2. **Data Management**
    - JSON-based content structure
@@ -63,6 +63,7 @@ https://github.com/user-attachments/assets/7d6d42e0-c1ee-4f3b-9bbc-692cbabe46ec
    - File operation safety
    - Access control
    - Audit logging
+   - **OpenAI API key never stored on client**
 
 ---
 
@@ -70,6 +71,7 @@ https://github.com/user-attachments/assets/7d6d42e0-c1ee-4f3b-9bbc-692cbabe46ec
 
 ```
 NEBedu/
+├── OpenAi_Proxy/openai_proxy # FastAPI-based OpenAI proxy server (for secure online Q&A) 
 ├── scripts/
 │   └── data_collection/
 │       └── data/
@@ -129,6 +131,7 @@ NEBedu/
    pip install -r requirements.txt
    ```
 
+---
 
 ## 💻 Usage
 
@@ -141,6 +144,8 @@ python -m student_app.interface.cli_interface
 ```bash
 python -m teacher_tools.content_editor.content_editor_cli
 ```
+
+---
 
 ## 🧠 AI Models
 
@@ -165,6 +170,8 @@ python -m teacher_tools.content_editor.content_editor_cli
 2. Model fine-tuning on Google Colab
 3. Model optimization and quantization
 4. Export for offline use
+
+---
 
 ## 📚 Content Management
 
@@ -246,6 +253,33 @@ python -m teacher_tools.content_editor.content_editor_cli
 - Duplicate detection
 - Reference validation
 
+---
+
+## 🛰️ OpenAI Proxy Integration (Online Q&A)
+
+NEBedu supports secure, online Q&A using OpenAI models via a proxy server. This allows students to ask any question and get an answer from OpenAI, **without ever exposing the OpenAI API key to the user**.
+
+### How It Works (for Students and Teachers)
+- When you use the "Search with OpenAI (Online)" feature in NEBedu, your question is securely sent to a server.
+- The server gets the answer from OpenAI and sends it back.
+- **You do not need to set up or configure anything extra.**
+- All server setup and security is handled by the responsible Stakeholders.
+
+### What You Need to Do
+- Just use NEBedu as normal.
+- If online Q&A is enabled, you'll see the "Search with OpenAI (Online)" option in your menu.
+- If it's not enabled, you can still use all offline features.
+
+### Security & Privacy
+- Your questions are sent securely to the server.
+- The OpenAI API key is never stored on your computer or shared with you.
+- Only the server communicates with OpenAI.
+
+### Troubleshooting
+- If you see a message like "[OpenAI Proxy Mock] ...", it means the online Q&A feature is not currently available. You can still use all offline features.
+
+---
+
 ## 🛠️ Development
 
 ### Setting Up Development Environment
@@ -270,6 +304,8 @@ pytest tests/
 - Document all functions
 - Write unit tests
 
+---
+
 ## 🤝 Contributing
 
 1. Fork the repository
@@ -280,23 +316,27 @@ pytest tests/
 
 See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for detailed guidelines.
 
+---
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+---
 
-- [Hugging Face](https://huggingface.co/) for DistilBERT and T5-small models
-- [Google Colab](https://colab.research.google.com/) for training infrastructure
-- [Curriculum Development Centre](http://lib.moecdc.gov.np/elibrary/pages/view.php?ref=3726&k=) and [ReadersNepal](Readersnepal.com) for Providing the necessary resources for this project.
-- All contributors and teachers who have helped shape this project
+## FAQ
 
-## Support
+**Q: Is my OpenAI API key safe?**
+A: Yes! The OpenAI API key is only stored on your proxy server. The client never sees or stores it.
 
-For support, please:
-1. Check the [documentation](docs/)
-2. Open an issue
-3. Contact the maintainers
+**Q: What if the proxy server is down or not configured?**
+A: The client will show a mock answer. Make sure the proxy is running and the environment variables are set.
+
+**Q: Can I use this offline?**
+A: Yes! All core features work offline. The OpenAI online Q&A is optional and only used if configured.
+
+**Q: How do I change the proxy key or URL?**
+A: Update the `PROXY_AUTH_KEY` on the server and `OPENAI_PROXY_KEY`/`OPENAI_PROXY_URL` on the client.
 
 ---
 
