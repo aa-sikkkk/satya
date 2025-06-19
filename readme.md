@@ -257,7 +257,7 @@ python -m teacher_tools.content_editor.content_editor_cli
 
 ## 🛰️ OpenAI Proxy Integration (Online Q&A)
 
-NEBedu supports secure, online Q&A using OpenAI models via a proxy server. This allows students to ask any question and get an answer from OpenAI, **without ever exposing the OpenAI API key to the user**.
+NEBedu supports secure, online Q&A using [OpenAI](https://github.com/aa-sikkkk/NEBedu/wiki/OpenAI-Integration) models via a proxy server. This allows students to ask any question and get an answer from OpenAI, **without ever exposing the OpenAI API key to the user**.
 
 ### How It Works (for Students and Teachers)
 - When you use the "Search with OpenAI (Online)" feature in NEBedu, your question is securely sent to a server.
