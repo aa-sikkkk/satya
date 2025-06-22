@@ -321,23 +321,3 @@ See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for detailed guidelines.
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## FAQ
-
-**Q: Is my OpenAI API key safe?**
-A: Yes! The OpenAI API key is only stored on your proxy server. The client never sees or stores it.
-
-**Q: What if the proxy server is down or not configured?**
-A: The client will show a mock answer. Make sure the proxy is running and the environment variables are set.
-
-**Q: Can I use this offline?**
-A: Yes! All core features work offline. The OpenAI online Q&A is optional and only used if configured.
-
-**Q: How do I change the proxy key or URL?**
-A: Update the `PROXY_AUTH_KEY` on the server and `OPENAI_PROXY_KEY`/`OPENAI_PROXY_URL` on the client.
-
----
-
-Made with ❤️ for Nepali students
