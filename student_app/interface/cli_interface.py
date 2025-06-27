@@ -555,10 +555,11 @@ Type 'back' to return to previous menu
                         console.print("\n💡 Here are some hints to help you understand better:")
                         for hint in hints:
                             console.print(f"• {hint}")
+                    else:
+                        console.print("\n💡 Sorry, no hints are available for this question.")
             except Exception as e:
                 logger.error(f"Error generating hints: {str(e)}")
-                # Don't show error to user, just skip hints
-                pass
+                console.print("\n💡 Sorry, no hints are available for this question.")
             
             # Show related concepts
             if len(relevant_content) > 1:

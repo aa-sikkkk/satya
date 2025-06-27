@@ -208,43 +208,59 @@ class NEBeduApp(ctk.CTk):
         def worker():
             try:
                 relevant = self.content_manager.search_content(question)
+                answer = None
+                confidence = 0.0
+                hints = []
+                explanation = None
+                related = None
+                context = None
+                strong_match = False
                 if relevant:
                     subject = relevant[0]['subject']
                     topic = relevant[0]['topic']
                     concept = relevant[0]['concept']
                     concept_data = self.content_manager.get_concept(subject, topic, concept)
-                    answer = None
-                    confidence = 0.0
-                    hints = []
-                    explanation = None
                     if concept_data and 'questions' in concept_data:
                         for q in concept_data['questions']:
                             if isinstance(q, dict) and 'question' in q:
                                 ratio = difflib.SequenceMatcher(None, q['question'].lower(), question.lower()).ratio()
-                                if ratio > 0.6:
+                                if ratio > 0.7:
+                                    strong_match = True
                                     if 'acceptable_answers' in q and q['acceptable_answers']:
                                         answer = q['acceptable_answers'][0]
                                         confidence = 0.9
                                         hints = q.get('hints', [])
                                         explanation = q.get('explanation', None)
                                         break
-                    if not answer:
-                        context = relevant[0]['summary']
-                        answer, confidence = self.model_handler.get_answer(question, context)
-                        try:
-                            hints = self.model_handler.get_hints(question, context)
-                        except Exception:
-                            hints = []
+                    context = relevant[0]['summary']
                     related = [f"{item['subject']} > {item['topic']} > {item['concept']}" for item in relevant[1:3]]
-                    self.after(0, lambda: self.ask_view.set_result(answer, confidence, hints, related))
-                else:
-                    context = self.content_manager.get_default_context()
+                if not strong_match:
+                    if not context:
+                        context = self.content_manager.get_default_context()
                     answer, confidence = self.model_handler.get_answer(question, context)
                     try:
                         hints = self.model_handler.get_hints(question, context)
                     except Exception:
                         hints = []
-                    self.after(0, lambda: self.ask_view.set_result(answer, confidence, hints, None))
+                
+                def show_result():
+                    # If answer is empty or low confidence, show fallback message and context
+                    if not answer or (isinstance(answer, str) and len(answer.strip()) == 0) or confidence < 0.1:
+                        fallback_msg = "I'm not sure about that. Let me help you find the right information:"
+                        fallback_context = context or "No relevant content found."
+                        self.ask_view.set_result(fallback_msg + "\n\n" + fallback_context, 0.0, hints if hints else None, related)
+                    else:
+                        # Color confidence like CLI
+                        conf = confidence
+                        if conf > 0.7:
+                            conf_color = "#43a047"  # green
+                        elif conf > 0.4:
+                            conf_color = "#fbc02d"  # yellow
+                        else:
+                            conf_color = "#e53935"  # red
+                        # Pass confidence color to the view if supported, else just show
+                        self.ask_view.set_result(answer, confidence, hints if hints else None, related)
+                self.after(0, show_result)
             except Exception as e:
                 self.after(0, lambda: (
                     mb.showerror("Ask Question", f"Failed to answer: {e}"),

@@ -2,6 +2,7 @@ import os
 from typing import Tuple, Any, Dict
 from transformers import AutoTokenizer, AutoModelForQuestionAnswering, pipeline
 import torch
+import time
 
 class QnAHandler:
     """
@@ -17,22 +18,23 @@ class QnAHandler:
         if self.model is None or self.tokenizer is None:
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
             self.model = AutoModelForQuestionAnswering.from_pretrained(self.model_path)
-            self.qa_pipeline = pipeline('question-answering', model=self.model, tokenizer=self.tokenizer, device=-1)
+            self.qa_pipeline = pipeline(
+                "question-answering",
+                model=self.model,
+                tokenizer=self.tokenizer,
+                device=-1,
+                max_length=64
+            )
 
-    def get_answer(self, question: str, context: str) -> Tuple[str, float]:
-        if self.qa_pipeline is None:
-            self.load_model()
-        try:
-            result = self.qa_pipeline({'question': question, 'context': context})
-            answer = result['answer']
-            score = result['score']  # This is the probability/confidence
-            # Heuristic: if answer is empty or very short, lower confidence
-            if not answer or len(answer.strip()) < 2:
-                return '', 0.0
-            confidence = float(score)
-            return answer, confidence
-        except Exception:
-            return '', 0.0
+    def get_answer(self, question: str, context: str) -> tuple:
+        start = time.time()
+        self.load_model()
+        result = self.qa_pipeline({"question": question, "context": context})
+        end = time.time()
+        print(f"[QnAHandler] Inference time: {end-start:.2f}s")
+        answer = result['answer']
+        score = result.get('score', 0.0)
+        return answer, score
 
     def get_model_info(self) -> Dict[str, Any]:
         return {
