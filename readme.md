@@ -5,7 +5,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Offline First](https://img.shields.io/badge/Offline-First-green)](https://github.com/yourusername/NEBedu)
+[![Offline First](https://img.shields.io/badge/Offline-First-green)](https://github.com/aa-sikkkk/NEBedu)
 
 An offline-first, community-editable AI learning companion for Grade 10 students in Nepal, focusing on Computer Science, Science, and English subjects. Built with lightweight AI models and structured educational content, designed to work in low-resource environments.
 
@@ -15,6 +15,7 @@ An offline-first, community-editable AI learning companion for Grade 10 students
 - [Project Structure](#-project-structure)
 - [Installation](#-installation)
 - [Usage](#-usage)
+- [GUI Usage](#gui-usage)
 - [AI Models](#-ai-models)
 - [Content Management](#-content-management)
 - [OpenAI Proxy Integration (Online Q&A)](#openai-proxy-integration-online-qa)
@@ -32,6 +33,7 @@ An offline-first, community-editable AI learning companion for Grade 10 students
 - 🔄 Offline-first functionality
 - 🎯 Adaptive learning paths
 - 🌐 **Search with OpenAI (Online):** Ask any question and get an answer from OpenAI (if enabled by your school/teacher)
+- 🖥️ **Modern, responsive GUI:** Beautiful customtkinter interface with NEBedu logo, sidebar navigation, loading spinner, and improved answer display (scrollable, word-wrapped, responsive to long answers)
 
 https://github.com/user-attachments/assets/7d6d42e0-c1ee-4f3b-9bbc-692cbabe46ec
 
@@ -51,14 +53,16 @@ https://github.com/user-attachments/assets/7d6d42e0-c1ee-4f3b-9bbc-692cbabe46ec
    - Offline model inference
    - Caching system for performance
    - **OpenAI Proxy Integration for online Q&A**
-
-2. **Data Management**
+2. **CustomTkinter GUI**
+   - Modern, aesthetic, and responsive interface
+   - Sidebar navigation, NEBedu logo, loading spinner, and scrollable answer display
+   - Threaded model inference for UI responsiveness
+3. **Data Management**
    - JSON-based content structure
    - Schema validation
    - Version control for content
    - Data integrity checks
-
-3. **Security Layer**
+4. **Security Layer**
    - Input sanitization
    - File operation safety
    - Access control
@@ -85,6 +89,7 @@ NEBedu/
 │   └── model_utils/            # Model helper functions
 │
 ├── student_app/
+│   ├── gui_app/                # Modern GUI (customtkinter)
 │   ├── interface/              # CLI interface components
 │   ├── learning/               # Learning features
 │   └── progress/               # Progress tracking
@@ -135,7 +140,7 @@ NEBedu/
 
 ## 💻 Usage
 
-### Student Mode
+### Student Mode (CLI)
 ```bash
 python -m student_app.interface.cli_interface
 ```
@@ -144,6 +149,17 @@ python -m student_app.interface.cli_interface
 ```bash
 python -m teacher_tools.content_editor.content_editor_cli
 ```
+
+---
+
+## 🖥️ GUI Usage
+
+### Student Mode (GUI)
+```bash
+python -m student_app.gui_app.main_window
+```
+- Enjoy a modern, responsive interface with sidebar navigation, NEBedu logo, loading spinner, and scrollable answer display.
+- All features of the CLI are available in the GUI, including AI-powered Q&A, progress tracking, and adaptive learning.
 
 ---
 
@@ -324,20 +340,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## FAQ
-
-**Q: Is my OpenAI API key safe?**
-A: Yes! The OpenAI API key is only stored on your proxy server. The client never sees or stores it.
-
-**Q: What if the proxy server is down or not configured?**
-A: The client will show a mock answer. Make sure the proxy is running and the environment variables are set.
-
-**Q: Can I use this offline?**
-A: Yes! All core features work offline. The OpenAI online Q&A is optional and only used if configured.
-
-**Q: How do I change the proxy key or URL?**
-A: Update the `PROXY_AUTH_KEY` on the server and `OPENAI_PROXY_KEY`/`OPENAI_PROXY_URL` on the client.
-
----
-
-Made with ❤️ for Nepali students
+Made with ❤️ for students
