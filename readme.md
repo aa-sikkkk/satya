@@ -161,6 +161,10 @@ python -m student_app.gui_app.main_window
 - Enjoy a modern, responsive interface with sidebar navigation, NEBedu logo, loading spinner, and scrollable answer display.
 - All features of the CLI are available in the GUI, including AI-powered Q&A, progress tracking, and adaptive learning.
 
+  ![Screenshot (116)](https://github.com/user-attachments/assets/6c1e438e-2bf8-438b-a6bf-e81f55502dbc)
+![Screenshot (118)](https://github.com/user-attachments/assets/9cb70ec8-a636-4f93-8d69-7a12c5eb61bf)
+
+
 ---
 
 ## 🧠 AI Models
