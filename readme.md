@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Offline First](https://img.shields.io/badge/Offline-First-green)](https://github.com/aa-sikkkk/NEBedu)
 
-An offline-first, community-editable AI learning companion for Grade 10 students in Nepal, focusing on Computer Science, Science, and English subjects. Built with lightweight AI models and structured educational content, designed to work in low-resource environments.
+An offline-first, community-editable AI learning companion for students, focusing on Computer Science, Science, and English subjects. Built with lightweight AI models and structured educational content, designed to work in low-resource environments.
 
 ## 📋 Table of Contents
 - [Features](#-features)
