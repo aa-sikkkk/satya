@@ -33,7 +33,7 @@ An offline-first, community-editable AI learning companion for Grade 10 students
 - 🔄 Offline-first functionality
 - 🎯 Adaptive learning paths
 - 🌐 **Search with OpenAI (Online):** Ask any question and get an answer from OpenAI (if enabled by your school/teacher)
-- 🖥️ **Modern, responsive GUI:** Beautiful customtkinter interface with NEBedu logo, sidebar navigation, loading spinner, and improved answer display (scrollable, word-wrapped, responsive to long answers)
+- 🖥️ **Modern, responsive GUI:** Beautiful customtkinter interface and improved answer display (scrollable, word-wrapped, responsive to long answers)
 
 https://github.com/user-attachments/assets/7d6d42e0-c1ee-4f3b-9bbc-692cbabe46ec
 
@@ -167,23 +167,6 @@ python -m student_app.gui_app.main_window
 
 ---
 
-## 🧠 AI Models
-
-### Model Specifications
-- **DistilBERT (Q&A)**
-  - Size: ~507MB
-  - RAM Usage: ~1.0GB
-  - Inference Time: ~5.2 seconds
-
-- **T5-small (Hints)**
-  - Size: ~462MB
-  - RAM Usage: ~500MB
-  - Inference Time: ~5.3 seconds
-
-- **Phi 2 (Advanced Reasoning and Adaptive Learning)**
-  - Size: ~1.66GB
-  - RAM Usage: ~2.3GB
-  - Inference Time: ~16.56–30.51 seconds (depending on complexity)
 
 ### Training Process
 1. Data collection and preprocessing
