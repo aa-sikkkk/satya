@@ -10,6 +10,7 @@ It supports:
 It is designed for efficient training and is extensible for future learning tasks.
 """
 
+!pip install onnx onnxruntime optimum[onnxruntime]
 import os
 import json
 import torch
@@ -27,6 +28,21 @@ from transformers import (
 from datasets import Dataset, DatasetDict
 import numpy as np
 from tqdm import tqdm
+import torch.onnx
+try:
+    from onnxruntime.quantization import quantize_dynamic, QuantType
+    import onnx
+except ImportError:
+    quantize_dynamic = None
+    QuantType = None
+    onnx = None
+try:
+    from optimum.onnxruntime import ORTModelForSeq2SeqLM
+    from optimum.exporters.onnx import main_export
+    optimum_available = True
+except ImportError:
+    optimum_available = False
+import shutil
 
 # Configure logging
 logging.basicConfig(
@@ -251,6 +267,62 @@ class NEBeduMultiTaskTrainer:
         self.t5_tokenizer.save_pretrained(os.path.join(self.output_dir, 'hint'))
         logger.info("Hint generation model training complete.")
 
+    def export_qna_to_onnx(self, save_dir):
+        """
+        Export the trained QnA model (DistilBERT) to ONNX and quantize it for CPU inference.
+        """
+        logger.info("Exporting QnA model to ONNX...")
+        dummy_question = "What is Nepal?"
+        dummy_context = "Nepal is a country in South Asia."
+        inputs = self.qna_tokenizer(dummy_question, dummy_context, return_tensors="pt", max_length=128, truncation=True)
+        input_ids = inputs["input_ids"]
+        attention_mask = inputs["attention_mask"]
+        model = self.qna_model.cpu()
+        onnx_path = os.path.join(save_dir, "qna.onnx")
+        torch.onnx.export(
+            model,
+            (input_ids, attention_mask),
+            onnx_path,
+            input_names=["input_ids", "attention_mask"],
+            output_names=["start_logits", "end_logits"],
+            dynamic_axes={"input_ids": {0: "batch_size", 1: "sequence"}, "attention_mask": {0: "batch_size", 1: "sequence"}},
+            opset_version=14
+        )
+        logger.info(f"QnA model exported to {onnx_path}")
+        # Quantize ONNX
+        if quantize_dynamic and QuantType:
+            quant_path = os.path.join(save_dir, "qna_quantized.onnx")
+            quantize_dynamic(onnx_path, quant_path, weight_type=QuantType.QInt8)
+            logger.info(f"QnA quantized ONNX model saved to {quant_path}")
+        else:
+            logger.warning("onnxruntime.quantization not available; skipping quantization.")
+
+    def export_hint_to_onnx(self, save_dir):
+        """
+        Export the trained T5 model (hint generation) to ONNX and quantize it for CPU inference.
+        Uses Hugging Face Optimum for proper seq2seq export.
+        Always exports to a directory named 'onnx' inside save_dir.
+        """
+        logger.info("Exporting Hint Generation model to ONNX (Optimum)...")
+        onnx_dir = os.path.join(save_dir, "onnx")  # Always use 'onnx' as the export directory
+        main_export(
+            model_name_or_path=save_dir,
+            output=onnx_dir,
+            task="seq2seq-lm"
+        )
+        logger.info(f"ONNX export directory contents: {os.listdir(onnx_dir)}")
+        # Quantize all .onnx files in the directory
+        if quantize_dynamic and QuantType:
+            for fname in os.listdir(onnx_dir):
+                if fname.endswith('.onnx'):
+                    onnx_model_file = os.path.join(onnx_dir, fname)
+                    quant_path = os.path.join(save_dir, f"hint_quantized_{fname}")
+                    logger.info(f"Quantizing {onnx_model_file} to {quant_path}")
+                    quantize_dynamic(onnx_model_file, quant_path, weight_type=QuantType.QInt8)
+                    logger.info(f"Hint quantized ONNX model saved to {quant_path}")
+        else:
+            logger.warning("onnxruntime.quantization not available; skipping quantization.")
+
     # Placeholder for step recommendation training (future)
     # def train_step_recommendation(self, ...):
     #     pass
@@ -293,15 +365,92 @@ def main():
         # QnA
         qna_dataset = trainer.prepare_qna_dataset(args.content_dir)
         trainer.train_qna(qna_dataset, epochs=args.epochs, batch_size=args.batch_size)
+        # Export QnA to ONNX and quantize
+        trainer.export_qna_to_onnx(os.path.join(args.output_dir, 'qna'))
         
         # Hint Generation
         hint_dataset = trainer.prepare_hint_dataset(args.content_dir)
         trainer.train_hint(hint_dataset, epochs=args.epochs, batch_size=args.batch_size)
+        # Export Hint Generation to ONNX and quantize
+        trainer.export_hint_to_onnx(os.path.join(args.output_dir, 'hint'))
         
         logger.info("All training complete!")
+        clean_exported_model_dir()
     except Exception as e:
         logger.error(f"Training failed: {str(e)}")
         raise
 
+def train_in_colab():
+    """Train models in Colab with default paths, export ONNX, quantize, and zip output."""
+    content_dir = "data/content"
+    output_dir = "ai_model/exported_model"
+    os.makedirs(content_dir, exist_ok=True)
+    os.makedirs(output_dir, exist_ok=True)
+    trainer = NEBeduMultiTaskTrainer(output_dir=output_dir)
+    # QnA
+    qna_dataset = trainer.prepare_qna_dataset(content_dir)
+    trainer.train_qna(qna_dataset)
+    trainer.export_qna_to_onnx(os.path.join(output_dir, 'qna'))
+    # Hint Generation
+    hint_dataset = trainer.prepare_hint_dataset(content_dir)
+    trainer.train_hint(hint_dataset)
+    trainer.export_hint_to_onnx(os.path.join(output_dir, 'hint'))
+    # Zip the output directory
+    zip_path = output_dir + ".zip"
+    shutil.make_archive(output_dir, 'zip', output_dir)
+    print(f"\nTraining and export complete! Download your models from: {zip_path}\n")
+    print("If running in Colab, use:")
+    print("from google.colab import files\nfiles.download('ai_model/exported_model.zip')\n")
+    clean_exported_model_dir()
+
+def clean_exported_model_dir():
+    """
+    Remove unnecessary files from exported model directories, keeping only quantized ONNX files and tokenizer/config files.
+    """
+    import glob
+    keep_patterns = [
+        # QnA
+        "qna_quantized.onnx", "tokenizer.json", "vocab.txt", "tokenizer_config.json", "special_tokens_map.json", "config.json",
+        # Hint (T5)
+        "hint_quantized_encoder_model.onnx", "hint_quantized_decoder_model.onnx", "hint_quantized_decoder_with_past_model.onnx",
+        "tokenizer_config.json", "special_tokens_map.json", "spiece.model", "config.json", "generation_config.json"
+    ]
+    # QnA
+    qna_dir = os.path.join("ai_model/exported_model/onnx", "qna")
+    if os.path.exists(qna_dir):
+        for fname in os.listdir(qna_dir):
+            if not any(fname == pat for pat in keep_patterns):
+                fpath = os.path.join(qna_dir, fname)
+                if os.path.isfile(fpath):
+                    os.remove(fpath)
+                    logger.info(f"Deleted {fpath}")
+                elif os.path.isdir(fpath):
+                    shutil.rmtree(fpath)
+                    logger.info(f"Deleted directory {fpath}")
+    # Hint
+    hint_dir = os.path.join("ai_model/exported_model/onnx", "hint")
+    if os.path.exists(hint_dir):
+        for fname in os.listdir(hint_dir):
+            if not any(fname == pat for pat in keep_patterns) and fname != "onnx":
+                fpath = os.path.join(hint_dir, fname)
+                if os.path.isfile(fpath):
+                    os.remove(fpath)
+                    logger.info(f"Deleted {fpath}")
+                elif os.path.isdir(fpath):
+                    shutil.rmtree(fpath)
+                    logger.info(f"Deleted directory {fpath}")
+        # Clean up ONNX subdir (remove unquantized .onnx files)
+        onnx_subdir = os.path.join(hint_dir, "onnx")
+        if os.path.exists(onnx_subdir):
+            for fname in os.listdir(onnx_subdir):
+                if fname.endswith('.onnx'):
+                    fpath = os.path.join(onnx_subdir, fname)
+                    os.remove(fpath)
+                    logger.info(f"Deleted {fpath}")
+
 if __name__ == "__main__":
-    main() 
+    import sys
+    if any(arg.startswith('--content-dir') for arg in sys.argv):
+        main()
+    else:
+        train_in_colab()

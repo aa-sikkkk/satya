@@ -113,7 +113,7 @@ NEBedu/
 ### Prerequisites
 - Python 3.8 or higher
 - 4GB RAM minimum
-- 3GB free disk space
+- 500MB free disk space
 - Offline environment support
 
 ### Step-by-Step Installation

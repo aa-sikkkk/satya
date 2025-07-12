@@ -39,8 +39,10 @@ class ModelHandler:
             model_path (str): Path to the model directory
         """
         self.model_path = model_path
+        # QnA ONNX model is in onnx/qna
+        self.qna_handler = QnAHandler(os.path.join(model_path, "onnx", "qna"))
+        # Phi2 and Hint are in their own folders
         self.phi2_handler = Phi2Handler(os.path.join(model_path, "phi2"))
-        self.qna_handler = QnAHandler(os.path.join(model_path, "qna"))
         self.hint_handler = HintHandler(os.path.join(model_path, "hint"), phi2_handler=self.phi2_handler)
         self.current_model = "qna"  # Default to QnA
         # Pre-load models for efficiency
