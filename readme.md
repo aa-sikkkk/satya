@@ -1,8 +1,7 @@
 # NEBedu - AI Learning Companion 🤖📚
 <div align="center">
-   <img height="180" width="180" src="https://github.com/user-attachments/assets/6564b7ae-b82d-4ab7-b7d3-bba81139ba96">
+   <img height="400" width="300" src="https://github.com/user-attachments/assets/319417d7-5993-40b9-b458-6f14b8495e2b">
 </div>
-
 
 
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
