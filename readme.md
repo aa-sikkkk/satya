@@ -1,7 +1,9 @@
 # NEBedu - AI Learning Companion 🤖📚
 <div align="center">
-   <img height="180" width="180" src="https://github.com/user-attachments/assets/daa5d212-12b8-49e7-8d72-f8a57a7b0b46">
+   <img height="180" width="180" src="https://github.com/user-attachments/assets/6564b7ae-b82d-4ab7-b7d3-bba81139ba96">
 </div>
+
+
 
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
