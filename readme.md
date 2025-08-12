@@ -1,14 +1,13 @@
-# NEBedu - AI Learning Companion 🤖📚
+# Satyá: Learning Companion 
 <div align="center">
-   <img height="400" width="300" src="https://github.com/user-attachments/assets/319417d7-5993-40b9-b458-6f14b8495e2b">
+   <img height="180" width="180" src="https://github.com/user-attachments/assets/4faf37b4-bb01-47c7-b443-d58b6c3eff62">
 </div>
-
 
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Offline First](https://img.shields.io/badge/Offline-First-green)](https://github.com/aa-sikkkk/NEBedu)
 
-An offline-first, community-editable AI learning companion for students, focusing on Computer Science, Science, and English subjects. Built with lightweight AI models and structured educational content, designed to work in low-resource environments.
+An offline-first learning companion for students. Built with structured educational content, designed to work with Outdated Hardware.
 
 ## 📋 Table of Contents
 - [Features](#-features)
@@ -114,8 +113,6 @@ NEBedu/
 ### Prerequisites
 - Python 3.8 or higher
 - 4GB RAM minimum
-- 500MB free disk space
-- Offline environment support
 
 ### Step-by-Step Installation
 
@@ -159,7 +156,7 @@ python -m teacher_tools.content_editor.content_editor_cli
 ```bash
 python -m student_app.gui_app.main_window
 ```
-- Enjoy a modern, responsive interface with sidebar navigation, NEBedu logo, loading spinner, and scrollable answer display.
+- Enjoy a modern, responsive interface with sidebar navigation, Satyá logo, loading spinner, and scrollable answer display.
 - All features of the CLI are available in the GUI, including AI-powered Q&A, progress tracking, and adaptive learning.
 
   ![Screenshot (116)](https://github.com/user-attachments/assets/6c1e438e-2bf8-438b-a6bf-e81f55502dbc)
