@@ -1,7 +1,7 @@
 """
-Web Crawler for NEBedu Content Collection
+Web Crawler for Satya Content Collection
 
-This script crawls Nepali educational websites to gather content for the NEBedu learning system.
+This script crawls Nepali educational websites to gather content for the Satya learning system.
 It processes the content into our structured JSON format for use in the AI model.
 """
 
@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 class ContentCrawler:
     """
-    Crawls educational websites to gather content for NEBedu.
+    Crawls educational websites to gather content for Satya.
     
     Attributes:
         base_urls (Dict[str, str]): Dictionary of subject names and their URLs

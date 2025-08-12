@@ -1,7 +1,7 @@
 """
 Security Utilities Module
 
-Provides input validation, safe file operations, and security event logging for NEBedu.
+Provides input validation, safe file operations, and security event logging for Satya.
 """
 
 import os

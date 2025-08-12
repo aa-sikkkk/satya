@@ -33,7 +33,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('nebedu.log'),  # Log to file instead of console
+        logging.FileHandler('satya.log'),  # Log to file instead of console
         logging.StreamHandler()  # Also log to console for debugging
     ]
 )
@@ -80,7 +80,7 @@ Confirm.ask = staticmethod(patched_confirm_ask)
 
 class CLIInterface:
     """
-    Command-line interface for the NEBedu learning system.
+    Command-line interface for the Satya learning system.
     
     Attributes:
         content_manager (ContentManager): Manager for educational content
@@ -131,7 +131,7 @@ class CLIInterface:
     def _show_welcome_message(self) -> None:
         """Display welcome message and quick start guide."""
         welcome_text = """
-# Welcome to NEBedu Learning System! 👋
+        # Welcome to Satya Learning System! 👋
 
 ## Quick Start Guide
 - Press 'h' key anytime for help
@@ -232,7 +232,7 @@ Type 'back' to return to previous menu
             str: The entered username
         """
         console.print(Panel(
-            "[bold cyan]Welcome to NEBedu![/bold cyan]\n"
+            "[bold cyan]Welcome to Satya![/bold cyan]\n"
             "Please enter your username to track your progress.",
             border_style="cyan"
         ))
@@ -276,7 +276,7 @@ Type 'back' to return to previous menu
                     
                 if choice.lower() in ['exit', 'q']:
                     if Confirm.ask("Are you sure you want to exit?"):
-                        console.print("[bold green]Thank you for using NEBedu. Goodbye![/bold green]")
+                        console.print("[bold green]Thank you for using Satya. Goodbye![/bold green]")
                         sys.exit(0)
                     continue
                 
@@ -592,7 +592,7 @@ Type 'back' to return to previous menu
             while True:
                 # Main menu
                 choice = self._create_menu(
-                    "NEBedu Learning System",
+                    "Satya Learning System",
                     [
                         "Browse Subjects",
                         "Ask a Question",
@@ -623,7 +623,7 @@ Type 'back' to return to previous menu
                     self._switch_model()
                 else:
                     if Confirm.ask("Are you sure you want to exit?"):
-                        console.print("[bold green]Thank you for using NEBedu. Goodbye![/bold green]")
+                        console.print("[bold green]Thank you for using Satya. Goodbye![/bold green]")
                         break
         except KeyboardInterrupt:
             console.print("\n[yellow]Goodbye![/yellow]")

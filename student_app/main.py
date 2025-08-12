@@ -1,8 +1,8 @@
 """
-Main entry point for the NEBedu learning system CLI application.
+Main entry point for the Satya learning system CLI application.
 
 This module provides the command-line interface for students to interact with
-the NEBedu learning system.
+the Satya learning system.
 """
 
 import os
@@ -18,7 +18,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('nebedu.log'),
+        logging.FileHandler('satya.log'),
         logging.StreamHandler(sys.stdout)
     ]
 )
@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 def parse_args():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
-        description="NEBedu Learning System - Grade 10 AI Learning Companion"
+        description="Satya Learning System - Grade 10 AI Learning Companion"
     )
     
     parser.add_argument(
@@ -76,7 +76,7 @@ def main():
             sys.exit(1)
             
         # Initialize and start CLI interface
-        logger.info("Starting NEBedu Learning System...")
+        logger.info("Starting Satya Learning System...")
         cli = CLIInterface(str(content_dir), str(model_path))
         cli.start()
         

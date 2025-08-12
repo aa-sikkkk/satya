@@ -1,7 +1,7 @@
 """
 Progress Manager Module
 
-Handles loading, saving, and updating user progress for the NEBedu CLI.
+Handles loading, saving, and updating user progress for the Satya CLI.
 """
 
 import os

@@ -1,7 +1,7 @@
 """
-NEBedu Multi-Task Model Training Script for Google Colab
+Satya Multi-Task Model Training Script for Google Colab
 
-This script handles the training and fine-tuning of models for the NEBedu learning system.
+This script handles the training and fine-tuning of models for the Satya learning system.
 It supports:
 - Extractive Question Answering (QnA)
 - Hint Generation (generative)
@@ -35,7 +35,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-class NEBeduMultiTaskTrainer:
+class SatyaMultiTaskTrainer:
     """
     Handles training for QnA, hint generation, and step recommendation.
     - QnA: DistilBERT extractive QA
@@ -260,7 +260,7 @@ def train_in_colab():
     try:
         os.makedirs('data/content', exist_ok=True)
         os.makedirs('ai_model/exported_model', exist_ok=True)
-        trainer = NEBeduMultiTaskTrainer(output_dir='ai_model/exported_model')
+        trainer = SatyaMultiTaskTrainer(output_dir='ai_model/exported_model')
         # QnA
         qna_dataset = trainer.prepare_qna_dataset('data/content')
         trainer.train_qna(qna_dataset, epochs=3, batch_size=8)

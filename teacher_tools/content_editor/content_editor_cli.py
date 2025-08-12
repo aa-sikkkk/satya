@@ -1,7 +1,7 @@
 """
 Teacher Content Editor CLI
 
-A command-line interface for teachers to load, edit, and save educational content JSON files for NEBedu.
+A command-line interface for teachers to load, edit, and save educational content JSON files for Satya.
 """
 
 import os
@@ -51,7 +51,7 @@ class TeacherContentEditorCLI:
         self.session = PromptSession()
 
     def start(self):
-        console.print(Panel("[bold cyan]Welcome to the NEBedu Teacher Content Editor![/bold cyan]", border_style="cyan"))
+        console.print(Panel("[bold cyan]Welcome to the Satya Teacher Content Editor![/bold cyan]", border_style="cyan"))
         while True:
             choice = self._create_menu(
                 "Teacher Content Editor Menu",

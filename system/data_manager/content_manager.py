@@ -2,7 +2,7 @@
 Content Manager Module
 
 This module handles loading, validating, and managing educational content
-for the NEBedu learning system.
+for the Satya learning system.
 """
 
 import os
@@ -19,7 +19,7 @@ from student_app.progress import progress_manager
 logging.basicConfig(
     level=logging.INFO,
     handlers=[
-        logging.FileHandler('nebedu.log'),  # Log to file instead of console
+        logging.FileHandler('satya.log'),  # Log to file instead of console
         logging.NullHandler()  # Prevent logs from being displayed
     ]
 )
@@ -99,7 +99,7 @@ CONTENT_SCHEMA = {
 
 class ContentManager:
     """
-    Manages educational content for the NEBedu learning system.
+    Manages educational content for the Satya learning system.
     
     Attributes:
         content_dir (str): Directory containing content files

@@ -1,7 +1,7 @@
 """
 Teacher Analytics CLI
 
-A command-line interface for teachers to generate and export student/class analytics reports for NEBedu.
+A command-line interface for teachers to generate and export student/class analytics reports for Satya.
 """
 
 import os
@@ -46,7 +46,7 @@ class TeacherAnalyticsCLI:
         self.session = PromptSession()
 
     def start(self):
-        console.print(Panel("[bold cyan]Welcome to the NEBedu Teacher Analytics CLI![/bold cyan]", border_style="cyan"))
+        console.print(Panel("[bold cyan]Welcome to the Satya Teacher Analytics CLI![/bold cyan]", border_style="cyan"))
         self._load_content_manager()
         while True:
             choice = self._create_menu(
