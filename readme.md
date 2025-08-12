@@ -1,11 +1,13 @@
 # Satyá: Learning Companion 
 <div align="center">
    <img height="180" width="180" src="https://github.com/user-attachments/assets/4faf37b4-bb01-47c7-b443-d58b6c3eff62">
+   
+   [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
+   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+   [![Offline First](https://img.shields.io/badge/Offline-First-green)](https://github.com/aa-sikkkk/Satya)
+
 </div>
 
-[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Offline First](https://img.shields.io/badge/Offline-First-green)](https://github.com/aa-sikkkk/NEBedu)
 
 An offline-first learning companion for students. Built with structured educational content, designed to work with Outdated Hardware.
 
