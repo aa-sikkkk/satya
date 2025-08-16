@@ -182,7 +182,6 @@ python -m student_app.gui_app.main_window
 - Enjoy a modern, responsive interface with sidebar navigation, Satyá logo, loading spinner, and scrollable answer display.
 - All features of the CLI are available in the GUI, including **RAG-enhanced Q&A**, progress tracking, and adaptive learning.
 
-  ![Screenshot (116)](https://github.com/user-attachments/assets/6faf37b4-bb01-47c7-b443-d58b6c3eff62)
 ![Screenshot (118)](https://github.com/user-attachments/assets/9cb70ec8-a636-4f93-8d69-7a12c5eb61bf)
 
 ---
@@ -350,6 +349,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 ## 🆕 What's New in This Version
+<img width="3840" height="1912" alt="Architecture" src="https://github.com/user-attachments/assets/3103e055-c728-4c29-b978-2bbc95e66f61" />
 
 ### 🚀 **Major Architecture Changes**
 - **Single AI Model**: Replaced multiple models with one efficient Phi 1.5
