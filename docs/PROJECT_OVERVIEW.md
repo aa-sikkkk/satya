@@ -1,26 +1,26 @@
-# Satya Project Overview: An Offline-First AI Learning Companion for Nepali Grade 10 Students
+# Satya Project Overview: An Offline-First, RAG-Powered AI Learning Companion for Nepali Grade 10 Students
 
 ## Executive Summary
 
-Satya is a pioneering educational technology initiative aimed at bridging educational disparities for Grade 10 students in Nepal, particularly in areas with limited or no internet connectivity. This project delivers an offline-first, AI-powered learning companion designed to cover the Computer Science, Science, and English curricula. By leveraging lightweight Hugging Face models and a meticulously structured, community-editable JSON content base, Satya provides interactive learning experiences, adaptive support, and valuable tools for both students and teachers, all operating efficiently on low-resource hardware (minimum 4GB RAM).
+Satya is a pioneering educational technology initiative aimed at bridging educational disparities for Grade 10 students in Nepal, particularly in areas with limited or no internet connectivity. This project delivers an **offline-first, RAG-powered learning companion** designed to cover the Computer Science, Science, and English curricula. By leveraging a **single lightweight Phi 1.5 AI model** and **intelligent content discovery through RAG (Retrieval-Augmented Generation)**, Satya provides interactive learning experiences, adaptive support, and valuable tools for both students and teachers, all operating efficiently on **low-resource hardware**.
 
 ## 🌐 Project Vision
 
-Our vision is to empower the next generation of Nepali students by providing accessible, high-quality educational resources regardless of their geographical location or access to online infrastructure. We aim to democratize learning through intelligent, adaptive technology and foster a collaborative environment for content development and continuous improvement, ultimately contributing to enhanced educational outcomes across the nation.
+Our vision is to empower the next generation of Nepali students by providing accessible, high-quality educational resources regardless of their geographical location or access to online infrastructure. We aim to democratize learning through **intelligent, RAG-enhanced technology** and foster a collaborative environment for content development and continuous improvement, ultimately contributing to enhanced educational outcomes across the nation.
 
 ## 🎯 Key Objectives
 
 The Satya project is guided by the following core objectives:
 
-1.  **Maximize Accessibility:** Ensure the learning companion is fully functional offline and requires minimal system resources to run on commonly available computers (targeting 4GB RAM systems). Provide comprehensive support for both English and Nepali languages to cater to diverse student needs and promote inclusivity.
-2.  **Deliver High-Quality Education:** Offer comprehensive coverage of the Grade 10 curriculum with engaging, interactive content designed for effective learning. Implement adaptive learning pathways and robust progress tracking mechanisms to personalize the learning experience and address individual student needs.
+1.  **Maximize Accessibility:** Ensure the learning companion is fully functional offline and requires minimal system resources to run on commonly available computers. Provide comprehensive support for both English and Nepali languages to cater to diverse student needs and promote inclusivity.
+2.  **Deliver High-Quality Education:** Offer comprehensive coverage of the Grade 10 curriculum with engaging, interactive content designed for effective learning. Implement **RAG-enhanced content discovery** and robust progress tracking mechanisms to personalize the learning experience and address individual student needs.
 3.  **Empower Teachers:** Provide intuitive and efficient tools for teachers to manage educational content, monitor student progress at both individual and class levels, and gain actionable insights through analytics, thereby enhancing their capacity to deliver effective instruction and targeted support.
 4.  **Foster Community Collaboration:** Establish a transparent and streamlined platform and workflow for community members, particularly subject matter experts and educators, to contribute to, rigorously validate, and continuously update the educational content, ensuring its accuracy, relevance, and pedagogical soundness.
 
 ## 👥 Target Users
 
 ### Primary Users
--   **Grade 10 Students in Nepal:** The core beneficiaries, utilizing the CLI application for self-paced, interactive learning, concept reinforcement, and practice exercises in an entirely offline setting.
+-   **Grade 10 Students in Nepal:** The core beneficiaries, utilizing the **CLI and GUI applications** for self-paced, interactive learning, **RAG-enhanced Q&A**, and practice exercises in an entirely offline setting.
 -   **Subject Teachers:** Employing the teacher tools for efficient content management (editing, validation, organization) and leveraging student progress analytics to inform their teaching strategies.
 -   **School Administrators:** Potentially utilizing aggregated student performance data and system usage metrics for educational planning, resource allocation, and assessing the impact of the learning companion within their institutions.
 
@@ -33,15 +33,18 @@ The Satya project is guided by the following core objectives:
 
 The Satya system is architected around several key features designed to provide a comprehensive and effective learning ecosystem:
 
-### 1. Student-Facing Features (CLI Learning Application)
+### 1. Student-Facing Features (CLI & GUI Learning Applications)
 
 *   **Offline Content and Functionality:** Guarantees uninterrupted access to all educational materials and AI functionalities without any requirement for internet connectivity, crucial for low-connectivity regions.
-*   **AI-Powered Learning Assistance:**
-    *   **Contextual Question Answering (Q&A):** Provides accurate and relevant answers to student queries based on the loaded educational content, powered by an optimized DistilBERT model.
-    *   **Progressive Hint Generation:** Offers structured, step-by-step hints generated by a fine-tuned T5-small model to help students solve problems and understand concepts without directly providing the answer.
-*   **Interactive and Structured Content Delivery:** Presents the curriculum (topics, subtopics, concepts) in a clear, navigable, and engaging command-line interface, making self-directed learning intuitive.
+*   **RAG-Enhanced AI-Powered Learning Assistance:**
+    *   **Intelligent Content Discovery:** Uses RAG (Retrieval-Augmented Generation) to find the most relevant study materials for any question, even with vague or incomplete queries.
+    *   **Contextual Question Answering (Q&A):** Provides accurate and relevant answers to student queries using **Phi 1.5 model** with retrieved RAG context for enhanced accuracy.
+    *   **Answer Length Control:** Students can choose from **5 different detail levels** (very short to very long) based on their learning needs and time constraints.
+    *   **Progressive Hint Generation:** Offers structured, step-by-step hints generated by the same **Phi 1.5 model** to help students solve problems and understand concepts.
+*   **Smart Text Handling:** Automatically normalizes uppercase, lowercase, and mixed case input for better AI understanding and response quality.
+*   **Interactive and Structured Content Delivery:** Presents the curriculum (topics, subtopics, concepts) in a clear, navigable, and engaging interface, making self-directed learning intuitive.
 *   **Detailed Progress Tracking:** Systematically records student performance data, including answers, time taken, hints used, and mastery levels, allowing students (and teachers) to monitor learning progress.
-*   **Adaptive Learning Paths (Future Development):** Planned functionality to dynamically adjust the learning content and sequence based on individual student performance and identified areas of difficulty.
+*   **Modern User Interface:** Both **command-line interface (CLI)** and **graphical user interface (GUI)** options for different user preferences and hardware capabilities.
 
 ### 2. Teacher and Community-Facing Features (Teacher Tools)
 
@@ -52,25 +55,69 @@ The Satya system is architected around several key features designed to provide 
 
 ## 🏗️ Technical Architecture
 
-The technical architecture of Satya is fundamentally designed for offline operation, efficiency on low-resource hardware, and ease of maintenance. Key architectural components include the data acquisition and processing pipeline, the AI model development and export process, the core CLI learning application with local logging capabilities, and the community content management system operating on a version-controlled repository.
+The technical architecture of Satya is fundamentally designed for **offline operation, efficiency on low-resource hardware, and intelligent content discovery**. Key architectural components include:
 
-(For an in-depth examination of the system architecture, including the interconnections between components and data flow, please refer to `docs/TECHNICAL_IMPLEMENTATION.md`, which also includes a textual representation of the `architecture.png` diagram.)
+### **RAG (Retrieval-Augmented Generation) System**
+- **PDF Content Processing**: Intelligent extraction and chunking of educational content from PDF documents
+- **Vector Embeddings**: Generation of high-dimensional representations for semantic search
+- **ChromaDB**: Local vector database for fast, intelligent content retrieval
+- **Smart Content Discovery**: Finds relevant content even with incomplete or vague queries
+
+### **Single AI Model Architecture**
+- **Phi 1.5 Model**: One lightweight model handles all AI tasks (Q&A, hints, content generation)
+- **GGUF Format**: Optimized for low-end hardware
+- **Answer Length Control**: Configurable response detail levels
+- **Text Normalization**: Handles various input formats intelligently
+
+### **Content Management System**
+- **Structured JSON Content**: Hierarchical organization of educational materials
+- **RAG + Structured Fallback**: Intelligent content discovery with traditional content backup
+- **Community Editing**: Version-controlled content management for teachers and experts
+
+(For an in-depth examination of the system architecture, including the interconnections between components and data flow, please refer to `docs/TECHNICAL_IMPLEMENTATION.md`, which includes the updated RAG + Phi 1.5 architecture diagram.)
 
 ## 🛣️ Implementation Strategy
 
-The development and implementation of Satya adhere to a structured, phased approach to ensure all critical components are developed and integrated effectively. The strategy involves initial focus on core infrastructure (data pipeline, basic AI integration, content management, security), followed by the development of primary user features (student CLI, teacher tools), rigorous testing and performance optimization for the target low-resource environment, and finally establishing and refining the community contribution framework.
+The development and implementation of Satya adhere to a structured, phased approach to ensure all critical components are developed and integrated effectively. The strategy involves:
+
+1. **Core Infrastructure**: RAG system setup, ChromaDB integration, and Phi 1.5 model optimization
+2. **AI Integration**: Single model architecture with answer length control and text normalization
+3. **User Applications**: Enhanced CLI and GUI with RAG capabilities
+4. **Content Pipeline**: PDF processing and embedding generation for intelligent search
+5. **Testing & Optimization**: Performance validation for low-end hardware
+6. **Community Framework**: Teacher tools and content management system
 
 ## ✅ Quality Assurance
 
-A stringent quality assurance process is integrated throughout the development lifecycle. This includes extensive unit and integration testing to ensure functional correctness and system stability, performance and memory profiling to meet the low-resource constraints, automated validation of the structured content against defined schemas, and a process for expert review of educational content to guarantee accuracy and pedagogical effectiveness.
+A stringent quality assurance process is integrated throughout the development lifecycle. This includes:
+
+- **Extensive Testing**: Unit and integration testing for functional correctness
+- **Performance Profiling**: Memory and speed optimization for low-resource systems
+- **Content Validation**: Automated schema validation and quality checks
+- **RAG System Testing**: Vector search accuracy and fallback mechanism validation
+- **Expert Review**: Educational content accuracy and pedagogical effectiveness
 
 ## 🚀 Deployment and Maintenance
 
-Satya is architected for straightforward local deployment on target machines without requiring complex server setups. The installation procedure involves obtaining the project files (e.g., by cloning the repository), installing necessary Python dependencies (managed via `requirements.txt`), and executing a simple setup script. Maintenance activities include applying updates to the application and content, potential retraining and deployment of newer AI models, and addressing any reported issues, facilitated by the version-controlled content repository and comprehensive documentation.
+Satya is architected for straightforward local deployment on target machines without requiring complex server setups. The installation procedure involves:
+
+1. **Obtaining Project Files**: Clone the repository or download the student package
+2. **Installing Dependencies**: Python dependencies managed via `requirements.txt`
+3. **Downloading Phi 1.5 Model**: Lightweight GGUF model (~1GB) for AI capabilities
+4. **Running Applications**: Simple commands for CLI or GUI versions
+
+Maintenance activities include applying updates to the application and content, potential model optimizations, and addressing any reported issues, facilitated by the version-controlled content repository and comprehensive documentation.
 
 ## 🌱 Future Roadmap
 
-Potential future developments for Satya include expanding the scope to cover additional subjects and grade levels, implementing more advanced analytics and reporting features, exploring the feasibility of a graphical user interface (GUI) or a mobile application version (while retaining offline capability), and investigating secure, optional synchronization mechanisms for anonymized analytics data if network infrastructure improves in target areas.
+Potential future developments for Satya include:
+
+- **Enhanced RAG Capabilities**: Multi-modal content understanding (text + images)
+- **Advanced Analytics**: Learning pattern recognition and adaptive recommendations
+- **Multi-Language Support**: Enhanced Nepali language processing
+- **Mobile Application**: Offline-capable mobile version
+- **Community Features**: Student collaboration and peer learning tools
+- **Content Expansion**: Additional subjects and grade levels
 
 ## 🤝 Support and Resources
 
@@ -82,8 +129,8 @@ This project is released under the MIT License, encouraging open access, modific
 
 ## 🙏 Acknowledgments
 
-We gratefully acknowledge the foundational contributions of Hugging Face for their transformative work in making powerful NLP models accessible, Google Colab for providing the computational resources necessary for model training, and extend our sincere thanks to all future contributors, educators, and users who will play a vital role in the growth and impact of Satya. Special thanks to [readersnepal](https://readersnepal.com/) and  [CDC](http://lib.moecdc.gov.np/) for the notes and resources neccessary for the Dataset gathering.
+We gratefully acknowledge the foundational contributions of **Microsoft** for their **Phi 1.5 model** that powers our AI capabilities, **ChromaDB** for enabling intelligent content discovery, and the **llama-cpp-python** community for efficient model inference. Special thanks to [readersnepal](https://readersnepal.com/) and [CDC](http://lib.moecdc.gov.np/) for the notes and resources necessary for the Dataset gathering.
 
 ---
 
-*Pioneering accessible AI education in Nepal with community power.* 
+*Pioneering accessible, intelligent AI education in Nepal with community power and RAG technology.* 

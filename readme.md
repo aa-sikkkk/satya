@@ -59,7 +59,7 @@ https://github.com/user-attachments/assets/7d6d42e0-c1ee-4f3b-9bbc-692cbabe46ec
 
 2. **AI Engine**
    - **Single Phi 1.5 Model**: Handles all AI tasks (Q&A, hints, content generation)
-   - **Lightweight GGUF Format**: Optimized for low-end hardware (2GB RAM minimum)
+   - **Lightweight GGUF Format**: Optimized for low-end hardware
    - **Answer Length Control**: 5 different detail levels for varied learning needs
    - **Offline Model Inference**: No internet required for AI responses
 
@@ -354,7 +354,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ### 🚀 **Major Architecture Changes**
 - **Single AI Model**: Replaced multiple models with one efficient Phi 1.5
 - **RAG System**: Added intelligent content discovery and retrieval
-- **Lightweight**: Optimized for low-end hardware (2GB RAM minimum)
+- **Lightweight**: Optimized for low-end hardware
 
 ### 🎯 **New Features**
 - **Answer Length Control**: 5 different detail levels for varied learning needs
