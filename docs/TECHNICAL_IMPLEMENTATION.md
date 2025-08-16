@@ -2,516 +2,517 @@
 
 ## System Architecture Overview
 
-This document provides a detailed technical overview of the NEBedu project's system architecture, elucidating the structure, function, and interaction of its core components. The architecture is designed to support an offline-first, AI-enhanced learning experience with efficient data processing and community-driven content management, optimized for low-resource computing environments.
+This document provides a detailed technical overview of the **Satya Learning System**'s architecture, elucidating the structure, function, and interaction of its core components. The architecture is designed to support an **offline-first, RAG-powered learning experience** with a lightweight Phi 1.5 AI model, optimized for **low-end hardware** (2GB RAM minimum).
 
-![architecture](https://github.com/user-attachments/assets/37d57fde-2f5e-4800-9769-31b61e684e1a)
+![architecture](https://github.com/user-attachments/assets/04136c9d-0f04-467f-80f8-760688a2860d)
 
-*Figure 1: NEBedu System Architecture Diagram*
+*Figure 1: Satya System Architecture Diagram (Updated for RAG + Phi 1.5)*
 
-### 1. Data Acquisition and Processing Pipeline
+### 1. RAG (Retrieval-Augmented Generation) Content Pipeline
 
-This pipeline is the initial stage of the NEBedu system, responsible for the systematic collection, refinement, and structuring of educational content from diverse sources into a format compatible with the project's requirements.
+This pipeline represents the modern approach to content processing, replacing the traditional web crawler with intelligent PDF processing and vector-based content discovery.
 
-#### 1.1 Web Crawler Module
+#### 1.1 PDF Content Processor
 
-*   **Purpose:** To programmatically navigate and extract raw educational content from designated public online resources (URLs) relevant to the Nepali Grade 10 curriculum. This includes lecture notes, articles, exercises, and other educational materials that can serve as the foundation for the structured content database.
-*   **Inputs:** A predefined list of URLs targeting educational websites or online resources.
-*   **Outputs:** Raw, unstructured or semi-structured text data and associated metadata extracted from the source URLs.
+*   **Purpose:** To extract, chunk, and process educational content from PDF documents into structured, searchable text chunks and images. This replaces the web crawler approach for more reliable, offline-first content acquisition.
+*   **Inputs:** PDF files containing educational content (textbooks, notes, study materials).
+*   **Outputs:** Structured text chunks and extracted images with metadata.
 *   **Key Processes:**
-    *   URL management and scheduling.
-    *   Fetching web page content (handling dynamic content via headless browser if necessary, as implied by Selenium usage in `FILE_REQUIREMENTS.md`).
-    *   Initial parsing of HTML/XML structure.
-    *   Extraction of main content blocks, potentially including text, tables, and other relevant elements.
-    *   Storage of raw extracted data for subsequent processing stages.
-*   **Technology/Implementation Notes:** Likely implemented using libraries such as `requests` or `Selenium` for fetching and `BeautifulSoup` for parsing, located within the `scripts/data_collection/` directory.
+    *   PDF text extraction and OCR for scanned documents.
+    *   Intelligent content chunking with overlap for context preservation.
+    *   Image extraction and processing for visual content.
+    *   Metadata generation (subject, chapter, page numbers).
+    *   Storage in structured format for embedding generation.
+*   **Technology/Implementation Notes:** Implemented using `PyPDF2`, `Pillow`, and custom chunking logic in `scripts/rag_data_preparation/pdf_processor.py`.
 
-#### 1.2 Content Processing and Cleaning Pipeline
+#### 1.2 Embedding Generation Engine
 
-*   **Purpose:** To transform the heterogeneous raw data into a clean, standardized, and more structured intermediate format by eliminating noise and applying initial organizational rules.
-*   **Inputs:** Raw content data received from the Web Crawler Module.
-*   **Outputs:** Cleaned and partially structured content data, free from irrelevant elements and inconsistencies.
+*   **Purpose:** To convert text chunks and images into high-dimensional vector representations that enable semantic search and content discovery.
+*   **Inputs:** Processed text chunks and images from the PDF processor.
+*   **Outputs:** Vector embeddings stored in ChromaDB for intelligent retrieval.
 *   **Key Processes:**
-    *   Noise reduction (removing advertisements, navigation links, headers, footers, etc.).
-    *   Text normalization (handling character encoding issues, standardizing formatting, correcting common errors).
-    *   Application of extraction rules to identify potential questions, answers, hints, and explanations within the text based on patterns or heuristics derived from the source material.
-    *   Structuring the cleaned content into a more consistent intermediate representation.
-*   **Technology/Implementation Notes:** This would involve custom Python scripts and potentially text processing libraries, residing within the `scripts/data_collection/` directory.
+    *   Text embedding generation using optimized algorithms.
+    *   Image embedding generation using CLIP model.
+    *   Vector storage in ChromaDB with metadata indexing.
+    *   Collection management for different subjects and content types.
+*   **Technology/Implementation Notes:** Located in `scripts/rag_data_preparation/embedding_generator.py`, uses ChromaDB for vector storage and optimized embedding algorithms.
 
-#### 1.3 Structured JSON Dataset Generator
+#### 1.3 ChromaDB Vector Database
 
-*   **Purpose:** To convert the cleaned and processed content into the definitive, hierarchical JSON format specified by the project, making it ready for both model training and direct use by the application.
-*   **Inputs:** Cleaned and partially structured data from the Content Processing and Cleaning Pipeline.
-*   **Outputs:** `Dataset JSON (Cleaned and Structured)` files adhering to the project's JSON schema, containing educational content organized by subject, topic, subtopic, concept, questions, acceptable answers, and hints. These files also populate the `JSON Content Repository`.
+*   **Purpose:** To store and index all content embeddings for fast, semantic similarity search and retrieval.
+*   **Inputs:** Text and image embeddings with associated metadata.
+*   **Outputs:** Indexed vector database ready for intelligent content retrieval.
 *   **Key Processes:**
-    *   Parsing the intermediate structured data.
-    *   Mapping identified content elements (questions, hints, etc.) to the fields defined in the target JSON schema.
-    *   Organizing content into the subject-topic-subtopic-concept hierarchy.
-    *   Assigning unique identifiers (`id`) to concepts and questions as per the defined standard.
-    *   Validating the generated JSON against the project's schema to ensure structural integrity and data correctness.
-*   **Technology/Implementation Notes:** Custom Python scripts responsible for data transformation and validation, likely using Python's built-in `json` library and potentially a JSON schema validation library. Located in the `scripts/data_collection/` directory.
+    *   Vector storage and indexing.
+    *   Metadata management and filtering.
+    *   Similarity search algorithms.
+    *   Collection organization by subject and content type.
+*   **Technology/Implementation Notes:** ChromaDB provides persistent storage and efficient similarity search, located in `satya_data/chroma_db/`.
 
-#### 1.4 Dataset JSON (Cleaned and Structured)
+### 2. AI Model Architecture (Single Phi 1.5 Model)
 
-*   **Purpose:** Serves as the standardized data format that is the direct output of the generation process and the primary input for training the AI models.
-*   **Content:** Contains educational content structured hierarchically in JSON format, validated against the project schema.
-*   **Role:** Acts as a bridge between the data processing pipeline and the AI model training phase.
+This segment covers the streamlined AI architecture using a single, lightweight Phi 1.5 model for all AI tasks, replacing the previous multi-model approach.
 
-#### 1.5 JSON Content Repository
+#### 2.1 Phi 1.5 Model Handler
 
-*   **Purpose:** The central, version-controlled repository for all validated and finalized educational content in the project's structured JSON format.
-*   **Content:** Stores the `Dataset JSON` files that have been generated and potentially further refined by the Community Editor.
-*   **Role:** Provides the definitive source of educational content for the CLI Learning Application and serves as the base for community contributions and updates.
-*   **Management:** Implemented using a Git repository, allowing for tracking changes, collaboration, and maintaining content history.
-
-### 2. AI Model Development and Integration
-
-This segment covers the training, optimization, and integration of the natural language processing models that provide the AI capabilities within the learning companion.
-
-#### 2.1 NLP Training Module (Google Colab + Huggingface)
-
-*   **Purpose:** To fine-tune pre-trained, lightweight Hugging Face transformer models on the project's structured educational dataset to specialize them for the tasks of subject-specific Question Answering (Q&A) and hint generation relevant to the Nepali Grade 10 curriculum.
-*   **Inputs:** `Dataset JSON (Cleaned and Structured)` files.
-*   **Outputs:** Fine-tuned AI models (DistilBERT, T5-small, or similar lightweight architectures) ready for export.
+*   **Purpose:** To manage a single, lightweight Phi 1.5 model that handles all AI tasks including Q&A, hint generation, and content generation with configurable answer lengths.
+*   **Inputs:** Student questions, RAG-retrieved context, and answer length preferences.
+*   **Outputs:** AI-generated answers, hints, and content with confidence scores.
 *   **Key Processes:**
-    *   Loading the structured dataset and preparing it into the format required by the Hugging Face `transformers` library (e.g., tokenization, creating datasets and dataloaders).
-    *   Loading pre-trained models (e.g., `distilbert-base-uncased`, `t5-small`).
-    *   Defining training objectives and loss functions for Q&A and hint generation tasks.
-    *   Executing the fine-tuning process, typically using optimizers and learning rate schedulers.
-    *   Evaluating model performance on validation data.
-*   **Technology/Implementation Notes:** Scripts (`ai_model/training/train_model_colab.py`) designed to run efficiently on Google Colab, leveraging its GPU/TPU resources. Uses `transformers` and potentially `PyTorch` or `TensorFlow`.
+    *   Model loading and optimization for low-end hardware.
+    *   Text normalization (handling uppercase, lowercase, mixed case).
+    *   Answer length control (5 different detail levels).
+    *   Confidence scoring and answer validation.
+    *   Fallback mechanisms for error handling.
+*   **Technology/Implementation Notes:** Implemented in `ai_model/model_utils/phi15_handler.py`, uses llama-cpp-python for efficient GGUF model inference.
 
-#### 2.2 Export Model (PyTorch/ONX) For Offline Use
+#### 2.2 Model Manager
 
-*   **Purpose:** To convert the fine-tuned models into a highly optimized format that minimizes size and maximizes inference speed, making them suitable for deployment and execution on low-resource student devices without internet connectivity.
-*   **Inputs:** Fine-tuned AI models from the NLP Training Module (typically in PyTorch or TensorFlow format).
-*   **Outputs:** Optimized model files, likely in ONNX format, along with associated configuration and vocabulary files.
+*   **Purpose:** To provide a unified interface for all AI operations, managing the Phi 1.5 model and coordinating with the RAG system.
+*   **Inputs:** Student requests for answers, hints, and content generation.
+*   **Outputs:** Coordinated AI responses using RAG context and Phi 1.5 generation.
 *   **Key Processes:**
-    *   Loading the trained model.
-    *   Converting the model graph to the target format (e.g., PyTorch to ONNX).
-    *   Applying optimization techniques such as model quantization (converting weights to lower precision like INT8) and graph optimizations.
-    *   Saving the optimized model and tokenizer files.
-*   **Technology/Implementation Notes:** Utilizes tools and libraries provided by PyTorch, TensorFlow, and ONNX Runtime for model conversion and optimization. Files are stored in `ai_model/exported_model/`.
+    *   Model lifecycle management.
+    *   RAG integration coordination.
+    *   Answer length control routing.
+    *   Error handling and fallbacks.
+*   **Technology/Implementation Notes:** Located in `ai_model/model_utils/model_handler.py`, acts as the central coordinator for AI operations.
 
-### 3. Offline Learning Application and Logging
+### 3. RAG Retrieval Engine
 
-This represents the student-facing part of the system and the mechanism for recording student interactions and progress.
+This component provides intelligent content discovery and retrieval, forming the core of the system's content understanding capabilities.
 
-#### 3.1 CLI Learning Application (Offline Use)
+#### 3.1 RAG Retrieval Engine
 
-*   **Purpose:** The primary interface through which students interact with the NEBedu system. It delivers educational content and provides AI-powered assistance in an offline environment.
-*   **Inputs:** Structured content from the `JSON Content Repository` and the `Exported Model`.
-*   **Outputs:** Student learning interactions and requests.
+*   **Purpose:** To intelligently search and retrieve the most relevant content for any student question using semantic similarity and vector search.
+*   **Inputs:** Student questions and search parameters.
+*   **Outputs:** Ranked, relevant content chunks with relevance scores.
 *   **Key Processes:**
-    *   Loading and presenting educational content (topics, concepts, questions) to the student via the command line.
-    *   Receiving and processing student inputs (answers, hint requests, navigation commands).
-    *   Invoking the loaded AI models to generate responses or hints based on student input and context.
-    *   Providing feedback and explanations to the student.
-    *   Interfacing with the Logging Manager to record interaction data.
-*   **Technology/Implementation Notes:** A Python CLI application (`student_app/` directory) likely using libraries like `rich` and `prompt_toolkit` for enhanced command-line user experience. Must efficiently load content and models into memory.
+    *   Query embedding generation.
+    *   Vector similarity search in ChromaDB.
+    *   Content ranking and filtering.
+    *   Metadata-based content organization.
+    *   Fallback to structured content when RAG fails.
+*   **Technology/Implementation Notes:** Implemented in `system/rag/rag_retrieval_engine.py`, provides the intelligent content discovery backbone.
 
-#### 3.2 Students Interacts with questions, hints, answers, etc
+### 4. Student Learning Application
 
-*   **Purpose:** Represents the actual engagement of students with the educational content and AI features provided by the CLI application.
-*   **Interaction Points:** Answering questions, requesting hints, reviewing explanations, navigating content hierarchy, potentially tracking personal progress indicators displayed by the application.
-*   **Data Generated:** Student responses, time taken per question, hints requested, navigation paths.
+This represents the student-facing part of the system with both CLI and GUI interfaces, enhanced with RAG capabilities.
 
-#### 3.3 Local Logging of Response, time, hints used
+#### 4.1 CLI Learning Application (RAG-Enhanced)
 
-*   **Purpose:** To capture granular details of each student interaction locally on their device.
-*   **Content:** Records timestamps, the specific question or prompt, the student's input, the AI response (if applicable), which hints were accessed, and potentially other relevant metrics like attempt count.
-*   **Storage:** Data is stored in a persistent format (e.g., flat files, local database) within the student's device storage.
-
-#### 3.4 Logging Manager (Local Storage)
-
-*   **Purpose:** To manage the storage, retrieval, and initial processing of the locally logged student interaction data.
-*   **Inputs:** Interaction data streams from the CLI Learning Application.
-*   **Outputs:** Stored log files/database; potentially aggregated or summarized data for display within the CLI app.
+*   **Purpose:** The primary command-line interface through which students interact with the Satya system, now enhanced with RAG-powered content discovery and answer length control.
+*   **Inputs:** Student questions, answer length preferences, and navigation commands.
+*   **Outputs:** RAG-enhanced answers, progress tracking, and learning analytics.
 *   **Key Processes:**
-    *   Writing interaction data to local storage efficiently.
-    *   Ensuring data integrity and handling potential storage issues.
-    *   Providing an interface for the CLI app to query and display student progress based on the logged data.
-    *   Potentially preparing data for export or synchronization (though synchronization is not explicitly shown in this diagram).
-*   **Technology/Implementation Notes:** A dedicated module (`system/logging/` or within `system/data_manager/`) managing file I/O or a local database (e.g., SQLite).
+    *   RAG-powered content discovery for questions.
+    *   Answer length selection (5 different detail levels).
+    *   Phi 1.5 model inference with retrieved context.
+    *   Progress tracking and analytics.
+    *   Fallback to structured content when needed.
+*   **Technology/Implementation Notes:** Enhanced CLI in `student_app/interface/cli_interface.py` with RAG integration and answer length control.
 
-### 4. Community Content Management
+#### 4.2 GUI Learning Application
 
-This loop describes the process by which the educational content is maintained, validated, and improved collaboratively.
-
-#### 4.1 Community Editor (CLI JSON editor, Validation, Version Control)
-
-*   **Purpose:** A tool designed primarily for teachers and authorized community members to directly edit, enhance, and validate the structured educational content within the `JSON Content Repository`.
-*   **Inputs:** Content files from the `JSON Content Repository`.
-*   **Outputs:** Updated and validated content files to be committed back to the `JSON Content Repository`.
+*   **Purpose:** A modern, responsive graphical interface providing the same RAG-enhanced capabilities with an intuitive user experience.
+*   **Inputs:** Student interactions through GUI elements.
+*   **Outputs:** Visual learning experience with RAG-enhanced content.
 *   **Key Processes:**
-    *   Loading and presenting content in an editable format via a command-line interface.
-    *   Allowing users to add, modify, or remove subjects, topics, subtopics, concepts, questions, answers, and hints.
-    *   Crucially, performing rigorous JSON schema validation on all changes before they can be saved.
-    *   Integrating with Git commands to commit and manage content updates within the repository, facilitating version control and collaboration.
-*   **Technology/Implementation Notes:** A dedicated CLI application (`teacher_tools/content_editor/main.py`) using libraries like `rich` and `prompt_toolkit`, incorporating JSON schema validation logic and potentially Python's `subprocess` module or a Git library to interact with the version control system.
+    *   Modern customtkinter interface.
+    *   RAG integration for intelligent Q&A.
+    *   Answer length control through GUI.
+    *   Progress visualization and analytics.
+*   **Technology/Implementation Notes:** Located in `student_app/gui_app/main_window.py`, provides a rich visual learning experience.
 
-This detailed breakdown illustrates the complete operational flow of the NEBedu system, from initial data acquisition and AI model preparation to student interaction, local logging, and the continuous improvement cycle facilitated by the community content editor. The architecture prioritizes offline functionality and resource efficiency to meet the project's goals.
+### 5. Content Management and Analytics
+
+This section covers the teacher tools and content management capabilities, enhanced for the new architecture.
+
+#### 5.1 Content Manager
+
+*   **Purpose:** To manage structured educational content and provide fallback content when RAG doesn't find relevant information.
+*   **Inputs:** JSON-based structured content files.
+*   **Outputs:** Validated content for student learning and RAG fallbacks.
+*   **Key Processes:**
+    *   Content loading and validation.
+    *   Schema enforcement.
+    *   Content search and retrieval.
+    *   Integration with RAG system.
+*   **Technology/Implementation Notes:** Located in `system/data_manager/content_manager.py`, provides the structured content foundation.
+
+#### 5.2 Teacher Tools
+
+*   **Purpose:** To provide teachers with tools for content management, analytics, and system administration.
+*   **Inputs:** Teacher commands and content editing requests.
+*   **Outputs:** Content updates, student analytics, and system reports.
+*   **Key Processes:**
+    *   Content editing and validation.
+    *   Student progress analytics.
+    *   System performance monitoring.
+    *   Content quality control.
+*   **Technology/Implementation Notes:** Located in `teacher_tools/` directory, provides comprehensive teacher capabilities.
 
 ## 📦 Dependencies
 
 ### Core Dependencies
 ```python
-transformers==4.30.2
-torch==2.0.1
-numpy==1.24.3
-tqdm==4.65.0
+llama-cpp-python>=0.2.0  # Phi 1.5 model support
+chromadb>=0.4.0          # Vector database for RAG
+numpy>=1.24.3            # Numerical operations
+rich>=13.3.5             # CLI interface enhancement
+```
+
+### RAG System Dependencies
+```python
+chromadb>=0.4.0          # Vector database
+sentence-transformers>=2.2.0  # Text embeddings (optional)
+Pillow>=9.0.0            # Image processing
+PyPDF2>=3.0.0            # PDF processing
 ```
 
 ### CLI/UI Dependencies
 ```python
-rich==13.3.5
-prompt_toolkit==3.0.38
-typer==0.9.0
-```
-
-### Data Collection Dependencies
-```python
-selenium==4.10.0
-beautifulsoup4==4.12.2
-webdriver_manager==3.8.6
+rich>=13.3.5             # Enhanced CLI display
+customtkinter>=5.2.0     # Modern GUI framework
+prompt_toolkit>=3.0.38   # Advanced CLI input
 ```
 
 ### Testing Dependencies
 ```python
-pytest==7.3.1
-pytest-cov==4.1.0
+pytest>=7.3.1            # Testing framework
+pytest-cov>=4.1.0        # Coverage reporting
 ```
 
 ## 📁 Directory Structure
 ```
-NEBedu/
+Satya/
+├── satya_data/                 # Data and models directory
+│   ├── models/
+│   │   └── phi_1_5/           # Phi 1.5 GGUF model
+│   ├── chroma_db/              # RAG vector database
+│   └── content/                # Educational content
+│
 ├── scripts/
-│   ├── data_collection/
-│   │   └── data/
-│   │       ├── raw_content/    # Raw, unprocessed data
-│   │       ├── processed/      # Cleaned/intermediate data
-│   │       └── content/        # Final, validated content JSONs
-│   └── validation/
-│       └── validate_standards.py # Script to validate code and content standards
-│
-├── ai_model/
-│   ├── training/               # Colab notebooks and training scripts
-│   ├── exported_model/         # Trained models for offline use
-│   └── model_utils/
-│       └── model_handler.py    # Model helper functions
-│
-├── student_app/
-│   ├── interface/
-│   │   └── cli_interface.py    # CLI interface components
-│   ├── learning/               # Learning features (e.g., question handling)
-│   └── progress/               # Progress tracking
-│
-├── teacher_tools/
-│   ├── content_editor/
-│   │   └── content_editor_utils.py # Content editing utilities
-│   └── analytics/
-│       └── analytics_utils.py    # Progress analytics utilities
+│   ├── rag_data_preparation/   # RAG content processing
+│   │   ├── embedding_generator.py  # Generate embeddings for RAG
+│   │   └── pdf_processor.py    # Process PDFs to chunks
+│   └── data_collection/        # Content collection tools
 │
 ├── system/
-│   ├── data_manager/
-│   │   └── content_manager.py    # Data handling and validation
-│   ├── performance/
-│   │   └── performance_utils.py  # Performance monitoring utilities
-│   └── security/
-│       └── security_utils.py     # Security features
+│   ├── rag/                    # RAG system components
+│   │   └── rag_retrieval_engine.py  # Intelligent content retrieval
+│   ├── data_manager/           # Data handling
+│   ├── performance/            # Performance monitoring
+│   └── security/               # Security features
 │
+├── ai_model/
+│   ├── model_utils/            # Model helper functions
+│   │   ├── phi15_handler.py    # Phi 1.5 model handler
+│   │   └── model_handler.py    # Main model manager
+│   └── training/               # Training scripts (if needed)
+│
+├── student_app/
+│   ├── gui_app/                # Modern GUI (customtkinter)
+│   ├── interface/              # CLI interface components
+│   ├── learning/               # Learning features
+│   └── progress/               # Progress tracking
+│
+├── teacher_tools/               # Teacher utilities
 ├── tests/                      # Test suite
-├── docs/
-│   ├── TECHNICAL_IMPLEMENTATION.md
-│   ├── content-explanation.md
-│   ├── PROJECT_OVERVIEW.md
-│   ├── PROJECT_STANDARDS.md
-│   ├── architecture.png
-│   ├── TEACHER_GUIDE.md
-│   ├── STUDENT_GUIDE.md
+└── docs/                       # Documentation
 ```
 
 ## 🔧 Implementation Details
 
-### 1. AI Model Handler
+### 1. Phi 1.5 Model Handler
 ```python
-class ModelHandler:
-    def __init__(self):
-        self.qna_model = DistilBertForQuestionAnswering.from_pretrained("distilbert-base-uncased")
-        self.qna_tokenizer = DistilBertTokenizerFast.from_pretrained("distilbert-base-uncased")
-        self.hint_model = T5ForConditionalGeneration.from_pretrained("t5-small")
-        self.hint_tokenizer = T5Tokenizer.from_pretrained("t5-small")
-        # Future: Add step recommendation, adaptive learning heads
-    def generate_answer(self, question: str, context: str) -> str:
-        # QnA implementation
-        pass
-    def generate_hint(self, question: str, context: str) -> str:
-        # Hint generation implementation
-        pass
+class Phi15Handler:
+    def __init__(self, model_path: str):
+        self.model_path = Path(model_path)
+        self.llm = None
+        self.config = self._load_config()
+        self.model_file = self._find_model_file()
+    
+    def get_answer(self, question: str, context: str, answer_length: str = "medium") -> Tuple[str, float]:
+        # Text normalization
+        normalized_question = self._normalize_text(question)
+        
+        # Length-specific prompt generation
+        length_config = self._get_length_config(answer_length)
+        prompt = self._generate_prompt(context, normalized_question, length_config)
+        
+        # Model inference
+        response = self.llm(prompt, max_tokens=length_config['max_tokens'])
+        answer = response['choices'][0]['text'].strip()
+        
+        # Answer validation and confidence scoring
+        confidence = self._calculate_confidence(answer, context, question)
+        return answer, confidence
 ```
 
+### 2. RAG Retrieval Engine
 ```python
-from typing import Dict, Any
-
-class JSONSchemaValidator:
-    def validate(self, data: Dict[str, Any], schema: Dict[str, Any]) -> bool:
-        # Schema validation implementation
-        pass
+class RAGRetrievalEngine:
+    def __init__(self, chroma_db_path: str):
+        self.chroma_client = chromadb.PersistentClient(path=chroma_db_path)
+        self.collections = self._load_collections()
+    
+    def retrieve_relevant_content(self, query: str, max_results: int = 5) -> Dict:
+        # Generate query embedding
+        query_embedding = self.generate_embedding(query)
+        
+        # Search across all collections
+        all_results = []
+        for collection_name, collection in self.collections.items():
+            results = collection.query(
+                query_embeddings=[query_embedding.tolist()],
+                n_results=max_results,
+                include=['documents', 'metadatas', 'distances']
+            )
+            # Process and rank results
+            all_results.extend(self._process_results(results, collection_name))
+        
+        # Return top-ranked results
+        return {'chunks': all_results[:max_results], 'total_found': len(all_results)}
 ```
 
-### 3. Data Collection Process
+### 3. Answer Length Control
 ```python
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from bs4 import BeautifulSoup
-from typing import Dict
-
-class ContentCrawler:
-    def __init__(self):
-        # Selenium setup
-        chrome_options = Options()
-        chrome_options.add_argument('--headless')
-        self.driver = webdriver.Chrome(options=chrome_options)
-    def extract_raw_content(self, soup: BeautifulSoup) -> Dict:
-        # Raw content extraction
-        pass
-    def extract_content(self, soup: BeautifulSoup, subject: str) -> Dict:
-        # Content processing
-        pass
+def _get_length_config(self, answer_length: str) -> dict:
+    length_configs = {
+        "very_short": {
+            "instruction": "Give a very brief, one-sentence answer (10-20 words). Focus on the core concept only.",
+            "max_tokens": 64,
+            "description": "Quick fact or definition"
+        },
+        "short": {
+            "instruction": "Give a concise answer in 2-3 sentences (30-50 words). Include key points and basic explanation.",
+            "max_tokens": 128,
+            "description": "Basic explanation with key points"
+        },
+        "medium": {
+            "instruction": "Give a detailed answer in 4-6 sentences (80-120 words). Include explanation, examples, and important details.",
+            "max_tokens": 256,
+            "description": "Detailed explanation with examples"
+        },
+        "long": {
+            "instruction": "Give a comprehensive answer in 8-12 sentences (150-250 words). Include detailed explanation, multiple examples, and step-by-step breakdown.",
+            "max_tokens": 512,
+            "description": "Comprehensive coverage with examples"
+        },
+        "very_long": {
+            "instruction": "Give an extensive answer in 15-20 sentences (300-500 words). Include comprehensive coverage, multiple perspectives, detailed examples, and thorough explanation.",
+            "max_tokens": 1024,
+            "description": "Extensive coverage with multiple perspectives"
+        }
+    }
+    return length_configs.get(answer_length, length_configs["medium"])
 ```
-
-### 4. Model Training Script
-- Located at `ai_model/training/train_model_colab.py`
-- Trains both DistilBERT (QnA) and T5-small (hint generation) on curriculum-aligned data
-- Modular, multi-task structure for future extensibility
 
 ## 🔍 Critical Implementation Notes
 
-### 1. Model Training
-- Use Google Colab for training
-- Export models in Hugging Face format for efficiency
-- Modular training for QnA and hint generation
-- Cache model responses
+### 1. Model Optimization
+- Use GGUF format for Phi 1.5 (lightweight, efficient)
+- Optimize for 2GB RAM minimum
+- Implement smart text normalization
+- Add robust fallback mechanisms
 
-### 2. Content Processing
-- Preserve raw content before processing
-- Handle Nepali characters properly
-- Remove ads and navigation
-- Validate content structure
+### 2. RAG System
+- ChromaDB for vector storage
+- Efficient embedding generation
+- Smart content retrieval
+- Fallback to structured content
 
 ### 3. Performance Optimization
-- Lazy loading of content
-- Content caching
-- Memory monitoring
-- Raw content compression
+- Lazy loading of models and content
+- Efficient vector search
+- Memory monitoring and optimization
+- Caching for frequently accessed content
 
 ### 4. Error Handling
-- Graceful degradation
+- Graceful degradation when RAG fails
+- Model fallback mechanisms
 - Content validation
-- Error logging
-- Recovery mechanisms
+- Comprehensive error logging
 
 ## 🧪 Testing Strategy
 
 ### 1. Unit Tests
 ```python
-def test_model_handler():
-    handler = ModelHandler()
-    answer = handler.generate_answer("What is...?", "Context...")
+def test_phi15_handler():
+    handler = Phi15Handler("test_models/phi_1_5")
+    answer, confidence = handler.get_answer("What is AI?", "AI is artificial intelligence", "short")
     assert isinstance(answer, str)
     assert len(answer) > 0
-    hint = handler.generate_hint("What is...?", "Context...")
-    assert isinstance(hint, str)
-    assert len(hint) > 0
+    assert 0.1 <= confidence <= 0.95
+
+def test_rag_engine():
+    engine = RAGRetrievalEngine("test_chroma_db")
+    results = engine.retrieve_relevant_content("What is computer science?")
+    assert 'chunks' in results
+    assert len(results['chunks']) > 0
 ```
 
 ### 2. Integration Tests
-- End-to-end content processing
-- Model inference pipeline (QnA + hint)
-- CLI interaction flow
+- End-to-end RAG pipeline
+- Model inference with RAG context
+- CLI/GUI interaction flow
+- Answer length control
 
 ### 3. Performance Tests
 - Memory usage monitoring
 - Response time measurement
-- Content processing speed
+- Vector search performance
+- Model loading time
 
 ## 🔒 Security Measures
 
 ### 1. Content Security
-- Input validation
-- Content sanitization
+- Input validation and sanitization
 - Safe file operations
-- Rate limiting
+- Content source validation
+- Rate limiting for AI operations
 
 ### 2. Data Protection
-- Content encryption
-- Backup system
-- Access control
-- Source validation
+- Local data storage only
+- No external API calls (except optional OpenAI)
+- Content encryption for sensitive data
+- Backup and recovery systems
 
 ## 📈 Future Enhancements
 
 ### 1. Short-term
-- Progress tracking
+- Enhanced RAG capabilities
 - Multi-language support
-- Enhanced hints
-- Image support
+- Advanced answer length control
+- Image understanding
 
 ### 2. Long-term
-- Community features
-- Content versioning
-- AI-powered generation
-- Adaptive learning
+- Community content contributions
+- Adaptive learning algorithms
+- Multi-modal content support
+- Advanced analytics
 
 ## 🚀 Deployment Guide
 
 ### 1. Prerequisites
 - Python 3.8+
-- Chrome browser
-- Sufficient disk space
-- Memory requirements
+- 2GB RAM minimum
+- Sufficient disk space for models and content
+- llama-cpp-python support
 
 ### 2. Installation
 ```bash
 # Create virtual environment
 python -m venv venv
 source venv/bin/activate  # or venv\Scripts\activate on Windows
+
 # Install dependencies
+pip install llama-cpp-python
 pip install -r requirements.txt
-# Download models
-python scripts/download_model.py
+
+# Download Phi 1.5 model
+# Place phi-1_5-Q5_K_S.gguf in satya_data/models/phi_1_5/
 ```
 
 ### 3. Configuration
 ```python
 # config.py
-MODEL_PATH = "models/neb_edu"
-CONTENT_DIR = "data/content"
-RAW_CONTENT_DIR = "data/raw_content"
+MODEL_PATH = "satya_data/models/phi_1_5"
+CHROMA_DB_PATH = "satya_data/chroma_db"
+CONTENT_DIR = "satya_data/content"
 ```
 
 ### 4. Running
 ```bash
-# Start the application
-python main.py
+# Start CLI application
+python -m student_app.interface.cli_interface
+
+# Start GUI application
+python -m student_app.gui_app.main_window
+
 # Run tests
 pytest tests/
-# Collect content
-python scripts/data_collection/crawler.py
 ```
 
 ## 🔄 Maintenance
 
 ### 1. Regular Tasks
-- Content updates
-- Model retraining
-- Performance monitoring
+- Content updates and RAG reindexing
+- Model performance monitoring
+- ChromaDB optimization
 - Error log review
 
 ### 2. Backup Strategy
 - Daily content backups
 - Model versioning
+- ChromaDB backups
 - Configuration backups
-- User data protection
 
 ## 📚 Additional Resources
 
 ### 1. Documentation
-- API documentation
-- User guides
-- Architecture docs
-- Content structure docs
+- Phi 1.5 model documentation
+- ChromaDB documentation
+- RAG system guides
+- User guides and tutorials
 
 ### 2. External Links
-- DistilBERT model documentation
-- T5 model documentation
-- Selenium documentation
-- Rich documentation
-- Hugging Face guides
+- Microsoft Phi 1.5 documentation
+- ChromaDB documentation
+- llama-cpp-python guides
+- RAG system research papers
 
 ## ⚠️ Known Limitations
 
 ### 1. Technical
-- Memory usage with large content
-- Processing speed with complex content
+- Memory usage with large content collections
+- Vector search performance with very large databases
 - Model accuracy limitations
-- Browser compatibility
+- Hardware compatibility requirements
 
 ### 2. Content
+- PDF processing limitations
+- Image content constraints
 - Language support limitations
-- Content format restrictions
-- Image handling constraints
-- Update frequency
+- Content update frequency
 
 ## 🔧 Troubleshooting
 
 ### 1. Common Issues
+- Model loading failures
+- ChromaDB connection issues
 - Memory errors
-- Content extraction failures
-- Model loading issues
-- Browser compatibility
+- Performance problems
 
 ### 2. Solutions
+- Model path verification
+- ChromaDB initialization
 - Memory optimization
-- Content validation
-- Model fallback
-- Browser configuration
+- Performance tuning
 
+## 🆕 What's New in This Architecture
 
-## System Architecture (Updated)
-- **CLI App**: Student-facing, uses Hugging Face models for Q&A, tracks progress, and adapts learning.
-- **Performance Module**: Provides @timeit decorator, resource usage logging, and performance metric logging. Used in critical paths (model inference, file I/O).
-- **Security Module**: Validates usernames, file paths, and content input. Logs security events and ensures safe file operations.
-- **Teacher Tools**:
-  - **Analytics**: Generates student/class reports, exports to CSV/JSON.
-  - **Content Editor**: Loads, edits, validates, and saves content JSONs. Uses ContentManager schema for validation.
+### 🚀 **Major Changes from Previous Version**
+- **Single AI Model**: Replaced multiple models (DistilBERT, T5-small, Phi 2) with one efficient Phi 1.5
+- **RAG System**: Added intelligent content discovery and retrieval using ChromaDB
+- **Lightweight Design**: Optimized for low-end hardware (2GB RAM minimum)
+- **PDF-First Content**: Replaced web crawler with PDF processing pipeline
 
-## Data Pipeline
-1. **raw_content/**: Raw, unprocessed data (scraped, OCR, etc.).
-2. **processed/**: Cleaned, normalized, or partially structured data.
-3. **content/**: Final, validated JSON files. Only these are used by the app and teacher tools.
+### 🎯 **New Technical Features**
+- **Vector Database**: ChromaDB for semantic content search
+- **Answer Length Control**: 5 different detail levels for varied learning needs
+- **Smart Text Normalization**: Handles uppercase, lowercase, and mixed case input
+- **RAG-Enhanced Q&A**: Intelligent content discovery for better answers
+- **Robust Fallbacks**: Multiple fallback levels ensure students always get help
 
-## Content Editor Utilities
-- Functions to add/remove topics, concepts, and questions.
-- Validates content against schema before saving.
-- Only operates on files in `content/`.
-
-## Analytics Utilities
-- Generates detailed student progress reports.
-- Identifies weak concepts and exports analytics.
-
-## Security & Performance Synergy
-- Security validation always precedes performance logging.
-- All suspicious/failed validations are logged as security events.
-- Critical operations are both profiled and secured.
-
-## Folder Structure
-- `scripts/data_collection/data/raw_content/`
-- `scripts/data_collection/data/processed/`
-- `scripts/data_collection/data/content/`
-- `teacher_tools/analytics/`
-- `teacher_tools/content_editor/`
-- `system/performance/`
-- `system/security/`
+### 🔧 **Technical Improvements**
+- **Offline-First**: 100% local operation, no internet required
+- **Performance**: Faster inference with optimized Phi 1.5 parameters
+- **Reliability**: Better error handling and confidence scoring
+- **Scalability**: Easy to add new subjects and content through RAG
 
 ## See also
 - [Project Overview](PROJECT_OVERVIEW.md)
 - [Project Standards](PROJECT_STANDARDS.md)
-
-## Teacher Content Editor CLI
-
-The Teacher Content Editor CLI is a command-line interface designed for teachers to manage educational content JSON files for NEBedu. It provides a user-friendly menu-driven experience, allowing teachers to perform the following actions:
-
-- **Load Content File**: Load a JSON file containing educational content.
-- **List Topics**: Display a list of topics available in the loaded content.
-- **Add Topic**: Add a new topic to the content.
-- **Add Concept**: Add a new concept to a specified topic and subtopic.
-- **Add Question**: Add a new question to a specified concept.
-- **Remove Topic**: Remove a topic from the content.
-- **Remove Concept**: Remove a concept from a specified topic and subtopic.
-- **Remove Question**: Remove a question from a specified concept.
-- **Save Content File**: Save the current content to a JSON file.
-- **Exit**: Exit the CLI with a goodbye message.
-
-The CLI uses the `rich` library for display and `prompt_toolkit` for input, ensuring a consistent and intuitive user experience. All operations are performed using utility functions from `content_editor_utils.py`, which handle the underlying logic for content management.
-
-This CLI is designed to be robust and user-friendly, allowing teachers to manage content without needing to write code. It includes clear prompts and confirmations, ensuring that users can easily navigate and perform actions without confusion. 
+- [RAG System Design](RAG_SYSTEM_DESIGN.md) 

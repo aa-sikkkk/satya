@@ -1,0 +1,11 @@
+{
+  "package_name": "satya_models",
+  "version": "1.0.0",
+  "description": "Offline models for Satya RAG system",
+  "models": [
+    "phi_1_5",
+    "clip"
+  ],
+  "created_at": "J:\\GithubContribution\\Satya",
+  "total_size_mb": 5014.741600036621
+}

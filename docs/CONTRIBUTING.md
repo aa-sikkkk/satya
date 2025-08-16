@@ -1,10 +1,10 @@
-# Contributing to NEBedu
+# Contributing to Satya
 
-Thank you for your interest in contributing to the Nepali Grade 10 AI Learning Companion (NEBedu)! Your contributions help us empower students in Nepal with accessible, offline AI-powered learning resources. This document outlines how you can get involved.
+Thank you for your interest in contributing to the Nepali Grade 10 AI Learning Companion (Satya)! Your contributions help us empower students in Nepal with accessible, offline AI-powered learning resources. This document outlines how you can get involved.
 
 ## Project Vision and Goals
 
-NEBedu aims to provide an offline-first, AI-powered learning companion for Grade 10 students in Nepal, focusing on Computer Science, Science, and English. Our goals include maximizing accessibility on low-resource hardware, delivering high-quality educational content, empowering teachers, and fostering community collaboration. (See [PROJECT_OVERVIEW.md](docs/PROJECT_OVERVIEW.md) for more details).
+Satya aims to provide an offline-first, AI-powered learning companion for Grade 10 students in Nepal, focusing on Computer Science, Science, and English. Our goals include maximizing accessibility on low-resource hardware, delivering high-quality educational content, empowering teachers, and fostering community collaboration. (See [PROJECT_OVERVIEW.md](docs/PROJECT_OVERVIEW.md) for more details).
 
 ## Code of Conduct
 
@@ -43,7 +43,7 @@ We welcome code contributions! Before submitting code, please ensure it adheres 
 
 ### Contributing Content
 
-The educational content is community-editable and a core part of NEBedu. We encourage subject matter experts and educators to contribute and improve the content.
+The educational content is community-editable and a core part of Satya. We encourage subject matter experts and educators to contribute and improve the content.
 
 *   **Content Structure**: All content must follow the JSON schema defined in [PROJECT_STANDARDS.md](docs/PROJECT_STANDARDS.md#41-json-schema-standards) and detailed in [content-explanation.md](docs/content-explanation.md#2-field-descriptions).
 *   **Content Quality**: Adhere to the [Content Quality Standards](docs/content-explanation.md#2-content-quality-standards) regarding language, accuracy, cultural sensitivity, and progression.

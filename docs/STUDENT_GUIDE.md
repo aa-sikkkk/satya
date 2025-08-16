@@ -1,18 +1,18 @@
-# NEBedu Student Guide
+# Satya Student Guide
 
-Welcome to the NEBedu Learning Companion! This guide will help you get started with the application and make the most of its features.
+Welcome to the Satya Learning Companion! This guide will help you get started with the application and make the most of its features.
 
-## 1. What is NEBedu?
+## 1. What is Satya?
 
-NEBedu is an offline AI learning companion for Grade 10 students in Nepal. It helps you study Computer Science, Science, and English using interactive content and AI assistance, even without internet access.
+Satya is an offline AI learning companion for Grade 10 students in Nepal. It helps you study Computer Science, Science, and English using interactive content and AI assistance, even without internet access.
 
 ## 2. Installation
 
-Your teacher or system administrator will likely install NEBedu for you. If you need to install it yourself, please refer to the detailed [Installation Guide](README.md#Installation).
+Your teacher or system administrator will likely install Satya for you. If you need to install it yourself, please refer to the detailed [Installation Guide](README.md#Installation).
 
 ## 3. Starting the Application
 
-To start the NEBedu learning application, open your terminal or command prompt and run:
+To start the Satya learning application, open your terminal or command prompt and run:
 
 ```bash
 python -m student_app.interface.cli_interface
@@ -43,7 +43,7 @@ Remember, all of this works offline!
 
 ## 6. Tracking Your Progress
 
-NEBedu tracks your learning progress locally on your device using your username.
+Satya tracks your learning progress locally on your device using your username.
 
 - The application records your answers, the time taken, and the hints used.
 - You can access progress-related features from the main menu of the application:
@@ -56,7 +56,7 @@ This data helps you and your teacher understand which concepts you have mastered
 
 ## 7. Offline Functionality
 
-One of the key features of NEBedu is that it works entirely offline. Once installed, you do not need an internet connection to access the content or use the AI assistance.
+One of the key features of Satya is that it works entirely offline. Once installed, you do not need an internet connection to access the content or use the AI assistance.
 
 ## 8. Troubleshooting
 

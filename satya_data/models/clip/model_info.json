@@ -1,0 +1,7 @@
+{
+  "name": "ViT-B/32",
+  "type": "clip",
+  "purpose": "image_embeddings",
+  "bundled_at": "J:\\GithubContribution\\Satya",
+  "note": "CLIP model is cached by torch hub, no need to copy files"
+}

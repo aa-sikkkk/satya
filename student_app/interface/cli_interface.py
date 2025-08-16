@@ -27,6 +27,7 @@ from student_app.progress import progress_manager
 from system.performance.performance_utils import timeit, log_resource_usage
 from system.security.security_utils import validate_username, sanitize_filepath, log_security_event, validate_content_input
 from student_app.learning.openai_proxy_client import OpenAIProxyClient
+from system.rag.rag_retrieval_engine import RAGRetrievalEngine
 
 # Configure logging
 logging.basicConfig(
@@ -100,6 +101,19 @@ class CLIInterface:
         """
         self.content_manager = ContentManager(content_dir)
         
+        # Initialize RAG retrieval engine
+        try:
+            self.rag_engine = RAGRetrievalEngine()
+
+        except Exception as e:
+            logger.error(f"Failed to initialize RAG engine: {str(e)}")
+            console.print(Panel(
+                "[yellow]Warning: RAG engine not available. Using basic content search.[/yellow]",
+                title="RAG Warning",
+                border_style="yellow"
+            ))
+            self.rag_engine = None
+        
         # Ensure model path exists
         if not os.path.exists(model_path):
             raise FileNotFoundError(f"Model directory not found: {model_path}")
@@ -107,13 +121,11 @@ class CLIInterface:
         # Initialize model handler with proper path
         try:
             self.model_handler = ModelHandler(model_path)
-            # Pre-load the model to catch any initialization errors
-            self.model_handler.phi2_handler.load_model()
-            logger.info("Model loaded successfully")
+
         except Exception as e:
-            logger.error(f"Failed to initialize model: {str(e)}")
+            logger.error(f"Failed to initialize Phi 1.5 model: {str(e)}")
             console.print(Panel(
-                "[red]Error: Could not initialize the AI model. Please check the model files and try again.[/red]",
+                "[red]Error: Could not initialize the Phi 1.5 model. Please check the model files and try again.[/red]",
                 title="Model Error",
                 border_style="red"
             ))
@@ -141,7 +153,7 @@ class CLIInterface:
 
 ## Available Features
 1. 📚 Browse Subjects - Study organized content
-2. ❓ Ask Questions - Get AI-powered answers
+2. ❓ Ask Questions - Get AI-powered answers with RAG-enhanced content discovery
 3. 📊 View Progress - Track your learning
 4. 💾 Export Progress - Save your progress
 5. 📥 Import Progress - Load saved progress
@@ -181,7 +193,9 @@ Type 'back' to return to previous menu
             "question": """
 # Ask Questions Help
 - Type your question in natural language
-- Get AI-powered answers with confidence scores
+- Get AI-powered answers with RAG-enhanced content discovery
+- Answers use both structured content and intelligent content retrieval
+- Get confidence scores and source information
 - Request hints for better understanding
 - Ask follow-up questions
 - Type 'back' to return to main menu
@@ -408,47 +422,175 @@ Type 'back' to return to previous menu
     def _handle_free_text_question(self, question: str) -> None:
         """Handle free-text questions using the AI model."""
         try:
+            # Show normalized question if it was changed
+            original_question = question
+            normalized_question = question.strip()
+            if normalized_question.isupper():
+                normalized_question = normalized_question.lower().capitalize()
+                if normalized_question != original_question:
+                    console.print(f"[yellow]Note: I'll answer: '{normalized_question}'[/yellow]")
+            elif normalized_question.islower():
+                normalized_question = normalized_question.capitalize()
+                if normalized_question != original_question:
+                    console.print(f"[yellow]Note: I'll answer: '{normalized_question}'[/yellow]")
+            
+            # Ask user for answer length preference
+            console.print("\n[cyan]Choose answer length:[/cyan]")
+            console.print("1. Very Short (quick fact)")
+            console.print("2. Short (basic explanation)")
+            console.print("3. Medium (detailed explanation) - [bold]Recommended[/bold]")
+            console.print("4. Long (comprehensive coverage)")
+            console.print("5. Very Long (extensive coverage)")
+            
+            length_choice = input("\nEnter choice (1-5, default 3): ").strip()
+            
+            # Map choice to length parameter
+            length_map = {
+                "1": "very_short",
+                "2": "short", 
+                "3": "medium",
+                "4": "long",
+                "5": "very_long"
+            }
+            
+            answer_length = length_map.get(length_choice, "medium")
+            console.print(f"[green]Selected: {answer_length.replace('_', ' ').title()}[/green]")
+            
             # Ensure model is loaded
-            if not self.model_handler.phi2_handler.llm:
-                self.model_handler.phi2_handler.load_model()
+            if not self.model_handler.phi15_handler.llm:
+                self.model_handler.phi15_handler.load_model()
                 
             with console.status("[bold green]Thinking...[/bold green]"):
                 log_resource_usage("Before model inference")
                 
-                # First try to find relevant content
+                # First try to find relevant content using RAG (if available) or fallback to basic search
                 try:
-                    relevant_content = self.content_manager.search_content(question)
-                    if relevant_content:
-                        # Get the full concept data to access questions and answers
-                        subject = relevant_content[0]['subject']
-                        topic = relevant_content[0]['topic']
-                        concept = relevant_content[0]['concept']
-                        concept_data = self.content_manager.get_concept(subject, topic, concept)
-                        
-                        if concept_data and 'questions' in concept_data:
-                            # Try to find a matching question
-                            for q in concept_data['questions']:
-                                if isinstance(q, dict) and 'question' in q:
-                                    # Use fuzzy matching to find similar questions
-                                    if difflib.SequenceMatcher(None, q['question'].lower(), question.lower()).ratio() > 0.6:
-                                        # Found a matching question, use its answer
-                                        if 'acceptable_answers' in q and q['acceptable_answers']:
-                                            answer = q['acceptable_answers'][0]
-                                            confidence = 0.9  # High confidence since it's from our content
-                                            # Use the question's hints if available
-                                            hints = q.get('hints', [])
-                                            break
+                    relevant_content = None
+                    rag_context = None
+                    
+                    # Try RAG first if available
+                    if self.rag_engine:
+                        try:
+                            rag_results = self.rag_engine.retrieve_relevant_content(question, max_results=3)
+                            if rag_results and rag_results['chunks']:
+                                rag_context = "\n\n".join([chunk['content'] for chunk in rag_results['chunks']])
+
+                                
+                                # Also try to find structured content
+                                relevant_content = self.content_manager.search_content(question)
                             else:
-                                # No matching question found, use the summary
-                                summary = relevant_content[0]['summary']
-                                context = get_most_relevant_sentence(summary, question)
-                                logger.info(f"Using focused context: {context}")
+                                # Fallback to basic search
+                                relevant_content = self.content_manager.search_content(question)
+                        except Exception as e:
+                            logger.warning(f"RAG search failed, falling back to basic search: {str(e)}")
+                            relevant_content = self.content_manager.search_content(question)
+                    else:
+                        # No RAG engine, use basic search
+                        relevant_content = self.content_manager.search_content(question)
+                    
+                    if relevant_content or rag_context:
+                        # Use RAG context if available, otherwise use structured content
+                        if rag_context:
+                            context = rag_context
+                            source_info = "RAG-enhanced content"
+                            confidence = 0.85
+                            
+                            # Try to generate answer from RAG context
+                            try:
+                                answer, confidence = self.model_handler.get_answer(question, context, answer_length)
+                                if not answer or len(answer.strip()) == 0:
+                                    raise ValueError("Model generated empty answer")
+                            except Exception as e:
+                                logger.error(f"RAG model inference error: {str(e)}")
+                                console.print(Panel(
+                                    "I'm having trouble with the RAG content. Let me try using my general knowledge instead!",
+                                    title="Fallback to AI Knowledge",
+                                    border_style="blue"
+                                ))
+                                
+                                # Fallback to general knowledge
+                                general_context = (
+                                    "You are a helpful AI tutor for Grade 10 students. "
+                                    "Use your general knowledge to provide accurate, educational answers. "
+                                    "Keep answers comprehensive but appropriate for high school level."
+                                )
+                                
                                 try:
-                                    answer, confidence = self.model_handler.get_answer(question, context)
+                                    answer, confidence = self.model_handler.get_answer(question, general_context, answer_length)
                                     if not answer or len(answer.strip()) == 0:
                                         raise ValueError("Model generated empty answer")
-                                except Exception as e:
-                                    logger.error(f"Model inference error: {str(e)}")
+                                    source_info = "AI General Knowledge (RAG Fallback)"
+                                except Exception as e2:
+                                    logger.error(f"RAG fallback model inference also failed: {str(e2)}")
+                                    console.print(Panel(
+                                        "I'm having trouble generating an answer. Let me show you the RAG content instead:",
+                                        title="Model Error",
+                                        border_style="yellow"
+                                    ))
+                                    answer = context
+                                    confidence = 0.8
+                                    source_info = "RAG content (Fallback)"
+                        else:
+                            # Get the full concept data to access questions and answers
+                            subject = relevant_content[0]['subject']
+                            topic = relevant_content[0]['topic']
+                            concept = relevant_content[0]['concept']
+                            concept_data = self.content_manager.get_concept(subject, topic, concept)
+                            
+                            if concept_data and 'questions' in concept_data:
+                                # Try to find a matching question
+                                for q in concept_data['questions']:
+                                    if isinstance(q, dict) and 'question' in q:
+                                        # Use fuzzy matching to find similar questions
+                                        if difflib.SequenceMatcher(None, q['question'].lower(), question.lower()).ratio() > 0.6:
+                                            # Found a matching question, use its answer
+                                            if 'acceptable_answers' in q and q['acceptable_answers']:
+                                                answer = q['acceptable_answers'][0]
+                                                confidence = 0.9  # High confidence since it's from our content
+                                                # Use the question's hints if available
+                                                hints = q.get('hints', [])
+                                                break
+                                else:
+                                    # No matching question found, use the summary
+                                    summary = relevant_content[0]['summary']
+                                    context = get_most_relevant_sentence(summary, question)
+                                    source_info = "Structured content"
+                                    confidence = 0.8
+                            else:
+                                # No questions found, use the summary
+                                summary = relevant_content[0]['summary']
+                                context = get_most_relevant_sentence(summary, question)
+                                source_info = "Structured content"
+                                confidence = 0.8
+                        
+                        # Generate answer using the context (for structured content)
+                        if 'answer' not in locals():
+                            try:
+                                answer, confidence = self.model_handler.get_answer(question, context, answer_length)
+                                if not answer or len(answer.strip()) == 0:
+                                    raise ValueError("Model generated empty answer")
+                            except Exception as e:
+                                logger.error(f"Model inference error: {str(e)}")
+                                console.print(Panel(
+                                    "I'm having trouble with the specific content. Let me try using my general knowledge instead!",
+                                    title="Fallback to AI Knowledge",
+                                    border_style="blue"
+                                ))
+                                
+                                # Fallback to general knowledge
+                                general_context = (
+                                    "You are a helpful AI tutor for Grade 10 students. "
+                                    "Use your general knowledge to provide accurate, educational answers. "
+                                    "Keep answers comprehensive but appropriate for high school level."
+                                )
+                                
+                                try:
+                                    answer, confidence = self.model_handler.get_answer(question, general_context, answer_length)
+                                    if not answer or len(answer.strip()) == 0:
+                                        raise ValueError("Model generated empty answer")
+                                    source_info = "AI General Knowledge (Fallback)"
+                                except Exception as e2:
+                                    logger.error(f"Fallback model inference also failed: {str(e2)}")
                                     console.print(Panel(
                                         "I'm having trouble generating an answer. Let me show you the relevant content instead:",
                                         title="Model Error",
@@ -456,36 +598,27 @@ Type 'back' to return to previous menu
                                     ))
                                     answer = context
                                     confidence = 0.8
-                        else:
-                            # No questions found, use the summary
-                            summary = relevant_content[0]['summary']
-                            context = get_most_relevant_sentence(summary, question)
-                            logger.info(f"Using focused context: {context}")
-                            try:
-                                answer, confidence = self.model_handler.get_answer(question, context)
-                                if not answer or len(answer.strip()) == 0:
-                                    raise ValueError("Model generated empty answer")
-                            except Exception as e:
-                                logger.error(f"Model inference error: {str(e)}")
-                                console.print(Panel(
-                                    "I'm having trouble generating an answer. Let me show you the relevant content instead:",
-                                    title="Model Error",
-                                    border_style="yellow"
-                                ))
-                                answer = context
-                                confidence = 0.8
+                                    source_info = "Structured content (Fallback)"
                     else:
-                        # Use default context from content manager
-                        context = self.content_manager.get_default_context()
+                        # No RAG or structured content found - use Phi 1.5 for general knowledge
                         console.print(Panel(
-                            "I couldn't find a direct match in your study materials, but I'll try to answer using general knowledge.",
-                            title="AI Attempt",
-                            border_style="yellow"
+                            "I couldn't find specific content in your study materials, but I'll use my knowledge to help you!",
+                            title="AI Knowledge",
+                            border_style="blue"
                         ))
+                        
+                        # Create a general knowledge context for Phi 1.5
+                        general_context = (
+                            "You are a helpful AI tutor for Grade 10 students. "
+                            "Use your general knowledge to provide accurate, educational answers. "
+                            "Keep answers comprehensive but appropriate for high school level."
+                        )
+                        
                         try:
-                            answer, confidence = self.model_handler.get_answer(question, context)
+                            answer, confidence = self.model_handler.get_answer(question, general_context, answer_length)
                             if not answer or len(answer.strip()) == 0:
                                 raise ValueError("Model generated empty answer")
+                            source_info = "AI General Knowledge"
                         except Exception as e:
                             logger.error(f"Model inference error: {str(e)}")
                             console.print(Panel(
@@ -520,11 +653,18 @@ Type 'back' to return to previous menu
                         ))
                 return
                 
-            # Display answer with confidence indicator
+            # Display answer with confidence indicator and source info
             confidence_color = "green" if confidence > 0.7 else "yellow" if confidence > 0.4 else "red"
+            
+            # Add source information if available
+            source_display = ""
+            if 'source_info' in locals():
+                source_display = f"\n\n[cyan]Source: {source_info}[/cyan]"
+            
             console.print(Panel(
                 f"[bold]{answer}[/bold]\n\n"
-                f"[{confidence_color}]Confidence: {confidence:.1%}[/{confidence_color}]",
+                f"[{confidence_color}]Confidence: {confidence:.1%}[/{confidence_color}]"
+                f"{source_display}",
                 title="Answer",
                 border_style="green"
             ))
@@ -582,7 +722,7 @@ Type 'back' to return to previous menu
         finally:
             # Clean up model resources
             try:
-                self.model_handler.phi2_handler.cleanup()
+                self.model_handler.cleanup()
             except Exception as e:
                 logger.error(f"Error cleaning up model: {str(e)}")
             
@@ -601,7 +741,7 @@ Type 'back' to return to previous menu
                         "Export Progress",
                         "Import Progress",
                         "Reset Progress",
-                        "Switch Model",
+
                         "Exit"
                     ]
                 )
@@ -619,8 +759,6 @@ Type 'back' to return to previous menu
                     self._import_progress()
                 elif choice == "Reset Progress":
                     self._reset_progress()
-                elif choice == "Switch Model":
-                    self._switch_model()
                 else:
                     if Confirm.ask("Are you sure you want to exit?"):
                         console.print("[bold green]Thank you for using Satya. Goodbye![/bold green]")
@@ -862,33 +1000,7 @@ Type 'back' to return to previous menu
             log_resource_usage("After progress reset")
             console.print("[green]Progress has been reset.[/green]")
 
-    def _switch_model(self) -> None:
-        """Switch between available AI models."""
-        try:
-            # Get available models
-            available_models = self.model_handler.get_available_models()
-            if not available_models:
-                console.print("[yellow]No other models available.[/yellow]")
-                return
 
-            # Show current model
-            current_model = self.model_handler.get_model_info()['name']
-            console.print(f"\n[bold]Current Model:[/bold] {current_model}")
-
-            # Create menu for model selection
-            model_choice = self._create_menu(
-                "Select a Model",
-                available_models
-            )
-
-            # Switch to selected model
-            if Confirm.ask(f"Switch to {model_choice}?"):
-                self.model_handler.switch_model(model_choice)
-                console.print(f"[green]Switched to {model_choice}[/green]")
-                self._show_model_info()
-        except Exception as e:
-            logger.error(f"Error switching model: {str(e)}")
-            console.print("[red]Failed to switch model. Please try again.[/red]")
 
     def _search_with_openai(self) -> None:
         """Prompt the user for a question and search using the OpenAI proxy."""
@@ -909,7 +1021,7 @@ if __name__ == "__main__":
         # Use absolute paths
         base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         content_dir = os.path.join(base_dir, "scripts", "data_collection", "data", "content")
-        model_path = os.path.join(base_dir, "ai_model", "exported_model")
+        model_path = os.path.join(base_dir, "satya_data", "models", "phi_1_5")
         
         # Verify paths exist
         if not os.path.exists(content_dir):

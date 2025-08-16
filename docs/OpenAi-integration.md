@@ -1,27 +1,29 @@
-# NEBedu - AI Learning Companion 🤖📚
+# Satyá: Learning Companion 
 <div align="center">
-   <img height="180" width="180" src="https://github.com/user-attachments/assets/daa5d212-12b8-49e7-8d72-f8a57a7b0b46">
+   <img height="180" width="180" src="https://github.com/user-attachments/assets/4faf37b4-bb01-47c7-b443-d58b6c3eff62">
+   
+   [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
+   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+   [![Offline First](https://img.shields.io/badge/Offline-First-green)](https://github.com/aa-sikkkk/Satya)
+   [![RAG Powered](https://img.shields.io/badge/RAG-Powered-purple)](https://github.com/aa-sikkkk/Satya)
+
 </div>
 
-[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Offline First](https://img.shields.io/badge/Offline-First-green)](https://github.com/yourusername/NEBedu)
-
-An offline-first, community-editable AI learning companion for Grade 10 students in Nepal, focusing on Computer Science, Science, and English subjects. Built with lightweight AI models and structured educational content, designed to work in low-resource environments.
+An offline-first, community-editable AI learning companion students in Nepal. Built with lightweight AI models and structured educational content, designed to work in low-resource environments.
 
 
-# OpenAI Proxy Integration Guide for NEBedu
+# OpenAI Proxy Integration Guide for Satya
 
 ## Overview
 
-NEBedu supports secure, online Q&A using OpenAI models via a proxy server. This allows students to ask any question and get an answer from OpenAI, **without ever exposing the OpenAI API key to the user**. This guide details how the proxy integration works, how to set it up, and best practices for security and maintenance.
+Satya supports secure, online Q&A using OpenAI models via a proxy server. This allows students to ask any question and get an answer from OpenAI, **without ever exposing the OpenAI API key to the user**. This guide details how the proxy integration works, how to set it up, and best practices for security and maintenance.
 
 ---
 
 ## 1. How the Proxy Works
 
 ### Architecture & Flow
-- The NEBedu client app (student/teacher) sends questions to a secure proxy server (FastAPI-based).
+- The Satya client app (student/teacher) sends questions to a secure proxy server (FastAPI-based).
 - The proxy server authenticates requests using a `PROXY_AUTH_KEY` and uses its own `OPENAI_API_KEY` to call OpenAI.
 - The answer is returned to the client. The OpenAI API key is **never** sent to or stored on the client.
 
@@ -41,7 +43,7 @@ NEBedu supports secure, online Q&A using OpenAI models via a proxy server. This 
   - Manage environment variables and secrets.
   - Monitor usage and security.
 - **Teachers/Students:**
-  - Use the NEBedu app as normal. No server setup or configuration required.
+  - Use the Satya app as normal. No server setup or configuration required.
 
 ---
 
@@ -133,7 +135,7 @@ python -m student_app.interface.cli_interface
 ## 7. Example Flows
 
 ### Student Q&A (Success)
-1. Student opens NEBedu and selects "Search with OpenAI (Online)".
+1. Student opens Satya and selects "Search with OpenAI (Online)".
 2. Student enters a question.
 3. The app sends the question to the proxy server with the `OPENAI_PROXY_KEY`.
 4. The proxy authenticates, calls OpenAI, and returns the answer.
@@ -149,7 +151,7 @@ python -m student_app.interface.cli_interface
 ## 8. FAQ
 
 **Q: Who should set up the proxy server?**
-A: The NEBedu technical team or your school's IT administrator. Teachers and students do not need to set up or manage the server.
+A: The Satya technical team or your school's IT administrator. Teachers and students do not need to set up or manage the server.
 
 **Q: Is my OpenAI API key safe?**
 A: Yes! The key is only stored on the proxy server and never shared with clients or users.

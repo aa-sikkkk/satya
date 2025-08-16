@@ -1,8 +1,8 @@
-# NEBedu Project Overview: An Offline-First AI Learning Companion for Nepali Grade 10 Students
+# Satya Project Overview: An Offline-First AI Learning Companion for Nepali Grade 10 Students
 
 ## Executive Summary
 
-NEBedu is a pioneering educational technology initiative aimed at bridging educational disparities for Grade 10 students in Nepal, particularly in areas with limited or no internet connectivity. This project delivers an offline-first, AI-powered learning companion designed to cover the Computer Science, Science, and English curricula. By leveraging lightweight Hugging Face models and a meticulously structured, community-editable JSON content base, NEBedu provides interactive learning experiences, adaptive support, and valuable tools for both students and teachers, all operating efficiently on low-resource hardware (minimum 4GB RAM).
+Satya is a pioneering educational technology initiative aimed at bridging educational disparities for Grade 10 students in Nepal, particularly in areas with limited or no internet connectivity. This project delivers an offline-first, AI-powered learning companion designed to cover the Computer Science, Science, and English curricula. By leveraging lightweight Hugging Face models and a meticulously structured, community-editable JSON content base, Satya provides interactive learning experiences, adaptive support, and valuable tools for both students and teachers, all operating efficiently on low-resource hardware (minimum 4GB RAM).
 
 ## 🌐 Project Vision
 
@@ -10,7 +10,7 @@ Our vision is to empower the next generation of Nepali students by providing acc
 
 ## 🎯 Key Objectives
 
-The NEBedu project is guided by the following core objectives:
+The Satya project is guided by the following core objectives:
 
 1.  **Maximize Accessibility:** Ensure the learning companion is fully functional offline and requires minimal system resources to run on commonly available computers (targeting 4GB RAM systems). Provide comprehensive support for both English and Nepali languages to cater to diverse student needs and promote inclusivity.
 2.  **Deliver High-Quality Education:** Offer comprehensive coverage of the Grade 10 curriculum with engaging, interactive content designed for effective learning. Implement adaptive learning pathways and robust progress tracking mechanisms to personalize the learning experience and address individual student needs.
@@ -27,11 +27,11 @@ The NEBedu project is guided by the following core objectives:
 ### Secondary Users
 -   **Parents:** Interested in monitoring their child's learning journey and academic progress as recorded by the local logging system.
 -   **Educational Content Creators/Experts:** Contributing their expertise to expand and refine the educational content database through the Community Editor.
--   **System Administrators:** Responsible for the technical deployment, maintenance, updates, and troubleshooting of the NEBedu system on local school or community center infrastructure.
+-   **System Administrators:** Responsible for the technical deployment, maintenance, updates, and troubleshooting of the Satya system on local school or community center infrastructure.
 
 ## ✨ Core Features
 
-The NEBedu system is architected around several key features designed to provide a comprehensive and effective learning ecosystem:
+The Satya system is architected around several key features designed to provide a comprehensive and effective learning ecosystem:
 
 ### 1. Student-Facing Features (CLI Learning Application)
 
@@ -52,13 +52,13 @@ The NEBedu system is architected around several key features designed to provide
 
 ## 🏗️ Technical Architecture
 
-The technical architecture of NEBedu is fundamentally designed for offline operation, efficiency on low-resource hardware, and ease of maintenance. Key architectural components include the data acquisition and processing pipeline, the AI model development and export process, the core CLI learning application with local logging capabilities, and the community content management system operating on a version-controlled repository.
+The technical architecture of Satya is fundamentally designed for offline operation, efficiency on low-resource hardware, and ease of maintenance. Key architectural components include the data acquisition and processing pipeline, the AI model development and export process, the core CLI learning application with local logging capabilities, and the community content management system operating on a version-controlled repository.
 
 (For an in-depth examination of the system architecture, including the interconnections between components and data flow, please refer to `docs/TECHNICAL_IMPLEMENTATION.md`, which also includes a textual representation of the `architecture.png` diagram.)
 
 ## 🛣️ Implementation Strategy
 
-The development and implementation of NEBedu adhere to a structured, phased approach to ensure all critical components are developed and integrated effectively. The strategy involves initial focus on core infrastructure (data pipeline, basic AI integration, content management, security), followed by the development of primary user features (student CLI, teacher tools), rigorous testing and performance optimization for the target low-resource environment, and finally establishing and refining the community contribution framework.
+The development and implementation of Satya adhere to a structured, phased approach to ensure all critical components are developed and integrated effectively. The strategy involves initial focus on core infrastructure (data pipeline, basic AI integration, content management, security), followed by the development of primary user features (student CLI, teacher tools), rigorous testing and performance optimization for the target low-resource environment, and finally establishing and refining the community contribution framework.
 
 ## ✅ Quality Assurance
 
@@ -66,11 +66,11 @@ A stringent quality assurance process is integrated throughout the development l
 
 ## 🚀 Deployment and Maintenance
 
-NEBedu is architected for straightforward local deployment on target machines without requiring complex server setups. The installation procedure involves obtaining the project files (e.g., by cloning the repository), installing necessary Python dependencies (managed via `requirements.txt`), and executing a simple setup script. Maintenance activities include applying updates to the application and content, potential retraining and deployment of newer AI models, and addressing any reported issues, facilitated by the version-controlled content repository and comprehensive documentation.
+Satya is architected for straightforward local deployment on target machines without requiring complex server setups. The installation procedure involves obtaining the project files (e.g., by cloning the repository), installing necessary Python dependencies (managed via `requirements.txt`), and executing a simple setup script. Maintenance activities include applying updates to the application and content, potential retraining and deployment of newer AI models, and addressing any reported issues, facilitated by the version-controlled content repository and comprehensive documentation.
 
 ## 🌱 Future Roadmap
 
-Potential future developments for NEBedu include expanding the scope to cover additional subjects and grade levels, implementing more advanced analytics and reporting features, exploring the feasibility of a graphical user interface (GUI) or a mobile application version (while retaining offline capability), and investigating secure, optional synchronization mechanisms for anonymized analytics data if network infrastructure improves in target areas.
+Potential future developments for Satya include expanding the scope to cover additional subjects and grade levels, implementing more advanced analytics and reporting features, exploring the feasibility of a graphical user interface (GUI) or a mobile application version (while retaining offline capability), and investigating secure, optional synchronization mechanisms for anonymized analytics data if network infrastructure improves in target areas.
 
 ## 🤝 Support and Resources
 
@@ -82,7 +82,7 @@ This project is released under the MIT License, encouraging open access, modific
 
 ## 🙏 Acknowledgments
 
-We gratefully acknowledge the foundational contributions of Hugging Face for their transformative work in making powerful NLP models accessible, Google Colab for providing the computational resources necessary for model training, and extend our sincere thanks to all future contributors, educators, and users who will play a vital role in the growth and impact of NEBedu. Special thanks to [readersnepal](https://readersnepal.com/) and  [CDC](http://lib.moecdc.gov.np/) for the notes and resources neccessary for the Dataset gathering.
+We gratefully acknowledge the foundational contributions of Hugging Face for their transformative work in making powerful NLP models accessible, Google Colab for providing the computational resources necessary for model training, and extend our sincere thanks to all future contributors, educators, and users who will play a vital role in the growth and impact of Satya. Special thanks to [readersnepal](https://readersnepal.com/) and  [CDC](http://lib.moecdc.gov.np/) for the notes and resources neccessary for the Dataset gathering.
 
 ---
 

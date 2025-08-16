@@ -1,14 +1,14 @@
-# NEBedu Teacher Guide
+# Satya Teacher Guide
 
-This guide provides instructions for teachers on how to use the NEBedu tools for content management and student progress analysis.
+This guide provides instructions for teachers on how to use the Satya tools for content management and student progress analysis.
 
 ## 1. Introduction
 
-The NEBedu system includes tools specifically designed for teachers to manage educational content and monitor student learning.
+The Satya system includes tools specifically designed for teachers to manage educational content and monitor student learning.
 
 ## 2. Installation
 
-Refer to the main [Installation Guide](README.md#Installation) for detailed steps on setting up the NEBedu system. The teacher tools are included in the standard installation.
+Refer to the main [Installation Guide](README.md#Installation) for detailed steps on setting up the Satya system. The teacher tools are included in the standard installation.
 
 ## 3. Content Management with the CLI Editor
 
@@ -66,7 +66,7 @@ Ensure the content also adheres to the [Content Quality Standards](docs/content-
 
 ## 6. Community Contribution
 
-The NEBedu content is community-editable. You can contribute to improving the content by making changes using the Content Editor and submitting them via the version control system (Git).
+The Satya content is community-editable. You can contribute to improving the content by making changes using the Content Editor and submitting them via the version control system (Git).
 
 
 ## 7. Troubleshooting

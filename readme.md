@@ -5,11 +5,12 @@
    [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
    [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
    [![Offline First](https://img.shields.io/badge/Offline-First-green)](https://github.com/aa-sikkkk/Satya)
+   [![RAG Powered](https://img.shields.io/badge/RAG-Powered-purple)](https://github.com/aa-sikkkk/Satya)
 
 </div>
 
 
-An offline-first learning companion for students. Built with structured educational content, designed to work with Outdated Hardware.
+An **offline-first, RAG-powered** learning companion for students. Built with intelligent content discovery and a lightweight Phi 1.5 AI model, designed to work with **low-end hardware**.
 
 ## 📋 Table of Contents
 - [Features](#-features)
@@ -19,7 +20,8 @@ An offline-first learning companion for students. Built with structured educatio
 - [Usage](#-usage)
 - [GUI Usage](#gui-usage)
 - [AI Models](#-ai-models)
-- [Content Management](#-content-management)
+- [RAG System](#rag-system)
+- [Content Management](#content-management)
 - [OpenAI Proxy Integration (Online Q&A)](#openai-proxy-integration-online-qa)
 - [Development](#-development)
 - [Contributing](#-contributing)
@@ -29,10 +31,11 @@ An offline-first learning companion for students. Built with structured educatio
 ## ✨ Features
 
 ### For Students
-- 📚 Comprehensive coverage of Grade 10 curriculum
-- 🤖 AI-powered Q&A and hint generation
+- 📚 **RAG-Enhanced Content Discovery**: Intelligent search through study materials
+- 🤖 **Single AI Model**: Phi 1.5 handles Q&A, hints, and content generation
+- 🎯 **Answer Length Control**: Choose from 5 different detail levels (very short to very long)
 - 📊 Progress tracking and analytics
-- 🔄 Offline-first functionality
+- 🔄 **100% Offline**: No internet required for core functionality
 - 🎯 Adaptive learning paths
 - 🌐 **Search with OpenAI (Online):** Ask any question and get an answer from OpenAI (if enabled by your school/teacher)
 - 🖥️ **Modern, responsive GUI:** Beautiful customtkinter interface and improved answer display (scrollable, word-wrapped, responsive to long answers)
@@ -48,23 +51,30 @@ https://github.com/user-attachments/assets/7d6d42e0-c1ee-4f3b-9bbc-692cbabe46ec
 ## 🏗️ Technical Architecture
 
 ### Core Components
-1. **AI Engine**
-   - DistilBERT for Q&A (optimized for 4GB RAM)
-   - T5-small for hint generation
-   - **Phi 2 for advanced reasoning and adaptive learning**
-   - Offline model inference
-   - Caching system for performance
-   - **OpenAI Proxy Integration for online Q&A**
-2. **CustomTkinter GUI**
+1. **RAG (Retrieval-Augmented Generation) Engine**
+   - **ChromaDB**: Local vector database for intelligent content search
+   - **Phi 1.5 Embeddings**: Lightweight text embeddings for content discovery
+   - **Smart Content Retrieval**: Finds most relevant study materials for any question
+   - **Offline Vector Search**: No internet required for content discovery
+
+2. **AI Engine**
+   - **Single Phi 1.5 Model**: Handles all AI tasks (Q&A, hints, content generation)
+   - **Lightweight GGUF Format**: Optimized for low-end hardware (2GB RAM minimum)
+   - **Answer Length Control**: 5 different detail levels for varied learning needs
+   - **Offline Model Inference**: No internet required for AI responses
+
+3. **CustomTkinter GUI**
    - Modern, aesthetic, and responsive interface
    - Sidebar navigation, NEBedu logo, loading spinner, and scrollable answer display
    - Threaded model inference for UI responsiveness
-3. **Data Management**
+
+4. **Data Management**
    - JSON-based content structure
    - Schema validation
    - Version control for content
    - Data integrity checks
-4. **Security Layer**
+
+5. **Security Layer**
    - Input sanitization
    - File operation safety
    - Access control
@@ -76,19 +86,30 @@ https://github.com/user-attachments/assets/7d6d42e0-c1ee-4f3b-9bbc-692cbabe46ec
 ## 📁 Project Structure
 
 ```
-NEBedu/
-├── OpenAi_Proxy/openai_proxy # FastAPI-based OpenAI proxy server (for secure online Q&A) 
+Satya/
+├── satya_data/                 # Data and models directory
+│   ├── models/
+│   │   └── phi_1_5/           # Phi 1.5 GGUF model
+│   ├── chroma_db/              # RAG vector database
+│   └── content/                # Educational content
+│
 ├── scripts/
-│   └── data_collection/
-│       └── data/
-│           ├── raw_content/    # Raw, unprocessed data
-│           ├── processed/      # Cleaned/intermediate data
-│           └── content/        # Final, validated content JSONs
+│   ├── rag_data_preparation/   # RAG content processing
+│   │   ├── embedding_generator.py  # Generate embeddings for RAG
+│   │   └── pdf_processor.py    # Process PDFs to chunks
+│   └── data_collection/        # Content collection tools
+│
+├── system/
+│   ├── rag/                    # RAG system components
+│   │   └── rag_retrieval_engine.py  # Intelligent content retrieval
+│   ├── data_manager/           # Data handling
+│   ├── performance/            # Performance monitoring
+│   └── security/               # Security features
 │
 ├── ai_model/
-│   ├── training/               # Colab notebooks and training scripts
-│   ├── exported_model/         # Trained models for offline use
-│   └── model_utils/            # Model helper functions
+│   ├── model_utils/            # Model helper functions
+│   │   ├── phi15_handler.py    # Phi 1.5 model handler
+│   │   └── model_handler.py    # Main model manager
 │
 ├── student_app/
 │   ├── gui_app/                # Modern GUI (customtkinter)
@@ -96,32 +117,23 @@ NEBedu/
 │   ├── learning/               # Learning features
 │   └── progress/               # Progress tracking
 │
-├── teacher_tools/
-│   ├── content_editor/         # Content editing tools
-│   └── analytics/              # Progress analytics
-│
-├── system/
-│   ├── data_manager/           # Data handling
-│   ├── performance/            # Performance monitoring
-│   └── security/               # Security features
-│
+├── teacher_tools/               # Teacher utilities
 ├── tests/                      # Test suite
-├── docs/                       # Documentation
-
+└── docs/                       # Documentation
 ```
 
 ## 🚀 Installation
 
 ### Prerequisites
 - Python 3.8 or higher
-- 4GB RAM minimum
+- **llama-cpp-python** for Phi 1.5 model support
 
 ### Step-by-Step Installation
 
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/aa-sikkkk/NEBedu.git
-   cd NEBedu
+   git clone https://github.com/aa-sikkkk/satya.git
+   cd Satya
    ```
 
 2. **Create Virtual Environment**
@@ -136,6 +148,10 @@ NEBedu/
    pip install -r requirements.txt
    ```
 
+4. **Download Phi 1.5 Model**
+   - Place the Phi 1.5 GGUF model in `satya_data/models/phi_1_5/`
+   - Recommended: `phi-1_5-Q5_K_S.gguf` (lightweight, ~1GB)
+
 ---
 
 ## 💻 Usage
@@ -144,6 +160,11 @@ NEBedu/
 ```bash
 python -m student_app.interface.cli_interface
 ```
+
+**New Features:**
+- **Answer Length Selection**: Choose from 5 detail levels
+- **RAG-Enhanced Q&A**: Intelligent content discovery
+- **Smart Fallbacks**: Always get meaningful answers
 
 ### Teacher Mode
 ```bash
@@ -159,20 +180,47 @@ python -m teacher_tools.content_editor.content_editor_cli
 python -m student_app.gui_app.main_window
 ```
 - Enjoy a modern, responsive interface with sidebar navigation, Satyá logo, loading spinner, and scrollable answer display.
-- All features of the CLI are available in the GUI, including AI-powered Q&A, progress tracking, and adaptive learning.
+- All features of the CLI are available in the GUI, including **RAG-enhanced Q&A**, progress tracking, and adaptive learning.
 
-  ![Screenshot (116)](https://github.com/user-attachments/assets/6c1e438e-2bf8-438b-a6bf-e81f55502dbc)
+  ![Screenshot (116)](https://github.com/user-attachments/assets/6faf37b4-bb01-47c7-b443-d58b6c3eff62)
 ![Screenshot (118)](https://github.com/user-attachments/assets/9cb70ec8-a636-4f93-8d69-7a12c5eb61bf)
-
 
 ---
 
+## 🤖 AI Models
 
-### Training Process
-1. Data collection and preprocessing
-2. Model fine-tuning on Google Colab
-3. Model optimization and quantization
-4. Export for offline use
+### Phi 1.5 Model
+- **Single Model Architecture**: One model for all tasks (Q&A, hints, content generation)
+- **Lightweight**: GGUF format optimized for low-end hardware
+- **Offline**: 100% local, no internet required
+- **Smart**: Handles text normalization, case sensitivity, and answer validation
+
+### Answer Length Control
+1. **Very Short** (10-20 words): Quick facts and definitions
+2. **Short** (30-50 words): Basic explanations with key points
+3. **Medium** (80-120 words): Detailed explanations with examples - **Recommended**
+4. **Long** (150-250 words): Comprehensive coverage with step-by-step breakdown
+5. **Very Long** (300-500 words): Extensive coverage with multiple perspectives
+
+---
+
+## 🔍 RAG System
+
+### What is RAG?
+**Retrieval-Augmented Generation** combines intelligent content search with AI-powered answer generation.
+
+### How It Works
+1. **Content Processing**: PDFs and documents are chunked and embedded
+2. **Vector Storage**: ChromaDB stores text and image embeddings
+3. **Smart Retrieval**: Finds most relevant content for any question
+4. **AI Enhancement**: Phi 1.5 generates answers using retrieved context
+5. **Fallback System**: Multiple fallback levels ensure students always get help
+
+### Benefits
+- **Intelligent Search**: Finds relevant content even with vague questions
+- **Context-Aware**: AI understands the context before answering
+- **Offline**: No internet required for content discovery
+- **Scalable**: Easy to add new subjects and content
 
 ---
 
@@ -260,16 +308,16 @@ python -m student_app.gui_app.main_window
 
 ## 🛰️ OpenAI Proxy Integration (Online Q&A)
 
-NEBedu supports secure, online Q&A using [OpenAI](https://github.com/aa-sikkkk/NEBedu/wiki/OpenAI-Integration) models via a proxy server. This allows students to ask any question and get an answer from OpenAI, **without ever exposing the OpenAI API key to the user**.
+Satyá supports secure, online Q&A using [OpenAI](https://github.com/aa-sikkkk/satya/wiki/OpenAI-Integration) models via a proxy server. This allows students to ask any question and get an answer from OpenAI, **without ever exposing the OpenAI API key to the user**.
 
 ### How It Works (for Students and Teachers)
-- When you use the "Search with OpenAI (Online)" feature in NEBedu, your question is securely sent to a server.
+- When you use the "Search with OpenAI (Online)" feature in Satyá, your question is securely sent to a server.
 - The server gets the answer from OpenAI and sends it back.
 - **You do not need to set up or configure anything extra.**
 - All server setup and security is handled by the responsible Stakeholders.
 
 ### What You Need to Do
-- Just use NEBedu as normal.
+- Just use Satyá as normal.
 - If online Q&A is enabled, you'll see the "Search with OpenAI (Online)" option in your menu.
 - If it's not enabled, you can still use all offline features.
 
@@ -283,38 +331,12 @@ NEBedu supports secure, online Q&A using [OpenAI](https://github.com/aa-sikkkk/N
 
 ---
 
-## 🛠️ Development
-
-### Setting Up Development Environment
-1. Install development dependencies:
-   ```bash
-   pip install -r requirements-dev.txt
-   ```
-
-2. Set up pre-commit hooks:
-   ```bash
-   pre-commit install
-   ```
-
-### Running Tests
-```bash
-pytest tests/
-```
-
-### Code Style
-- Follow PEP 8
-- Use type hints
-- Document all functions
-- Write unit tests
-
----
-
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
+2. Create your feature branch (`git checkout -b feature/new_feature`)
+3. Commit your changes (`git commit -m 'Add some new_feature'`)
+4. Push to the branch (`git push origin feature/new_feature`)
 5. Open a Pull Request
 
 See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for detailed guidelines.
@@ -324,6 +346,27 @@ See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for detailed guidelines.
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🆕 What's New in This Version
+
+### 🚀 **Major Architecture Changes**
+- **Single AI Model**: Replaced multiple models with one efficient Phi 1.5
+- **RAG System**: Added intelligent content discovery and retrieval
+- **Lightweight**: Optimized for low-end hardware (2GB RAM minimum)
+
+### 🎯 **New Features**
+- **Answer Length Control**: 5 different detail levels for varied learning needs
+- **Smart Text Normalization**: Handles uppercase, lowercase, and mixed case input
+- **RAG-Enhanced Q&A**: Intelligent content discovery for better answers
+- **Robust Fallbacks**: Multiple fallback levels ensure students always get help
+
+### 🔧 **Technical Improvements**
+- **Offline-First**: 100% local operation, no internet required
+- **Performance**: Faster inference with optimized Phi 1.5 parameters
+- **Reliability**: Better error handling and confidence scoring
+- **Scalability**: Easy to add new subjects and content
 
 ---
 

@@ -1,0 +1,42 @@
+{
+  "database": {
+    "path": "satya_data\\chroma_db",
+    "type": "chroma",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  "collections": {
+    "text": {
+      "computer_science_grade_10": "Computer Science text chunks",
+      "english_grade_10": "English text chunks",
+      "science_grade_10": "Science text chunks"
+    },
+    "image": {
+      "computer_science_images": "Computer Science images",
+      "english_images": "English images",
+      "science_images": "Science images"
+    },
+    "base64_image": {
+      "computer_science_base64": "Computer Science base64 images",
+      "english_base64": "English base64 images",
+      "science_base64": "Science base64 images"
+    }
+  },
+  "metadata_schema": {
+    "chunk_id": "unique_identifier",
+    "content_type": "text|image|base64",
+    "subject": "computer_science|english|science",
+    "grade": "10",
+    "chapter": "chapter_name",
+    "difficulty": "beginner|intermediate|advanced",
+    "language": "en",
+    "file_path": "path_to_original_content",
+    "related_content": "comma_separated_chunk_ids",
+    "created_at": "timestamp",
+    "updated_at": "timestamp"
+  },
+  "system": {
+    "name": "Satya RAG System",
+    "version": "1.0.0",
+    "description": "Offline-first AI learning companion"
+  }
+}

@@ -1,7 +1,7 @@
 """
-Content Processor for NEBedu
+Content Processor for Satya - PDF-First Approach
 
-This script processes and cleans the crawled educational content,
+This script processes PDF chunks into structured educational content,
 ensuring it follows our structured format and is ready for the AI model.
 """
 
@@ -19,27 +19,24 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-content_dir = "data/raw_content"
-processed_dir = "data/content"
-
-class ContentProcessor:
+class PDFContentProcessor:
     """
-    Processes and cleans crawled educational content.
+    Processes PDF chunks into structured educational content.
     
     Attributes:
-        content_dir (str): Directory containing crawled content
         processed_dir (str): Directory to save processed content
+        chunks_dir (str): Directory containing PDF chunks
     """
     
-    def __init__(self, content_dir: str = "data/raw_content", processed_dir: str = "data/content"):
+    def __init__(self, chunks_dir: str = "processed_data_new/chunks", processed_dir: str = "data/content"):
         """
-        Initialize the processor.
+        Initialize the PDF processor.
         
         Args:
-            content_dir (str): Directory containing crawled content
+            chunks_dir (str): Directory containing PDF chunks
             processed_dir (str): Directory to save processed content
         """
-        self.content_dir = content_dir
+        self.chunks_dir = chunks_dir
         self.processed_dir = processed_dir
         
         # Create processed directory if it doesn't exist
@@ -133,7 +130,7 @@ class ContentProcessor:
         
     def split_content_into_topics(self, content: str, subject: str) -> List[Dict]:
         """
-        Split large content string into logical topics based on keywords and structure.
+        Split large content string into logical topics based on PDF structure.
         
         Args:
             content (str): Large content string
@@ -144,16 +141,27 @@ class ContentProcessor:
         """
         topics = []
         
-        # Define topic keywords for different subjects
+        # Define topic keywords for different subjects (PDF-specific)
         topic_keywords = {
             "Computer Science": [
                 r"computer network", r"internet", r"cyber", r"database", r"dbms", 
                 r"programming", r"qbasic", r"ecommerce", r"data communication",
-                r"transmission media", r"topology", r"security", r"virus"
+                r"transmission media", r"topology", r"security", r"virus",
+                r"chapter", r"unit", r"section", r"lesson"
+            ],
+            "English": [
+                r"grammar", r"literature", r"poetry", r"prose", r"comprehension",
+                r"writing", r"speaking", r"listening", r"vocabulary",
+                r"chapter", r"unit", r"section", r"lesson"
+            ],
+            "Science": [
+                r"physics", r"chemistry", r"biology", r"motion", r"energy",
+                r"forces", r"atomic", r"chemical", r"cell", r"ecosystem",
+                r"chapter", r"unit", r"section", r"lesson"
             ]
         }
         
-        # Split content by major sections
+        # Split content by major sections (PDF structure)
         sections = re.split(r'\n\s*\n', content)
         current_topic = None
         current_content = []
@@ -219,67 +227,6 @@ class ContentProcessor:
         # Otherwise, create a topic name from the keyword
         return keyword.replace(r"\b", "").replace(r"\s+", " ").title()
         
-    def parse_raw_content(self, raw: Dict, subject: str) -> Dict:
-        """
-        Convert raw crawled data into structured topics, subtopics, concepts, steps, and questions.
-        
-        Args:
-            raw (Dict): Raw content from crawler
-            subject (str): Subject name
-            
-        Returns:
-            Dict: Structured content
-        """
-        # Extract all text content
-        all_text = ""
-        if "paragraphs" in raw:
-            all_text = "\n".join(raw["paragraphs"])
-        elif "content" in raw:
-            all_text = raw["content"]
-        elif "text" in raw:
-            all_text = raw["text"]
-        
-        # If content is too large, split into topics first
-        if len(all_text) > 5000:  # Threshold for splitting
-            topic_chunks = self.split_content_into_topics(all_text, subject)
-        else:
-            topic_chunks = [{"name": subject, "content": all_text}]
-        
-        topics = []
-        
-        for topic_chunk in topic_chunks:
-            topic_name = topic_chunk["name"]
-            topic_content = topic_chunk["content"]
-            
-            # Split topic content into concepts
-            concepts = self.extract_concepts_from_content(topic_content)
-            
-            if concepts:
-                topics.append({
-                    "name": topic_name,
-                    "subtopics": [{
-                        "name": topic_name,
-                        "concepts": concepts
-                    }]
-                })
-        
-        return {
-            "subject": subject,
-            "grade": 10,
-            "topics": topics if topics else [{
-                "name": subject,
-                "subtopics": [{
-                    "name": subject,
-                    "concepts": [{
-                        "name": subject,
-                        "summary": self.clean_text(all_text[:500]) + "...",
-                        "steps": [],
-                        "questions": []
-                    }]
-                }]
-            }]
-        }
-    
     def extract_concepts_from_content(self, content: str) -> List[Dict]:
         """
         Extract individual concepts from content.
@@ -386,51 +333,135 @@ class ContentProcessor:
         
         return steps, questions
 
-    def process_file(self, filepath: str) -> Optional[Dict]:
+    def process_pdf_chunks(self, subject: str) -> Optional[Dict]:
         """
-        Process a single content file, recursively processing subtopics and concepts.
+        Process PDF chunks for a specific subject.
+        
+        Args:
+            subject: str: Subject name
+            
+        Returns:
+            Dict: Structured content or None if failed
         """
         try:
-            with open(filepath, 'r', encoding='utf-8') as f:
-                content = json.load(f)
-            # Clean subject name
-            content["subject"] = self.clean_text(content.get("subject", ""))
-            for topic in content.get("topics", []):
-                topic["name"] = self.clean_text(topic.get("name", ""))
-                topic["subtopics"] = [self.process_subtopic(st) for st in topic.get("subtopics", [])]
-            if not self.validate_content(content):
-                logger.warning(f"Invalid content structure in {filepath}")
-                return None
-            return content
-        except Exception as e:
-            logger.error(f"Error processing {filepath}: {str(e)}")
-            return None
+            # Find chunks file for this subject
+            chunks_file = os.path.join(self.chunks_dir, f"{subject.lower().replace(' ', '_')}_grade_10_chunks.json")
             
-    def process_all(self) -> None:
-        """Process all content files in the content directory."""
-        for filename in os.listdir(self.content_dir):
-            if filename.endswith('.json'):
-                filepath = os.path.join(self.content_dir, filename)
-                processed_content = self.process_file(filepath)
+            if not os.path.exists(chunks_file):
+                logger.warning(f"Chunks file not found: {chunks_file}")
+                return None
+            
+            # Load chunks
+            with open(chunks_file, 'r', encoding='utf-8') as f:
+                chunks_data = json.load(f)
+            
+            # Extract text chunks
+            text_chunks = chunks_data.get('text_chunks', [])
+            
+            if not text_chunks:
+                logger.warning(f"No text chunks found in {chunks_file}")
+                return None
+            
+            # Combine all chunks into content
+            all_content = "\n\n".join([
+                chunk.get('text', '') for chunk in text_chunks
+            ])
+            
+            # Split content into topics
+            topics = self.split_content_into_topics(all_content, subject)
+            
+            # Process each topic
+            processed_topics = []
+            for topic in topics:
+                concepts = self.extract_concepts_from_content(topic["content"])
                 
-                if processed_content:
-                    # Save processed content with final name
-                    # Check for 'computer' before 'science' to avoid mislabeling
-                    if "computer" in filename.lower():
-                        output_name = "computer_science.json"
-                    elif "science" in filename.lower():
-                        output_name = "science.json"
-                    else:
-                        output_name = filename.replace("_raw", "")
+                processed_topics.append({
+                    "name": topic["name"],
+                    "subtopics": [{
+                        "name": topic["name"],
+                        "concepts": concepts
+                    }]
+                })
+            
+            # Create structured content
+            structured_content = {
+                "subject": subject,
+                "grade": 10,
+                "topics": processed_topics
+            }
+            
+            # Validate content
+            if not self.validate_content(structured_content):
+                logger.warning(f"Invalid content structure for {subject}")
+                return None
+            
+            return structured_content
+            
+        except Exception as e:
+            logger.error(f"Error processing PDF chunks for {subject}: {str(e)}")
+            return None
+    
+    def process_all_subjects(self) -> None:
+        """Process all available subjects from PDF chunks."""
+        try:
+            # Get list of available chunk files
+            available_subjects = []
+            for filename in os.listdir(self.chunks_dir):
+                if filename.endswith('_chunks.json'):
+                    # Extract subject name from filename
+                    subject = filename.replace('_grade_10_chunks.json', '').replace('_', ' ').title()
+                    available_subjects.append(subject)
+            
+            logger.info(f"Found {len(available_subjects)} subjects to process: {available_subjects}")
+            
+            # Process each subject
+            for subject in available_subjects:
+                logger.info(f"Processing {subject}...")
+                
+                structured_content = self.process_pdf_chunks(subject)
+                
+                if structured_content:
+                    # Save processed content
+                    output_name = f"{subject.lower().replace(' ', '_')}.json"
                     output_path = os.path.join(self.processed_dir, output_name)
-                    with open(output_path, 'w', encoding='utf-8') as f:
-                        json.dump(processed_content, f, indent=4, ensure_ascii=False)
-                    logger.info(f"Processed {filename} -> {output_name}")
                     
+                    with open(output_path, 'w', encoding='utf-8') as f:
+                        json.dump(structured_content, f, indent=4, ensure_ascii=False)
+                    
+                    logger.info(f"✅ Successfully processed {subject} -> {output_name}")
+                    logger.info(f"   Topics: {len(structured_content['topics'])}")
+                    logger.info(f"   Total Concepts: {sum(len(topic['subtopics'][0]['concepts']) for topic in structured_content['topics'])}")
+                else:
+                    logger.error(f"❌ Failed to process {subject}")
+            
+            logger.info("🎉 PDF content processing completed!")
+            
+        except Exception as e:
+            logger.error(f"Error in process_all_subjects: {str(e)}")
+    
+    def get_available_subjects(self) -> List[str]:
+        """Get list of subjects available for processing."""
+        available_subjects = []
+        try:
+            for filename in os.listdir(self.chunks_dir):
+                if filename.endswith('_chunks.json'):
+                    subject = filename.replace('_grade_10_chunks.json', '').replace('_', ' ').title()
+                    available_subjects.append(subject)
+        except Exception as e:
+            logger.error(f"Error getting available subjects: {str(e)}")
+        
+        return available_subjects
+
 def main():
-    """Main function to run the processor."""
-    processor = ContentProcessor()
-    processor.process_all()
+    """Main function to run the PDF processor."""
+    processor = PDFContentProcessor()
+    
+    # Show available subjects
+    available = processor.get_available_subjects()
+    print(f"📚 Available subjects: {available}")
+    
+    # Process all subjects
+    processor.process_all_subjects()
 
 if __name__ == "__main__":
     main()
