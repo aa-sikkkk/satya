@@ -7,14 +7,21 @@ class TopicView(ctk.CTkFrame):
         self.on_back = on_back
         self.topics = topics
 
+        # Main title
         self.label = ctk.CTkLabel(self, text="Select a Topic", font=ctk.CTkFont(size=22, weight="bold"))
         self.label.pack(pady=(30, 20))
 
+        # Create scrollable frame for topics
+        self.scrollable_frame = ctk.CTkScrollableFrame(self, width=600, height=400)
+        self.scrollable_frame.pack(pady=(0, 20), padx=20, fill='both', expand=True)
+
+        # Add topic buttons to scrollable frame
         self.topic_buttons = []
         for topic in topics:
-            btn = ctk.CTkButton(self, text=topic, width=220, command=lambda t=topic: self.on_select(t))
+            btn = ctk.CTkButton(self.scrollable_frame, text=topic, width=220, command=lambda t=topic: self.on_select(t))
             btn.pack(pady=8)
             self.topic_buttons.append(btn)
 
-        self.back_btn = ctk.CTkButton(self, text="Back", command=self.on_back, fg_color="#bdbdbd", hover_color="#757575")
-        self.back_btn.pack(pady=(40, 0)) 
+        # Back button
+        self.back_btn = ctk.CTkButton(self, text="Back to Subjects", command=self.on_back, fg_color="#bdbdbd", hover_color="#757575")
+        self.back_btn.pack(pady=(20, 30)) 

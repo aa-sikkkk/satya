@@ -344,7 +344,7 @@ class Phi15Handler:
             'format': 'GGUF',
             'context_size': self.config.get('n_ctx', 2048),
             'threads': self.config.get('n_threads', 2),
-            'max_tokens': self.config.get('max_tokens', 128),
+            'max_tokens': self.config.get('max_tokens', 512),
             'temperature': self.config.get('temperature', 0.7),
             'top_p': self.config.get('top_p', 0.9),
             'model_path': str(self.model_file)

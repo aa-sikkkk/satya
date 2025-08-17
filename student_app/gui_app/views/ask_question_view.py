@@ -5,13 +5,33 @@ class AskQuestionView(ctk.CTkFrame):
         super().__init__(master, *args, **kwargs)
         self.on_submit = on_submit
         self.on_back = on_back
+        self.spinner_animation_running = False
 
         self.label = ctk.CTkLabel(self, text="Ask a Question", font=ctk.CTkFont(size=22, weight="bold"))
         self.label.pack(pady=(30, 10))
 
+        # Question input
         self.entry = ctk.CTkEntry(self, placeholder_text="Type your question here...", width=400, font=ctk.CTkFont(size=16))
         self.entry.pack(pady=10)
         self.entry.bind('<Return>', lambda e: self.submit())
+
+        # Answer length selection
+        length_frame = ctk.CTkFrame(self)
+        length_frame.pack(pady=10)
+        
+        ctk.CTkLabel(length_frame, text="Answer Length:", font=ctk.CTkFont(size=14, weight="bold")).pack(pady=(10, 5))
+        
+        self.length_var = ctk.StringVar(value="medium")
+        length_options = [
+            ("Very Short", "very_short"),
+            ("Short", "short"), 
+            ("Medium", "medium"),
+            ("Long", "long"),
+            ("Very Long", "very_long")
+        ]
+        
+        for text, value in length_options:
+            ctk.CTkRadioButton(length_frame, text=text, variable=self.length_var, value=value).pack(side='left', padx=5, pady=2)
 
         self.submit_btn = ctk.CTkButton(self, text="Ask", command=self.submit)
         self.submit_btn.pack(pady=10)
@@ -29,7 +49,8 @@ class AskQuestionView(ctk.CTkFrame):
         question = self.entry.get().strip()
         if question:
             self.set_loading(True)
-            self.on_submit(question)
+            answer_length = self.length_var.get()
+            self.on_submit(question, answer_length)
 
     def set_loading(self, loading):
         if loading:
@@ -37,21 +58,38 @@ class AskQuestionView(ctk.CTkFrame):
             self.submit_btn.configure(state="disabled")
             for widget in self.result_frame.winfo_children():
                 widget.destroy()
-            self.spinner = ctk.CTkLabel(self.result_frame, text="Thinking... ⏳", font=ctk.CTkFont(size=16))
+            self.spinner = ctk.CTkLabel(self.result_frame, text="", font=ctk.CTkFont(size=16))
             self.spinner.pack(pady=20)
+            self.spinner_animation_running = True
+            self._animate_spinner(0)
         else:
             self.entry.configure(state="normal")
             self.submit_btn.configure(state="normal")
             if self.spinner:
                 self.spinner.destroy()
                 self.spinner = None
+            self.spinner_animation_running = False
 
-    def set_result(self, answer, confidence=None, hints=None, related=None):
+    def _animate_spinner(self, index):
+        if self.spinner_animation_running and self.spinner and self.spinner.winfo_exists():
+            chars = ["|", "/", "-", "\\"]
+            self.spinner.configure(text=f"Thinking... {chars[index]}")
+            next_index = (index + 1) % len(chars)
+            self.after(100, self._animate_spinner, next_index)
+
+    def set_result(self, answer, confidence=None, hints=None, related=None, source_info=None):
         self.set_loading(False)
         for widget in self.result_frame.winfo_children():
             widget.destroy()
+        
+        # Source information panel
+        if source_info:
+            source_frame = ctk.CTkFrame(self.result_frame, fg_color="#e3f2fd", corner_radius=8)
+            source_frame.pack(pady=(0, 10), padx=10, fill='x')
+            ctk.CTkLabel(source_frame, text=f"Source: {source_info}", font=ctk.CTkFont(size=12), text_color="#1976d2").pack(pady=5, padx=10, anchor='w')
+        
         if confidence is None or confidence < 0.1:
-            # Yellow warning panel
+            # Yellow warning panel for low confidence
             warn_frame = ctk.CTkFrame(self.result_frame, fg_color="#fffde7", corner_radius=8)
             warn_frame.pack(pady=(0, 10), padx=10, fill='x', expand=True)
             ctk.CTkLabel(warn_frame, text="I'm not sure about that. Let me help you find the right information:", font=ctk.CTkFont(size=15, weight="bold"), text_color="#fbc02d").pack(pady=(10, 0), padx=10, anchor='w')
@@ -65,13 +103,36 @@ class AskQuestionView(ctk.CTkFrame):
             self.answer_box.insert('1.0', answer)
             self.answer_box.configure(state="disabled")
             self.answer_box.pack(pady=(0, 10), padx=10, fill='x', expand=True)
-            color = '#43a047' if confidence > 0.7 else '#fbc02d' if confidence > 0.4 else '#e53935'
-            ctk.CTkLabel(self.result_frame, text=f"Confidence: {confidence*100:.1f}%", font=ctk.CTkFont(size=14), text_color=color).pack()
+            
+            # Confidence indicator with color coding
+            if confidence > 0.7:
+                conf_color = "#43a047"  # Green
+                conf_text = "High Confidence"
+            elif confidence > 0.4:
+                conf_color = "#fbc02d"  # Yellow
+                conf_text = "Medium Confidence"
+            else:
+                conf_color = "#e53935"  # Red
+                conf_text = "Low Confidence"
+            
+            conf_frame = ctk.CTkFrame(self.result_frame, fg_color=conf_color, corner_radius=4)
+            conf_frame.pack(pady=(0, 10), padx=10, fill='x')
+            ctk.CTkLabel(conf_frame, text=f"{conf_text}: {confidence*100:.1f}%", font=ctk.CTkFont(size=14, weight="bold"), text_color="white").pack(pady=5, padx=10)
+        
+        # Hints section
         if hints:
-            ctk.CTkLabel(self.result_frame, text="Hints:", font=ctk.CTkFont(size=15, weight="bold")).pack(pady=(10, 0))
+            hints_frame = ctk.CTkFrame(self.result_frame, fg_color="#f3e5f5", corner_radius=8)
+            hints_frame.pack(pady=(0, 10), padx=10, fill='x')
+            ctk.CTkLabel(hints_frame, text="💡 Hints:", font=ctk.CTkFont(size=15, weight="bold"), text_color="#7b1fa2").pack(pady=(10, 5), padx=10, anchor='w')
             for hint in hints:
-                ctk.CTkLabel(self.result_frame, text=f"• {hint}", font=ctk.CTkFont(size=14), wraplength=580, justify='left').pack(anchor='w', padx=40)
+                ctk.CTkLabel(hints_frame, text=f"• {hint}", font=ctk.CTkFont(size=14), wraplength=580, justify='left').pack(anchor='w', padx=20, pady=2)
+        
+        # Related concepts section
         if related:
-            ctk.CTkLabel(self.result_frame, text="Related Concepts:", font=ctk.CTkFont(size=15, weight="bold")).pack(pady=(10, 0))
+            related_frame = ctk.CTkFrame(self.result_frame, fg_color="#e8f5e8", corner_radius=8)
+            related_frame.pack(pady=(0, 10), padx=10, fill='x')
+            ctk.CTkLabel(related_frame, text="🔗 Related Concepts:", font=ctk.CTkFont(size=15, weight="bold"), text_color="#388e3c").pack(pady=(10, 5), padx=10, anchor='w')
             for rel in related:
-                ctk.CTkLabel(self.result_frame, text=f"• {rel}", font=ctk.CTkFont(size=14)).pack(anchor='w', padx=40) 
+                ctk.CTkLabel(related_frame, text=f"• {rel}", font=ctk.CTkFont(size=14)).pack(anchor='w', padx=20, pady=2)
+
+    

@@ -8,7 +8,7 @@ class WelcomeView(ctk.CTkFrame):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
-        self.label = ctk.CTkLabel(self, text="Welcome to NEBedu!", font=ctk.CTkFont(size=28, weight="bold"))
+        self.label = ctk.CTkLabel(self, text="Welcome to Satya!", font=ctk.CTkFont(size=28, weight="bold"))
         self.label.pack(pady=(60, 10))
         self.desc = ctk.CTkLabel(self, text="Please enter your username to begin:", font=ctk.CTkFont(size=16))
         self.desc.pack(pady=(0, 20))

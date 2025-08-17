@@ -7,14 +7,21 @@ class SubjectView(ctk.CTkFrame):
         self.on_back = on_back
         self.subjects = subjects
 
+        # Main title
         self.label = ctk.CTkLabel(self, text="Select a Subject", font=ctk.CTkFont(size=22, weight="bold"))
         self.label.pack(pady=(30, 20))
 
+        # Create scrollable frame for subjects
+        self.scrollable_frame = ctk.CTkScrollableFrame(self, width=600, height=400)
+        self.scrollable_frame.pack(pady=(0, 20), padx=20, fill='both', expand=True)
+
+        # Add subject buttons to scrollable frame
         self.subject_buttons = []
         for subj in subjects:
-            btn = ctk.CTkButton(self, text=subj, width=220, command=lambda s=subj: self.on_select(s))
+            btn = ctk.CTkButton(self.scrollable_frame, text=subj, width=220, command=lambda s=subj: self.on_select(s))
             btn.pack(pady=8)
             self.subject_buttons.append(btn)
 
-        self.back_btn = ctk.CTkButton(self, text="Back", command=self.on_back, fg_color="#bdbdbd", hover_color="#757575")
-        self.back_btn.pack(pady=(40, 0)) 
+        # Back button
+        self.back_btn = ctk.CTkButton(self, text="Back to Main Menu", command=self.on_back, fg_color="#bdbdbd", hover_color="#757575")
+        self.back_btn.pack(pady=(20, 30)) 
