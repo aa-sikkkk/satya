@@ -40,7 +40,11 @@ An **offline-first, RAG-powered** learning companion for students. Built with in
 - 🌐 **Search with OpenAI (Online):** Ask any question and get an answer from OpenAI (if enabled by your school/teacher)
 - 🖥️ **Modern, responsive GUI:** Beautiful customtkinter interface and improved answer display (scrollable, word-wrapped, responsive to long answers)
 
-https://github.com/user-attachments/assets/7d6d42e0-c1ee-4f3b-9bbc-692cbabe46ec
+
+https://github.com/user-attachments/assets/27e34daf-0919-4393-bb60-50ff6dedc716
+
+
+
 
 ### For Teachers
 - 📝 Content management and editing
@@ -182,7 +186,8 @@ python -m student_app.gui_app.main_window
 - Enjoy a modern, responsive interface with sidebar navigation, Satyá logo, loading spinner, and scrollable answer display.
 - All features of the CLI are available in the GUI, including **RAG-enhanced Q&A**, progress tracking, and adaptive learning.
 
-![Screenshot (118)](https://github.com/user-attachments/assets/9cb70ec8-a636-4f93-8d69-7a12c5eb61bf)
+<img width="1200" height="700" alt="Screenshot (124)" src="https://github.com/user-attachments/assets/cebd5966-77c3-4f94-9173-68a1a953f156" />
+
 
 ---
 
