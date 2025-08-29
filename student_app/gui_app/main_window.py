@@ -188,7 +188,8 @@ class NEBeduApp(ctk.CTk):
         
         def load_topics():
             try:
-                topics = self.content_manager.get_all_topics(subject)
+                # Build flattened browseable topics (topic + nested subtopic paths with content)
+                topics = self.content_manager.list_browseable_topics(subject)
                 
                 def show_topics():
                     self._safe_destroy_widgets()
@@ -214,17 +215,30 @@ class NEBeduApp(ctk.CTk):
             return
         self._loading = True
         
-        self.selected_topic = topic
+        # Topic entry can be a flattened dict from list_browseable_topics or a simple string
+        if isinstance(topic, dict) and "topic" in topic:
+            self.selected_topic = topic["topic"]
+            self.selected_subtopic_path = topic.get("subtopic_path", [])
+            display_label = topic.get("label", self.selected_topic)
+        else:
+            self.selected_topic = topic.get("name") if isinstance(topic, dict) else topic
+            self.selected_subtopic_path = []
+            display_label = self.selected_topic
         self._safe_destroy_widgets()
         
         # Show loading immediately
-        loading = ctk.CTkLabel(self.main_frame, text="Loading concepts...", font=ctk.CTkFont(size=16))
+        loading = ctk.CTkLabel(self.main_frame, text=f"Loading concepts for {display_label}...", font=ctk.CTkFont(size=16))
         loading.pack(pady=40)
         self.main_frame.update()
         
         def load_concepts():
             try:
-                concepts = self.content_manager.get_all_concepts(self.selected_subject, topic)
+                # Fetch concepts at specific nested path if provided
+                concepts = self.content_manager.get_concepts_at_path(
+                    self.selected_subject,
+                    self.selected_topic,
+                    self.selected_subtopic_path,
+                )
                 
                 def show_concepts():
                     self._safe_destroy_widgets()
@@ -404,10 +418,18 @@ class NEBeduApp(ctk.CTk):
                 
                 if self.rag_engine:
                     try:
-                        rag_results = self.rag_engine.retrieve_relevant_content(question, top_k=3)
-                        if rag_results and rag_results['chunks']:
-                            rag_context = "\n\n".join([chunk['content'] for chunk in rag_results['chunks']])
-                            source_info = f"RAG found {len(rag_results['chunks'])} relevant content chunks"
+                        rag_results = self.rag_engine.retrieve_relevant_content(question, max_results=3)
+                        if rag_results and rag_results.get('chunks'):
+                            # Apply lightweight distance filtering if available
+                            chunks = rag_results['chunks']
+                            safe_chunks = []
+                            for ch in chunks:
+                                dist = ch.get('distance', 0.0)
+                                if dist is None or dist <= 0.35:
+                                    safe_chunks.append(ch)
+                            if safe_chunks:
+                                rag_context = "\n\n".join([ch['content'] for ch in safe_chunks])
+                                source_info = f"RAG found {len(safe_chunks)} relevant content chunks"
                     except Exception:
                         # RAG failed, continue with fallback
                         pass

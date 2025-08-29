@@ -28,7 +28,7 @@ class PDFContentProcessor:
         chunks_dir (str): Directory containing PDF chunks
     """
     
-    def __init__(self, chunks_dir: str = "processed_data_new/chunks", processed_dir: str = "data/content"):
+    def __init__(self, chunks_dir: str = "processed_data_new/chunks", processed_dir: str = "scripts/data_collection/data/content"):
         """
         Initialize the PDF processor.
         
@@ -132,6 +132,9 @@ class PDFContentProcessor:
         """
         Split large content string into logical topics based on PDF structure.
         
+        Uses robust heading detection for Chapter/Unit/Lesson (English and Nepali)
+        anchored to the start of lines to avoid false positives.
+        
         Args:
             content (str): Large content string
             subject (str): Subject name
@@ -139,93 +142,97 @@ class PDFContentProcessor:
         Returns:
             List[Dict]: List of topics with their content
         """
-        topics = []
-        
-        # Define topic keywords for different subjects (PDF-specific)
-        topic_keywords = {
-            "Computer Science": [
-                r"computer network", r"internet", r"cyber", r"database", r"dbms", 
-                r"programming", r"qbasic", r"ecommerce", r"data communication",
-                r"transmission media", r"topology", r"security", r"virus",
-                r"chapter", r"unit", r"section", r"lesson"
-            ],
-            "English": [
-                r"grammar", r"literature", r"poetry", r"prose", r"comprehension",
-                r"writing", r"speaking", r"listening", r"vocabulary",
-                r"chapter", r"unit", r"section", r"lesson"
-            ],
-            "Science": [
-                r"physics", r"chemistry", r"biology", r"motion", r"energy",
-                r"forces", r"atomic", r"chemical", r"cell", r"ecosystem",
-                r"chapter", r"unit", r"section", r"lesson"
-            ]
-        }
-        
-        # Split content by major sections (PDF structure)
-        sections = re.split(r'\n\s*\n', content)
-        current_topic = None
-        current_content = []
-        
-        for section in sections:
-            section = section.strip()
-            if not section:
+        topics: List[Dict] = []
+
+        # Normalize newlines and split into paragraphs/blocks
+        blocks = [b.strip() for b in re.split(r"\n\s*\n", content) if b.strip()]
+
+        # Heading patterns (English + Nepali). Anchored at start of block.
+        heading_patterns = [
+            # English headings like: Chapter 3 / Unit 2 / Lesson 5: Title
+            r"^(?:chapter|unit|lesson)\s*[0-9]+\s*[:.)-]?\s*(.+)$",
+            # Nepali headings like: अध्याय ३ / एकक २ / पाठ ५: शीर्षक (support Nepali digits ०-९)
+            r"^(?:अध्याय|एकक|पाठ)\s*[०-९0-9]+\s*[:.)-]?\s*(.+)$",
+            # Topic/Section headings with delimiter
+            r"^(?:topic|section)\s*[:.)-]\s*(.+)$",
+        ]
+        compiled_patterns = [re.compile(pat, re.IGNORECASE) for pat in heading_patterns]
+
+        current_topic_name: Optional[str] = None
+        current_topic_blocks: List[str] = []
+
+        def flush_current():
+            if current_topic_name and current_topic_blocks:
+                topics.append({
+                    "name": current_topic_name,
+                    "content": "\n".join(current_topic_blocks)
+                })
+
+        for block in blocks:
+            # Try heading detection
+            heading_match = None
+            for pat in compiled_patterns:
+                m = pat.match(block)
+                if m:
+                    heading_match = m
+                    break
+
+            if heading_match:
+                # Start a new topic, flush previous
+                flush_current()
+                extracted = heading_match.group(1).strip() if heading_match.lastindex else block.strip()
+                current_topic_name = self.extract_topic_name(block, extracted)
+                current_topic_blocks = [block]
                 continue
-                
-            # Check if this section starts a new topic
-            found_topic = False
-            if subject in topic_keywords:
-                for keyword in topic_keywords[subject]:
-                    if re.search(keyword, section.lower()):
-                        # Save previous topic if exists
-                        if current_topic and current_content:
-                            topics.append({
-                                "name": current_topic,
-                                "content": "\n".join(current_content)
-                            })
-                        
-                        # Start new topic
-                        current_topic = self.extract_topic_name(section, keyword)
-                        current_content = [section]
-                        found_topic = True
-                        break
-            
-            if not found_topic:
-                if current_topic:
-                    current_content.append(section)
-                else:
-                    # First section without clear topic
-                    current_topic = "Introduction"
-                    current_content = [section]
-        
-        # Add the last topic
-        if current_topic and current_content:
-            topics.append({
-                "name": current_topic,
-                "content": "\n".join(current_content)
-            })
-        
+
+            # Heuristic: very short title-like block (no period, Title Case, < 80 chars)
+            first_line = block.split("\n", 1)[0].strip()
+            if (
+                len(first_line) <= 80
+                and "." not in first_line
+                and re.match(r"^[\w\-():'\s\u0900-\u097F]+$", first_line)
+                and sum(1 for c in first_line if c.isupper()) >= max(1, int(0.5 * len([c for c in first_line if c.isalpha()] or [0])))
+            ):
+                flush_current()
+                current_topic_name = first_line.title()
+                current_topic_blocks = [block]
+                continue
+
+            # Accumulate content in current topic or create an Introduction if none yet
+            if current_topic_name:
+                current_topic_blocks.append(block)
+            else:
+                current_topic_name = "Introduction"
+                current_topic_blocks = [block]
+
+        # Add the final topic
+        flush_current()
+
         return topics if topics else [{"name": subject, "content": content}]
     
-    def extract_topic_name(self, section: str, keyword: str) -> str:
+    def extract_topic_name(self, section: str, candidate: str) -> str:
         """
-        Extract a clean topic name from a section.
+        Determine a clean topic name from a heading section and/or a candidate title.
         
         Args:
-            section (str): Text section
-            keyword (str): Matched keyword
+            section (str): Full heading block
+            candidate (str): Candidate title extracted from regex
             
         Returns:
             str: Clean topic name
         """
-        lines = section.split('\n')
-        first_line = lines[0].strip()
-        
-        # If first line is short and contains the keyword, use it
-        if len(first_line) < 100 and keyword.replace(r"\b", "").replace(r"\s+", " ") in first_line.lower():
+        # Prefer the first line if it's concise and looks like a title
+        first_line = section.split('\n', 1)[0].strip()
+        if 3 <= len(first_line) <= 100 and "." not in first_line:
             return first_line.title()
-        
-        # Otherwise, create a topic name from the keyword
-        return keyword.replace(r"\b", "").replace(r"\s+", " ").title()
+
+        # Fallback to candidate extracted from regex
+        if 3 <= len(candidate) <= 120:
+            return candidate.title()
+
+        # Last resort: trimmed snippet
+        snippet = re.sub(r"\s+", " ", section).strip()
+        return (snippet[:100] + ("..." if len(snippet) > 100 else "")).title()
         
     def extract_concepts_from_content(self, content: str) -> List[Dict]:
         """

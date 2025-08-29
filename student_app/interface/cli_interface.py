@@ -20,6 +20,7 @@ from prompt_toolkit.completion import WordCompleter
 from prompt_toolkit.styles import Style
 from prompt_toolkit.keys import Keys
 from prompt_toolkit.key_binding import KeyBindings
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 
 from system.data_manager.content_manager import ContentManager, get_most_relevant_sentence
 from ai_model.model_utils.model_handler import ModelHandler
@@ -133,6 +134,10 @@ class CLIInterface:
             
         self.session = PromptSession(key_bindings=bindings)
         self.username = self._prompt_username()
+        # Sticky memory for the most recent QA context
+        self._last_question_text: Optional[str] = None
+        self._last_acceptable_answers: Optional[List[str]] = None
+        self._last_concept_summary: Optional[str] = None
         self._show_welcome_message()
         self._show_model_info()
         # Configure OpenAI proxy client with environment variables or defaults
@@ -302,6 +307,38 @@ Type 'back' to return to previous menu
                 
             except Exception as e:
                 console.print("[red]Invalid choice. Please try again.[/red]")
+    
+    def _create_menu_with_index(self, title: str, options: List[str]) -> Any:
+        """
+        Create and display a menu and return both index (1-based) and label.
+        
+        Returns:
+            (int, str): Tuple of (selected_index_1_based, selected_label)
+        """
+        table = Table(title=title, show_header=False, box=None)
+        table.add_column("Option", style="cyan")
+        table.add_column("Description", style="green")
+        for i, option in enumerate(options, 1):
+            table.add_row(str(i), option)
+        console.print(table)
+        console.print("\nPress 'h' for help, 'q' to exit")
+        while True:
+            try:
+                choice = self.session.prompt("Select an option (1-{}) ".format(len(options)))
+                if choice.lower() in ['help', 'h']:
+                    self._show_help()
+                    continue
+                if choice.lower() in ['exit', 'q']:
+                    if Confirm.ask("Are you sure you want to exit?"):
+                        console.print("[bold green]Thank you for using Satya. Goodbye![/bold green]")
+                        sys.exit(0)
+                    continue
+                if choice.isdigit() and 1 <= int(choice) <= len(options):
+                    idx = int(choice)
+                    return idx, options[idx - 1]
+                console.print("[red]Please enter a number between 1 and {}[/red]".format(len(options)))
+            except Exception:
+                console.print("[red]Invalid choice. Please try again.[/red]")
             
     def _display_concept(self, concept: Dict[str, Any]) -> None:
         """
@@ -354,12 +391,119 @@ Type 'back' to return to previous menu
         if 'type' in question:
             console.print(f"[dim]Type: {question['type']}[/dim]")
             
-        # Get user's answer with progress indicator
-        with console.status("[bold green]Thinking...[/bold green]"):
-            answer = Prompt.ask("Your answer")
+        # Update sticky memory for this question
+        try:
+            self._last_question_text = question.get('question')
+        except Exception:
+            self._last_question_text = None
+        try:
+            self._last_concept_summary = concept_summary
+        except Exception:
+            self._last_concept_summary = None
+        # Get user's answer (use prompt_toolkit session for consistent input handling)
+        answer = self.session.prompt("Your answer: ")
         
-        # Check answer with visual feedback
-        correct = any(ans.lower() in answer.lower() for ans in question.get('acceptable_answers', []))
+        # Data-driven grading: rubric-based scoring derived from content
+        from difflib import SequenceMatcher
+        import re
+        STOPWORDS = set([
+            "the","is","are","a","an","to","of","and","or","for","in","on","at","by","that",
+            "this","it","as","be","with","from","into","their","its","they","them","can","will",
+            "about","how","what","why","which","who","whose","when","where","than","then","also"
+        ])
+        def _stem(token: str) -> str:
+            # very light stemming to improve overlap
+            for suf in ("ing","ed","es","s"):
+                if token.endswith(suf) and len(token) - len(suf) >= 3:
+                    return token[: -len(suf)]
+            return token
+        def tokenize(text: str):
+            tokens = re.findall(r"[a-zA-Z]+", text.lower())
+            return [_stem(t) for t in tokens if len(t) >= 3 and t not in STOPWORDS]
+        def build_rubric(ref_texts):
+            # Build frequency-based keyword rubric from acceptable answers
+            freq = {}
+            for rt in ref_texts:
+                for t in set(tokenize(rt)):
+                    freq[t] = freq.get(t, 0) + 1
+            # Keep top keywords that appear across references
+            common = [t for t, c in freq.items() if c >= max(1, len(ref_texts)//2)]
+            # Ensure at least some keywords
+            if not common:
+                # fallback to top 8 tokens by frequency
+                common = [t for t, _ in sorted(freq.items(), key=lambda kv: kv[1], reverse=True)[:8]]
+            return set(common)
+        # Prefer explicit rubric if present in question
+        explicit_rubric = set(question.get('rubric_keywords', []))
+        acc = [a for a in question.get('acceptable_answers', []) if isinstance(a, str)]
+        # Save acceptable answers for later steps
+        try:
+            self._last_acceptable_answers = acc if acc else None
+        except Exception:
+            self._last_acceptable_answers = None
+        rubric = explicit_rubric if explicit_rubric else build_rubric(acc) if acc else set()
+        user_tokens = set(tokenize(answer))
+        # Similarity components
+        keyword_overlap = len(user_tokens & rubric) / max(1, len(rubric)) if rubric else 0.0
+        fuzzy_max = max((SequenceMatcher(None, answer.lower(), rt.lower()).ratio() for rt in acc), default=0.0)
+        # Weighted score (favor keyword coverage to reduce verbosity dependency)
+        score = 0.8 * keyword_overlap + 0.2 * fuzzy_max
+        # Decide correctness based on thresholds; require minimum coverage to avoid false positives
+        threshold = float(question.get('rubric_threshold', 0.45))
+        min_coverage = float(question.get('rubric_min_coverage', 0.50))
+        correct = (score >= threshold) and (keyword_overlap >= min_coverage)
+
+        # Optional fast model-based judge for borderline/false negatives
+        margin_low = threshold - 0.12
+        margin_high = threshold + 0.05
+        if not correct and acc and (score >= margin_low and score < margin_high):
+            try:
+                # Reuse the existing quick inference helper via a minimal inline definition
+                from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
+                def _quick_answer(prompt_text: str, context_text: str, length: str, timeout_seconds: int = 1):
+                    try:
+                        with ThreadPoolExecutor(max_workers=1) as executor:
+                            fut = executor.submit(self.model_handler.get_answer, prompt_text, context_text, length)
+                            return fut.result(timeout=timeout_seconds)
+                    except FuturesTimeoutError:
+                        return (None, 0.0)
+                    except Exception:
+                        return (None, 0.0)
+                # Compact grading context using rubric keywords to minimize prompt size
+                rubric_preview = ", ".join(list(rubric)[:8]) if rubric else ""
+                grading_context = (
+                    f"Question: {question.get('question','')[:140]}\n"
+                    f"Key points to check: {rubric_preview}\n"
+                    f"Student answer: {answer[:220]}\n"
+                    "Reply 'Yes' if the answer correctly covers the key points, otherwise 'No'."
+                )
+                judge_reply, _ = _quick_answer("Is the answer correct?", grading_context, "very_short", timeout_seconds=1)
+                if isinstance(judge_reply, str) and judge_reply.strip().lower().startswith("yes"):
+                    correct = True
+            except Exception:
+                pass
+        # Optional fast model-based veto for borderline/false positives
+        if correct and acc and (score < (threshold + 0.10)):
+            try:
+                from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
+                def _quick_judge(prompt_text: str, context_text: str, timeout_seconds: float = 1.2):
+                    try:
+                        with ThreadPoolExecutor(max_workers=1) as executor:
+                            fut = executor.submit(self.model_handler.get_answer, prompt_text, context_text, "very_short")
+                            res = fut.result(timeout=timeout_seconds)
+                            return res[0] if isinstance(res, tuple) else res
+                    except (FuturesTimeoutError, Exception):
+                        return None
+                q_text = question.get('question','') or (self._last_question_text or '')
+                ctx = acc[0][:240]
+                judge_prompt = (
+                    f"{q_text}\n\nStudent answer: {answer[:240]}\n\nUsing ONLY the context, is the student correct? Reply 'Yes' or 'No'."
+                )
+                reply = _quick_judge(judge_prompt, ctx, timeout_seconds=1.2)
+                if isinstance(reply, str) and reply.strip().lower().startswith('no'):
+                    correct = False
+            except Exception:
+                pass
         if correct:
             console.print(Panel(
                 "[bold green]✓ Correct![/bold green]",
@@ -381,13 +525,60 @@ Type 'back' to return to previous menu
                     if not Confirm.ask("Would you like another hint?"):
                         break
                         
-        # Show explanation with better formatting
-        if Confirm.ask("Would you like to see the explanation?"):
+        # Offer a brief explanation; default off when correct, on when incorrect
+        want_expl = Confirm.ask(
+            "Would you like a brief explanation?",
+            default=(not correct)
+        )
+        if want_expl:
+            # Prefer per-question explanation if present
             explanation = question.get('explanation')
-            if not explanation and concept_summary:
-                explanation = concept_summary
+            # Ultra-fast model-based explanation with tiny context and ~0.8s timeout
             if not explanation:
-                explanation = 'No explanation available.'
+                try:
+                    from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
+                    def _quick_explain(prompt_text: str, context_text: str, timeout_seconds: float = 0.8):
+                        try:
+                            with ThreadPoolExecutor(max_workers=1) as executor:
+                                fut = executor.submit(self.model_handler.get_answer, prompt_text, context_text, "very_short")
+                                res = fut.result(timeout=timeout_seconds)
+                                return res[0] if isinstance(res, tuple) else res
+                        except (FuturesTimeoutError, Exception):
+                            return None
+                    # Build a compact, question-specific context (prefer acceptable_answers)
+                    q_text = question.get('question', '') or (self._last_question_text or '')
+                    base_context = None
+                    if acc and len(acc) > 0:
+                        base_context = acc[0][:240]
+                    # Only fall back to concept summary if no acceptable answer exists
+                    if (not base_context or len(base_context.strip()) == 0):
+                        cs = concept_summary or self._last_concept_summary
+                        if cs:
+                            base_context = get_most_relevant_sentence(cs, q_text)
+                    base_context = (base_context or "").strip()[:240]
+                    # Ask with the actual question to keep it on-topic
+                    ask_text = (
+                        f"{q_text} \n\nInstruction: Using ONLY the context, answer in exactly 2 short, simple sentences for Grade 10. Stay on-topic."
+                    )
+                    explanation = _quick_explain(ask_text, base_context, timeout_seconds=1.2)
+                except Exception:
+                    explanation = None
+            if not explanation:
+                # Instant fallback: 1-2 sentences from concept summary, else rubric
+                # Prefer compressing the current question's acceptable answer first
+                if acc:
+                    # Take first acceptable answer and compress to 1-2 sentences
+                    a0 = acc[0]
+                    # Split by sentence delimiters; join first 2
+                    parts = [p.strip() for p in re.split(r"[\.!?]", a0) if p.strip()]
+                    explanation = '. '.join(parts[:2]) + ('.' if parts[:2] else '')
+                # If not available, use 1-2 sentences from the concept summary
+                if (not explanation or len(explanation.strip()) == 0) and concept_summary:
+                    sentences = [s.strip() for s in concept_summary.split('.') if s.strip()]
+                    explanation = '. '.join(sentences[:2]) + ('.' if sentences[:2] else '')
+                if (not explanation) or (len(explanation.strip()) == 0):
+                    rubric_preview = ", ".join(list(rubric)[:6]) if 'rubric' in locals() and rubric else ""
+                    explanation = f"In simple terms: {rubric_preview}." if rubric_preview else 'No explanation available.'
             console.print(Panel(
                 explanation,
                 title="Explanation",
@@ -405,22 +596,46 @@ Type 'back' to return to previous menu
             progress_manager.update_progress(
                 self.username, subject, topic, concept, question['question'], correct
             )
-            
-            # Show progress update
-            progress = progress_manager.get_concept_progress(
-                self.username, subject, topic, concept
-            )
-            if progress:
+            # Compute simple progress summary inline
+            try:
+                pdata = progress_manager.load_progress(self.username)
+                qlist = (
+                    pdata.get(subject, {})
+                         .get(topic, {})
+                         .get(concept, {})
+                         .get('questions', [])
+                )
+                total = len(qlist)
+                num_correct = sum(1 for q in qlist if q.get('correct', 0) > 0)
+                mastery = int((num_correct / total) * 100) if total else 0
                 console.print(Panel(
-                    f"[bold]Progress:[/bold] {progress['correct']}/{progress['total']} correct\n"
-                    f"[bold]Mastery Level:[/bold] {progress['mastery_level']}%",
+                    f"[bold]Progress:[/bold] {num_correct}/{total} correct\n"
+                    f"[bold]Mastery Level:[/bold] {mastery}%",
                     title="Your Progress",
                     border_style="cyan"
                 ))
+            except Exception:
+                pass
             
     @timeit
     def _handle_free_text_question(self, question: str) -> None:
         """Handle free-text questions using the AI model."""
+        def _quick_answer(prompt: str, context: str, length: str, timeout_seconds: int = 30):
+            """Call model with a timeout; on failure/timeout return (None, 0.0)."""
+            try:
+                if timeout_seconds is None or timeout_seconds <= 0:
+                    # Direct, no-timeout call
+                    return self.model_handler.get_answer(prompt, context, length)
+                with ThreadPoolExecutor(max_workers=1) as executor:
+                    fut = executor.submit(self.model_handler.get_answer, prompt, context, length)
+                    return fut.result(timeout=timeout_seconds)
+            except FuturesTimeoutError:
+                logger.warning("Model inference timed out; falling back to fast path.")
+                return None, 0.0
+            except Exception as e:
+                logger.error(f"Model inference error: {str(e)}")
+                return None, 0.0
+        
         try:
             # Show normalized question if it was changed
             original_question = question
@@ -471,16 +686,39 @@ Type 'back' to return to previous menu
                     # Try RAG first if available
                     if self.rag_engine:
                         try:
-                            rag_results = self.rag_engine.retrieve_relevant_content(question, max_results=3)
-                            if rag_results and rag_results['chunks']:
-                                rag_context = "\n\n".join([chunk['content'] for chunk in rag_results['chunks']])
-
-                                
-                                # Also try to find structured content
-                                relevant_content = self.content_manager.search_content(question)
-                            else:
-                                # Fallback to basic search
-                                relevant_content = self.content_manager.search_content(question)
+                            rag_results = self.rag_engine.retrieve_relevant_content(question, max_results=8)
+                            rag_context = None
+                            if rag_results and rag_results.get('chunks'):
+                                # Filter by distance to keep only highly relevant chunks
+                                safe_chunks = []
+                                for ch in rag_results['chunks']:
+                                    dist = ch.get('distance')
+                                    if dist is None:
+                                        # Fall back to relevance_score if distance not present
+                                        rel = ch.get('relevance_score', 0.0)
+                                        if rel >= 0.50:
+                                            safe_chunks.append(ch)
+                                    elif dist <= 0.50:
+                                        safe_chunks.append(ch)
+                                if safe_chunks:
+                                    # If too few pass threshold, backstop with top-2 by relevance
+                                    selected = safe_chunks
+                                    if len(selected) < 2:
+                                        top_any = sorted(rag_results['chunks'], key=lambda c: c.get('distance', 1.0))[:2]
+                                        ids = set(id(ch) for ch in selected)
+                                        for item in top_any:
+                                            if id(item) not in ids:
+                                                selected.append(item)
+                                            if len(selected) >= 2:
+                                                break
+                                    rag_context = "\n\n".join([ch['content'] for ch in selected])
+                                    # Trim context to reduce latency and prevent timeouts
+                                    rag_context = rag_context[:1200]
+                            # Also try to find structured content
+                            relevant_content = self.content_manager.search_content(question)
+                            if not rag_context and not relevant_content:
+                                # Nothing useful from RAG or content; proceed without context
+                                pass
                         except Exception as e:
                             logger.warning(f"RAG search failed, falling back to basic search: {str(e)}")
                             relevant_content = self.content_manager.search_content(question)
@@ -497,39 +735,47 @@ Type 'back' to return to previous menu
                             
                             # Try to generate answer from RAG context
                             try:
-                                answer, confidence = self.model_handler.get_answer(question, context, answer_length)
+                                # Respect user-selected length; no timeout to avoid premature fallback
+                                answer, confidence = _quick_answer(question, context, answer_length, timeout_seconds=0)
                                 if not answer or len(answer.strip()) == 0:
                                     raise ValueError("Model generated empty answer")
                             except Exception as e:
                                 logger.error(f"RAG model inference error: {str(e)}")
-                                console.print(Panel(
-                                    "I'm having trouble with the RAG content. Let me try using my general knowledge instead!",
-                                    title="Fallback to AI Knowledge",
-                                    border_style="blue"
-                                ))
-                                
-                                # Fallback to general knowledge
-                                general_context = (
-                                    "You are a helpful AI tutor for Grade 10 students. "
-                                    "Use your general knowledge to provide accurate, educational answers. "
-                                    "Keep answers comprehensive but appropriate for high school level."
-                                )
-                                
-                                try:
-                                    answer, confidence = self.model_handler.get_answer(question, general_context, answer_length)
-                                    if not answer or len(answer.strip()) == 0:
-                                        raise ValueError("Model generated empty answer")
-                                    source_info = "AI General Knowledge (RAG Fallback)"
-                                except Exception as e2:
-                                    logger.error(f"RAG fallback model inference also failed: {str(e2)}")
+                                if not answer or len(str(answer).strip()) == 0:
                                     console.print(Panel(
-                                        "I'm having trouble generating an answer. Let me show you the RAG content instead:",
-                                        title="Model Error",
-                                        border_style="yellow"
+                                        "I'm having trouble with the RAG content. Let me try using my general knowledge instead!",
+                                        title="Fallback to AI Knowledge",
+                                        border_style="blue"
                                     ))
-                                    answer = context
-                                    confidence = 0.8
-                                    source_info = "RAG content (Fallback)"
+                                    
+                                    # Fallback to general knowledge
+                                    general_context = (
+                                        "You are a helpful AI tutor for Grade 10 students. "
+                                        "Use your general knowledge to provide accurate, educational answers. "
+                                        "Keep answers comprehensive but appropriate for high school level."
+                                    )
+                                    
+                                    try:
+                                        answer, confidence = _quick_answer(question, general_context, answer_length)
+                                        if not answer or len(answer.strip()) == 0:
+                                            raise ValueError("Model generated empty answer")
+                                        source_info = "AI General Knowledge (RAG Fallback)"
+                                    except Exception as e2:
+                                        logger.error(f"RAG fallback model inference also failed: {str(e2)}")
+                                        # Avoid dumping raw RAG chunks; show a brief content pointer instead
+                                        console.print(Panel(
+                                            "I'm having trouble generating an answer. Here's a related summary from your materials.",
+                                            title="Model Error",
+                                            border_style="yellow"
+                                        ))
+                                        summary_snippet = ""
+                                        if relevant_content:
+                                            summary_snippet = relevant_content[0].get('summary', '')[:400]
+                                        elif rag_context:
+                                            summary_snippet = rag_context[:400]
+                                        answer = summary_snippet or "No suitable answer could be generated."
+                                        confidence = 0.4
+                                        source_info = "Structured/RAG summary (Fallback)"
                         else:
                             # Get the full concept data to access questions and answers
                             subject = relevant_content[0]['subject']
@@ -543,10 +789,11 @@ Type 'back' to return to previous menu
                                     if isinstance(q, dict) and 'question' in q:
                                         # Use fuzzy matching to find similar questions
                                         if difflib.SequenceMatcher(None, q['question'].lower(), question.lower()).ratio() > 0.6:
-                                            # Found a matching question, use its answer
+                                            # Found a matching question, use its answer as context
                                             if 'acceptable_answers' in q and q['acceptable_answers']:
-                                                answer = q['acceptable_answers'][0]
-                                                confidence = 0.9  # High confidence since it's from our content
+                                                context = ". ".join(q['acceptable_answers'])
+                                                source_info = "Structured content (matching question)"
+                                                confidence = 0.9
                                                 # Use the question's hints if available
                                                 hints = q.get('hints', [])
                                                 break
@@ -566,7 +813,7 @@ Type 'back' to return to previous menu
                         # Generate answer using the context (for structured content)
                         if 'answer' not in locals():
                             try:
-                                answer, confidence = self.model_handler.get_answer(question, context, answer_length)
+                                answer, confidence = _quick_answer(question, context, answer_length)
                                 if not answer or len(answer.strip()) == 0:
                                     raise ValueError("Model generated empty answer")
                             except Exception as e:
@@ -585,7 +832,7 @@ Type 'back' to return to previous menu
                                 )
                                 
                                 try:
-                                    answer, confidence = self.model_handler.get_answer(question, general_context, answer_length)
+                                    answer, confidence = _quick_answer(question, general_context, answer_length)
                                     if not answer or len(answer.strip()) == 0:
                                         raise ValueError("Model generated empty answer")
                                     source_info = "AI General Knowledge (Fallback)"
@@ -615,7 +862,7 @@ Type 'back' to return to previous menu
                         )
                         
                         try:
-                            answer, confidence = self.model_handler.get_answer(question, general_context, answer_length)
+                            answer, confidence = _quick_answer(question, general_context, answer_length)
                             if not answer or len(answer.strip()) == 0:
                                 raise ValueError("Model generated empty answer")
                             source_info = "AI General Knowledge"
@@ -720,11 +967,8 @@ Type 'back' to return to previous menu
                 border_style="red"
             ))
         finally:
-            # Clean up model resources
-            try:
-                self.model_handler.cleanup()
-            except Exception as e:
-                logger.error(f"Error cleaning up model: {str(e)}")
+            # Keep model in memory for faster subsequent answers; cleanup handled on app exit.
+            pass
             
     def start(self) -> None:
         """Start the CLI interface."""
@@ -779,17 +1023,30 @@ Type 'back' to return to previous menu
         # Select subject
         subject = self._create_menu("Select a Subject", subjects)
         
-        # Get topics
-        topics = self.content_manager.get_all_topics(subject)
-        if not topics:
-            console.print("[yellow]No topics available.[/yellow]")
-            return
-            
-        # Select topic
-        topic = self._create_menu("Select a Topic", topics)
+        # Prefer browseable flattened topic entries (handles nested subtopics)
+        browseable_entries = []
+        try:
+            browseable_entries = self.content_manager.list_browseable_topics(subject)
+        except Exception:
+            browseable_entries = []
         
-        # Get concepts
-        concepts = self.content_manager.get_all_concepts(subject, topic)
+        if browseable_entries:
+            topic_labels = [e.get("label", e.get("topic", "")) for e in browseable_entries]
+            selected_idx, selected_label = self._create_menu_with_index("Select a Topic", topic_labels)
+            selected_entry = browseable_entries[selected_idx - 1]
+            topic_name = selected_entry["topic"]
+            subtopic_path = selected_entry.get("subtopic_path", [])
+            # Concepts under chosen path (topic root if path empty)
+            concepts = self.content_manager.get_concepts_at_path(subject, topic_name, subtopic_path)
+        else:
+            # Fallback to legacy topic -> concepts flow
+            topics = self.content_manager.get_all_topics(subject)
+            if not topics:
+                console.print("[yellow]No topics available.[/yellow]")
+                return
+            topic_name = self._create_menu("Select a Topic", topics)
+            concepts = self.content_manager.get_all_concepts(subject, topic_name)
+        
         if not concepts:
             console.print("[yellow]No concepts available.[/yellow]")
             return
@@ -811,7 +1068,7 @@ Type 'back' to return to previous menu
                     self._display_question(
                         question,
                         subject=subject,
-                        topic=topic,
+                        topic=topic_name,
                         concept=concept,
                         concept_summary=concept_data.get('summary', None)
                     )

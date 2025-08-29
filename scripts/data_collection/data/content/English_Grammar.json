@@ -1,0 +1,488 @@
+{
+    "subject": "English Grammar",
+    "grade": 10,
+    "topics": [
+      {
+        "name": "Foundational Elements",
+        "subtopics": [
+          {
+            "name": "Articles",
+            "concepts": [
+              {
+                "name": "Definite and Indefinite Articles",
+                "summary": "Articles are determiners that specify the grammatical definiteness of a noun. 'A/an' are indefinite articles used for general or non-specific nouns, while 'the' is the definite article used for specific nouns that are known to the speaker and listener.",
+                "steps": [
+                  "Learn the rules for using 'a' (before consonant sounds) and 'an' (before vowel sounds).",
+                  "Understand when to use the definite article 'the' (e.g., for unique objects, previously mentioned nouns, superlatives).",
+                  "Study the concept of 'zero article' (when no article is needed, e.g., with plural countable nouns in a general sense, or most proper nouns)."
+                ],
+                "questions": [
+                  {
+                    "question": "Fill in the blanks with 'a', 'an', or 'the': I saw ___ old man walking with ___ dog. ___ dog was very friendly.",
+                    "acceptable_answers": [
+                      "an, a, The"
+                    ],
+                    "hints": [
+                      "Use 'an' before 'old' (vowel sound). Use 'a' for the first mention of the dog. Use 'the' for the second mention."
+                    ]
+                  },
+                  {
+                    "question": "Choose the correct article: ___ Mount Everest is the highest peak in the world.",
+                    "acceptable_answers": [
+                      "No article is needed."
+                    ],
+                    "hints": [
+                      "We do not use 'the' before the names of single mountains."
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Determiners",
+            "concepts": [
+              {
+                "name": "Quantifiers and Demonstratives",
+                "summary": "Determiners are words placed before a noun to clarify what the noun refers to. This includes quantifiers (e.g., some, any, much, many, a few, a little) which specify quantity, and demonstratives (this, that, these, those) which point to specific items.",
+                "steps": [
+                  "Learn the difference between quantifiers used for countable nouns (many, a few) and uncountable nouns (much, a little).",
+                  "Understand the usage of 'some' (typically in positive sentences) and 'any' (typically in negative sentences and questions).",
+                  "Practice using demonstratives 'this/these' for things that are near and 'that/those' for things that are far."
+                ],
+                "questions": [
+                  {
+                    "question": "Choose the correct word: How (much/many) money do you have?",
+                    "acceptable_answers": [
+                      "much"
+                    ],
+                    "hints": [
+                      "'Money' is an uncountable noun."
+                    ]
+                  },
+                  {
+                    "question": "Fill in the blank with 'some' or 'any': I don't have ___ questions.",
+                    "acceptable_answers": [
+                      "any"
+                    ],
+                    "hints": [
+                      "Use 'any' in negative sentences."
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Prepositions",
+            "concepts": [
+              {
+                "name": "Prepositions of Time, Place, and Movement",
+                "summary": "Prepositions are words (e.g., in, on, at, for, from, to, under) that show the relationship between a noun or pronoun and other words in a sentence, often indicating time, place, or direction.",
+                "steps": [
+                  "Learn the usage of prepositions of time: 'at' for specific times (at 5 PM), 'on' for days and dates (on Monday), 'in' for longer periods (in April, in 2024).",
+                  "Study the usage of prepositions of place: 'at' for specific points (at the bus stop), 'on' for surfaces (on the table), 'in' for enclosed spaces (in the box).",
+                  "Understand prepositions of movement (e.g., to, from, into, across, through).",
+                  "Practice selecting the correct preposition based on the context of the sentence."
+                ],
+                "questions": [
+                  {
+                    "question": "Fill in the blanks with the correct prepositions: The meeting is ___ Monday ___ 10 AM.",
+                    "acceptable_answers": [
+                      "on, at"
+                    ],
+                    "hints": [
+                      "Use 'on' for days and 'at' for specific times."
+                    ]
+                  },
+                  {
+                    "question": "Choose the correct preposition: He lives ___ Kathmandu.",
+                    "acceptable_answers": [
+                      "in"
+                    ],
+                    "hints": [
+                      "Use 'in' for cities, states, and countries."
+                    ]
+                  },
+                  {
+                    "question": "Fill in the blank: The cat jumped ___ the wall.",
+                    "acceptable_answers": [
+                      "over"
+                    ],
+                    "hints": [
+                      "The preposition must indicate movement from one side of an obstacle to the other."
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Verbs and Tenses",
+        "subtopics": [
+          {
+            "name": "Tense System",
+            "concepts": [
+              {
+                "name": "Usage of Different Tenses",
+                "summary": "Tense indicates the time of an action or event. The English tense system is divided into past, present, and future, each with simple, continuous, perfect, and perfect continuous aspects. Correct tense usage is fundamental to constructing clear and logical sentences.",
+                "steps": [
+                  "Review the structure and use of simple tenses (present, past, future).",
+                  "Study the structure and use of continuous tenses (present, past, future) for ongoing actions.",
+                  "Learn the structure and use of perfect tenses (present, past, future) for completed actions with relevance to another point in time.",
+                  "Understand the use of perfect continuous tenses for actions that continue over a period up to a specific point in time.",
+                  "Practice choosing the correct tense based on context and time markers."
+                ],
+                "questions": [
+                  {
+                    "question": "Fill in the blank with the correct form of the verb: She ___ (go) to the market yesterday.",
+                    "acceptable_answers": [
+                      "went"
+                    ],
+                    "hints": [
+                      "The time marker 'yesterday' indicates the simple past tense."
+                    ]
+                  },
+                  {
+                    "question": "Choose the correct tense: Look! The children ___ (play) in the garden.",
+                    "acceptable_answers": [
+                      "are playing"
+                    ],
+                    "hints": [
+                      "The word 'Look!' suggests an action happening right now, which requires the present continuous tense."
+                    ]
+                  },
+                  {
+                    "question": "Fill in the blank: By the time I arrived, he ___ (leave).",
+                    "acceptable_answers": [
+                      "had left"
+                    ],
+                    "hints": [
+                      "This sentence describes two past actions. The action that happened first ('leaving') should be in the past perfect tense."
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Modals and Auxiliaries",
+            "concepts": [
+              {
+                "name": "Usage of Modal Verbs",
+                "summary": "Modal verbs (e.g., can, could, may, might, must, should, will, would) are auxiliary verbs that express necessity, possibility, permission, or ability. They are used with a main verb to add specific meaning.",
+                "steps": [
+                  "Learn the meanings and functions of different modal verbs (e.g., 'can' for ability, 'must' for obligation).",
+                  "Practice using modals to express permission, advice, obligation, and possibility.",
+                  "Understand the difference between similar modals (e.g., 'may' vs. 'might')."
+                ],
+                "questions": [
+                  {
+                    "question": "Choose the correct modal verb: You ___ finish your homework before you go out to play.",
+                    "acceptable_answers": [
+                      "must",
+                      "should"
+                    ],
+                    "hints": [
+                      "The sentence expresses obligation or strong advice."
+                    ]
+                  },
+                  {
+                    "question": "Fill in the blank with a modal showing possibility: It ___ rain later today.",
+                    "acceptable_answers": [
+                      "may",
+                      "might",
+                      "could"
+                    ],
+                    "hints": [
+                      "Use a modal that indicates something is possible but not certain."
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Sentence Structure and Transformation",
+        "subtopics": [
+          {
+            "name": "Basic Sentence Forms",
+            "concepts": [
+              {
+                "name": "Affirmative, Negative, and Interrogative",
+                "summary": "Sentence transformation involves changing the form of a sentence (e.g., from affirmative to negative) without changing its core meaning. This skill is essential for expressing ideas flexibly and accurately.",
+                "steps": [
+                  "Learn the rules for changing affirmative sentences to negative sentences by adding 'not' with auxiliary verbs.",
+                  "Understand how to form questions (interrogative) from statements by inverting the subject and auxiliary verb.",
+                  "Practice transforming sentences across different tenses and structures.",
+                  "Study the use of question tags."
+                ],
+                "questions": [
+                  {
+                    "question": "Change the sentence into a negative form: He plays football every day.",
+                    "acceptable_answers": [
+                      "He does not play football every day."
+                    ],
+                    "hints": [
+                      "Use the auxiliary verb 'do/does' for simple present tense.",
+                      "Add 'not' after the auxiliary."
+                    ]
+                  },
+                  {
+                    "question": "Change into an interrogative (Yes/No) form: She has finished her homework.",
+                    "acceptable_answers": [
+                      "Has she finished her homework?"
+                    ],
+                    "hints": [
+                      "Move the auxiliary verb 'has' to the beginning of the sentence."
+                    ]
+                  },
+                  {
+                    "question": "Add a suitable question tag: You are a student, ___?",
+                    "acceptable_answers": [
+                      "You are a student, aren't you?"
+                    ],
+                    "hints": [
+                      "A positive statement takes a negative tag.",
+                      "Use the same auxiliary verb ('are') in the tag."
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Voice",
+            "concepts": [
+              {
+                "name": "Active and Passive Voice",
+                "summary": "Voice refers to the form of a verb that shows whether the subject of a sentence performs the action (active voice) or is affected by it (passive voice). The passive voice is often used when the action is more important than the doer, or when the doer is unknown. It is commonly used in news reports, scientific writing, and formal notices.",
+                "steps": [
+                  "Identify the subject, verb, and object in an active sentence.",
+                  "Understand the structure of the passive voice: object + auxiliary verb 'to be' (in the correct tense) + past participle (V3) + (by + subject).",
+                  "Practice changing sentences from active to passive across different tenses (simple present, simple past, present continuous, etc.).",
+                  "Learn when it is appropriate to use the passive voice (e.g., when the agent is unknown or unimportant)."
+                ],
+                "questions": [
+                  {
+                    "question": "Change the sentence into passive voice: The cat chased the mouse.",
+                    "acceptable_answers": [
+                      "The mouse was chased by the cat."
+                    ],
+                    "hints": [
+                      "The object 'the mouse' becomes the new subject.",
+                      "The verb 'chased' (simple past) becomes 'was chased'."
+                    ]
+                  },
+                  {
+                    "question": "Change into passive voice: Someone is cleaning the room.",
+                    "acceptable_answers": [
+                      "The room is being cleaned."
+                    ],
+                    "hints": [
+                      "The tense is present continuous, so use 'is being' + past participle.",
+                      "The agent 'someone' is unimportant and can be omitted."
+                    ]
+                  },
+                  {
+                    "question": "Change into active voice: The novel was written by a famous author.",
+                    "acceptable_answers": [
+                      "A famous author wrote the novel."
+                    ],
+                    "hints": [
+                      "The agent 'a famous author' becomes the new subject.",
+                      "The verb 'was written' (simple past passive) becomes 'wrote' (simple past active)."
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Building Complex Sentences",
+        "subtopics": [
+          {
+            "name": "Conjunctions and Connectives",
+            "concepts": [
+              {
+                "name": "Using Linking Words",
+                "summary": "Connectives (or conjunctions) are words or phrases that link clauses, sentences, or ideas. They can show contrast (but, however), cause (because, so), addition (and, also), sequence (first, then, finally), etc. Proper use of connectives makes writing coherent and logical.",
+                "steps": [
+                  "Identify different types of connectives: coordinating (e.g., for, and, nor, but, or, yet, so) and subordinating (e.g., because, although, since, while).",
+                  "Learn the function of different connectives (e.g., 'although' for contrast, 'because' for reason).",
+                  "Practice joining sentences using appropriate connectives.",
+                  "Understand the use of transitional phrases (e.g., 'in addition', 'on the other hand')."
+                ],
+                "questions": [
+                  {
+                    "question": "Join the sentences using a suitable connective: He studied hard. He failed the exam.",
+                    "acceptable_answers": [
+                      "He studied hard, but he failed the exam.",
+                      "Although he studied hard, he failed the exam."
+                    ],
+                    "hints": [
+                      "The two ideas present a contrast. Use a connective that shows contrast."
+                    ]
+                  },
+                  {
+                    "question": "Choose the correct connective: I was tired, ___ I went to bed early.",
+                    "acceptable_answers": [
+                      "so"
+                    ],
+                    "hints": [
+                      "The second clause is a result of the first one. Use a connective that shows a result."
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Relative Clauses",
+            "concepts": [
+              {
+                "name": "Defining and Non-Defining Clauses",
+                "summary": "A relative clause is a type of subordinate clause that gives more information about a noun. It starts with a relative pronoun like 'who', 'which', 'that', 'whose', or 'where'. Defining clauses give essential information, while non-defining clauses give extra, non-essential information and are separated by commas.",
+                "steps": [
+                  "Learn the use of different relative pronouns ('who' for people, 'which' for things, etc.).",
+                  "Understand the difference between defining relative clauses (no commas) and non-defining relative clauses (with commas).",
+                  "Practice combining sentences using relative clauses."
+                ],
+                "questions": [
+                  {
+                    "question": "Combine the sentences using a relative pronoun: The man was very helpful. He gave us directions.",
+                    "acceptable_answers": [
+                      "The man who gave us directions was very helpful."
+                    ],
+                    "hints": [
+                      "Use 'who' to refer to 'the man'."
+                    ]
+                  },
+                  {
+                    "question": "Fill in the blank: This is the house ___ I was born.",
+                    "acceptable_answers": [
+                      "where"
+                    ],
+                    "hints": [
+                      "Use a relative pronoun that refers to a place."
+                    ]
+                  },
+                  {
+                    "question": "Identify if the relative clause is defining or non-defining: My brother, who lives in Pokhara, is a doctor.",
+                    "acceptable_answers": [
+                      "Non-defining"
+                    ],
+                    "hints": [
+                      "The clause is separated by commas, indicating it provides extra information, not essential information to identify the brother."
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Conditionals",
+            "concepts": [
+              {
+                "name": "Types of Conditional Sentences",
+                "summary": "Conditional sentences (or 'if' clauses) express a condition and its result. There are four main types: Zero (for general truths), First (for real future possibilities), Second (for hypothetical or unreal present/future situations), and Third (for unreal past situations).",
+                "steps": [
+                  "Learn the structure and use of the Zero Conditional (If + present simple, ... present simple).",
+                  "Learn the structure and use of the First Conditional (If + present simple, ... will + base verb).",
+                  "Learn the structure and use of the Second Conditional (If + past simple, ... would + base verb).",
+                  "Learn the structure and use of the Third Conditional (If + past perfect, ... would have + past participle).",
+                  "Practice completing conditional sentences with the correct verb forms."
+                ],
+                "questions": [
+                  {
+                    "question": "Complete the sentence: If it rains, I ___ (stay) at home.",
+                    "acceptable_answers": [
+                      "will stay"
+                    ],
+                    "hints": [
+                      "This is a First Conditional sentence, describing a real possibility in the future."
+                    ]
+                  },
+                  {
+                    "question": "Complete the sentence: If I were you, I ___ (study) harder.",
+                    "acceptable_answers": [
+                      "would study"
+                    ],
+                    "hints": [
+                      "This is a Second Conditional sentence, giving hypothetical advice."
+                    ]
+                  },
+                  {
+                    "question": "Complete the sentence: If she had known about the meeting, she ___ (attend) it.",
+                    "acceptable_answers": [
+                      "would have attended"
+                    ],
+                    "hints": [
+                      "This is a Third Conditional sentence, talking about an unreal situation in the past."
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Reported Speech",
+            "concepts": [
+              {
+                "name": "Direct and Indirect Speech",
+                "summary": "Reported speech (or indirect speech) is used to communicate what someone else has said without quoting them directly. This involves changing tenses, pronouns, adverbs of time and place, and sentence structure (e.g., from interrogative to assertive). Mastering reported speech is crucial for clear communication in both writing and speaking.",
+                "steps": [
+                  "Understand the difference between direct speech (quoting) and indirect speech (reporting).",
+                  "Learn the rules for changing tenses (e.g., present simple to past simple).",
+                  "Study the changes required for pronouns and possessive adjectives (e.g., 'I' to 'he/she').",
+                  "Learn how to change adverbs of time and place (e.g., 'now' to 'then', 'here' to 'there').",
+                  "Practice converting statements, questions (Wh- and Yes/No), commands, and exclamations."
+                ],
+                "questions": [
+                  {
+                    "question": "Change the following sentence into indirect speech: She said, 'I am reading a book now.'",
+                    "acceptable_answers": [
+                      "She said that she was reading a book then."
+                    ],
+                    "hints": [
+                      "Change the tense to the past continuous.",
+                      "Change the pronoun 'I' and the adverb 'now'."
+                    ]
+                  },
+                  {
+                    "question": "Change into indirect speech: He asked me, 'Do you like coffee?'",
+                    "acceptable_answers": [
+                      "He asked me if I liked coffee.",
+                      "He asked me whether I liked coffee."
+                    ],
+                    "hints": [
+                      "Use 'if' or 'whether' for Yes/No questions.",
+                      "Change the question into a statement and shift the tense to the past."
+                    ]
+                  },
+                  {
+                    "question": "Change into indirect speech: The teacher said to the students, 'Be quiet.'",
+                    "acceptable_answers": [
+                      "The teacher ordered the students to be quiet.",
+                      "The teacher told the students to be quiet."
+                    ],
+                    "hints": [
+                      "Use an infinitive ('to' + verb) for commands or requests.",
+                      "The reporting verb 'said to' can be changed to 'ordered', 'told', or 'requested'."
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+    

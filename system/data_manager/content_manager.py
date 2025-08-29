@@ -115,7 +115,21 @@ class ContentManager:
         """
         # [DEBUG] Uncomment for developer debugging
         # print("[DEBUG] Loading content from directory:", content_dir)
-        self.content_dir = content_dir
+        # Resolve content directory robustly: prefer provided path if valid; otherwise compute relative to project root
+        provided_path = content_dir
+        if not os.path.isabs(provided_path):
+            provided_path_abs = os.path.abspath(provided_path)
+        else:
+            provided_path_abs = provided_path
+        if os.path.isdir(provided_path_abs):
+            resolved_dir = provided_path_abs
+        else:
+            # Compute default relative to this file's location (project root -> scripts/data_collection/data/content)
+            this_dir = os.path.dirname(__file__)
+            project_root = os.path.abspath(os.path.join(this_dir, os.pardir, os.pardir))
+            candidate = os.path.join(project_root, "scripts", "data_collection", "data", "content")
+            resolved_dir = candidate if os.path.isdir(candidate) else provided_path_abs
+        self.content_dir = resolved_dir
         self.subjects = {}
         self._load_content()
         # [DEBUG] Uncomment for developer debugging
@@ -385,6 +399,21 @@ class ContentManager:
             return concepts
         return []
 
+    def get_subject_structure(self, subject: str) -> Optional[Dict[str, Any]]:
+        """
+        Return the exact data structure for a subject as loaded from content.
+        
+        This preserves the nested hierarchy of topics, subtopics, and concepts so
+        callers that need the full tree (e.g., UI browse) can render it directly.
+        
+        Args:
+            subject (str): Subject name
+        
+        Returns:
+            Optional[Dict[str, Any]]: The subject dictionary or None if not found
+        """
+        return self.get_subject(subject)
+
     def suggest_next_concept(self, username: str) -> Optional[Dict[str, Any]]:
         """
         Suggest the next concept for a user to study based on their progress.
@@ -596,6 +625,124 @@ class ContentManager:
                 if all(word in question.lower() for word in keywords):
                     return True
         return False
+
+    def list_browseable_topics(self, subject: str) -> List[Dict[str, Any]]:
+        """
+        Produce a flattened list of browseable topic entries for a subject.
+
+        Each entry represents either a top-level topic or a nested subtopic
+        path that actually contains concepts (directly or nested). This helps
+        when content extraction placed many subtopics under a single topic.
+
+        Args:
+            subject (str): Subject name
+
+        Returns:
+            List[Dict[str, Any]]: Entries with keys:
+              - label: display string (e.g., "Topic > Subtopic > Nested")
+              - topic: top-level topic name
+              - subtopic_path: list[str] path to nested subtopic (may be empty)
+        """
+        subject_content = self.get_subject(subject)
+        if not subject_content:
+            return []
+
+        entries: List[Dict[str, Any]] = []
+
+        def subtopic_has_concepts(node: Dict[str, Any]) -> bool:
+            if node.get("concepts"):
+                return True
+            for child in node.get("subtopics", []):
+                if subtopic_has_concepts(child):
+                    return True
+            return False
+
+        def add_entries_for_subtopics(topic_name: str, subtopics: List[Dict[str, Any]], path_prefix: List[str]):
+            for st in subtopics or []:
+                current_path = path_prefix + [st.get("name", "")] if st.get("name") else path_prefix
+                if subtopic_has_concepts(st):
+                    entries.append({
+                        "label": " > ".join([topic_name] + current_path),
+                        "topic": topic_name,
+                        "subtopic_path": current_path,
+                    })
+                # Recurse to nested
+                add_entries_for_subtopics(topic_name, st.get("subtopics", []), current_path)
+
+        for topic in subject_content.get("topics", []):
+            topic_name = topic.get("name", "")
+            # If topic or any of its subtopics have concepts, include an entry for the topic root
+            if topic.get("concepts") or subtopic_has_concepts({"subtopics": topic.get("subtopics", [])}):
+                entries.append({
+                    "label": topic_name,
+                    "topic": topic_name,
+                    "subtopic_path": [],
+                })
+            # Also include each nested subtopic path with content as its own entry
+            add_entries_for_subtopics(topic_name, topic.get("subtopics", []), [])
+
+        # Deduplicate by (topic, tuple(path)) while keeping first label
+        seen = set()
+        deduped: List[Dict[str, Any]] = []
+        for e in entries:
+            key = (e["topic"], tuple(e["subtopic_path"]))
+            if key in seen:
+                continue
+            seen.add(key)
+            deduped.append(e)
+
+        return deduped
+
+    def get_concepts_at_path(self, subject: str, topic_name: str, subtopic_path: List[str]) -> List[Dict[str, Any]]:
+        """
+        Return concepts at a specific nested path within a topic.
+
+        If subtopic_path is empty, behaves like get_all_concepts for this topic.
+        Otherwise, finds the subtopic by walking the path and returns concepts
+        directly under it plus any nested concepts.
+
+        Args:
+            subject (str): Subject name
+            topic_name (str): Top-level topic name
+            subtopic_path (List[str]): List of subtopic names representing the path
+
+        Returns:
+            List[Dict[str, Any]]: Concepts at the path (including nested)
+        """
+        topic = self.get_topic(subject, topic_name)
+        if not topic:
+            return []
+
+        def collect_concepts(node: Dict[str, Any]) -> List[Dict[str, Any]]:
+            concepts: List[Dict[str, Any]] = []
+            concepts.extend(node.get("concepts", []))
+            for st in node.get("subtopics", []):
+                concepts.extend(collect_concepts(st))
+            return concepts
+
+        if not subtopic_path:
+            # Topic-wide concepts including nested
+            concepts: List[Dict[str, Any]] = []
+            if "concepts" in topic:
+                concepts.extend(topic["concepts"])
+            for st in topic.get("subtopics", []):
+                concepts.extend(collect_concepts(st))
+            return concepts
+
+        # Walk down the path
+        current: Optional[Dict[str, Any]] = {"subtopics": topic.get("subtopics", [])}
+        for name in subtopic_path:
+            if not current:
+                return []
+            next_node = None
+            for st in current.get("subtopics", []):
+                if st.get("name") == name:
+                    next_node = st
+                    break
+            current = next_node
+        if not current:
+            return []
+        return collect_concepts(current)
 
     def get_default_context(self) -> str:
         """

@@ -91,6 +91,39 @@ class RAGRetrievalEngine:
             # Placeholder for Phi 1.5 embeddings
             return self._generate_hash_embedding(text)
     
+    def _prepare_query_embeddings(self, embedding: Any) -> List[List[float]]:
+        """Normalize a single or batched embedding into the format Chroma expects.
+        
+        - If a 1D numpy array/list of floats is provided, wrap it as [[...]].
+        - If a 2D numpy array/list of lists is provided, return as [[...], [...]].
+        - Ensure all values are Python floats.
+        """
+        import numpy as _np
+        # Convert numpy arrays to lists
+        if isinstance(embedding, _np.ndarray):
+            if embedding.ndim == 1:
+                return [[float(x) for x in embedding.tolist()]]
+            if embedding.ndim == 2:
+                return [[float(x) for x in row.tolist()] for row in embedding]
+        # Python list inputs
+        if isinstance(embedding, list):
+            if len(embedding) == 0:
+                return [[]]
+            first = embedding[0]
+            # Already batched: [[...], [...]]
+            if isinstance(first, (list, tuple, _np.ndarray)):
+                return [[float(x) for x in (row.tolist() if isinstance(row, _np.ndarray) else row)] for row in embedding]
+            # Single vector: [...]
+            return [[float(x) for x in embedding]]
+        # Fallback: try to cast to list and wrap
+        try:
+            as_list = list(embedding)
+            return [[float(x) for x in as_list]]
+        except Exception:
+            # Last resort: stringify and hash-embed to avoid crashing
+            vec = self._generate_hash_embedding(str(embedding))
+            return [[float(x) for x in vec.tolist()]]
+    
     def _generate_hash_embedding(self, text: str) -> np.ndarray:
         """Generate 32-dimensional hash-based embedding."""
         import hashlib
@@ -165,7 +198,7 @@ class RAGRetrievalEngine:
                     
                     # Perform vector search
                     results = collection.query(
-                        query_embeddings=[query_embedding.tolist()],
+                        query_embeddings=self._prepare_query_embeddings(query_embedding),
                         n_results=n_results,
                         include=['documents', 'metadatas', 'distances']
                     )
@@ -222,7 +255,7 @@ class RAGRetrievalEngine:
             
             # Get sample content for overview
             sample_results = collection.query(
-                query_embeddings=[np.zeros(32).tolist()],  # Dummy query
+                query_embeddings=self._prepare_query_embeddings(np.zeros(32, dtype=np.float32)),  # Dummy query
                 n_results=min(5, count)
             )
             
@@ -308,12 +341,15 @@ class RAGRetrievalEngine:
             for collection_name, collection in self.collections.items():
                 if "grade_10" in collection_name:  # Only text collections
                     try:
+                        logger.debug(f"RAG: querying collection '{collection_name}' for '{query}'")
                         # Query the collection
                         results = collection.query(
-                            query_embeddings=[query_embedding.tolist()],
+                            query_embeddings=self._prepare_query_embeddings(query_embedding),
                             n_results=max_results,
                             include=['documents', 'metadatas', 'distances']
                         )
+                        hit_count = len(results['documents'][0]) if results.get('documents') and results['documents'] and results['documents'][0] else 0
+                        logger.debug(f"RAG: '{collection_name}' vector hits: {hit_count}")
                         
                         if results['documents']:
                             for i, doc in enumerate(results['documents'][0]):
@@ -324,6 +360,19 @@ class RAGRetrievalEngine:
                                     'collection': collection_name
                                 }
                                 all_results.append(result)
+                        
+                        # If no vector hits here, try keyword fallback per collection
+                        if hit_count == 0:
+                            fallback = self._keyword_fallback_search(collection, query, max_results=max_results)
+                            logger.debug(f"RAG: '{collection_name}' keyword-fallback hits: {len(fallback)}")
+                            for f in fallback:
+                                f['collection'] = collection_name
+                                all_results.append({
+                                    'content': f['content'],
+                                    'metadata': f.get('metadata', {}),
+                                    'distance': f.get('distance', 0.75),
+                                    'collection': collection_name
+                                })
                                 
                     except Exception as e:
                         logger.warning(f"Error querying collection {collection_name}: {e}")
@@ -331,6 +380,10 @@ class RAGRetrievalEngine:
             
             # Sort by distance (lower is better) and take top results
             all_results.sort(key=lambda x: x['distance'])
+            # Backstop: if nothing found (or distances missing), try a lenient include
+            if not all_results:
+                logger.info("RAG: no results from vector or keyword fallback across collections")
+                return {'chunks': [], 'total_found': 0, 'query': query}
             top_results = all_results[:max_results]
             
             # Convert to chunks format
@@ -340,9 +393,11 @@ class RAGRetrievalEngine:
                     'content': result['content'],
                     'metadata': result['metadata'],
                     'source': result['collection'],
+                    'distance': result['distance'],
                     'relevance_score': 1.0 - result['distance']  # Convert distance to relevance
                 }
                 chunks.append(chunk)
+            logger.debug(f"RAG: returning {len(chunks)} chunks (max_results={max_results})")
             
             return {
                 'chunks': chunks,
@@ -379,3 +434,102 @@ class RAGRetrievalEngine:
         except Exception as e:
             logger.error(f"Error getting statistics: {e}")
             return {"error": str(e)} 
+
+    def _keyword_fallback_search(self, collection, query: str, max_results: int) -> List[Dict]:
+        """Data-driven fallback using simple BM25-style scoring without hardcoded synonyms."""
+        import math
+        import re
+        try:
+            def _tokenize(text: str) -> List[str]:
+                text = text.lower()
+                text = re.sub(r"[^a-z0-9\s]", " ", text)
+                text = re.sub(r"\s+", " ", text).strip()
+                return text.split() if text else []
+            
+            def _normalize(tokens: List[str]) -> List[str]:
+                normalized = []
+                for t in tokens:
+                    if len(t) > 4 and t.endswith("ing"):
+                        t = t[:-3]
+                    elif len(t) > 3 and t.endswith("ed"):
+                        t = t[:-2]
+                    elif len(t) > 3 and t.endswith("es"):
+                        t = t[:-2]
+                    elif len(t) > 2 and t.endswith("s"):
+                        t = t[:-1]
+                    normalized.append(t)
+                return normalized
+            
+            # Load docs
+            results = collection.get(include=['documents', 'metadatas'])
+            docs = results.get('documents') or []
+            metas = results.get('metadatas') or []
+            if not docs:
+                return []
+            
+            # Prepare tokens
+            doc_tokens: List[List[str]] = []
+            doc_lengths: List[int] = []
+            df: Dict[str, int] = {}
+            for doc in docs:
+                if not isinstance(doc, str):
+                    doc_tokens.append([])
+                    doc_lengths.append(0)
+                    continue
+                toks = _normalize(_tokenize(doc))
+                doc_tokens.append(toks)
+                doc_lengths.append(len(toks))
+                seen = set()
+                for tok in toks:
+                    if tok and tok not in seen:
+                        df[tok] = df.get(tok, 0) + 1
+                        seen.add(tok)
+            N = max(1, len(docs))
+            avgdl = sum(doc_lengths) / N
+            
+            # Query tokens
+            q_tokens = _normalize(_tokenize(query))
+            if not q_tokens:
+                return []
+            
+            # IDF
+            idf: Dict[str, float] = {}
+            for tok in set(q_tokens):
+                dfi = df.get(tok, 0)
+                idf[tok] = math.log((N - dfi + 0.5) / (dfi + 0.5) + 1.0)
+            
+            # BM25-lite scoring
+            k1 = 1.5
+            b = 0.75
+            scores: List[Tuple[float, int]] = []
+            for idx, toks in enumerate(doc_tokens):
+                if not toks:
+                    continue
+                score = 0.0
+                tf: Dict[str, int] = {}
+                for t in toks:
+                    tf[t] = tf.get(t, 0) + 1
+                dl = max(1, doc_lengths[idx])
+                for q in q_tokens:
+                    if q not in idf:
+                        continue
+                    f = tf.get(q, 0)
+                    if f == 0:
+                        continue
+                    denom = f + k1 * (1 - b + b * dl / avgdl)
+                    score += idf[q] * (f * (k1 + 1)) / denom
+                if score > 0:
+                    scores.append((score, idx))
+            scores.sort(key=lambda x: x[0], reverse=True)
+            top = scores[:max_results]
+            fallback: List[Dict] = []
+            for score, idx in top:
+                fallback.append({
+                    'content': docs[idx],
+                    'metadata': metas[idx] if idx < len(metas) and metas[idx] else {},
+                    'distance': max(0.0, 1.0 - min(score / 10.0, 1.0)),  # map score to pseudo-distance
+                })
+            return fallback
+        except Exception as e:
+            logger.warning(f"Keyword fallback failed: {e}")
+            return [] 

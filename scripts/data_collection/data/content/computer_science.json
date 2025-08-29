@@ -1,3 +1,4 @@
+
 {
     "subject": "Computer Science",
     "grade": 10,
@@ -98,211 +99,211 @@
                                         "Think about data transfer speed",
                                         "Consider how it affects network performance"
                                     ]
-                                },
+                                }
+                            ]
+                        },
+                        {
+                            "name": "Internet and Web Technologies",
+                            "summary": "The Internet is a global network of networks that connects millions of devices worldwide. It enables communication, information sharing, and access to various services. The World Wide Web (WWW) is a collection of interconnected documents and resources accessible via the Internet. Web technologies include browsers, servers, and protocols that enable access to web content. Key components include URLs (Uniform Resource Locators) for addressing resources, HTTP (Hypertext Transfer Protocol) for communication, HTML (Hypertext Markup Language) for content structure, and CSS (Cascading Style Sheets) for presentation. Web servers host websites and serve content to clients, while web browsers interpret and display web pages. Modern web technologies include JavaScript for interactivity, AJAX for asynchronous communication, and various frameworks for web development. Understanding web technologies is crucial for both using and developing web applications. The Internet also supports various services like email, file transfer, remote access, and streaming media. Security aspects like HTTPS, SSL/TLS, and secure authentication are essential for safe web browsing and transactions.",
+                            "steps": [
+                                "Understand Internet architecture and components",
+                                "Learn about web protocols and standards",
+                                "Study web development technologies",
+                                "Explore web security concepts",
+                                "Practice web browsing and development"
+                            ],
+                            "questions": [
                                 {
-                                    "name": "Internet and Web Technologies",
-                                    "summary": "The Internet is a global network of networks that connects millions of devices worldwide. It enables communication, information sharing, and access to various services. The World Wide Web (WWW) is a collection of interconnected documents and resources accessible via the Internet. Web technologies include browsers, servers, and protocols that enable access to web content. Key components include URLs (Uniform Resource Locators) for addressing resources, HTTP (Hypertext Transfer Protocol) for communication, HTML (Hypertext Markup Language) for content structure, and CSS (Cascading Style Sheets) for presentation. Web servers host websites and serve content to clients, while web browsers interpret and display web pages. Modern web technologies include JavaScript for interactivity, AJAX for asynchronous communication, and various frameworks for web development. Understanding web technologies is crucial for both using and developing web applications. The Internet also supports various services like email, file transfer, remote access, and streaming media. Security aspects like HTTPS, SSL/TLS, and secure authentication are essential for safe web browsing and transactions.",
-                                    "steps": [
-                                        "Understand Internet architecture and components",
-                                        "Learn about web protocols and standards",
-                                        "Study web development technologies",
-                                        "Explore web security concepts",
-                                        "Practice web browsing and development"
+                                    "question": "Explain the working of the World Wide Web. [5 marks]",
+                                    "acceptable_answers": [
+                                        "WWW working: 1) Uses client-server model, 2) Web browsers as clients request pages, 3) Web servers host and serve content, 4) HTTP protocol for communication, 5) HTML for content structure, 6) URLs for resource addressing"
                                     ],
-                                    "questions": [
-                                        {
-                                            "question": "Explain the working of the World Wide Web. [5 marks]",
-                                            "acceptable_answers": [
-                                                "WWW working: 1) Uses client-server model, 2) Web browsers as clients request pages, 3) Web servers host and serve content, 4) HTTP protocol for communication, 5) HTML for content structure, 6) URLs for resource addressing"
-                                            ],
-                                            "hints": [
-                                                "Consider the request-response cycle",
-                                                "Think about how web pages are delivered"
-                                            ]
-                                        },
-                                        {
-                                            "question": "What is the difference between Internet and World Wide Web? [4 marks]",
-                                            "acceptable_answers": [
-                                                "Internet: 1) Global network of networks, 2) Infrastructure for communication, 3) Supports various services, 4) Physical and logical connections. WWW: 1) Collection of web pages, 2) Service running on Internet, 3) Uses HTTP protocol, 4) Accessed through browsers"
-                                            ],
-                                            "hints": [
-                                                "Consider their scope and purpose",
-                                                "Think about their relationship"
-                                            ]
-                                        },
-                                        {
-                                            "question": "Explain the components of a URL with examples. [5 marks]",
-                                            "acceptable_answers": [
-                                                "URL components: 1) Protocol (http/https), 2) Domain name (www.example.com), 3) Path (/page), 4) Parameters (?id=123), 5) Fragment (#section). Example: https://www.example.com/page?id=123#section"
-                                            ],
-                                            "hints": [
-                                                "Consider how URLs are structured",
-                                                "Think about different parts of a web address"
-                                            ]
-                                        },
-                                        {
-                                            "question": "What are the main features of HTML5? [4 marks]",
-                                            "acceptable_answers": [
-                                                "HTML5 features: 1) Semantic elements (header, nav, article), 2) Multimedia support (audio, video), 3) Canvas for graphics, 4) Local storage, 5) Form improvements, 6) Mobile-friendly design"
-                                            ],
-                                            "hints": [
-                                                "Consider modern web requirements",
-                                                "Think about multimedia and interactivity"
-                                            ]
-                                        },
-                                        {
-                                            "question": "Explain the role of CSS in web development. [5 marks]",
-                                            "acceptable_answers": [
-                                                "CSS role: 1) Controls page layout and design, 2) Separates content from presentation, 3) Enables responsive design, 4) Provides consistent styling, 5) Supports animations and transitions, 6) Improves user experience"
-                                            ],
-                                            "hints": [
-                                                "Consider visual aspects of websites",
-                                                "Think about design flexibility"
-                                            ]
-                                        },
-                                        {
-                                            "question": "What is JavaScript and how is it used in web development? [4 marks]",
-                                            "acceptable_answers": [
-                                                "JavaScript: 1) Client-side scripting language, 2) Adds interactivity to web pages, 3) Handles form validation, 4) Creates dynamic content, 5) Supports AJAX for asynchronous communication"
-                                            ],
-                                            "hints": [
-                                                "Consider user interaction",
-                                                "Think about dynamic web features"
-                                            ]
-                                        },
-                                        {
-                                            "question": "Explain the concept of responsive web design. [5 marks]",
-                                            "acceptable_answers": [
-                                                "Responsive design: 1) Adapts to different screen sizes, 2) Uses flexible layouts, 3) Implements media queries, 4) Optimizes images and content, 5) Improves mobile experience, 6) Follows mobile-first approach"
-                                            ],
-                                            "hints": [
-                                                "Consider different devices",
-                                                "Think about user experience"
-                                            ]
-                                        },
-                                        {
-                                            "question": "What are web cookies and how do they work? [4 marks]",
-                                            "acceptable_answers": [
-                                                "Cookies: 1) Small text files stored on user's computer, 2) Used for session management, 3) Store user preferences, 4) Enable tracking and personalization, 5) Have security and privacy implications"
-                                            ],
-                                            "hints": [
-                                                "Consider user data storage",
-                                                "Think about website functionality"
-                                            ]
-                                        },
-                                        {
-                                            "question": "Explain the working of search engines. [5 marks]",
-                                            "acceptable_answers": [
-                                                "Search engine working: 1) Web crawling to discover pages, 2) Indexing of content, 3) Ranking algorithms, 4) Query processing, 5) Result presentation, 6) Continuous updates and improvements"
-                                            ],
-                                            "hints": [
-                                                "Consider how pages are found",
-                                                "Think about result relevance"
-                                            ]
-                                        },
-                                        {
-                                            "question": "What are the common web security threats and their prevention? [5 marks]",
-                                            "acceptable_answers": [
-                                                "Threats: 1) Cross-site scripting (XSS), 2) SQL injection, 3) Cross-site request forgery (CSRF), 4) Phishing attacks, 5) Man-in-the-middle attacks. Prevention: 1) Input validation, 2) Secure coding practices, 3) HTTPS implementation, 4) Regular updates, 5) Security headers"
-                                            ],
-                                            "hints": [
-                                                "Consider different attack types",
-                                                "Think about security measures"
-                                            ]
-                                        }
+                                    "hints": [
+                                        "Consider the request-response cycle",
+                                        "Think about how web pages are delivered"
                                     ]
                                 },
                                 {
-                                    "name": "Network Security",
-                                    "summary": "Network security involves protecting networks and data from unauthorized access, attacks, and damage. It encompasses various measures and practices to ensure the confidentiality, integrity, and availability of network resources. Key concepts include authentication, authorization, encryption, firewalls, and intrusion detection systems. Common security threats include malware, phishing, denial of service attacks, and man-in-the-middle attacks. Security measures include using strong passwords, implementing firewalls, encrypting data, and maintaining regular backups. Network administrators must stay updated with security patches and best practices. Understanding security concepts is crucial for both network administration and safe internet usage. Security protocols like SSL/TLS ensure secure communication, while VPNs provide secure remote access. Regular security audits and monitoring help identify and prevent potential threats.",
-                                    "steps": [
-                                        "Learn about security threats and vulnerabilities",
-                                        "Study security measures and best practices",
-                                        "Understand encryption and authentication",
-                                        "Explore security protocols and tools",
-                                        "Practice security implementation and monitoring"
+                                    "question": "What is the difference between Internet and World Wide Web? [4 marks]",
+                                    "acceptable_answers": [
+                                        "Internet: 1) Global network of networks, 2) Infrastructure for communication, 3) Supports various services, 4) Physical and logical connections. WWW: 1) Collection of web pages, 2) Service running on Internet, 3) Uses HTTP protocol, 4) Accessed through browsers"
                                     ],
-                                    "questions": [
-                                        {
-                                            "question": "What are the main types of network security threats? [5 marks]",
-                                            "acceptable_answers": [
-                                                "Main threats: 1) Malware (viruses, worms, trojans), 2) Phishing attacks, 3) Denial of Service (DoS), 4) Man-in-the-middle attacks, 5) SQL injection, 6) Cross-site scripting (XSS), 7) Password attacks"
-                                            ],
-                                            "hints": [
-                                                "Consider different attack methods",
-                                                "Think about potential vulnerabilities"
-                                            ]
-                                        },
-                                        {
-                                            "question": "Explain the concept of encryption in network security. [4 marks]",
-                                            "acceptable_answers": [
-                                                "Encryption: 1) Converts data into unreadable format, 2) Uses algorithms and keys, 3) Ensures data confidentiality, 4) Types include symmetric and asymmetric, 5) Essential for secure communication"
-                                            ],
-                                            "hints": [
-                                                "Consider data protection",
-                                                "Think about secure transmission"
-                                            ]
-                                        },
-                                        {
-                                            "question": "What is a firewall and how does it work? [5 marks]",
-                                            "acceptable_answers": [
-                                                "Firewall: 1) Network security device, 2) Monitors and controls traffic, 3) Uses rules to allow/block packets, 4) Can be hardware or software, 5) Protects against unauthorized access, 6) Implements security policies"
-                                            ],
-                                            "hints": [
-                                                "Consider traffic control",
-                                                "Think about security rules"
-                                            ]
-                                        },
-                                        {
-                                            "question": "Explain the importance of strong passwords. [4 marks]",
-                                            "acceptable_answers": [
-                                                "Strong passwords: 1) Prevent unauthorized access, 2) Should be complex and unique, 3) Include mix of characters, 4) Regular changes required, 5) Part of security best practices"
-                                            ],
-                                            "hints": [
-                                                "Consider password strength",
-                                                "Think about security practices"
-                                            ]
-                                        },
-                                        {
-                                            "question": "What is a VPN and how does it enhance security? [5 marks]",
-                                            "acceptable_answers": [
-                                                "VPN: 1) Creates secure tunnel for data, 2) Encrypts all traffic, 3) Hides IP address, 4) Enables secure remote access, 5) Protects against eavesdropping, 6) Bypasses geographical restrictions"
-                                            ],
-                                            "hints": [
-                                                "Consider secure remote access",
-                                                "Think about data protection"
-                                            ]
-                                        },
-                                        {
-                                            "question": "Explain the concept of two-factor authentication. [4 marks]",
-                                            "acceptable_answers": [
-                                                "Two-factor authentication: 1) Requires two verification methods, 2) Combines password with second factor, 3) Uses SMS, email, or authenticator apps, 4) Enhances security significantly, 5) Prevents unauthorized access"
-                                            ],
-                                            "hints": [
-                                                "Consider multiple verification steps",
-                                                "Think about security layers"
-                                            ]
-                                        },
-                                        {
-                                            "question": "What are the best practices for network security? [5 marks]",
-                                            "acceptable_answers": [
-                                                "Best practices: 1) Regular updates and patches, 2) Strong password policies, 3) Employee training, 4) Regular backups, 5) Security monitoring, 6) Access control, 7) Incident response plan"
-                                            ],
-                                            "hints": [
-                                                "Consider comprehensive security",
-                                                "Think about preventive measures"
-                                            ]
-                                        },
-                                        {
-                                            "question": "Explain the concept of intrusion detection systems. [4 marks]",
-                                            "acceptable_answers": [
-                                                "IDS: 1) Monitors network traffic, 2) Detects suspicious activities, 3) Alerts administrators, 4) Can be network or host-based, 5) Helps prevent security breaches"
-                                            ],
-                                            "hints": [
-                                                "Consider monitoring and detection",
-                                                "Think about security alerts"
-                                            ]
-                                        }
+                                    "hints": [
+                                        "Consider their scope and purpose",
+                                        "Think about their relationship"
+                                    ]
+                                },
+                                {
+                                    "question": "Explain the components of a URL with examples. [5 marks]",
+                                    "acceptable_answers": [
+                                        "URL components: 1) Protocol (http/https), 2) Domain name (www.example.com), 3) Path (/page), 4) Parameters (?id=123), 5) Fragment (#section). Example: https://www.example.com/page?id=123#section"
+                                    ],
+                                    "hints": [
+                                        "Consider how URLs are structured",
+                                        "Think about different parts of a web address"
+                                    ]
+                                },
+                                {
+                                    "question": "What are the main features of HTML5? [4 marks]",
+                                    "acceptable_answers": [
+                                        "HTML5 features: 1) Semantic elements (header, nav, article), 2) Multimedia support (audio, video), 3) Canvas for graphics, 4) Local storage, 5) Form improvements, 6) Mobile-friendly design"
+                                    ],
+                                    "hints": [
+                                        "Consider modern web requirements",
+                                        "Think about multimedia and interactivity"
+                                    ]
+                                },
+                                {
+                                    "question": "Explain the role of CSS in web development. [5 marks]",
+                                    "acceptable_answers": [
+                                        "CSS role: 1) Controls page layout and design, 2) Separates content from presentation, 3) Enables responsive design, 4) Provides consistent styling, 5) Supports animations and transitions, 6) Improves user experience"
+                                    ],
+                                    "hints": [
+                                        "Consider visual aspects of websites",
+                                        "Think about design flexibility"
+                                    ]
+                                },
+                                {
+                                    "question": "What is JavaScript and how is it used in web development? [4 marks]",
+                                    "acceptable_answers": [
+                                        "JavaScript: 1) Client-side scripting language, 2) Adds interactivity to web pages, 3) Handles form validation, 4) Creates dynamic content, 5) Supports AJAX for asynchronous communication"
+                                    ],
+                                    "hints": [
+                                        "Consider user interaction",
+                                        "Think about dynamic web features"
+                                    ]
+                                },
+                                {
+                                    "question": "Explain the concept of responsive web design. [5 marks]",
+                                    "acceptable_answers": [
+                                        "Responsive design: 1) Adapts to different screen sizes, 2) Uses flexible layouts, 3) Implements media queries, 4) Optimizes images and content, 5) Improves mobile experience, 6) Follows mobile-first approach"
+                                    ],
+                                    "hints": [
+                                        "Consider different devices",
+                                        "Think about user experience"
+                                    ]
+                                },
+                                {
+                                    "question": "What are web cookies and how do they work? [4 marks]",
+                                    "acceptable_answers": [
+                                        "Cookies: 1) Small text files stored on user's computer, 2) Used for session management, 3) Store user preferences, 4) Enable tracking and personalization, 5) Have security and privacy implications"
+                                    ],
+                                    "hints": [
+                                        "Consider user data storage",
+                                        "Think about website functionality"
+                                    ]
+                                },
+                                {
+                                    "question": "Explain the working of search engines. [5 marks]",
+                                    "acceptable_answers": [
+                                        "Search engine working: 1) Web crawling to discover pages, 2) Indexing of content, 3) Ranking algorithms, 4) Query processing, 5) Result presentation, 6) Continuous updates and improvements"
+                                    ],
+                                    "hints": [
+                                        "Consider how pages are found",
+                                        "Think about result relevance"
+                                    ]
+                                },
+                                {
+                                    "question": "What are the common web security threats and their prevention? [5 marks]",
+                                    "acceptable_answers": [
+                                        "Threats: 1) Cross-site scripting (XSS), 2) SQL injection, 3) Cross-site request forgery (CSRF), 4) Phishing attacks, 5) Man-in-the-middle attacks. Prevention: 1) Input validation, 2) Secure coding practices, 3) HTTPS implementation, 4) Regular updates, 5) Security headers"
+                                    ],
+                                    "hints": [
+                                        "Consider different attack types",
+                                        "Think about security measures"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "name": "Network Security",
+                            "summary": "Network security involves protecting networks and data from unauthorized access, attacks, and damage. It encompasses various measures and practices to ensure the confidentiality, integrity, and availability of network resources. Key concepts include authentication, authorization, encryption, firewalls, and intrusion detection systems. Common security threats include malware, phishing, denial of service attacks, and man-in-the-middle attacks. Security measures include using strong passwords, implementing firewalls, encrypting data, and maintaining regular backups. Network administrators must stay updated with security patches and best practices. Understanding security concepts is crucial for both network administration and safe internet usage. Security protocols like SSL/TLS ensure secure communication, while VPNs provide secure remote access. Regular security audits and monitoring help identify and prevent potential threats.",
+                            "steps": [
+                                "Learn about security threats and vulnerabilities",
+                                "Study security measures and best practices",
+                                "Understand encryption and authentication",
+                                "Explore security protocols and tools",
+                                "Practice security implementation and monitoring"
+                            ],
+                            "questions": [
+                                {
+                                    "question": "What are the main types of network security threats? [5 marks]",
+                                    "acceptable_answers": [
+                                        "Main threats: 1) Malware (viruses, worms, trojans), 2) Phishing attacks, 3) Denial of Service (DoS), 4) Man-in-the-middle attacks, 5) SQL injection, 6) Cross-site scripting (XSS), 7) Password attacks"
+                                    ],
+                                    "hints": [
+                                        "Consider different attack methods",
+                                        "Think about potential vulnerabilities"
+                                    ]
+                                },
+                                {
+                                    "question": "Explain the concept of encryption in network security. [4 marks]",
+                                    "acceptable_answers": [
+                                        "Encryption: 1) Converts data into unreadable format, 2) Uses algorithms and keys, 3) Ensures data confidentiality, 4) Types include symmetric and asymmetric, 5) Essential for secure communication"
+                                    ],
+                                    "hints": [
+                                        "Consider data protection",
+                                        "Think about secure transmission"
+                                    ]
+                                },
+                                {
+                                    "question": "What is a firewall and how does it work? [5 marks]",
+                                    "acceptable_answers": [
+                                        "Firewall: 1) Network security device, 2) Monitors and controls traffic, 3) Uses rules to allow/block packets, 4) Can be hardware or software, 5) Protects against unauthorized access, 6) Implements security policies"
+                                    ],
+                                    "hints": [
+                                        "Consider traffic control",
+                                        "Think about security rules"
+                                    ]
+                                },
+                                {
+                                    "question": "Explain the importance of strong passwords. [4 marks]",
+                                    "acceptable_answers": [
+                                        "Strong passwords: 1) Prevent unauthorized access, 2) Should be complex and unique, 3) Include mix of characters, 4) Regular changes required, 5) Part of security best practices"
+                                    ],
+                                    "hints": [
+                                        "Consider password strength",
+                                        "Think about security practices"
+                                    ]
+                                },
+                                {
+                                    "question": "What is a VPN and how does it enhance security? [5 marks]",
+                                    "acceptable_answers": [
+                                        "VPN: 1) Creates secure tunnel for data, 2) Encrypts all traffic, 3) Hides IP address, 4) Enables secure remote access, 5) Protects against eavesdropping, 6) Bypasses geographical restrictions"
+                                    ],
+                                    "hints": [
+                                        "Consider secure remote access",
+                                        "Think about data protection"
+                                    ]
+                                },
+                                {
+                                    "question": "Explain the concept of two-factor authentication. [4 marks]",
+                                    "acceptable_answers": [
+                                        "Two-factor authentication: 1) Requires two verification methods, 2) Combines password with second factor, 3) Uses SMS, email, or authenticator apps, 4) Enhances security significantly, 5) Prevents unauthorized access"
+                                    ],
+                                    "hints": [
+                                        "Consider multiple verification steps",
+                                        "Think about security layers"
+                                    ]
+                                },
+                                {
+                                    "question": "What are the best practices for network security? [5 marks]",
+                                    "acceptable_answers": [
+                                        "Best practices: 1) Regular updates and patches, 2) Strong password policies, 3) Employee training, 4) Regular backups, 5) Security monitoring, 6) Access control, 7) Incident response plan"
+                                    ],
+                                    "hints": [
+                                        "Consider comprehensive security",
+                                        "Think about preventive measures"
+                                    ]
+                                },
+                                {
+                                    "question": "Explain the concept of intrusion detection systems. [4 marks]",
+                                    "acceptable_answers": [
+                                        "IDS: 1) Monitors network traffic, 2) Detects suspicious activities, 3) Alerts administrators, 4) Can be network or host-based, 5) Helps prevent security breaches"
+                                    ],
+                                    "hints": [
+                                        "Consider monitoring and detection",
+                                        "Think about security alerts"
                                     ]
                                 }
                             ]
@@ -686,79 +687,86 @@
                                     ]
                                 }
                             ]
-                        },
+                        }
+                    ]
+                },
+                {
+                    "name": "QBASIC Programming",
+                    "concepts": [
                         {
-                            "name": "QBASIC Programming",
-                            "concepts": [
+                            "name": "QBASIC Fundamentals",
+                            "summary": "QBASIC is a simple programming language designed for beginners, widely used in Nepali schools for teaching programming concepts. It uses English-like commands and provides an integrated development environment. Key features include simple syntax, built-in graphics capabilities, and immediate feedback. QBASIC is particularly useful for learning programming concepts and creating simple applications. The language includes commands for input/output operations, mathematical calculations, string manipulation, and graphics. Understanding QBASIC helps build a foundation for learning more advanced programming languages. The integrated development environment provides tools for editing, debugging, and running programs.",
+                            "steps": [
+                                "Learn QBASIC syntax and basic commands",
+                                "Practice input/output operations",
+                                "Study control structures (IF-THEN, FOR-NEXT, DO-LOOP)",
+                                "Learn about arrays and string manipulation",
+                                "Practice graphics and sound commands",
+                                "Create simple applications like calculators and games"
+                            ],
+                            "questions": [
                                 {
-                                    "name": "QBASIC Fundamentals",
-                                    "summary": "QBASIC is a simple programming language designed for beginners, widely used in Nepali schools for teaching programming concepts. It uses English-like commands and provides an integrated development environment. Key features include simple syntax, built-in graphics capabilities, and immediate feedback. QBASIC is particularly useful for learning programming concepts and creating simple applications. The language includes commands for input/output operations, mathematical calculations, string manipulation, and graphics. Understanding QBASIC helps build a foundation for learning more advanced programming languages. The integrated development environment provides tools for editing, debugging, and running programs.",
-                                    "steps": [
-                                        "Learn QBASIC syntax and basic commands",
-                                        "Practice input/output operations",
-                                        "Study control structures (IF-THEN, FOR-NEXT, DO-LOOP)",
-                                        "Learn about arrays and string manipulation",
-                                        "Practice graphics and sound commands",
-                                        "Create simple applications like calculators and games"
+                                    "question": "Write a QBASIC program to create a simple calculator that can perform basic arithmetic operations. [5 marks]",
+                                    "acceptable_answers": [
+                                        "CLS\nPRINT \"Simple Calculator\"\nPRINT \"1. Addition\"\nPRINT \"2. Subtraction\"\nPRINT \"3. Multiplication\"\nPRINT \"4. Division\"\nINPUT \"Enter your choice (1-4): \"; choice\nINPUT \"Enter first number: \"; a\nINPUT \"Enter second number: \"; b\nSELECT CASE choice\n    CASE 1\n        result = a + b\n        PRINT a; \" + \"; b; \" = \"; result\n    CASE 2\n        result = a - b\n        PRINT a; \" - \"; b; \" = \"; result\n    CASE 3\n        result = a * b\n        PRINT a; \" * \"; b; \" = \"; result\n    CASE 4\n        IF b <> 0 THEN\n            result = a / b\n            PRINT a; \" / \"; b; \" = \"; result\n        ELSE\n            PRINT \"Error: Division by zero\"\n        END IF\n    CASE ELSE\n        PRINT \"Invalid choice\"\nEND SELECT\nEND"
                                     ],
-                                    "questions": [
-                                        {
-                                            "question": "Write a QBASIC program to create a simple calculator that can perform basic arithmetic operations. [5 marks]",
-                                            "acceptable_answers": [
-                                                "CLS\nPRINT \"Simple Calculator\"\nPRINT \"1. Addition\"\nPRINT \"2. Subtraction\"\nPRINT \"3. Multiplication\"\nPRINT \"4. Division\"\nINPUT \"Enter your choice (1-4): \"; choice\nINPUT \"Enter first number: \"; a\nINPUT \"Enter second number: \"; b\nSELECT CASE choice\n    CASE 1\n        result = a + b\n        PRINT a; \" + \"; b; \" = \"; result\n    CASE 2\n        result = a - b\n        PRINT a; \" - \"; b; \" = \"; result\n    CASE 3\n        result = a * b\n        PRINT a; \" * \"; b; \" = \"; result\n    CASE 4\n        IF b <> 0 THEN\n            result = a / b\n            PRINT a; \" / \"; b; \" = \"; result\n        ELSE\n            PRINT \"Error: Division by zero\"\n        END IF\n    CASE ELSE\n        PRINT \"Invalid choice\"\nEND SELECT\nEND"
-                                            ],
-                                            "hints": [
-                                                "Use SELECT CASE for different operations",
-                                                "Handle division by zero error",
-                                                "Use proper input/output statements"
-                                            ]
-                                        },
-                                        {
-                                            "question": "Write a QBASIC program to create a student record management system that can store and display student information. [5 marks]",
-                                            "acceptable_answers": [
-                                                "CLS\nDIM name$(10), class(10), roll(10)\nPRINT \"Student Record Management System\"\nPRINT \"1. Add Record\"\nPRINT \"2. Display Records\"\nPRINT \"3. Exit\"\nDO\n    INPUT \"Enter your choice (1-3): \"; choice\n    SELECT CASE choice\n        CASE 1\n            INPUT \"Enter student name: \"; name$(i)\n            INPUT \"Enter class: \"; class(i)\n            INPUT \"Enter roll number: \"; roll(i)\n            i = i + 1\n        CASE 2\n            PRINT \"\\nStudent Records:\"\n            FOR j = 0 TO i - 1\n                PRINT \"Name: \"; name$(j)\n                PRINT \"Class: \"; class(j)\n                PRINT \"Roll: \"; roll(j)\n                PRINT \"-------------------\"\n            NEXT j\n        CASE 3\n            EXIT DO\n        CASE ELSE\n            PRINT \"Invalid choice\"\n    END SELECT\nLOOP\nEND"
-                                            ],
-                                            "hints": [
-                                                "Use arrays to store multiple records",
-                                                "Implement a menu-driven interface",
-                                                "Use proper formatting for display"
-                                            ]
-                                        },
-                                        {
-                                            "question": "Write a QBASIC program to create a simple quiz game with multiple-choice questions. [5 marks]",
-                                            "acceptable_answers": [
-                                                "CLS\nDIM question$(5), option$(5, 4), answer(5)\nscore = 0\n' Set questions and answers\nquestion$(1) = \"What is the capital of Nepal?\"\noption$(1, 1) = \"A. Kathmandu\"\noption$(1, 2) = \"B. Pokhara\"\noption$(1, 3) = \"C. Lalitpur\"\noption$(1, 4) = \"D. Bhaktapur\"\nanswer(1) = 1\n' Add more questions here\nFOR i = 1 TO 5\n    CLS\n    PRINT \"Question \"; i\n    PRINT question$(i)\n    FOR j = 1 TO 4\n        PRINT option$(i, j)\n    NEXT j\n    INPUT \"Enter your answer (1-4): \"; userAnswer\n    IF userAnswer = answer(i) THEN\n        score = score + 1\n        PRINT \"Correct!\"\n    ELSE\n        PRINT \"Wrong!\"\n    END IF\n    SLEEP 2\nNEXT i\nPRINT \"\\nYour final score: \"; score; \" out of 5\"\nEND"
-                                            ],
-                                            "hints": [
-                                                "Use arrays to store questions and options",
-                                                "Implement scoring system",
-                                                "Add proper feedback for answers"
-                                            ]
-                                        },
-                                        {
-                                            "question": "Write a QBASIC program to create a simple graphics animation. [4 marks]",
-                                            "acceptable_answers": [
-                                                "CLS\nSCREEN 1\nCOLOR 1\nFOR i = 1 TO 10\n    CIRCLE (160, 100), i * 10\n    SLEEP 1\nNEXT i\nFOR i = 10 TO 1 STEP -1\n    CIRCLE (160, 100), i * 10\n    SLEEP 1\nNEXT i\nEND"
-                                            ],
-                                            "hints": [
-                                                "Use SCREEN statement for graphics mode",
-                                                "Use CIRCLE command for drawing",
-                                                "Add SLEEP for animation effect"
-                                            ]
-                                        }
+                                    "hints": [
+                                        "Use SELECT CASE for different operations",
+                                        "Handle division by zero error",
+                                        "Use proper input/output statements"
+                                    ]
+                                },
+                                {
+                                    "question": "Write a QBASIC program to create a student record management system that can store and display student information. [5 marks]",
+                                    "acceptable_answers": [
+                                        "CLS\nDIM name$(10), class(10), roll(10)\nPRINT \"Student Record Management System\"\nPRINT \"1. Add Record\"\nPRINT \"2. Display Records\"\nPRINT \"3. Exit\"\nDO\n    INPUT \"Enter your choice (1-3): \"; choice\n    SELECT CASE choice\n        CASE 1\n            INPUT \"Enter student name: \"; name$(i)\n            INPUT \"Enter class: \"; class(i)\n            INPUT \"Enter roll number: \"; roll(i)\n            i = i + 1\n        CASE 2\n            PRINT \"\\nStudent Records:\"\n            FOR j = 0 TO i - 1\n                PRINT \"Name: \"; name$(j)\n                PRINT \"Class: \"; class(j)\n                PRINT \"Roll: \"; roll(j)\n                PRINT \"-------------------\"\n            NEXT j\n        CASE 3\n            EXIT DO\n        CASE ELSE\n            PRINT \"Invalid choice\"\n    END SELECT\nLOOP\nEND"
+                                    ],
+                                    "hints": [
+                                        "Use arrays to store multiple records",
+                                        "Implement a menu-driven interface",
+                                        "Use proper formatting for display"
+                                    ]
+                                },
+                                {
+                                    "question": "Write a QBASIC program to create a simple quiz game with multiple-choice questions. [5 marks]",
+                                    "acceptable_answers": [
+                                        "CLS\nDIM question$(5), option$(5, 4), answer(5)\nscore = 0\n' Set questions and answers\nquestion$(1) = \"What is the capital of Nepal?\"\noption$(1, 1) = \"A. Kathmandu\"\noption$(1, 2) = \"B. Pokhara\"\noption$(1, 3) = \"C. Lalitpur\"\noption$(1, 4) = \"D. Bhaktapur\"\nanswer(1) = 1\n' Add more questions here\nFOR i = 1 TO 5\n    CLS\n    PRINT \"Question \"; i\n    PRINT question$(i)\n    FOR j = 1 TO 4\n        PRINT option$(i, j)\n    NEXT j\n    INPUT \"Enter your answer (1-4): \"; userAnswer\n    IF userAnswer = answer(i) THEN\n        score = score + 1\n        PRINT \"Correct!\"\n    ELSE\n        PRINT \"Wrong!\"\n    END IF\n    SLEEP 2\nNEXT i\nPRINT \"\\nYour final score: \"; score; \" out of 5\"\nEND"
+                                    ],
+                                    "hints": [
+                                        "Use arrays to store questions and options",
+                                        "Implement scoring system",
+                                        "Add proper feedback for answers"
+                                    ]
+                                },
+                                {
+                                    "question": "Write a QBASIC program to create a simple graphics animation. [4 marks]",
+                                    "acceptable_answers": [
+                                        "CLS\nSCREEN 1\nCOLOR 1\nFOR i = 1 TO 10\n    CIRCLE (160, 100), i * 10\n    SLEEP 1\nNEXT i\nFOR i = 10 TO 1 STEP -1\n    CIRCLE (160, 100), i * 10\n    SLEEP 1\nNEXT i\nEND"
+                                    ],
+                                    "hints": [
+                                        "Use SCREEN statement for graphics mode",
+                                        "Use CIRCLE command for drawing",
+                                        "Add SLEEP for animation effect"
                                     ]
                                 }
                             ]
-                        },
+                        }
+                    ]
+                },
+                {
+                    "name": "C Programming",
+                    "concepts": [
                         {
-                            "name": "C Programming",
-                            "summary": "C is a powerful programming language that provides low-level access to memory and hardware. It's widely used for system programming and developing applications. Key features include pointers, memory management, and structured programming. C supports various data types, operators, control structures, and functions. Understanding C programming is crucial for system-level programming and learning other languages. The language emphasizes efficiency and control over hardware resources. C programs are compiled into machine code for direct execution. The language includes features for file handling, dynamic memory allocation, and modular programming.",
+                            "name": "C Programming Fundamentals",
+                            "summary": "C is a powerful programming language widely used in Nepal for system programming and application development. It provides low-level access to memory and hardware, making it essential for understanding computer architecture. Key concepts include pointers, memory management, and structured programming. C is particularly important for Grade 10 students as it helps build strong programming fundamentals. The language emphasizes efficiency and control over hardware resources. Understanding C programming is crucial for system-level programming and learning other languages. C programs are compiled into machine code for direct execution, making them fast and efficient. The language includes features for file handling, dynamic memory allocation, and modular programming.",
                             "steps": [
-                                "Learn C syntax and structure",
-                                "Understand pointers and memory",
-                                "Practice writing C programs",
-                                "Study file handling",
-                                "Learn debugging techniques"
+                                "Learn C syntax and basic structure",
+                                "Understand variables, data types, and operators",
+                                "Master control structures (if-else, loops)",
+                                "Learn about functions and arrays",
+                                "Study pointers and memory management",
+                                "Practice file handling and structures",
+                                "Create complete applications"
                             ],
                             "questions": [
                                 {
@@ -790,131 +798,111 @@
                                         "Use switch statement for different operations",
                                         "Handle division by zero case"
                                     ]
-                                }
-                            ]
-                        },
-                        {
-                            "name": "Practical Programming",
-                            "concepts": [
+                                },
                                 {
-                                    "name": "Real-World Applications",
-                                    "summary": "Programming in Nepal's context involves creating solutions for local challenges and needs. This includes developing applications for education, business, and government services. Understanding both theoretical concepts and practical implementation is crucial. Students should learn to create programs that address real-world problems in Nepal, such as school management systems, inventory management for local businesses, and community service applications. The programming curriculum should focus on practical skills that can be immediately applied in the local context, while also preparing students for global opportunities.",
-                                    "steps": [
-                                        "Learn programming fundamentals",
-                                        "Understand local requirements",
-                                        "Practice with real examples",
-                                        "Develop problem-solving skills",
-                                        "Create practical applications",
-                                        "Test and debug programs",
-                                        "Document and maintain code"
+                                    "question": "Write a C program to create a student management system that can add, display, and search student records. [5 marks]",
+                                    "acceptable_answers": [
+                                        "#include <stdio.h>\n#include <string.h>\n#define MAX 100\n\nstruct Student {\n    char name[50];\n    int roll;\n    float marks;\n};\n\nstruct Student students[MAX];\nint count = 0;\n\nvoid addStudent() {\n    if(count < MAX) {\n        printf(\"\\nEnter student details:\\n\");\n        printf(\"Name: \");\n        scanf(\"%s\", students[count].name);\n        printf(\"Roll: \");\n        scanf(\"%d\", &students[count].roll);\n        printf(\"Marks: \");\n        scanf(\"%f\", &students[count].marks);\n        count++;\n        printf(\"Record added successfully!\\n\");\n    } else {\n        printf(\"Database full!\\n\");\n    }\n}\n\nvoid displayAll() {\n    printf(\"\\nStudent Records:\\n\");\n    printf(\"Name\\tRoll\\tMarks\\n\");\n    for(int i = 0; i < count; i++) {\n        printf(\"%s\\t%d\\t%.2f\\n\", students[i].name, students[i].roll, students[i].marks);\n    }\n}\n\nvoid searchStudent() {\n    int roll;\n    printf(\"\\nEnter roll number to search: \");\n    scanf(\"%d\", &roll);\n    for(int i = 0; i < count; i++) {\n        if(students[i].roll == roll) {\n            printf(\"\\nRecord found!\\n\");\n            printf(\"Name: %s\\n\", students[i].name);\n            printf(\"Roll: %d\\n\", students[i].roll);\n            printf(\"Marks: %.2f\\n\", students[i].marks);\n            return;\n        }\n    }\n    printf(\"Record not found!\\n\");\n}\n\nint main() {\n    int choice;\n    do {\n        printf(\"\\nStudent Management System\\n\");\n        printf(\"1. Add Student\\n\");\n        printf(\"2. Display All\\n\");\n        printf(\"3. Search Student\\n\");\n        printf(\"4. Exit\\n\");\n        printf(\"Enter your choice: \");\n        scanf(\"%d\", &choice);\n        switch(choice) {\n            case 1: addStudent(); break;\n            case 2: displayAll(); break;\n            case 3: searchStudent(); break;\n            case 4: printf(\"Thank you!\\n\"); break;\n            default: printf(\"Invalid choice!\\n\");\n        }\n    } while(choice != 4);\n    return 0;\n}"
                                     ],
-                                    "questions": [
-                                        {
-                                            "question": "Write a C program to create a school fee management system for a Nepali school, including features for different fee types and payment tracking. [5 marks]",
-                                            "acceptable_answers": [
-                                                "#include <stdio.h>\\n#include <string.h>\\n\\nstruct Student {\\n    int roll;\\n    char name[50];\\n    char class[10];\\n    float monthly_fee;\\n    float exam_fee;\\n    float computer_fee;\\n    float total_paid;\\n};\\n\\nvoid addStudent(struct Student *s) {\\n    printf(\\\"Enter Roll No: \\\");\\n    scanf(\\\"%d\\\", &s->roll);\\n    printf(\\\"Enter Name: \\\");\\n    scanf(\\\"%s\\\", s->name);\\n    printf(\\\"Enter Class: \\\");\\n    scanf(\\\"%s\\\", s->class);\\n    printf(\\\"Enter Monthly Fee: \\\");\\n    scanf(\\\"%f\\\", &s->monthly_fee);\\n    printf(\\\"Enter Exam Fee: \\\");\\n    scanf(\\\"%f\\\", &s->exam_fee);\\n    printf(\\\"Enter Computer Fee: \\\");\\n    scanf(\\\"%f\\\", &s->computer_fee);\\n    s->total_paid = 0;\\n}\\n\\nvoid makePayment(struct Student *s) {\\n    float amount;\\n    printf(\\\"Enter payment amount: \\\");\\n    scanf(\\\"%f\\\", &amount);\\n    s->total_paid += amount;\\n    printf(\\\"Payment recorded. Total paid: %.2f\\\\n\\\", s->total_paid);\\n}\\n\\nvoid generateReceipt(struct Student s) {\\n    printf(\\\"\\\\n=== Fee Receipt ===\\\\n\\\");\\n    printf(\\\"Roll No: %d\\\\n\\\", s.roll);\\n    printf(\\\"Name: %s\\\\n\\\", s.name);\\n    printf(\\\"Class: %s\\\\n\\\", s.class);\\n    printf(\\\"Monthly Fee: %.2f\\\\n\\\", s.monthly_fee);\\n    printf(\\\"Exam Fee: %.2f\\\\n\\\", s.exam_fee);\\n    printf(\\\"Computer Fee: %.2f\\\\n\\\", s.computer_fee);\\n    printf(\\\"Total Paid: %.2f\\\\n\\\", s.total_paid);\\n    printf(\\\"Balance: %.2f\\\\n\\\", (s.monthly_fee + s.exam_fee + s.computer_fee - s.total_paid));\\n}\\n\\nint main() {\\n    struct Student s;\\n    int choice;\\n    do {\\n        printf(\\\"\\\\nSchool Fee Management System\\\\n\\\");\\n        printf(\\\"1. Add Student\\\\n\\\");\\n        printf(\\\"2. Make Payment\\\\n\\\");\\n        printf(\\\"3. Generate Receipt\\\\n\\\");\\n        printf(\\\"4. Exit\\\\n\\\");\\n        printf(\\\"Enter choice: \\\");\\n        scanf(\\\"%d\\\", &choice);\\n        switch(choice) {\\n            case 1: addStudent(&s); break;\\n            case 2: makePayment(&s); break;\\n            case 3: generateReceipt(s); break;\\n            case 4: printf(\\\"Thank you!\\\\n\\\"); break;\\n            default: printf(\\\"Invalid choice!\\\\n\\\");\\n        }\\n    } while(choice != 4);\\n    return 0;\\n}"
-                                            ],
-                                            "hints": [
-                                                "Use structures for student data",
-                                                "Include different fee types",
-                                                "Implement payment tracking",
-                                                "Generate detailed receipts"
-                                            ]
-                                        },
-                                        {
-                                            "question": "Write a C program to create a simple inventory management system for a local shop in Nepal, including features for stock tracking and sales. [5 marks]",
-                                            "acceptable_answers": [
-                                                "#include <stdio.h>\n#include <string.h>\n\nstruct Product {\n    int code;\n    char name[50];\n    float price;\n    int quantity;\n    char category[20];\n};\n\nstruct Sale {\n    int product_code;\n    int quantity;\n    float total_amount;\n    char date[20];\n};\n\nvoid addProduct(struct Product *p) {\n    printf(\"Enter Product Code: \");\n    scanf(\"%d\", &p->code);\n    printf(\"Enter Product Name: \");\n    scanf(\"%s\", p->name);\n    printf(\"Enter Price: \");\n    scanf(\"%f\", &p->price);\n    printf(\"Enter Quantity: \");\n    scanf(\"%d\", &p->quantity);\n    printf(\"Enter Category: \");\n    scanf(\"%s\", p->category);\n}\n\nvoid makeSale(struct Product *p, struct Sale *s) {\n    printf(\"Enter Product Code: \");\n    scanf(\"%d\", &s->product_code);\n    printf(\"Enter Quantity: \");\n    scanf(\"%d\", &s->quantity);\n    if(s->quantity <= p->quantity) {\n        s->total_amount = s->quantity * p->price;\n        p->quantity -= s->quantity;\n        printf(\"Enter Date (DD/MM/YYYY): \");\n        scanf(\"%s\", s->date);\n        printf(\"Sale recorded. Total: %.2f\\n\", s->total_amount);\n    } else {\n        printf(\"Insufficient stock!\\n\");\n    }\n}\n\nvoid generateReport(struct Product p, struct Sale s) {\n    printf(\"\\n=== Sales Report ===\\n\");\n    printf(\"Product: %s\\n\", p.name);\n    printf(\"Category: %s\\n\", p.category);\n    printf(\"Quantity Sold: %d\\n\", s.quantity);\n    printf(\"Total Amount: %.2f\\n\", s.total_amount);\n    printf(\"Remaining Stock: %d\\n\", p.quantity);\n    printf(\"Date: %s\\n\", s.date);\n}\n\nint main() {\n    struct Product p;\n    struct Sale s;\n    int choice;\n    do {\n        printf(\"\\nInventory Management System\\n\");\n        printf(\"1. Add Product\\n\");\n        printf(\"2. Make Sale\\n\");\n        printf(\"3. Generate Report\\n\");\n        printf(\"4. Exit\\n\");\n        printf(\"Enter choice: \");\n        scanf(\"%d\", &choice);\n        switch(choice) {\n            case 1: addProduct(&p); break;\n            case 2: makeSale(&p, &s); break;\n            case 3: generateReport(p, s); break;\n            case 4: printf(\"Thank you!\\n\"); break;\n            default: printf(\"Invalid choice!\\n\");\n        }\n    } while(choice != 4);\n    return 0;\n}"
-                                            ],
-                                            "hints": [
-                                                "Use structures for products and sales",
-                                                "Implement stock tracking",
-                                                "Include sales reporting",
-                                                "Add date tracking"
-                                            ]
-                                        },
-                                        {
-                                            "question": "Write a C program to create a simple bus ticket booking system for a local bus service in Nepal. [5 marks]",
-                                            "acceptable_answers": [
-                                                "#include <stdio.h>\\n#include <string.h>\\n\\nstruct Bus {\\n    int bus_no;\\n    char route[50];\\n    int total_seats;\\n    int available_seats;\\n    float fare;\\n};\\n\\nstruct Ticket {\\n    int ticket_no;\\n    int bus_no;\\n    char passenger_name[50];\\n    int seat_no;\\n    char date[20];\\n    float amount_paid;\\n};\\n\\nvoid addBus(struct Bus *b) {\\n    printf(\\\"Enter Bus Number: \\\");\\n    scanf(\\\"%d\\\", &b->bus_no);\\n    printf(\\\"Enter Route: \\\");\\n    scanf(\\\"%s\\\", b->route);\\n    printf(\\\"Enter Total Seats: \\\");\\n    scanf(\\\"%d\\\", &b->total_seats);\\n    b->available_seats = b->total_seats;\\n    printf(\\\"Enter Fare: \\\");\\n    scanf(\\\"%f\\\", &b->fare);\\n}\\n\\nvoid bookTicket(struct Bus *b, struct Ticket *t) {\\n    if(b->available_seats > 0) {\\n        printf(\\\"Enter Passenger Name: \\\");\\n        scanf(\\\"%s\\\", t->passenger_name);\\n        t->bus_no = b->bus_no;\\n        t->seat_no = b->total_seats - b->available_seats + 1;\\n        printf(\\\"Enter Date (DD/MM/YYYY): \\\");\\n        scanf(\\\"%s\\\", t->date);\\n        t->amount_paid = b->fare;\\n        b->available_seats--;\\n        printf(\\\"Ticket booked successfully!\\\\n\\\");\\n    } else {\\n        printf(\\\"Sorry, bus is full!\\\\n\\\");\\n    }\\n}\\n\\nvoid printTicket(struct Ticket t) {\\n    printf(\\\"\\\\n=== Bus Ticket ===\\\\n\\\");\\n    printf(\\\"Ticket No: %d\\\\n\\\", t.ticket_no);\\n    printf(\\\"Passenger: %s\\\\n\\\", t.passenger_name);\\n    printf(\\\"Bus No: %d\\\\n\\\", t.bus_no);\\n    printf(\\\"Seat No: %d\\\\n\\\", t.seat_no);\\n    printf(\\\"Date: %s\\\\n\\\", t.date);\\n    printf(\\\"Amount Paid: %.2f\\\\n\\\", t.amount_paid);\\n}\\n\\nint main() {\\n    struct Bus b;\\n    struct Ticket t;\\n    int choice;\\n    do {\\n        printf(\\\"\\\\nBus Ticket Booking System\\\\n\\\");\\n        printf(\\\"1. Add Bus\\\\n\\\");\\n        printf(\\\"2. Book Ticket\\\\n\\\");\\n        printf(\\\"3. Print Ticket\\\\n\\\");\\n        printf(\\\"4. Exit\\\\n\\\");\\n        printf(\\\"Enter choice: \\\");\\n        scanf(\\\"%d\\\", &choice);\\n        switch(choice) {\\n            case 1: addBus(&b); break;\\n            case 2: bookTicket(&b, &t); break;\\n            case 3: printTicket(t); break;\\n            case 4: printf(\\\"Thank you!\\\\n\\\"); break;\\n            default: printf(\\\"Invalid choice!\\\\n\\\");\\n        }\\n    } while(choice != 4);\\n    return 0;\\n}"
-                                            ],
-                                            "hints": [
-                                                "Use structures for bus and ticket data",
-                                                "Implement seat tracking",
-                                                "Include fare calculation",
-                                                "Generate ticket details"
-                                            ]
-                                        }
+                                    "hints": [
+                                        "Use structures to store student data",
+                                        "Implement menu-driven interface",
+                                        "Use arrays to store multiple records",
+                                        "Include search functionality"
+                                    ]
+                                },
+                                {
+                                    "question": "Write a C program to create a simple banking system with deposit, withdrawal, and balance check features. [5 marks]",
+                                    "acceptable_answers": [
+                                        "#include <stdio.h>\n\nstruct Account {\n    int accountNumber;\n    char name[50];\n    float balance;\n};\n\nvoid deposit(struct Account *acc) {\n    float amount;\n    printf(\"\\nEnter amount to deposit: \");\n    scanf(\"%f\", &amount);\n    if(amount > 0) {\n        acc->balance += amount;\n        printf(\"Deposit successful! New balance: %.2f\\n\", acc->balance);\n    } else {\n        printf(\"Invalid amount!\\n\");\n    }\n}\n\nvoid withdraw(struct Account *acc) {\n    float amount;\n    printf(\"\\nEnter amount to withdraw: \");\n    scanf(\"%f\", &amount);\n    if(amount > 0 && amount <= acc->balance) {\n        acc->balance -= amount;\n        printf(\"Withdrawal successful! New balance: %.2f\\n\", acc->balance);\n    } else {\n        printf(\"Invalid amount or insufficient balance!\\n\");\n    }\n}\n\nvoid checkBalance(struct Account *acc) {\n    printf(\"\\nAccount Holder: %s\\n\", acc->name);\n    printf(\"Account Number: %d\\n\", acc->accountNumber);\n    printf(\"Current Balance: %.2f\\n\", acc->balance);\n}\n\nint main() {\n    struct Account acc = {1001, \"Ram Sharma\", 5000.0};\n    int choice;\n    do {\n        printf(\"\\nBanking System\\n\");\n        printf(\"1. Deposit\\n\");\n        printf(\"2. Withdraw\\n\");\n        printf(\"3. Check Balance\\n\");\n        printf(\"4. Exit\\n\");\n        printf(\"Enter your choice: \");\n        scanf(\"%d\", &choice);\n        switch(choice) {\n            case 1: deposit(&acc); break;\n            case 2: withdraw(&acc); break;\n            case 3: checkBalance(&acc); break;\n            case 4: printf(\"Thank you!\\n\"); break;\n            default: printf(\"Invalid choice!\\n\");\n        }\n    } while(choice != 4);\n    return 0;\n}"
+                                    ],
+                                    "hints": [
+                                        "Use structures for account data",
+                                        "Implement pointer-based functions",
+                                        "Include balance validation",
+                                        "Add proper error handling"
+                                    ]
+                                },
+                                {
+                                    "question": "Write a C program to create a simple quiz game with multiple-choice questions and score tracking. [5 marks]",
+                                    "acceptable_answers": [
+                                        "#include <stdio.h>\n#include <string.h>\n#include <stdlib.h>\n#include <time.h>\n\nstruct Question {\n    char question[200];\n    char options[4][100];\n    int correctAnswer;\n};\n\nvoid initializeQuestions(struct Question *q) {\n    strcpy(q[0].question, \"What is the capital of Nepal?\");\n    strcpy(q[0].options[0], \"A. Kathmandu\");\n    strcpy(q[0].options[1], \"B. Pokhara\");\n    strcpy(q[0].options[2], \"C. Lalitpur\");\n    strcpy(q[0].options[3], \"D. Bhaktapur\");\n    q[0].correctAnswer = 0;\n    \n    // Add more questions here\n}\n\nvoid playQuiz(struct Question *q, int numQuestions) {\n    int score = 0;\n    int answer;\n    \n    for(int i = 0; i < numQuestions; i++) {\n        printf(\"\\nQuestion %d: %s\\n\", i+1, q[i].question);\n        for(int j = 0; j < 4; j++) {\n            printf(\"%s\\n\", q[i].options[j]);\n        }\n        printf(\"\\nEnter your answer (1-4): \");\n        scanf(\"%d\", &answer);\n        \n        if(answer-1 == q[i].correctAnswer) {\n            printf(\"Correct!\\n\");\n            score++;\n        } else {\n            printf(\"Wrong! Correct answer was: %s\\n\", q[i].options[q[i].correctAnswer]);\n        }\n    }\n    \n    printf(\"\\nQuiz completed! Your score: %d/%d\\n\", score, numQuestions);\n}\n\nint main() {\n    struct Question questions[5];\n    initializeQuestions(questions);\n    printf(\"Welcome to the Quiz Game!\\n\");\n    playQuiz(questions, 1); // Start with 1 question, add more as needed\n    return 0;\n}"
+                                    ],
+                                    "hints": [
+                                        "Use structures for questions and options",
+                                        "Implement scoring system",
+                                        "Add proper feedback for answers",
+                                        "Include Nepal-specific questions"
+                                    ]
+                                },
+                                {
+                                    "question": "Write a C program to create a simple file management system that can create, read, and append to files. [5 marks]",
+                                    "acceptable_answers": [
+                                        "#include <stdio.h>\n#include <string.h>\n\nvoid createFile() {\n    FILE *fp;\n    char filename[50], content[200];\n    printf(\"\\nEnter filename: \");\n    scanf(\"%s\", filename);\n    fp = fopen(filename, \"w\");\n    if(fp != NULL) {\n        printf(\"Enter content (type 'end' on new line to finish):\\n\");\n        while(1) {\n            scanf(\"%s\", content);\n            if(strcmp(content, \"end\") == 0) break;\n            fprintf(fp, \"%s\\n\", content);\n        }\n        fclose(fp);\n        printf(\"File created successfully!\\n\");\n    } else {\n        printf(\"Error creating file!\\n\");\n    }\n}\n\nvoid readFile() {\n    FILE *fp;\n    char filename[50], line[200];\n    printf(\"\\nEnter filename to read: \");\n    scanf(\"%s\", filename);\n    fp = fopen(filename, \"r\");\n    if(fp != NULL) {\n        printf(\"\\nFile contents:\\n\");\n        while(fgets(line, sizeof(line), fp)) {\n            printf(\"%s\", line);\n        }\n        fclose(fp);\n    } else {\n        printf(\"Error reading file!\\n\");\n    }\n}\n\nvoid appendFile() {\n    FILE *fp;\n    char filename[50], content[200];\n    printf(\"\\nEnter filename to append: \");\n    scanf(\"%s\", filename);\n    fp = fopen(filename, \"a\");\n    if(fp != NULL) {\n        printf(\"Enter content to append (type 'end' on new line to finish):\\n\");\n        while(1) {\n            scanf(\"%s\", content);\n            if(strcmp(content, \"end\") == 0) break;\n            fprintf(fp, \"%s\\n\", content);\n        }\n        fclose(fp);\n        printf(\"Content appended successfully!\\n\");\n    } else {\n        printf(\"Error appending to file!\\n\");\n    }\n}\n\nint main() {\n    int choice;\n    do {\n        printf(\"\\nFile Management System\\n\");\n        printf(\"1. Create File\\n\");\n        printf(\"2. Read File\\n\");\n        printf(\"3. Append to File\\n\");\n        printf(\"4. Exit\\n\");\n        printf(\"Enter your choice: \");\n        scanf(\"%d\", &choice);\n        switch(choice) {\n            case 1: createFile(); break;\n            case 2: readFile(); break;\n            case 3: appendFile(); break;\n            case 4: printf(\"Thank you!\\n\"); break;\n            default: printf(\"Invalid choice!\\n\");\n        }\n    } while(choice != 4);\n    return 0;\n}"
+                                    ],
+                                    "hints": [
+                                        "Use proper file handling functions",
+                                        "Implement error checking",
+                                        "Use different file modes (w, r, a)",
+                                        "Include user-friendly interface"
                                     ]
                                 }
                             ]
                         }
                     ]
-                }
-            ]
-        },
-        {
-            "name": "C Programming",
-            "subtopics": [
+                },
                 {
-                    "name": "C Programming Fundamentals",
-                    "summary": "C is a powerful programming language widely used in Nepal for system programming and application development. It provides low-level access to memory and hardware, making it essential for understanding computer architecture. Key concepts include pointers, memory management, and structured programming. C is particularly important for Grade 10 students as it helps build strong programming fundamentals. The language emphasizes efficiency and control over hardware resources. Understanding C programming is crucial for system-level programming and learning other languages. C programs are compiled into machine code for direct execution, making them fast and efficient. The language includes features for file handling, dynamic memory allocation, and modular programming.",
-                    "steps": [
-                        "Learn C syntax and basic structure",
-                        "Understand variables, data types, and operators",
-                        "Master control structures (if-else, loops)",
-                        "Learn about functions and arrays",
-                        "Study pointers and memory management",
-                        "Practice file handling and structures",
-                        "Create complete applications"
-                    ],
-                    "questions": [
+                    "name": "Practical Programming",
+                    "concepts": [
                         {
-                            "question": "Write a C program to create a student management system that can add, display, and search student records. [5 marks]",
-                            "acceptable_answers": [
-                                "#include <stdio.h>\n#include <string.h>\n#define MAX 100\n\nstruct Student {\n    char name[50];\n    int roll;\n    float marks;\n};\n\nstruct Student students[MAX];\nint count = 0;\n\nvoid addStudent() {\n    if(count < MAX) {\n        printf(\"\\nEnter student details:\\n\");\n        printf(\"Name: \");\n        scanf(\"%s\", students[count].name);\n        printf(\"Roll: \");\n        scanf(\"%d\", &students[count].roll);\n        printf(\"Marks: \");\n        scanf(\"%f\", &students[count].marks);\n        count++;\n        printf(\"Record added successfully!\\n\");\n    } else {\n        printf(\"Database full!\\n\");\n    }\n}\n\nvoid displayAll() {\n    printf(\"\\nStudent Records:\\n\");\n    printf(\"Name\\tRoll\\tMarks\\n\");\n    for(int i = 0; i < count; i++) {\n        printf(\"%s\\t%d\\t%.2f\\n\", students[i].name, students[i].roll, students[i].marks);\n    }\n}\n\nvoid searchStudent() {\n    int roll;\n    printf(\"\\nEnter roll number to search: \");\n    scanf(\"%d\", &roll);\n    for(int i = 0; i < count; i++) {\n        if(students[i].roll == roll) {\n            printf(\"\\nRecord found!\\n\");\n            printf(\"Name: %s\\n\", students[i].name);\n            printf(\"Roll: %d\\n\", students[i].roll);\n            printf(\"Marks: %.2f\\n\", students[i].marks);\n            return;\n        }\n    }\n    printf(\"Record not found!\\n\");\n}\n\nint main() {\n    int choice;\n    do {\n        printf(\"\\nStudent Management System\\n\");\n        printf(\"1. Add Student\\n\");\n        printf(\"2. Display All\\n\");\n        printf(\"3. Search Student\\n\");\n        printf(\"4. Exit\\n\");\n        printf(\"Enter your choice: \");\n        scanf(\"%d\", &choice);\n        switch(choice) {\n            case 1: addStudent(); break;\n            case 2: displayAll(); break;\n            case 3: searchStudent(); break;\n            case 4: printf(\"Thank you!\\n\"); break;\n            default: printf(\"Invalid choice!\\n\");\n        }\n    } while(choice != 4);\n    return 0;\n}"
+                            "name": "Real-World Applications",
+                            "summary": "Programming in Nepal's context involves creating solutions for local challenges and needs. This includes developing applications for education, business, and government services. Understanding both theoretical concepts and practical implementation is crucial. Students should learn to create programs that address real-world problems in Nepal, such as school management systems, inventory management for local businesses, and community service applications. The programming curriculum should focus on practical skills that can be immediately applied in the local context, while also preparing students for global opportunities.",
+                            "steps": [
+                                "Learn programming fundamentals",
+                                "Understand local requirements",
+                                "Practice with real examples",
+                                "Develop problem-solving skills",
+                                "Create practical applications",
+                                "Test and debug programs",
+                                "Document and maintain code"
                             ],
-                            "hints": [
-                                "Use structures to store student data",
-                                "Implement menu-driven interface",
-                                "Use arrays to store multiple records",
-                                "Include search functionality"
-                            ]
-                        },
-                        {
-                            "question": "Write a C program to create a simple banking system with deposit, withdrawal, and balance check features. [5 marks]",
-                            "acceptable_answers": [
-                                "#include <stdio.h>\n\nstruct Account {\n    int accountNumber;\n    char name[50];\n    float balance;\n};\n\nvoid deposit(struct Account *acc) {\n    float amount;\n    printf(\"\\nEnter amount to deposit: \");\n    scanf(\"%f\", &amount);\n    if(amount > 0) {\n        acc->balance += amount;\n        printf(\"Deposit successful! New balance: %.2f\\n\", acc->balance);\n    } else {\n        printf(\"Invalid amount!\\n\");\n    }\n}\n\nvoid withdraw(struct Account *acc) {\n    float amount;\n    printf(\"\\nEnter amount to withdraw: \");\n    scanf(\"%f\", &amount);\n    if(amount > 0 && amount <= acc->balance) {\n        acc->balance -= amount;\n        printf(\"Withdrawal successful! New balance: %.2f\\n\", acc->balance);\n    } else {\n        printf(\"Invalid amount or insufficient balance!\\n\");\n    }\n}\n\nvoid checkBalance(struct Account *acc) {\n    printf(\"\\nAccount Holder: %s\\n\", acc->name);\n    printf(\"Account Number: %d\\n\", acc->accountNumber);\n    printf(\"Current Balance: %.2f\\n\", acc->balance);\n}\n\nint main() {\n    struct Account acc = {1001, \"Ram Sharma\", 5000.0};\n    int choice;\n    do {\n        printf(\"\\nBanking System\\n\");\n        printf(\"1. Deposit\\n\");\n        printf(\"2. Withdraw\\n\");\n        printf(\"3. Check Balance\\n\");\n        printf(\"4. Exit\\n\");\n        printf(\"Enter your choice: \");\n        scanf(\"%d\", &choice);\n        switch(choice) {\n            case 1: deposit(&acc); break;\n            case 2: withdraw(&acc); break;\n            case 3: checkBalance(&acc); break;\n            case 4: printf(\"Thank you!\\n\"); break;\n            default: printf(\"Invalid choice!\\n\");\n        }\n    } while(choice != 4);\n    return 0;\n}"
-                            ],
-                            "hints": [
-                                "Use structures for account data",
-                                "Implement pointer-based functions",
-                                "Include balance validation",
-                                "Add proper error handling"
-                            ]
-                        },
-                        {
-                            "question": "Write a C program to create a simple quiz game with multiple-choice questions and score tracking. [5 marks]",
-                            "acceptable_answers": [
-                                "#include <stdio.h>\n#include <string.h>\n#include <stdlib.h>\n#include <time.h>\n\nstruct Question {\n    char question[200];\n    char options[4][100];\n    int correctAnswer;\n};\n\nvoid initializeQuestions(struct Question *q) {\n    strcpy(q[0].question, \"What is the capital of Nepal?\");\n    strcpy(q[0].options[0], \"A. Kathmandu\");\n    strcpy(q[0].options[1], \"B. Pokhara\");\n    strcpy(q[0].options[2], \"C. Lalitpur\");\n    strcpy(q[0].options[3], \"D. Bhaktapur\");\n    q[0].correctAnswer = 0;\n    \n    // Add more questions here\n}\n\nvoid playQuiz(struct Question *q, int numQuestions) {\n    int score = 0;\n    int answer;\n    \n    for(int i = 0; i < numQuestions; i++) {\n        printf(\"\\nQuestion %d: %s\\n\", i+1, q[i].question);\n        for(int j = 0; j < 4; j++) {\n            printf(\"%s\\n\", q[i].options[j]);\n        }\n        printf(\"\\nEnter your answer (1-4): \");\n        scanf(\"%d\", &answer);\n        \n        if(answer-1 == q[i].correctAnswer) {\n            printf(\"Correct!\\n\");\n            score++;\n        } else {\n            printf(\"Wrong! Correct answer was: %s\\n\", q[i].options[q[i].correctAnswer]);\n        }\n    }\n    \n    printf(\"\\nQuiz completed! Your score: %d/%d\\n\", score, numQuestions);\n}\n\nint main() {\n    struct Question questions[5];\n    initializeQuestions(questions);\n    printf(\"Welcome to the Quiz Game!\\n\");\n    playQuiz(questions, 1); // Start with 1 question, add more as needed\n    return 0;\n}"
-                            ],
-                            "hints": [
-                                "Use structures for questions and options",
-                                "Implement scoring system",
-                                "Add proper feedback for answers",
-                                "Include Nepal-specific questions"
-                            ]
-                        },
-                        {
-                            "question": "Write a C program to create a simple file management system that can create, read, and append to files. [5 marks]",
-                            "acceptable_answers": [
-                                "#include <stdio.h>\n#include <string.h>\n\nvoid createFile() {\n    FILE *fp;\n    char filename[50], content[200];\n    printf(\"\\nEnter filename: \");\n    scanf(\"%s\", filename);\n    fp = fopen(filename, \"w\");\n    if(fp != NULL) {\n        printf(\"Enter content (type 'end' on new line to finish):\\n\");\n        while(1) {\n            scanf(\"%s\", content);\n            if(strcmp(content, \"end\") == 0) break;\n            fprintf(fp, \"%s\\n\", content);\n        }\n        fclose(fp);\n        printf(\"File created successfully!\\n\");\n    } else {\n        printf(\"Error creating file!\\n\");\n    }\n}\n\nvoid readFile() {\n    FILE *fp;\n    char filename[50], line[200];\n    printf(\"\\nEnter filename to read: \");\n    scanf(\"%s\", filename);\n    fp = fopen(filename, \"r\");\n    if(fp != NULL) {\n        printf(\"\\nFile contents:\\n\");\n        while(fgets(line, sizeof(line), fp)) {\n            printf(\"%s\", line);\n        }\n        fclose(fp);\n    } else {\n        printf(\"Error reading file!\\n\");\n    }\n}\n\nvoid appendFile() {\n    FILE *fp;\n    char filename[50], content[200];\n    printf(\"\\nEnter filename to append: \");\n    scanf(\"%s\", filename);\n    fp = fopen(filename, \"a\");\n    if(fp != NULL) {\n        printf(\"Enter content to append (type 'end' on new line to finish):\\n\");\n        while(1) {\n            scanf(\"%s\", content);\n            if(strcmp(content, \"end\") == 0) break;\n            fprintf(fp, \"%s\\n\", content);\n        }\n        fclose(fp);\n        printf(\"Content appended successfully!\\n\");\n    } else {\n        printf(\"Error appending to file!\\n\");\n    }\n}\n\nint main() {\n    int choice;\n    do {\n        printf(\"\\nFile Management System\\n\");\n        printf(\"1. Create File\\n\");\n        printf(\"2. Read File\\n\");\n        printf(\"3. Append to File\\n\");\n        printf(\"4. Exit\\n\");\n        printf(\"Enter your choice: \");\n        scanf(\"%d\", &choice);\n        switch(choice) {\n            case 1: createFile(); break;\n            case 2: readFile(); break;\n            case 3: appendFile(); break;\n            case 4: printf(\"Thank you!\\n\"); break;\n            default: printf(\"Invalid choice!\\n\");\n        }\n    } while(choice != 4);\n    return 0;\n}"
-                            ],
-                            "hints": [
-                                "Use proper file handling functions",
-                                "Implement error checking",
-                                "Use different file modes (w, r, a)",
-                                "Include user-friendly interface"
+                            "questions": [
+                                {
+                                    "question": "Write a C program to create a school fee management system for a Nepali school, including features for different fee types and payment tracking. [5 marks]",
+                                    "acceptable_answers": [
+                                        "#include <stdio.h>\\n#include <string.h>\\n\\nstruct Student {\\n    int roll;\\n    char name[50];\\n    char class[10];\\n    float monthly_fee;\\n    float exam_fee;\\n    float computer_fee;\\n    float total_paid;\\n};\\n\\nvoid addStudent(struct Student *s) {\\n    printf(\\\"Enter Roll No: \\\");\\n    scanf(\\\"%d\\\", &s->roll);\\n    printf(\\\"Enter Name: \\\");\\n    scanf(\\\"%s\\\", s->name);\\n    printf(\\\"Enter Class: \\\");\\n    scanf(\\\"%s\\\", s->class);\\n    printf(\\\"Enter Monthly Fee: \\\");\\n    scanf(\\\"%f\\\", &s->monthly_fee);\\n    printf(\\\"Enter Exam Fee: \\\");\\n    scanf(\\\"%f\\\", &s->exam_fee);\\n    printf(\\\"Enter Computer Fee: \\\");\\n    scanf(\\\"%f\\\", &s->computer_fee);\\n    s->total_paid = 0;\\n}\\n\\nvoid makePayment(struct Student *s) {\\n    float amount;\\n    printf(\\\"Enter payment amount: \\\");\\n    scanf(\\\"%f\\\", &amount);\\n    s->total_paid += amount;\\n    printf(\\\"Payment recorded. Total paid: %.2f\\\\n\\\", s->total_paid);\\n}\\n\\nvoid generateReceipt(struct Student s) {\\n    printf(\\\"\\\\n=== Fee Receipt ===\\\\n\\\");\\n    printf(\\\"Roll No: %d\\\\n\\\", s.roll);\\n    printf(\\\"Name: %s\\\\n\\\", s.name);\\n    printf(\\\"Class: %s\\\\n\\\", s.class);\\n    printf(\\\"Monthly Fee: %.2f\\\\n\\\", s.monthly_fee);\\n    printf(\\\"Exam Fee: %.2f\\\\n\\\", s.exam_fee);\\n    printf(\\\"Computer Fee: %.2f\\\\n\\\", s.computer_fee);\\n    printf(\\\"Total Paid: %.2f\\\\n\\\", s.total_paid);\\n    printf(\\\"Balance: %.2f\\\\n\\\", (s.monthly_fee + s.exam_fee + s.computer_fee - s.total_paid));\\n}\\n\\nint main() {\\n    struct Student s;\\n    int choice;\\n    do {\\n        printf(\\\"\\\\nSchool Fee Management System\\\\n\\\");\\n        printf(\\\"1. Add Student\\\\n\\\");\\n        printf(\\\"2. Make Payment\\\\n\\\");\\n        printf(\\\"3. Generate Receipt\\\\n\\\");\\n        printf(\\\"4. Exit\\\\n\\\");\\n        printf(\\\"Enter choice: \\\");\\n        scanf(\\\"%d\\\", &choice);\\n        switch(choice) {\\n            case 1: addStudent(&s); break;\\n            case 2: makePayment(&s); break;\\n            case 3: generateReceipt(s); break;\\n            case 4: printf(\\\"Thank you!\\\\n\\\"); break;\\n            default: printf(\\\"Invalid choice!\\\\n\\\");\\n        }\\n    } while(choice != 4);\\n    return 0;\\n}"
+                                    ],
+                                    "hints": [
+                                        "Use structures for student data",
+                                        "Include different fee types",
+                                        "Implement payment tracking",
+                                        "Generate detailed receipts"
+                                    ]
+                                },
+                                {
+                                    "question": "Write a C program to create a simple inventory management system for a local shop in Nepal, including features for stock tracking and sales. [5 marks]",
+                                    "acceptable_answers": [
+                                        "#include <stdio.h>\n#include <string.h>\n\nstruct Product {\n    int code;\n    char name[50];\n    float price;\n    int quantity;\n    char category[20];\n};\n\nstruct Sale {\n    int product_code;\n    int quantity;\n    float total_amount;\n    char date[20];\n};\n\nvoid addProduct(struct Product *p) {\n    printf(\"Enter Product Code: \");\n    scanf(\"%d\", &p->code);\n    printf(\"Enter Product Name: \");\n    scanf(\"%s\", p->name);\n    printf(\"Enter Price: \");\n    scanf(\"%f\", &p->price);\n    printf(\"Enter Quantity: \");\n    scanf(\"%d\", &p->quantity);\n    printf(\"Enter Category: \");\n    scanf(\"%s\", p->category);\n}\n\nvoid makeSale(struct Product *p, struct Sale *s) {\n    printf(\"Enter Product Code: \");\n    scanf(\"%d\", &s->product_code);\n    printf(\"Enter Quantity: \");\n    scanf(\"%d\", &s->quantity);\n    if(s->quantity <= p->quantity) {\n        s->total_amount = s->quantity * p->price;\n        p->quantity -= s->quantity;\n        printf(\"Enter Date (DD/MM/YYYY): \");\n        scanf(\"%s\", s->date);\n        printf(\"Sale recorded. Total: %.2f\\n\", s->total_amount);\n    } else {\n        printf(\"Insufficient stock!\\n\");\n    }\n}\n\nvoid generateReport(struct Product p, struct Sale s) {\n    printf(\"\\n=== Sales Report ===\\n\");\n    printf(\"Product: %s\\n\", p.name);\n    printf(\"Category: %s\\n\", p.category);\n    printf(\"Quantity Sold: %d\\n\", s.quantity);\n    printf(\"Total Amount: %.2f\\n\", s.total_amount);\n    printf(\"Remaining Stock: %d\\n\", p.quantity);\n    printf(\"Date: %s\\n\", s.date);\n}\n\nint main() {\n    struct Product p;\n    struct Sale s;\n    int choice;\n    do {\n        printf(\"\\nInventory Management System\\n\");\n        printf(\"1. Add Product\\n\");\n        printf(\"2. Make Sale\\n\");\n        printf(\"3. Generate Report\\n\");\n        printf(\"4. Exit\\n\");\n        printf(\"Enter choice: \");\n        scanf(\"%d\", &choice);\n        switch(choice) {\n            case 1: addProduct(&p); break;\n            case 2: makeSale(&p, &s); break;\n            case 3: generateReport(p, s); break;\n            case 4: printf(\"Thank you!\\n\"); break;\n            default: printf(\"Invalid choice!\\n\");\n        }\n    } while(choice != 4);\n    return 0;\n}"
+                                    ],
+                                    "hints": [
+                                        "Use structures for products and sales",
+                                        "Implement stock tracking",
+                                        "Include sales reporting",
+                                        "Add date tracking"
+                                    ]
+                                },
+                                {
+                                    "question": "Write a C program to create a simple bus ticket booking system for a local bus service in Nepal. [5 marks]",
+                                    "acceptable_answers": [
+                                        "#include <stdio.h>\\n#include <string.h>\\n\\nstruct Bus {\\n    int bus_no;\\n    char route[50];\\n    int total_seats;\\n    int available_seats;\\n    float fare;\\n};\\n\\nstruct Ticket {\\n    int ticket_no;\\n    int bus_no;\\n    char passenger_name[50];\\n    int seat_no;\\n    char date[20];\\n    float amount_paid;\\n};\\n\\nvoid addBus(struct Bus *b) {\\n    printf(\\\"Enter Bus Number: \\\");\\n    scanf(\\\"%d\\\", &b->bus_no);\\n    printf(\\\"Enter Route: \\\");\\n    scanf(\\\"%s\\\", b->route);\\n    printf(\\\"Enter Total Seats: \\\");\\n    scanf(\\\"%d\\\", &b->total_seats);\\n    b->available_seats = b->total_seats;\\n    printf(\\\"Enter Fare: \\\");\\n    scanf(\\\"%f\\\", &b->fare);\\n}\\n\\nvoid bookTicket(struct Bus *b, struct Ticket *t) {\\n    if(b->available_seats > 0) {\\n        printf(\\\"Enter Passenger Name: \\\");\\n        scanf(\\\"%s\\\", t->passenger_name);\\n        t->bus_no = b->bus_no;\\n        t->seat_no = b->total_seats - b->available_seats + 1;\\n        printf(\\\"Enter Date (DD/MM/YYYY): \\\");\\n        scanf(\\\"%s\\\", t->date);\\n        t->amount_paid = b->fare;\\n        b->available_seats--;\\n        printf(\\\"Ticket booked successfully!\\\\n\\\");\\n    } else {\\n        printf(\\\"Sorry, bus is full!\\\\n\\\");\\n    }\\n}\\n\\nvoid printTicket(struct Ticket t) {\\n    printf(\\\"\\\\n=== Bus Ticket ===\\\\n\\\");\\n    printf(\\\"Ticket No: %d\\\\n\\\", t.ticket_no);\\n    printf(\\\"Passenger: %s\\\\n\\\", t.passenger_name);\\n    printf(\\\"Bus No: %d\\\\n\\\", t.bus_no);\\n    printf(\\\"Seat No: %d\\\\n\\\", t.seat_no);\\n    printf(\\\"Date: %s\\\\n\\\", t.date);\\n    printf(\\\"Amount Paid: %.2f\\\\n\\\", t.amount_paid);\\n}\\n\\nint main() {\\n    struct Bus b;\\n    struct Ticket t;\\n    int choice;\\n    do {\\n        printf(\\\"\\\\nBus Ticket Booking System\\\\n\\\");\\n        printf(\\\"1. Add Bus\\\\n\\\");\\n        printf(\\\"2. Book Ticket\\\\n\\\");\\n        printf(\\\"3. Print Ticket\\\\n\\\");\\n        printf(\\\"4. Exit\\\\n\\\");\\n        printf(\\\"Enter choice: \\\");\\n        scanf(\\\"%d\\\", &choice);\\n        switch(choice) {\\n            case 1: addBus(&b); break;\\n            case 2: bookTicket(&b, &t); break;\\n            case 3: printTicket(t); break;\\n            case 4: printf(\\\"Thank you!\\\\n\\\"); break;\\n            default: printf(\\\"Invalid choice!\\\\n\\\");\\n        }\\n    } while(choice != 4);\\n    return 0;\\n}"
+                                    ],
+                                    "hints": [
+                                        "Use structures for bus and ticket data",
+                                        "Implement seat tracking",
+                                        "Include fare calculation",
+                                        "Generate ticket details"
+                                    ]
+                                }
                             ]
                         }
                     ]
@@ -969,16 +957,23 @@
                                     ]
                                 }
                             ]
-                        },
+                        }
+                    ]
+                },
+                {
+                    "name": "MS Access",
+                    "concepts": [
                         {
-                            "name": "MS Access",
-                            "summary": "Microsoft Access is a database management system that combines a graphical user interface with database capabilities. It allows users to create and manage databases, forms, reports, and queries. Key features include table creation, relationship management, form design, report generation, and query building. MS Access is particularly useful for small to medium-sized applications. It supports SQL queries and provides tools for data analysis. Understanding MS Access is essential for database management and application development. The software includes features for data validation, security, and backup.",
+                            "name": "MS Access Fundamentals",
+                            "summary": "Microsoft Access is a powerful database management system widely used in Nepali schools and businesses. It combines a graphical user interface with database capabilities, making it ideal for learning database concepts. Key features include table creation, relationship management, form design, report generation, and query building. MS Access is particularly useful for small to medium-sized applications like school management systems, library management, and business databases. Understanding MS Access is essential for database management and application development in Nepal's context. The software includes features for data validation, security, and backup, which are crucial for maintaining data integrity in educational institutions and businesses.",
                             "steps": [
-                                "Learn MS Access interface",
-                                "Create tables and relationships",
-                                "Design forms and reports",
-                                "Write queries",
-                                "Manage database security"
+                                "Learn MS Access interface and basic concepts",
+                                "Create and manage tables with proper relationships",
+                                "Design user-friendly forms for data entry",
+                                "Create queries for data retrieval and analysis",
+                                "Generate professional reports",
+                                "Implement data validation and security",
+                                "Practice with real-world examples"
                             ],
                             "questions": [
                                 {
@@ -1010,78 +1005,121 @@
                                         "Use SELECT statement",
                                         "Use WHERE clause for condition"
                                     ]
+                                },
+                                {
+                                    "question": "Create a school management database in MS Access with tables for students, teachers, and courses. Include proper relationships and data validation. [5 marks]",
+                                    "acceptable_answers": [
+                                        "Steps to create school management database:\n1) Create Tables:\n   - Students (StudentID, Name, Class, RollNo, Address, Phone)\n   - Teachers (TeacherID, Name, Subject, Qualification, Phone)\n   - Courses (CourseID, CourseName, TeacherID, Class)\n2) Set Relationships:\n   - One-to-Many between Teachers and Courses\n   - One-to-Many between Courses and Students\n3) Add Validation Rules:\n   - Phone numbers must be 10 digits\n   - Roll numbers must be unique\n   - Class must be between 1-12\n4) Create Forms:\n   - Student Entry Form\n   - Teacher Entry Form\n   - Course Assignment Form\n5) Create Queries:\n   - List all students in a class\n   - Find teachers for a subject\n   - Generate class-wise reports"
+                                    ],
+                                    "hints": [
+                                        "Use proper data types for each field",
+                                        "Set up referential integrity",
+                                        "Create lookup fields for better data entry",
+                                        "Add input masks for phone numbers"
+                                    ]
+                                },
+                                {
+                                    "question": "Design a library management system in MS Access for a school library. Include features for book management, member management, and issue/return tracking. [5 marks]",
+                                    "acceptable_answers": [
+                                        "Library Management System Design:\n1) Tables Required:\n   - Books (BookID, Title, Author, Category, Status)\n   - Members (MemberID, Name, Class, RollNo, JoinDate)\n   - Issues (IssueID, BookID, MemberID, IssueDate, ReturnDate)\n2) Relationships:\n   - One-to-Many between Books and Issues\n   - One-to-Many between Members and Issues\n3) Forms:\n   - Book Entry Form with validation\n   - Member Registration Form\n   - Book Issue/Return Form\n4) Queries:\n   - Books available for issue\n   - Overdue books list\n   - Member-wise issue history\n5) Reports:\n   - Daily issue/return report\n   - Category-wise book list\n   - Overdue books report"
+                                    ],
+                                    "hints": [
+                                        "Include date validation for issue/return",
+                                        "Add status tracking for books",
+                                        "Create calculated fields for fines",
+                                        "Implement member category system"
+                                    ]
+                                },
+                                {
+                                    "question": "Create a fee management system for a school using MS Access. Include features for fee collection, receipt generation, and outstanding balance tracking. [5 marks]",
+                                    "acceptable_answers": [
+                                        "Fee Management System Design:\n1) Tables:\n   - Students (StudentID, Name, Class, RollNo)\n   - FeeStructure (FeeID, Class, FeeType, Amount)\n   - Payments (PaymentID, StudentID, FeeID, Amount, Date, ReceiptNo)\n2) Relationships:\n   - One-to-Many between Students and Payments\n   - One-to-Many between FeeStructure and Payments\n3) Forms:\n   - Student Fee Entry Form\n   - Receipt Generation Form\n   - Outstanding Balance Form\n4) Queries:\n   - Class-wise fee collection\n   - Student-wise payment history\n   - Outstanding balance report\n5) Reports:\n   - Daily collection report\n   - Monthly fee statement\n   - Outstanding balance report"
+                                    ],
+                                    "hints": [
+                                        "Include payment mode tracking",
+                                        "Add receipt number generation",
+                                        "Create balance calculation queries",
+                                        "Implement fee structure by class"
+                                    ]
+                                },
+                                {
+                                    "question": "Design a result management system for a school using MS Access. Include features for marks entry, grade calculation, and result generation. [5 marks]",
+                                    "acceptable_answers": [
+                                        "Result Management System Design:\n1) Tables:\n   - Students (StudentID, Name, Class, RollNo)\n   - Subjects (SubjectID, SubjectName, Class)\n   - Marks (MarkID, StudentID, SubjectID, Term, Marks, Grade)\n2) Relationships:\n   - One-to-Many between Students and Marks\n   - One-to-Many between Subjects and Marks\n3) Forms:\n   - Marks Entry Form with validation\n   - Grade Calculation Form\n   - Result Generation Form\n4) Queries:\n   - Subject-wise performance\n   - Class-wise result analysis\n   - Student-wise grade report\n5) Reports:\n   - Term-wise result card\n   - Class performance report\n   - Subject-wise analysis"
+                                    ],
+                                    "hints": [
+                                        "Implement grade calculation rules",
+                                        "Add marks validation (0-100)",
+                                        "Create result card format",
+                                        "Include pass/fail criteria"
+                                    ]
                                 }
                             ]
                         }
                     ]
                 },
                 {
-                    "name": "Database Management",
-                    "subtopics": [
+                    "name": "Practical Database Applications",
+                    "concepts": [
                         {
-                            "name": "MS Access",
-                            "concepts": [
+                            "name": "Real-World Database Solutions",
+                            "summary": "Database management in Nepal's context involves creating practical solutions for local businesses, schools, and government organizations. This includes developing systems for student management, inventory control, and service delivery. Understanding both theoretical concepts and practical implementation is crucial. Students should learn to create database solutions that address real-world problems in Nepal, such as school management systems, inventory management for local businesses, and community service applications. The curriculum should focus on practical skills that can be immediately applied in the local context, while also preparing students for global opportunities.",
+                            "steps": [
+                                "Learn database fundamentals",
+                                "Understand local requirements",
+                                "Practice with real examples",
+                                "Develop problem-solving skills",
+                                "Create practical applications",
+                                "Test and optimize databases",
+                                "Document and maintain systems"
+                            ],
+                            "questions": [
                                 {
-                                    "name": "MS Access Fundamentals",
-                                    "summary": "Microsoft Access is a powerful database management system widely used in Nepali schools and businesses. It combines a graphical user interface with database capabilities, making it ideal for learning database concepts. Key features include table creation, relationship management, form design, report generation, and query building. MS Access is particularly useful for small to medium-sized applications like school management systems, library management, and business databases. Understanding MS Access is essential for database management and application development in Nepal's context. The software includes features for data validation, security, and backup, which are crucial for maintaining data integrity in educational institutions and businesses.",
-                                    "steps": [
-                                        "Learn MS Access interface and basic concepts",
-                                        "Create and manage tables with proper relationships",
-                                        "Design user-friendly forms for data entry",
-                                        "Create queries for data retrieval and analysis",
-                                        "Generate professional reports",
-                                        "Implement data validation and security",
-                                        "Practice with real-world examples"
+                                    "question": "Design a database for a Nepali school management system using MS Access, including tables for students, teachers, courses, and attendance. [5 marks]",
+                                    "acceptable_answers": [
+                                        "School Management Database Design:\n\n1) Students Table:\n   - StudentID (Primary Key)\n   - Name\n   - Class\n   - RollNo\n   - Address\n   - Phone\n   - GuardianName\n   - JoinDate\n\n2) Teachers Table:\n   - TeacherID (Primary Key)\n   - Name\n   - Subject\n   - Qualification\n   - Phone\n   - Email\n   - JoinDate\n\n3) Courses Table:\n   - CourseID (Primary Key)\n   - CourseName\n   - TeacherID (Foreign Key)\n   - Class\n   - Duration\n   - Fee\n\n4) Attendance Table:\n   - AttendanceID (Primary Key)\n   - StudentID (Foreign Key)\n   - Date\n   - Status (Present/Absent)\n   - Remarks\n\n5) Relationships:\n   - One-to-Many between Teachers and Courses\n   - One-to-Many between Students and Attendance\n   - One-to-Many between Courses and Students\n\n6) Validation Rules:\n   - Phone numbers must be 10 digits\n   - Roll numbers must be unique\n   - Class must be between 1-12\n   - Dates must be valid\n\n7) Forms:\n   - Student Entry Form\n   - Teacher Entry Form\n   - Attendance Entry Form\n   - Course Assignment Form\n\n8) Reports:\n   - Class-wise student list\n   - Attendance report\n   - Teacher-wise course list\n   - Student performance report"
                                     ],
-                                    "questions": [
-                                        {
-                                            "question": "Create a school management database in MS Access with tables for students, teachers, and courses. Include proper relationships and data validation. [5 marks]",
-                                            "acceptable_answers": [
-                                                "Steps to create school management database:\n1) Create Tables:\n   - Students (StudentID, Name, Class, RollNo, Address, Phone)\n   - Teachers (TeacherID, Name, Subject, Qualification, Phone)\n   - Courses (CourseID, CourseName, TeacherID, Class)\n2) Set Relationships:\n   - One-to-Many between Teachers and Courses\n   - One-to-Many between Courses and Students\n3) Add Validation Rules:\n   - Phone numbers must be 10 digits\n   - Roll numbers must be unique\n   - Class must be between 1-12\n4) Create Forms:\n   - Student Entry Form\n   - Teacher Entry Form\n   - Course Assignment Form\n5) Create Queries:\n   - List all students in a class\n   - Find teachers for a subject\n   - Generate class-wise reports"
-                                            ],
-                                            "hints": [
-                                                "Use proper data types for each field",
-                                                "Set up referential integrity",
-                                                "Create lookup fields for better data entry",
-                                                "Add input masks for phone numbers"
-                                            ]
-                                        },
-                                        {
-                                            "question": "Design a library management system in MS Access for a school library. Include features for book management, member management, and issue/return tracking. [5 marks]",
-                                            "acceptable_answers": [
-                                                "Library Management System Design:\n1) Tables Required:\n   - Books (BookID, Title, Author, Category, Status)\n   - Members (MemberID, Name, Class, RollNo, JoinDate)\n   - Issues (IssueID, BookID, MemberID, IssueDate, ReturnDate)\n2) Relationships:\n   - One-to-Many between Books and Issues\n   - One-to-Many between Members and Issues\n3) Forms:\n   - Book Entry Form with validation\n   - Member Registration Form\n   - Book Issue/Return Form\n4) Queries:\n   - Books available for issue\n   - Overdue books list\n   - Member-wise issue history\n5) Reports:\n   - Daily issue/return report\n   - Category-wise book list\n   - Overdue books report"
-                                            ],
-                                            "hints": [
-                                                "Include date validation for issue/return",
-                                                "Add status tracking for books",
-                                                "Create calculated fields for fines",
-                                                "Implement member category system"
-                                            ]
-                                        },
-                                        {
-                                            "question": "Create a fee management system for a school using MS Access. Include features for fee collection, receipt generation, and outstanding balance tracking. [5 marks]",
-                                            "acceptable_answers": [
-                                                "Fee Management System Design:\n1) Tables:\n   - Students (StudentID, Name, Class, RollNo)\n   - FeeStructure (FeeID, Class, FeeType, Amount)\n   - Payments (PaymentID, StudentID, FeeID, Amount, Date, ReceiptNo)\n2) Relationships:\n   - One-to-Many between Students and Payments\n   - One-to-Many between FeeStructure and Payments\n3) Forms:\n   - Student Fee Entry Form\n   - Receipt Generation Form\n   - Outstanding Balance Form\n4) Queries:\n   - Class-wise fee collection\n   - Student-wise payment history\n   - Outstanding balance report\n5) Reports:\n   - Daily collection report\n   - Monthly fee statement\n   - Outstanding balance report"
-                                            ],
-                                            "hints": [
-                                                "Include payment mode tracking",
-                                                "Add receipt number generation",
-                                                "Create balance calculation queries",
-                                                "Implement fee structure by class"
-                                            ]
-                                        },
-                                        {
-                                            "question": "Design a result management system for a school using MS Access. Include features for marks entry, grade calculation, and result generation. [5 marks]",
-                                            "acceptable_answers": [
-                                                "Result Management System Design:\n1) Tables:\n   - Students (StudentID, Name, Class, RollNo)\n   - Subjects (SubjectID, SubjectName, Class)\n   - Marks (MarkID, StudentID, SubjectID, Term, Marks, Grade)\n2) Relationships:\n   - One-to-Many between Students and Marks\n   - One-to-Many between Subjects and Marks\n3) Forms:\n   - Marks Entry Form with validation\n   - Grade Calculation Form\n   - Result Generation Form\n4) Queries:\n   - Subject-wise performance\n   - Class-wise result analysis\n   - Student-wise grade report\n5) Reports:\n   - Term-wise result card\n   - Class performance report\n   - Subject-wise analysis"
-                                            ],
-                                            "hints": [
-                                                "Implement grade calculation rules",
-                                                "Add marks validation (0-100)",
-                                                "Create result card format",
-                                                "Include pass/fail criteria"
-                                            ]
-                                        }
+                                    "hints": [
+                                        "Use proper data types for each field",
+                                        "Set up referential integrity",
+                                        "Create lookup fields for better data entry",
+                                        "Add input masks for phone numbers"
+                                    ]
+                                },
+                                {
+                                    "question": "Create a database for a local bus service in Nepal, including tables for buses, routes, tickets, and passengers. [5 marks]",
+                                    "acceptable_answers": [
+                                        "Bus Service Database Design:\n\n1) Buses Table:\n   - BusID (Primary Key)\n   - BusNumber\n   - Capacity\n   - Type (Local/Express)\n   - Status (Active/Inactive)\n\n2) Routes Table:\n   - RouteID (Primary Key)\n   - FromLocation\n   - ToLocation\n   - Distance\n   - Fare\n   - Duration\n\n3) Tickets Table:\n   - TicketID (Primary Key)\n   - BusID (Foreign Key)\n   - RouteID (Foreign Key)\n   - PassengerID (Foreign Key)\n   - IssueDate\n   - JourneyDate\n   - SeatNumber\n   - Fare\n   - Status (Booked/Cancelled)\n\n4) Passengers Table:\n   - PassengerID (Primary Key)\n   - Name\n   - Phone\n   - Address\n   - IDType (Citizenship/Passport)\n   - IDNumber\n\n5) Relationships:\n   - One-to-Many between Buses and Tickets\n   - One-to-Many between Routes and Tickets\n   - One-to-Many between Passengers and Tickets\n\n6) Validation Rules:\n   - Phone numbers must be 10 digits\n   - Fare must be positive\n   - Dates must be valid\n   - Seat numbers must be unique per bus\n\n7) Forms:\n   - Bus Entry Form\n   - Route Entry Form\n   - Ticket Booking Form\n   - Passenger Registration Form\n\n8) Reports:\n   - Daily ticket sales\n   - Route-wise passenger list\n   - Bus-wise occupancy report\n   - Revenue report"
+                                    ],
+                                    "hints": [
+                                        "Consider different types of buses",
+                                        "Include fare calculation",
+                                        "Track seat availability",
+                                        "Generate booking reports"
+                                    ]
+                                },
+                                {
+                                    "question": "Design a database for a local shop inventory management system in Nepal, including tables for products, suppliers, sales, and stock. [5 marks]",
+                                    "acceptable_answers": [
+                                        "Shop Inventory Database Design:\n\n1) Products Table:\n   - ProductID (Primary Key)\n   - Name\n   - Category\n   - UnitPrice\n   - ReorderLevel\n   - SupplierID (Foreign Key)\n\n2) Suppliers Table:\n   - SupplierID (Primary Key)\n   - Name\n   - ContactPerson\n   - Phone\n   - Address\n   - Email\n\n3) Stock Table:\n   - StockID (Primary Key)\n   - ProductID (Foreign Key)\n   - Quantity\n   - LastUpdated\n   - Location\n\n4) Sales Table:\n   - SaleID (Primary Key)\n   - ProductID (Foreign Key)\n   - Quantity\n   - UnitPrice\n   - TotalAmount\n   - SaleDate\n   - PaymentMethod\n\n5) Relationships:\n   - One-to-Many between Suppliers and Products\n   - One-to-Many between Products and Stock\n   - One-to-Many between Products and Sales\n\n6) Validation Rules:\n   - Phone numbers must be 10 digits\n   - Prices must be positive\n   - Quantities must be positive\n   - Stock cannot be negative\n\n7) Forms:\n   - Product Entry Form\n   - Supplier Entry Form\n   - Stock Update Form\n   - Sales Entry Form\n\n8) Reports:\n   - Low stock alert\n   - Sales analysis\n   - Supplier-wise product list\n   - Daily sales report"
+                                    ],
+                                    "hints": [
+                                        "Track stock levels",
+                                        "Include supplier information",
+                                        "Calculate sales totals",
+                                        "Generate inventory reports"
+                                    ]
+                                },
+                                {
+                                    "question": "Create a database for a local hospital management system in Nepal, including tables for patients, doctors, appointments, and medical records. [5 marks]",
+                                    "acceptable_answers": [
+                                        "Hospital Management Database Design:\n\n1) Patients Table:\n   - PatientID (Primary Key)\n   - Name\n   - Age\n   - Gender\n   - Address\n   - Phone\n   - BloodGroup\n   - EmergencyContact\n\n2) Doctors Table:\n   - DoctorID (Primary Key)\n   - Name\n   - Specialization\n   - Qualification\n   - Phone\n   - Email\n   - ConsultationFee\n\n3) Appointments Table:\n   - AppointmentID (Primary Key)\n   - PatientID (Foreign Key)\n   - DoctorID (Foreign Key)\n   - Date\n   - Time\n   - Status (Scheduled/Completed/Cancelled)\n   - Fee\n\n4) MedicalRecords Table:\n   - RecordID (Primary Key)\n   - PatientID (Foreign Key)\n   - DoctorID (Foreign Key)\n   - Diagnosis\n   - Prescription\n   - Date\n   - FollowUpDate\n\n5) Relationships:\n   - One-to-Many between Doctors and Appointments\n   - One-to-Many between Patients and Appointments\n   - One-to-Many between Patients and MedicalRecords\n   - One-to-Many between Doctors and MedicalRecords\n\n6) Validation Rules:\n   - Phone numbers must be 10 digits\n   - Ages must be positive\n   - Dates must be valid\n   - Fees must be positive\n\n7) Forms:\n   - Patient Registration Form\n   - Doctor Entry Form\n   - Appointment Booking Form\n   - Medical Record Entry Form\n\n8) Reports:\n   - Daily appointments\n   - Patient history\n   - Doctor schedule\n   - Medical records summary"
+                                    ],
+                                    "hints": [
+                                        "Track patient history",
+                                        "Manage appointments",
+                                        "Record medical information",
+                                        "Generate medical reports"
                                     ]
                                 }
                             ]
@@ -1453,79 +1491,6 @@
                                         "Think about support systems",
                                         "Include challenges faced",
                                         "Consider future potential"
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "Database Management System",
-            "subtopics": [
-                {
-                    "name": "Practical Database Applications",
-                    "concepts": [
-                        {
-                            "name": "Real-World Database Solutions",
-                            "summary": "Database management in Nepal's context involves creating practical solutions for local businesses, schools, and government organizations. This includes developing systems for student management, inventory control, and service delivery. Understanding both theoretical concepts and practical implementation is crucial. Students should learn to create database solutions that address real-world problems in Nepal, such as school management systems, inventory management for local businesses, and community service applications. The curriculum should focus on practical skills that can be immediately applied in the local context, while also preparing students for global opportunities.",
-                            "steps": [
-                                "Learn database fundamentals",
-                                "Understand local requirements",
-                                "Practice with real examples",
-                                "Develop problem-solving skills",
-                                "Create practical applications",
-                                "Test and optimize databases",
-                                "Document and maintain systems"
-                            ],
-                            "questions": [
-                                {
-                                    "question": "Design a database for a Nepali school management system using MS Access, including tables for students, teachers, courses, and attendance. [5 marks]",
-                                    "acceptable_answers": [
-                                        "School Management Database Design:\n\n1) Students Table:\n   - StudentID (Primary Key)\n   - Name\n   - Class\n   - RollNo\n   - Address\n   - Phone\n   - GuardianName\n   - JoinDate\n\n2) Teachers Table:\n   - TeacherID (Primary Key)\n   - Name\n   - Subject\n   - Qualification\n   - Phone\n   - Email\n   - JoinDate\n\n3) Courses Table:\n   - CourseID (Primary Key)\n   - CourseName\n   - TeacherID (Foreign Key)\n   - Class\n   - Duration\n   - Fee\n\n4) Attendance Table:\n   - AttendanceID (Primary Key)\n   - StudentID (Foreign Key)\n   - Date\n   - Status (Present/Absent)\n   - Remarks\n\n5) Relationships:\n   - One-to-Many between Teachers and Courses\n   - One-to-Many between Students and Attendance\n   - One-to-Many between Courses and Students\n\n6) Validation Rules:\n   - Phone numbers must be 10 digits\n   - Roll numbers must be unique\n   - Class must be between 1-12\n   - Dates must be valid\n\n7) Forms:\n   - Student Entry Form\n   - Teacher Entry Form\n   - Attendance Entry Form\n   - Course Assignment Form\n\n8) Reports:\n   - Class-wise student list\n   - Attendance report\n   - Teacher-wise course list\n   - Student performance report"
-                                    ],
-                                    "hints": [
-                                        "Use proper data types for each field",
-                                        "Set up referential integrity",
-                                        "Create lookup fields for better data entry",
-                                        "Add input masks for phone numbers"
-                                    ]
-                                },
-                                {
-                                    "question": "Create a database for a local bus service in Nepal, including tables for buses, routes, tickets, and passengers. [5 marks]",
-                                    "acceptable_answers": [
-                                        "Bus Service Database Design:\n\n1) Buses Table:\n   - BusID (Primary Key)\n   - BusNumber\n   - Capacity\n   - Type (Local/Express)\n   - Status (Active/Inactive)\n\n2) Routes Table:\n   - RouteID (Primary Key)\n   - FromLocation\n   - ToLocation\n   - Distance\n   - Fare\n   - Duration\n\n3) Tickets Table:\n   - TicketID (Primary Key)\n   - BusID (Foreign Key)\n   - RouteID (Foreign Key)\n   - PassengerID (Foreign Key)\n   - IssueDate\n   - JourneyDate\n   - SeatNumber\n   - Fare\n   - Status (Booked/Cancelled)\n\n4) Passengers Table:\n   - PassengerID (Primary Key)\n   - Name\n   - Phone\n   - Address\n   - IDType (Citizenship/Passport)\n   - IDNumber\n\n5) Relationships:\n   - One-to-Many between Buses and Tickets\n   - One-to-Many between Routes and Tickets\n   - One-to-Many between Passengers and Tickets\n\n6) Validation Rules:\n   - Phone numbers must be 10 digits\n   - Fare must be positive\n   - Dates must be valid\n   - Seat numbers must be unique per bus\n\n7) Forms:\n   - Bus Entry Form\n   - Route Entry Form\n   - Ticket Booking Form\n   - Passenger Registration Form\n\n8) Reports:\n   - Daily ticket sales\n   - Route-wise passenger list\n   - Bus-wise occupancy report\n   - Revenue report"
-                                    ],
-                                    "hints": [
-                                        "Consider different types of buses",
-                                        "Include fare calculation",
-                                        "Track seat availability",
-                                        "Generate booking reports"
-                                    ]
-                                },
-                                {
-                                    "question": "Design a database for a local shop inventory management system in Nepal, including tables for products, suppliers, sales, and stock. [5 marks]",
-                                    "acceptable_answers": [
-                                        "Shop Inventory Database Design:\n\n1) Products Table:\n   - ProductID (Primary Key)\n   - Name\n   - Category\n   - UnitPrice\n   - ReorderLevel\n   - SupplierID (Foreign Key)\n\n2) Suppliers Table:\n   - SupplierID (Primary Key)\n   - Name\n   - ContactPerson\n   - Phone\n   - Address\n   - Email\n\n3) Stock Table:\n   - StockID (Primary Key)\n   - ProductID (Foreign Key)\n   - Quantity\n   - LastUpdated\n   - Location\n\n4) Sales Table:\n   - SaleID (Primary Key)\n   - ProductID (Foreign Key)\n   - Quantity\n   - UnitPrice\n   - TotalAmount\n   - SaleDate\n   - PaymentMethod\n\n5) Relationships:\n   - One-to-Many between Suppliers and Products\n   - One-to-Many between Products and Stock\n   - One-to-Many between Products and Sales\n\n6) Validation Rules:\n   - Phone numbers must be 10 digits\n   - Prices must be positive\n   - Quantities must be positive\n   - Stock cannot be negative\n\n7) Forms:\n   - Product Entry Form\n   - Supplier Entry Form\n   - Stock Update Form\n   - Sales Entry Form\n\n8) Reports:\n   - Low stock alert\n   - Sales analysis\n   - Supplier-wise product list\n   - Daily sales report"
-                                    ],
-                                    "hints": [
-                                        "Track stock levels",
-                                        "Include supplier information",
-                                        "Calculate sales totals",
-                                        "Generate inventory reports"
-                                    ]
-                                },
-                                {
-                                    "question": "Create a database for a local hospital management system in Nepal, including tables for patients, doctors, appointments, and medical records. [5 marks]",
-                                    "acceptable_answers": [
-                                        "Hospital Management Database Design:\n\n1) Patients Table:\n   - PatientID (Primary Key)\n   - Name\n   - Age\n   - Gender\n   - Address\n   - Phone\n   - BloodGroup\n   - EmergencyContact\n\n2) Doctors Table:\n   - DoctorID (Primary Key)\n   - Name\n   - Specialization\n   - Qualification\n   - Phone\n   - Email\n   - ConsultationFee\n\n3) Appointments Table:\n   - AppointmentID (Primary Key)\n   - PatientID (Foreign Key)\n   - DoctorID (Foreign Key)\n   - Date\n   - Time\n   - Status (Scheduled/Completed/Cancelled)\n   - Fee\n\n4) MedicalRecords Table:\n   - RecordID (Primary Key)\n   - PatientID (Foreign Key)\n   - DoctorID (Foreign Key)\n   - Diagnosis\n   - Prescription\n   - Date\n   - FollowUpDate\n\n5) Relationships:\n   - One-to-Many between Doctors and Appointments\n   - One-to-Many between Patients and Appointments\n   - One-to-Many between Patients and MedicalRecords\n   - One-to-Many between Doctors and MedicalRecords\n\n6) Validation Rules:\n   - Phone numbers must be 10 digits\n   - Ages must be positive\n   - Dates must be valid\n   - Fees must be positive\n\n7) Forms:\n   - Patient Registration Form\n   - Doctor Entry Form\n   - Appointment Booking Form\n   - Medical Record Entry Form\n\n8) Reports:\n   - Daily appointments\n   - Patient history\n   - Doctor schedule\n   - Medical records summary"
-                                    ],
-                                    "hints": [
-                                        "Track patient history",
-                                        "Manage appointments",
-                                        "Record medical information",
-                                        "Generate medical reports"
                                     ]
                                 }
                             ]

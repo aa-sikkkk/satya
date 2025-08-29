@@ -1,0 +1,1637 @@
+{
+  "subject": "Science",
+  "grade": 10,
+  "topics": [
+    {
+      "name": "Physics",
+      "subtopics": [
+        {
+          "name": "Force",
+          "concepts": [
+            {
+              "name": "Definition and Effects of Force",
+              "summary": "Force is a push or pull that can change the state of rest or motion of an object, or its shape. Understanding force is fundamental to physics as it explains everyday phenomena and forms the basis for understanding more complex physical concepts. Force can be measured, calculated, and analyzed using mathematical tools, making it essential for engineering and technological applications.",
+              "steps": [
+                "Define force and its SI unit (Newton, N).",
+                "List the effects of force: can move a stationary object, stop a moving object, change the speed or direction of an object, and change the shape or size of an object.",
+                "Give examples of each effect.",
+                "Practice numerical problems involving force calculations."
+              ],
+              "questions": [
+                {
+                  "question": "What is a force? State its SI unit and give two real-world examples. [4 marks]",
+                  "acceptable_answers": ["1) Definition: A force is a push or pull that changes the state of rest or motion or shape of an object, 2) SI unit: Newton (N), 3) Examples: Pushing a shopping cart (motion change), Stretching a rubber band (shape change), Lifting a book (overcoming gravity)"],
+                  "hints": ["Think about daily activities involving pushing, pulling, or lifting", "Consider both motion and shape changes"]
+                },
+                {
+                  "question": "List any three effects of force with examples.",
+                  "acceptable_answers": ["Force can move a stationary object (pushing a box), stop a moving object (applying brakes), change direction (hitting a cricket ball), or change shape (squeezing a sponge)."],
+                  "hints": ["Think about sports, vehicles, and daily life."]
+                },
+                {
+                  "question": "A force of 50 N is applied to a 10 kg object. What is its acceleration?",
+                  "acceptable_answers": ["a = F/m = 50/10 = 5 m/s²."],
+                  "hints": ["Use F = m × a."]
+                }
+              ]
+            },
+            {
+              "name": "Types of Forces",
+              "summary": "Forces can be classified as contact forces (require physical contact) and non-contact forces (act at a distance). Understanding the types helps us explain many natural and artificial phenomena.",
+              "steps": [
+                "Define contact forces: friction, tension, normal, air resistance, applied force.",
+                "Define non-contact forces: gravitational, magnetic, electrostatic.",
+                "Give examples of each type.",
+                "Explain the importance of each in daily life."
+              ],
+              "questions": [
+                {
+                  "question": "What is the difference between contact and non-contact forces? Give two examples of each.",
+                  "acceptable_answers": ["Contact forces require physical contact (e.g., friction, tension). Non-contact forces act at a distance (e.g., gravity, magnetism)."],
+                  "hints": ["Touching vs. not touching."]
+                },
+                {
+                  "question": "Which force keeps us on the ground?",
+                  "acceptable_answers": ["Gravitational force."],
+                  "hints": ["Acts at a distance from the Earth."]
+                },
+                {
+                  "question": "A book is placed on a table. What forces are acting on it?",
+                  "acceptable_answers": ["Gravitational force (weight) and normal force from the table."],
+                  "hints": ["Think about forces in equilibrium."]
+                }
+              ]
+            },
+            {
+              "name": "Newton's First Law of Motion (Law of Inertia)",
+              "summary": "Newton's First Law states that an object remains at rest or in uniform motion in a straight line unless acted upon by an external force. This property is called inertia.",
+              "steps": [
+                "State the law in words.",
+                "Define inertia and give examples (e.g., passengers lurching forward in a bus when it stops suddenly).",
+                "Explain the importance of seat belts in vehicles.",
+                "Relate the law to real-life situations."
+              ],
+              "questions": [
+                {
+                  "question": "State Newton's First Law of Motion.",
+                  "acceptable_answers": ["An object remains at rest or in uniform motion unless acted upon by an external force."],
+                  "hints": ["Law of inertia."]
+                },
+                {
+                  "question": "Why do passengers move forward when a moving bus stops suddenly?",
+                  "acceptable_answers": ["Due to inertia, their bodies tend to remain in motion even when the bus stops."],
+                  "hints": ["Inertia of motion."]
+                },
+                {
+                  "question": "A coin is placed on a card on a glass. The card is flicked. What happens to the coin?",
+                  "acceptable_answers": ["The coin falls into the glass due to inertia."],
+                  "hints": ["Think about the coin's initial state."]
+                }
+              ]
+            },
+            {
+              "name": "Newton's Second Law of Motion",
+              "summary": "Newton's Second Law states that the acceleration of an object is directly proportional to the net force acting on it and inversely proportional to its mass. The law is mathematically expressed as F = m × a.",
+              "steps": [
+                "State the law in words and formula (F = m × a).",
+                "Explain the meaning of each term (F: force, m: mass, a: acceleration).",
+                "Solve numerical problems using the formula.",
+                "Relate the law to real-life examples (e.g., pushing a car vs. a bicycle)."
+              ],
+              "questions": [
+                {
+                  "question": "State Newton's Second Law of Motion.",
+                  "acceptable_answers": ["The acceleration of an object is proportional to the net force and inversely proportional to its mass. F = m × a."],
+                  "hints": ["Think about force, mass, and acceleration."]
+                },
+                {
+                  "question": "A force of 20 N is applied to a 4 kg object. What is its acceleration?",
+                  "acceptable_answers": ["a = F/m = 20/4 = 5 m/s²."],
+                  "hints": ["Use F = m × a."]
+                },
+                {
+                  "question": "Why is it harder to push a car than a bicycle?",
+                  "acceptable_answers": ["The car has more mass, so it requires more force to achieve the same acceleration."],
+                  "hints": ["Think about mass and acceleration."]
+                }
+              ]
+            },
+            {
+              "name": "Newton's Third Law of Motion",
+              "summary": "Newton's Third Law states that for every action, there is an equal and opposite reaction. This explains phenomena such as walking, swimming, and rocket propulsion.",
+              "steps": [
+                "State the law in words.",
+                "Give examples: walking (foot pushes ground, ground pushes foot), swimming, jumping off a boat.",
+                "Explain action-reaction pairs always act on different bodies.",
+                "Relate the law to real-life situations."
+              ],
+              "questions": [
+                {
+                  "question": "State Newton's Third Law of Motion.",
+                  "acceptable_answers": ["For every action, there is an equal and opposite reaction."],
+                  "hints": ["Action-reaction."]
+                },
+                {
+                  "question": "Explain how a rocket moves upward.",
+                  "acceptable_answers": ["The rocket pushes gases downward (action), and the gases push the rocket upward (reaction)."],
+                  "hints": ["Action-reaction pair."]
+                },
+                {
+                  "question": "Why does a swimmer push the water backward?",
+                  "acceptable_answers": ["To create a reaction force that propels them forward."],
+                  "hints": ["Think about action-reaction pairs."]
+                }
+              ]
+            },
+            {
+              "name": "Friction",
+              "summary": "Friction is a force that opposes the motion of objects in contact. It can be static, sliding, rolling, or fluid. Friction is necessary for walking and driving but also causes wear and energy loss.",
+              "steps": [
+                "Define friction and its types.",
+                "List factors affecting friction: surface roughness, normal force.",
+                "Explain advantages (walking, brakes) and disadvantages (wear, energy loss).",
+                "Describe ways to reduce or increase friction."
+              ],
+              "questions": [
+                {
+                  "question": "What is friction? Name two types.",
+                  "acceptable_answers": ["Friction is a force that opposes motion. Types: static, sliding."],
+                  "hints": ["Think about starting and continuing motion."]
+                },
+                {
+                  "question": "Why is friction necessary for walking?",
+                  "acceptable_answers": ["Friction between our feet and the ground prevents slipping and allows us to move forward."],
+                  "hints": ["What happens on ice?"]
+                },
+                {
+                  "question": "List one way to reduce friction and one way to increase it.",
+                  "acceptable_answers": ["Reduce: use oil or grease. Increase: use rough surfaces or treads."],
+                  "hints": ["Think about machines and shoes."]
+                },
+                {
+                  "question": "A box of mass 10 kg is pushed with a force of 50 N. If the coefficient of friction is 0.2, what is the acceleration?",
+                  "acceptable_answers": ["Frictional force = μ × N = 0.2 × 100 = 20 N. Net force = 50 - 20 = 30 N. a = F/m = 30/10 = 3 m/s²."],
+                  "hints": ["Calculate frictional force first."]
+                }
+              ]
+            },
+            {
+              "name": "Gravity and Weight",
+              "summary": "Gravity is a universal force of attraction between all masses. It keeps us on Earth, causes objects to fall, and governs the motion of planets and stars. Weight is the force of gravity acting on an object.",
+              "steps": [
+                "State Newton's Law of Universal Gravitation: F = G × (m1 × m2) / r².",
+                "Define weight as the force of gravity on an object (W = m × g).",
+                "Explain the difference between mass (amount of matter) and weight (force due to gravity).",
+                "Describe effects of gravity on Earth and in space."
+              ],
+              "questions": [
+                {
+                  "question": "State Newton's Law of Universal Gravitation.",
+                  "acceptable_answers": ["Every mass attracts every other mass with a force proportional to the product of their masses and inversely proportional to the square of the distance between them."] ,
+                  "hints": ["Think about the formula F = G × (m1 × m2) / r²."]
+                },
+                {
+                  "question": "What is the weight of a 10 kg object on Earth (g = 9.8 m/s²)?",
+                  "acceptable_answers": ["W = m × g = 10 × 9.8 = 98 N."],
+                  "hints": ["Multiply mass by acceleration due to gravity."]
+                },
+                {
+                  "question": "How does mass differ from weight?",
+                  "acceptable_answers": ["Mass is the amount of matter (kg), weight is the force of gravity (N)."],
+                  "hints": ["Mass is constant, weight changes with gravity."]
+                },
+                {
+                  "question": "Why do objects fall at the same rate in a vacuum?",
+                  "acceptable_answers": ["Because the acceleration due to gravity is independent of mass."],
+                  "hints": ["Think about Galileo's experiment."]
+                }
+              ]
+            },
+            {
+              "name": "Moment of Force (Torque)",
+              "summary": "The moment of force, or torque, is the turning effect produced by a force acting at a distance from a pivot point. It explains how levers and wrenches work.",
+              "steps": [
+                "Define moment of force (torque): Torque = Force × Perpendicular distance from pivot.",
+                "Identify the pivot (fulcrum) and line of action of force.",
+                "Explain clockwise and counterclockwise moments.",
+                "Apply the principle of moments: For equilibrium, total clockwise moment = total counterclockwise moment."
+              ],
+              "questions": [
+                {
+                  "question": "Define moment of force and give its formula.",
+                  "acceptable_answers": ["Moment of force (torque) is the turning effect of a force. Formula: Torque = Force × Perpendicular distance."],
+                  "hints": ["Think about opening a door."]
+                },
+                {
+                  "question": "A force of 5 N acts at a distance of 2 m from a pivot. What is the torque?",
+                  "acceptable_answers": ["Torque = 5 × 2 = 10 Nm."],
+                  "hints": ["Multiply force by distance."]
+                },
+                {
+                  "question": "State the principle of moments.",
+                  "acceptable_answers": ["For an object in equilibrium, the sum of clockwise moments equals the sum of counterclockwise moments."],
+                  "hints": ["Balance, seesaw."]
+                },
+                {
+                  "question": "A seesaw is balanced with a 30 kg child 2 m from the pivot. Where should a 20 kg child sit to balance it?",
+                  "acceptable_answers": ["30 × 2 = 20 × d, so d = 3 m from the pivot."],
+                  "hints": ["Use the principle of moments."]
+                }
+              ]
+            },
+            {
+              "name": "Center of Gravity",
+              "summary": "The center of gravity is the point at which the entire weight of an object appears to act. It determines balance and stability.",
+              "steps": [
+                "Define center of gravity.",
+                "Explain how to find the center of gravity for regular and irregular objects.",
+                "Describe the importance of center of gravity in stability (e.g., vehicles, buildings).",
+                "Relate center of gravity to real-life situations (e.g., sports, design)."
+              ],
+              "questions": [
+                {
+                  "question": "What is the center of gravity?",
+                  "acceptable_answers": ["The point where the entire weight of an object acts."],
+                  "hints": ["Balance point."]
+                },
+                {
+                  "question": "Why is a low center of gravity important for vehicles?",
+                  "acceptable_answers": ["It increases stability and reduces the risk of toppling."],
+                  "hints": ["Think about sports cars vs. trucks."]
+                },
+                {
+                  "question": "How can you find the center of gravity of an irregular object?",
+                  "acceptable_answers": ["Suspend the object from different points and mark the vertical lines; the intersection is the center of gravity."],
+                  "hints": ["Use a plumb line."]
+                },
+                {
+                  "question": "Why do tightrope walkers carry a long pole?",
+                  "acceptable_answers": ["To lower their center of gravity and increase stability."],
+                  "hints": ["Think about balance."]
+                }
+              ]
+            },
+            {
+              "name": "Work, Energy, and Power",
+              "concepts": [
+                {
+                  "name": "Work and Energy",
+                  "summary": "Work is done when a force moves an object through a distance. Energy is the capacity to do work. Different forms of energy can be converted from one form to another, but the total energy remains constant (Law of Conservation of Energy).",
+                  "steps": [
+                    "Define work (W = F × d) and its SI unit (Joule).",
+                    "Explain different forms of energy: kinetic, potential, chemical, nuclear.",
+                    "State and explain the Law of Conservation of Energy.",
+                    "Solve numerical problems involving work and energy.",
+                    "Describe energy conversions in daily life (e.g., hydroelectric power).",
+                    "Explain the concept of mechanical energy (kinetic + potential)."
+                  ],
+                  "questions": [
+                    {
+                      "question": "What is work? Give its formula and unit.",
+                      "acceptable_answers": ["Work is force multiplied by displacement in the direction of force. W = F × d. Unit: Joule (J)."],
+                      "hints": ["Think about pushing a box."]
+                    },
+                    {
+                      "question": "A force of 50 N moves an object 2 m. Calculate the work done.",
+                      "acceptable_answers": ["W = F × d = 50 × 2 = 100 J."],
+                      "hints": ["Use the work formula."]
+                    },
+                    {
+                      "question": "What is the difference between kinetic and potential energy?",
+                      "acceptable_answers": ["Kinetic energy is energy of motion (KE = ½mv²), while potential energy is stored energy due to position or state (PE = mgh)."],
+                      "hints": ["Think about a moving car vs. a raised weight."]
+                    },
+                    {
+                      "question": "How is energy conserved in a swinging pendulum?",
+                      "acceptable_answers": ["Energy converts between kinetic and potential forms, but the total mechanical energy remains constant."],
+                      "hints": ["Think about the highest and lowest points."]
+                    },
+                    {
+                      "question": "What is the work-energy theorem?",
+                      "acceptable_answers": ["The work done on an object equals the change in its kinetic energy."],
+                      "hints": ["Think about force and motion."]
+                    }
+                  ]
+                },
+                {
+                  "name": "Power and Efficiency",
+                  "summary": "Power is the rate of doing work or transferring energy. Efficiency measures how well energy is converted from one form to another. Understanding these concepts is crucial for energy conservation and machine design.",
+                  "steps": [
+                    "Define power (P = W/t) and its SI unit (Watt).",
+                    "Explain the concept of efficiency (η = useful output/total input).",
+                    "Calculate power and efficiency in different situations.",
+                    "Describe factors affecting efficiency of machines.",
+                    "Explain the importance of energy efficiency in daily life.",
+                    "Discuss renewable and non-renewable energy sources."
+                  ],
+                  "questions": [
+                    {
+                      "question": "What is power? Give its formula and unit.",
+                      "acceptable_answers": ["Power is the rate of doing work. P = W/t. Unit: Watt (W)."],
+                      "hints": ["Think about how fast work is done."]
+                    },
+                    {
+                      "question": "A machine does 1000 J of work in 5 seconds. Calculate its power.",
+                      "acceptable_answers": ["P = W/t = 1000/5 = 200 W."],
+                      "hints": ["Use the power formula."]
+                    },
+                    {
+                      "question": "What is efficiency? How is it calculated?",
+                      "acceptable_answers": ["Efficiency is the ratio of useful output to total input. η = (useful output/total input) × 100%."],
+                      "hints": ["Think about energy conversion."]
+                    },
+                    {
+                      "question": "Why can't a machine be 100% efficient?",
+                      "acceptable_answers": ["Due to energy losses through friction, heat, sound, and other forms of energy."],
+                      "hints": ["Think about energy conservation."]
+                    },
+                    {
+                      "question": "How can we improve the efficiency of machines?",
+                      "acceptable_answers": ["By reducing friction, using better materials, proper maintenance, and optimal design."],
+                      "hints": ["Think about energy losses."]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Heat and Temperature",
+              "concepts": [
+                {
+                  "name": "Heat Transfer and Thermal Properties",
+                  "summary": "Heat is a form of energy that flows from higher to lower temperature. Understanding heat transfer and thermal properties is essential for many applications, from cooking to engineering.",
+                  "steps": [
+                    "Define heat and temperature, explaining their difference.",
+                    "Describe the three methods of heat transfer: conduction, convection, radiation.",
+                    "Explain thermal expansion and its applications.",
+                    "Define specific heat capacity and latent heat.",
+                    "Solve problems involving heat calculations.",
+                    "Describe practical applications of heat transfer."
+                  ],
+                  "questions": [
+                    {
+                      "question": "What is the difference between heat and temperature?",
+                      "acceptable_answers": ["Heat is energy in transit, while temperature is a measure of average kinetic energy of particles."],
+                      "hints": ["Think about energy vs. measurement."]
+                    },
+                    {
+                      "question": "How does heat transfer occur in a metal rod?",
+                      "acceptable_answers": ["Through conduction, where heat energy is transferred by molecular collisions."],
+                      "hints": ["Think about particle movement."]
+                    },
+                    {
+                      "question": "Why does water take longer to heat up than land?",
+                      "acceptable_answers": ["Due to its high specific heat capacity, water requires more energy to raise its temperature."],
+                      "hints": ["Think about heat capacity."]
+                    },
+                    {
+                      "question": "What is thermal expansion? Give an example.",
+                      "acceptable_answers": ["The increase in size of a substance when heated. Example: expansion of railway tracks in summer."],
+                      "hints": ["Think about temperature changes."]
+                    },
+                    {
+                      "question": "How does a thermos flask keep drinks hot?",
+                      "acceptable_answers": ["By minimizing heat transfer through conduction (vacuum), convection (sealed), and radiation (reflective surfaces)."],
+                      "hints": ["Think about heat transfer methods."]
+                    }
+                  ]
+                },
+                {
+                  "name": "Heat Engines and Refrigeration",
+                  "summary": "Heat engines convert heat energy into mechanical work, while refrigerators transfer heat from cold to hot regions. Understanding these principles is crucial for modern technology.",
+                  "steps": [
+                    "Explain the working principle of heat engines.",
+                    "Describe the refrigeration cycle.",
+                    "Define efficiency of heat engines.",
+                    "Explain the role of refrigerants.",
+                    "Discuss environmental impact of heat engines.",
+                    "Describe applications in daily life."
+                  ],
+                  "questions": [
+                    {
+                      "question": "How does a heat engine work?",
+                      "acceptable_answers": ["It converts heat energy into mechanical work by using a working substance that undergoes cyclic processes."],
+                      "hints": ["Think about car engines."]
+                    },
+                    {
+                      "question": "What is the refrigeration cycle?",
+                      "acceptable_answers": ["A process where a refrigerant absorbs heat from a cold space and releases it to a warmer space."],
+                      "hints": ["Think about how refrigerators work."]
+                    },
+                    {
+                      "question": "Why can't a heat engine be 100% efficient?",
+                      "acceptable_answers": ["Due to the second law of thermodynamics, some heat must be rejected to the environment."],
+                      "hints": ["Think about energy conservation."]
+                    },
+                    {
+                      "question": "What is the role of a compressor in a refrigerator?",
+                      "acceptable_answers": ["It compresses the refrigerant gas, increasing its temperature and pressure."],
+                      "hints": ["Think about gas compression."]
+                    },
+                    {
+                      "question": "How can we improve the efficiency of heat engines?",
+                      "acceptable_answers": ["By increasing the temperature difference, reducing friction, and using better materials."],
+                      "hints": ["Think about energy losses."]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Electricity and Magnetism",
+              "concepts": [
+                {
+                  "name": "Electric Current and Circuits",
+                  "summary": "Electric current is the flow of electric charge. Understanding circuits and their components is essential for both theoretical knowledge and practical applications.",
+                  "steps": [
+                    "Define electric current and its units.",
+                    "Explain Ohm's law and its applications.",
+                    "Describe series and parallel circuits.",
+                    "Solve problems involving circuit calculations.",
+                    "Explain electrical power and energy.",
+                    "Describe safety measures in electrical circuits."
+                  ],
+                  "questions": [
+                    {
+                      "question": "What is Ohm's law?",
+                      "acceptable_answers": ["The current through a conductor is directly proportional to the potential difference across it, provided the temperature remains constant."],
+                      "hints": ["Think about the relationship between current and voltage."]
+                    },
+                    {
+                      "question": "How do series and parallel circuits differ?",
+                      "acceptable_answers": ["In series circuits, current is the same through all components, while in parallel circuits, voltage is the same across all components."],
+                      "hints": ["Think about current and voltage distribution."]
+                    },
+                    {
+                      "question": "What is electrical power?",
+                      "acceptable_answers": ["The rate at which electrical energy is converted into other forms of energy. It is measured in watts (W)."],
+                      "hints": ["Think about energy conversion rate."]
+                    },
+                    {
+                      "question": "Why are fuses used in electrical circuits?",
+                      "acceptable_answers": ["To protect circuits from excessive current by breaking the circuit when current exceeds a safe limit."],
+                      "hints": ["Think about safety devices."]
+                    },
+                    {
+                      "question": "How is electrical energy calculated?",
+                      "acceptable_answers": ["By multiplying power (in watts) by time (in hours) to get energy in watt-hours."],
+                      "hints": ["Think about power and time relationship."]
+                    }
+                  ]
+                },
+                {
+                  "name": "Magnetism and Electromagnetism",
+                  "summary": "Magnetism and electromagnetism are fundamental forces that have numerous applications in modern technology. Understanding these principles is crucial for various devices.",
+                  "steps": [
+                    "Describe properties of magnets.",
+                    "Explain magnetic field and field lines.",
+                    "Describe electromagnetism and its applications.",
+                    "Explain electromagnetic induction.",
+                    "Describe electric motors and generators.",
+                    "Explain transformers and their uses."
+                  ],
+                  "questions": [
+                    {
+                      "question": "What are the properties of magnets?",
+                      "acceptable_answers": ["Magnets have north and south poles, like poles repel and unlike poles attract, and they can attract certain materials like iron."],
+                      "hints": ["Think about magnetic poles."]
+                    },
+                    {
+                      "question": "How does an electric motor work?",
+                      "acceptable_answers": ["It converts electrical energy into mechanical energy using the interaction between magnetic fields and electric current."],
+                      "hints": ["Think about energy conversion."]
+                    },
+                    {
+                      "question": "What is electromagnetic induction?",
+                      "acceptable_answers": ["The process of generating electric current in a conductor by changing the magnetic field around it."],
+                      "hints": ["Think about Faraday's law."]
+                    },
+                    {
+                      "question": "How does a transformer work?",
+                      "acceptable_answers": ["It uses electromagnetic induction to change the voltage of alternating current, with the ratio of turns in primary and secondary coils determining the voltage change."],
+                      "hints": ["Think about voltage transformation."]
+                    },
+                    {
+                      "question": "What is the right-hand rule?",
+                      "acceptable_answers": ["A rule used to determine the direction of magnetic field around a current-carrying conductor: when the thumb points in the current direction, the curled fingers show the magnetic field direction."],
+                      "hints": ["Think about field direction."]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Sound and Waves",
+              "concepts": [
+                {
+                  "name": "Properties of Sound and Wave Motion",
+                  "summary": "Sound is a form of energy that travels as waves. Understanding wave properties is essential for explaining sound behavior and applications.",
+                  "steps": [
+                    "Define sound and its properties.",
+                    "Explain wave characteristics.",
+                    "Describe types of waves.",
+                    "Explain sound propagation.",
+                    "Describe applications of sound.",
+                    "Explain the Doppler effect."
+                  ],
+                  "questions": [
+                    {
+                      "question": "What are the properties of sound waves?",
+                      "acceptable_answers": ["Amplitude, frequency, wavelength, and speed."],
+                      "hints": ["Think about wave characteristics."]
+                    },
+                    {
+                      "question": "How does sound travel through different media?",
+                      "acceptable_answers": ["Sound travels fastest in solids, then liquids, and slowest in gases, due to particle density."],
+                      "hints": ["Think about particle arrangement."]
+                    },
+                    {
+                      "question": "What is the Doppler effect?",
+                      "acceptable_answers": ["The change in frequency of sound due to relative motion between source and observer."],
+                      "hints": ["Think about moving sound sources."]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Measurement and Units",
+              "concepts": [
+                {
+                  "name": "Scientific Measurement and Error Analysis",
+                  "summary": "Accurate measurement and understanding of units are fundamental to scientific work. Error analysis helps in understanding the reliability of measurements.",
+                  "steps": [
+                    "Define SI units and their prefixes.",
+                    "Explain significant figures.",
+                    "Describe scientific notation.",
+                    "Explain types of errors.",
+                    "Calculate percentage error.",
+                    "Describe precision and accuracy."
+                  ],
+                  "questions": [
+                    {
+                      "question": "What is the difference between significant figures and scientific notation?",
+                      "acceptable_answers": ["Significant figures are digits that carry meaning, while scientific notation is a way to express numbers in a compact form."],
+                      "hints": ["Think about measurement precision and scale."]
+                    },
+                    {
+                      "question": "How do you calculate percentage error?",
+                      "acceptable_answers": ["Percentage error is calculated by dividing the absolute error by the actual value and multiplying by 100%."],
+                      "hints": ["Think about error calculation."]
+                    },
+                    {
+                      "question": "What is the difference between precision and accuracy?",
+                      "acceptable_answers": ["Precision refers to the closeness of repeated measurements to each other, while accuracy refers to the closeness of a measurement to the true value."],
+                      "hints": ["Think about measurement consistency and correctness."]
+                    },
+                    {
+                      "question": "What is the difference between absolute error and relative error?",
+                      "acceptable_answers": ["Absolute error is the difference between the measured value and the true value, while relative error is the absolute error divided by the true value."],
+                      "hints": ["Think about error magnitude."]
+                    },
+                    {
+                      "question": "What is the difference between systematic error and random error?",
+                      "acceptable_answers": ["Systematic error is a consistent error that affects all measurements in the same way, while random error is unpredictable and affects measurements randomly."],
+                      "hints": ["Think about error consistency and variability."]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Pressure",
+              "concepts": [
+                {"name": "Pressure in Liquids and Gases", "summary": "Pressure is force per unit area.", "steps": ["Define pressure.", "Explain in liquids/gases."], "questions": [{"question": "What is pressure?", "acceptable_answers": ["Force per unit area."], "hints": ["Formula: P=F/A."]}]},
+                {"name": "Atmospheric Pressure", "summary": "Pressure exerted by air.", "steps": ["Define atmospheric pressure.", "Describe measurement."], "questions": [{"question": "What is atmospheric pressure?", "acceptable_answers": ["Pressure by air."], "hints": ["Barometer."]}]},
+                {"name": "Hydraulic Machines", "summary": "Machines using liquid pressure.", "steps": ["Explain principle.", "Give examples."], "questions": [{"question": "Name a hydraulic machine.", "acceptable_answers": ["Hydraulic press."], "hints": ["Uses liquid pressure."]}]}
+              ]
+            },
+            {
+              "name": "Reflection and Mirrors",
+              "summary": "Light reflection and mirrors are fundamental concepts in optics. Understanding these principles is crucial for various applications, from simple mirrors to complex optical instruments.",
+              "steps": [
+                "State the laws of reflection.",
+                "Explain the formation of images in plane mirrors.",
+                "Describe the properties of concave and convex mirrors.",
+                "Solve problems involving mirror equations.",
+                "Explain real and virtual images.",
+                "Describe applications of mirrors in daily life."
+              ],
+              "questions": [
+                {
+                  "question": "What are the laws of reflection?",
+                  "acceptable_answers": ["The incident ray, reflected ray, and normal all lie in the same plane. The angle of incidence equals the angle of reflection."],
+                  "hints": ["Think about the relationship between incident and reflected rays."]
+                },
+                {
+                  "question": "How does a plane mirror form an image?",
+                  "acceptable_answers": ["It forms a virtual, erect image that is the same size as the object and located behind the mirror."],
+                  "hints": ["Think about image characteristics."]
+                },
+                {
+                  "question": "What is the difference between concave and convex mirrors?",
+                  "acceptable_answers": ["Concave mirrors converge light rays and can form both real and virtual images, while convex mirrors diverge light rays and form only virtual images."],
+                  "hints": ["Think about light ray behavior."]
+                },
+                {
+                  "question": "Where are convex mirrors commonly used?",
+                  "acceptable_answers": ["In vehicle side mirrors and security mirrors in stores for wide-angle viewing."],
+                  "hints": ["Think about safety applications."]
+                },
+                {
+                  "question": "How does a concave mirror form a real image?",
+                  "acceptable_answers": ["When the object is placed beyond the focal point, the reflected rays converge to form a real, inverted image."],
+                  "hints": ["Think about light convergence."]
+                }
+              ]
+            },
+            {
+              "name": "Refraction and Lenses",
+              "summary": "Refraction is the bending of light as it passes through different media. Lenses use this principle to form images and are essential in many optical devices.",
+              "steps": [
+                "Explain the laws of refraction.",
+                "Describe the working of convex and concave lenses.",
+                "Solve problems using the lens equation.",
+                "Explain the formation of images by lenses.",
+                "Describe common optical instruments.",
+                "Explain vision defects and their correction."
+              ],
+              "questions": [
+                {
+                  "question": "What is Snell's law?",
+                  "acceptable_answers": ["The ratio of the sine of the angle of incidence to the sine of the angle of refraction is constant for a given pair of media."],
+                  "hints": ["Think about the relationship between angles."]
+                },
+                {
+                  "question": "How does a convex lens form an image?",
+                  "acceptable_answers": ["It converges parallel light rays to a focal point and can form both real and virtual images depending on the object's position."],
+                  "hints": ["Think about light convergence."]
+                },
+                {
+                  "question": "What is the difference between myopia and hypermetropia?",
+                  "acceptable_answers": ["Myopia (nearsightedness) is corrected with concave lenses, while hypermetropia (farsightedness) is corrected with convex lenses."],
+                  "hints": ["Think about vision defects."]
+                },
+                {
+                  "question": "How does a compound microscope work?",
+                  "acceptable_answers": ["It uses two convex lenses: an objective lens to form a real image, and an eyepiece to magnify this image."],
+                  "hints": ["Think about lens combination."]
+                },
+                {
+                  "question": "What is total internal reflection?",
+                  "acceptable_answers": ["When light travels from a denser to a rarer medium at an angle greater than the critical angle, it reflects back into the denser medium."],
+                  "hints": ["Think about light behavior at boundaries."]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Simple Machines",
+          "concepts": [
+            {
+              "name": "Types and Applications of Simple Machines",
+              "summary": "Simple machines are basic mechanical devices that make work easier by changing the direction or magnitude of force. Understanding these is crucial for practical applications in daily life.",
+              "steps": [
+                "Define simple machines and their types.",
+                "Explain the principle of each machine.",
+                "Calculate mechanical advantage.",
+                "Describe real-world applications.",
+                "Solve numerical problems.",
+                "Explain energy conservation in machines."
+              ],
+              "questions": [
+                {
+                  "question": "What are the six types of simple machines?",
+                  "acceptable_answers": ["Lever, pulley, inclined plane, wedge, screw, and wheel and axle."],
+                  "hints": ["Think about basic tools."]
+                },
+                {
+                  "question": "How does a lever work?",
+                  "acceptable_answers": ["It uses a fulcrum to multiply force, with the effort arm and load arm determining the mechanical advantage."],
+                  "hints": ["Think about seesaw."]
+                },
+                {
+                  "question": "What is mechanical advantage?",
+                  "acceptable_answers": ["The ratio of output force to input force, or the ratio of input distance to output distance."],
+                  "hints": ["Think about force multiplication."]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Chemistry",
+      "subtopics": [
+        {
+          "name": "Classification of Elements",
+          "concepts": [
+            {
+              "name": "Periodic Table and Classification",
+              "summary": "The periodic table arranges elements by increasing atomic number and groups them by similar properties. It helps predict element behavior and trends.",
+              "steps": [
+                "Describe the structure of the periodic table (groups, periods).",
+                "Explain the basis of classification (atomic number, properties).",
+                "Identify metals, nonmetals, and metalloids on the table.",
+                "Discuss trends (atomic size, reactivity, valency)."
+              ],
+              "questions": [
+                {"question": "What is the periodic table?", "acceptable_answers": ["A table that arranges elements by increasing atomic number and similar properties."], "hints": ["Rows and columns."]},
+                {"question": "Name one metal and one nonmetal from the periodic table.", "acceptable_answers": ["Metal: Sodium. Nonmetal: Oxygen."], "hints": ["Left and right sides."]},
+                {"question": "What is the trend of atomic size across a period?", "acceptable_answers": ["Atomic size decreases across a period due to increasing nuclear charge."], "hints": ["Think about effective nuclear charge."]}
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Chemical Reactions and Equations",
+          "concepts": [
+            {
+              "name": "Types of Chemical Reactions and Balancing Equations",
+              "summary": "Chemical reactions involve the transformation of substances. Types include combination, decomposition, displacement, and double displacement. Equations must be balanced to obey the law of conservation of mass.",
+              "steps": [
+                "List and define types of chemical reactions.",
+                "Explain the law of conservation of mass.",
+                "Describe how to balance chemical equations.",
+                "Give examples of each reaction type."
+              ],
+              "questions": [
+                {"question": "What is a combination reaction? Give an example.", "acceptable_answers": ["A reaction where two or more substances combine to form one product. Example: H2 + O2 → H2O."], "hints": ["Two become one."]},
+                {"question": "Why must chemical equations be balanced?", "acceptable_answers": ["To obey the law of conservation of mass."], "hints": ["Atoms are not created or destroyed."]},
+                {"question": "Balance the equation: Fe + O2 → Fe2O3.", "acceptable_answers": ["4Fe + 3O2 → 2Fe2O3."], "hints": ["Count atoms on both sides."]}
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Acid, Base and Salt",
+          "concepts": [
+            {
+              "name": "Properties and Uses of Acids, Bases, and Salts",
+              "summary": "Acids release H+ ions, bases release OH- ions, and salts are formed from acid-base reactions. Each has characteristic properties and uses in daily life.",
+              "steps": [
+                "Define acids, bases, and salts.",
+                "List properties of each (taste, litmus, reaction with metals/carbonates).",
+                "Describe uses in daily life (cleaning, food, industry).",
+                "Explain neutralization reactions."
+              ],
+              "questions": [
+                {"question": "What is an acid? Give one property.", "acceptable_answers": ["A substance that releases H+ ions in water. Property: turns blue litmus red."], "hints": ["Sour taste."]},
+                {"question": "What is formed when an acid reacts with a base?", "acceptable_answers": ["A salt and water are formed."], "hints": ["Neutralization."]},
+                {"question": "Name a common acid and a common base used in daily life.", "acceptable_answers": ["Acid: Vinegar (acetic acid). Base: Baking soda (sodium bicarbonate)."], "hints": ["Think about cooking and cleaning."]}
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Some Gases",
+          "concepts": [
+            {
+              "name": "Preparation and Properties of Common Gases (Oxygen, Hydrogen, Carbon Dioxide)",
+              "summary": "Oxygen, hydrogen, and carbon dioxide are important gases with unique properties and uses. Each can be prepared in the lab and tested by characteristic reactions.",
+              "steps": [
+                "Describe laboratory preparation of oxygen, hydrogen, and carbon dioxide.",
+                "List physical and chemical properties of each gas.",
+                "Explain uses and tests for each gas.",
+                "Discuss environmental importance (e.g., CO2 and climate)."
+              ],
+              "questions": [
+                {"question": "How is oxygen prepared in the laboratory?", "acceptable_answers": ["By heating potassium permanganate or hydrogen peroxide."], "hints": ["Decomposition reaction."]},
+                {"question": "Name one use of carbon dioxide.", "acceptable_answers": ["Used in fire extinguishers, carbonated drinks."], "hints": ["Fire safety, beverages."]},
+                {"question": "What is the test for hydrogen gas?", "acceptable_answers": ["It burns with a pop sound when a lighted splint is brought near it."], "hints": ["Think about combustion."]}
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Metals",
+          "concepts": [
+            {
+              "name": "Properties, Extraction, and Uses of Metals",
+              "summary": "Metals are good conductors, malleable, ductile, and lustrous. Extraction involves mining, concentration, reduction, and refining. Metals are used in construction, transport, and industry.",
+              "steps": [
+                "List physical and chemical properties of metals.",
+                "Describe basic steps of metal extraction.",
+                "Explain uses of common metals (iron, copper, aluminum).",
+                "Discuss corrosion and prevention."
+              ],
+              "questions": [
+                {"question": "Name two properties of metals.", "acceptable_answers": ["Good conductors of heat and electricity, malleable."], "hints": ["Think about wires and sheets."]},
+                {"question": "What is corrosion? How can it be prevented?", "acceptable_answers": ["Corrosion is the gradual destruction of metals by reaction with air or water. Prevention: painting, galvanizing."], "hints": ["Rusting of iron."]},
+                {"question": "Why is aluminum used in aircraft construction?", "acceptable_answers": ["It is lightweight, strong, and resistant to corrosion."], "hints": ["Think about weight and durability."]}
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Carbon and its Compounds",
+          "concepts": [
+            {
+              "name": "Allotropes, Compounds, and Uses of Carbon",
+              "summary": "Carbon exists as diamond, graphite, and coal (allotropes). It forms many compounds, including hydrocarbons and carbonates, essential for life and industry.",
+              "steps": [
+                "List allotropes of carbon and their properties.",
+                "Describe important carbon compounds (methane, carbon dioxide, calcium carbonate).",
+                "Explain uses of carbon and its compounds in daily life."
+              ],
+              "questions": [
+                {"question": "Name two allotropes of carbon.", "acceptable_answers": ["Diamond, graphite."], "hints": ["Jewelry, pencils."]},
+                {"question": "What is the main component of natural gas?", "acceptable_answers": ["Methane (CH4)."], "hints": ["Cooking fuel."]},
+                {"question": "Why is carbon dioxide important for plants?", "acceptable_answers": ["It is used in photosynthesis to produce glucose and oxygen."], "hints": ["Think about plant growth."]}
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Materials used in Daily Life",
+          "concepts": [
+            {
+              "name": "Common Materials and Their Uses (Plastics, Glass, Cement, Fertilizers)",
+              "summary": "Materials like plastics, glass, cement, and fertilizers are essential in daily life. Each has unique properties, methods of production, and uses.",
+              "steps": [
+                "List common materials and their properties.",
+                "Describe uses in construction, agriculture, and households.",
+                "Discuss environmental impacts and safe disposal."
+              ],
+              "questions": [
+                {"question": "Name two materials used in construction.", "acceptable_answers": ["Cement, glass."], "hints": ["Buildings, windows."]},
+                {"question": "Why is plastic pollution a problem?", "acceptable_answers": ["Plastics do not decompose easily and harm the environment."], "hints": ["Non-biodegradable."]},
+                {"question": "What is the role of fertilizers in agriculture?", "acceptable_answers": ["They provide essential nutrients to plants for growth."], "hints": ["Think about plant nutrition."]}
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Chemical Bonding",
+          "concepts": [
+            {
+              "name": "Types of Chemical Bonds",
+              "summary": "Chemical bonds are forces that hold atoms together in compounds. Understanding different types of bonds is crucial for explaining the properties and behavior of substances.",
+              "steps": [
+                "Define ionic, covalent, and metallic bonds.",
+                "Explain how each type of bond forms.",
+                "Describe properties of compounds with different bond types.",
+                "Explain the role of electronegativity in bond formation.",
+                "Describe the structure of common compounds.",
+                "Relate bond types to physical properties."
+              ],
+              "questions": [
+                {
+                  "question": "What is the difference between ionic and covalent bonds?",
+                  "acceptable_answers": ["Ionic bonds form through electron transfer between metals and non-metals, while covalent bonds form through electron sharing between non-metals."],
+                  "hints": ["Think about electron behavior."]
+                },
+                {
+                  "question": "Why do ionic compounds conduct electricity when dissolved in water?",
+                  "acceptable_answers": ["Because they dissociate into free-moving ions that can carry electric current."],
+                  "hints": ["Think about charged particles."]
+                },
+                {
+                  "question": "What determines the type of bond formed between atoms?",
+                  "acceptable_answers": ["The difference in electronegativity between the atoms and their positions in the periodic table."],
+                  "hints": ["Think about electron attraction."]
+                },
+                {
+                  "question": "Why are metals good conductors of electricity?",
+                  "acceptable_answers": ["Due to their metallic bonds, which allow free movement of electrons."],
+                  "hints": ["Think about electron mobility."]
+                },
+                {
+                  "question": "How does a polar covalent bond differ from a non-polar covalent bond?",
+                  "acceptable_answers": ["In polar covalent bonds, electrons are shared unequally due to different electronegativities, while in non-polar bonds, electrons are shared equally."],
+                  "hints": ["Think about electron distribution."]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Solutions",
+          "concepts": [
+            {
+              "name": "Types and Properties of Solutions",
+              "summary": "Solutions are homogeneous mixtures of two or more substances. Understanding solutions is important for many chemical processes and biological systems.",
+              "steps": [
+                "Define solution, solute, and solvent.",
+                "Explain different types of solutions (solid, liquid, gas).",
+                "Describe factors affecting solubility.",
+                "Explain concentration and its units.",
+                "Describe methods of expressing concentration.",
+                "Explain colligative properties of solutions."
+              ],
+              "questions": [
+                {
+                  "question": "What is a solution? Give an example.",
+                  "acceptable_answers": ["A homogeneous mixture of two or more substances. Example: salt water."],
+                  "hints": ["Think about mixing substances."]
+                },
+                {
+                  "question": "How does temperature affect solubility?",
+                  "acceptable_answers": ["For most solids, solubility increases with temperature; for gases, solubility decreases with temperature."],
+                  "hints": ["Think about molecular motion."]
+                },
+                {
+                  "question": "What is molarity?",
+                  "acceptable_answers": ["The number of moles of solute per liter of solution."],
+                  "hints": ["Think about concentration units."]
+                },
+                {
+                  "question": "Why do solutions have lower freezing points than pure solvents?",
+                  "acceptable_answers": ["Due to colligative properties, where the presence of solute particles interferes with the formation of the solid phase."],
+                  "hints": ["Think about freezing point depression."]
+                },
+                {
+                  "question": "What is the difference between a saturated and unsaturated solution?",
+                  "acceptable_answers": ["A saturated solution contains the maximum amount of solute that can dissolve at a given temperature, while an unsaturated solution can dissolve more solute."],
+                  "hints": ["Think about dissolving capacity."]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Chemical Kinetics",
+          "concepts": [
+            {
+              "name": "Rate of Chemical Reactions",
+              "summary": "Chemical kinetics studies the rates of chemical reactions and the factors that affect them. Understanding reaction rates is crucial for industrial processes and biological systems.",
+              "steps": [
+                "Define rate of reaction and its units.",
+                "Explain factors affecting reaction rate: temperature, concentration, surface area, catalysts.",
+                "Describe collision theory.",
+                "Explain activation energy.",
+                "Describe methods of measuring reaction rates.",
+                "Explain the role of catalysts in reactions."
+              ],
+              "questions": [
+                {
+                  "question": "What factors affect the rate of a chemical reaction?",
+                  "acceptable_answers": ["Temperature, concentration, surface area, presence of catalysts, and pressure (for gases)."],
+                  "hints": ["Think about molecular collisions."]
+                },
+                {
+                  "question": "How does a catalyst speed up a reaction?",
+                  "acceptable_answers": ["By providing an alternative reaction pathway with lower activation energy."],
+                  "hints": ["Think about energy barriers."]
+                },
+                {
+                  "question": "What is activation energy?",
+                  "acceptable_answers": ["The minimum energy required for a reaction to occur."],
+                  "hints": ["Think about energy threshold."]
+                },
+                {
+                  "question": "Why does increasing temperature increase reaction rate?",
+                  "acceptable_answers": ["Because it increases the kinetic energy of particles, leading to more frequent and effective collisions."],
+                  "hints": ["Think about particle movement."]
+                },
+                {
+                  "question": "How can you measure the rate of a reaction?",
+                  "acceptable_answers": ["By measuring changes in concentration, volume, mass, or color over time."],
+                  "hints": ["Think about observable changes."]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Biology",
+      "subtopics": [
+        {
+          "name": "Human Nervous and Glandular System",
+          "concepts": [
+            {
+              "name": "Structure and Function of Nervous System",
+              "summary": "The nervous system is the body's control center, consisting of the brain, spinal cord, and nerves. It coordinates all body activities and responds to internal and external stimuli. The endocrine system, through glands and hormones, regulates long-term processes like growth and metabolism.",
+              "steps": [
+                "Describe the central nervous system (brain and spinal cord) and peripheral nervous system (nerves).",
+                "Explain the functions of different parts of the brain: cerebrum (thinking, memory), cerebellum (balance, coordination), medulla (vital functions).",
+                "Describe the structure and function of neurons (nerve cells).",
+                "Explain how nerve impulses travel through the body.",
+                "List major endocrine glands and their hormones: pituitary (growth hormone), thyroid (thyroxine), pancreas (insulin), adrenal (adrenaline).",
+                "Describe how hormones affect target organs and maintain homeostasis."
+              ],
+              "questions": [
+                {
+                  "question": "What are the main parts of the central nervous system?",
+                  "acceptable_answers": ["Brain and spinal cord."],
+                  "hints": ["Think about the main control center."]
+                },
+                {
+                  "question": "What is the function of the cerebellum?",
+                  "acceptable_answers": ["It controls balance, coordination, and fine muscle movements."],
+                  "hints": ["Think about sports and precise movements."]
+                },
+                {
+                  "question": "How do nerve impulses travel through the body?",
+                  "acceptable_answers": ["Through neurons, from dendrites to axon terminals, using electrical and chemical signals."],
+                  "hints": ["Think about the path of signals."]
+                },
+                {
+                  "question": "What happens when adrenaline is released into the bloodstream?",
+                  "acceptable_answers": ["It increases heart rate, breathing rate, and blood flow to muscles, preparing the body for 'fight or flight'."],
+                  "hints": ["Think about emergency situations."]
+                },
+                {
+                  "question": "Why is the pituitary gland called the 'master gland'?",
+                  "acceptable_answers": ["Because it controls other endocrine glands and produces hormones that regulate growth and other body functions."],
+                  "hints": ["Think about control and regulation."]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Chromosome and Sex Determination",
+          "concepts": [
+            {
+              "name": "Chromosomes, Genes, and Sex Determination",
+              "summary": "Chromosomes are thread-like structures in the nucleus that carry genetic information. Genes are segments of DNA that control specific traits. Sex determination in humans is controlled by X and Y chromosomes, with XX producing females and XY producing males.",
+              "steps": [
+                "Define chromosome and gene, explaining their relationship to DNA.",
+                "Describe the structure of chromosomes (chromatids, centromere).",
+                "Explain how sex is determined in humans (XX for female, XY for male).",
+                "Describe inheritance of sex-linked traits (e.g., color blindness, hemophilia).",
+                "Explain the role of genes in determining physical and behavioral traits.",
+                "Discuss genetic disorders and their inheritance patterns."
+              ],
+              "questions": [
+                {
+                  "question": "What determines the sex of a human baby?",
+                  "acceptable_answers": ["The combination of sex chromosomes: XX for female, XY for male."],
+                  "hints": ["Think about chromosome pairs."]
+                },
+                {
+                  "question": "Why are sex-linked disorders more common in males?",
+                  "acceptable_answers": ["Because males have only one X chromosome, so they will show the trait if they inherit the affected X chromosome."],
+                  "hints": ["Think about recessive traits on X chromosome."]
+                },
+                {
+                  "question": "What is the difference between a gene and a chromosome?",
+                  "acceptable_answers": ["A gene is a segment of DNA that codes for a specific trait, while a chromosome is a structure made of DNA and proteins that contains many genes."],
+                  "hints": ["Think about the relationship between parts and whole."]
+                },
+                {
+                  "question": "How do chromosomes ensure genetic continuity?",
+                  "acceptable_answers": ["Through the process of cell division (mitosis and meiosis), where chromosomes are copied and distributed to new cells."],
+                  "hints": ["Think about cell reproduction."]
+                },
+                {
+                  "question": "What is the role of genes in inheritance?",
+                  "acceptable_answers": ["Genes carry instructions for making proteins that determine traits, and these instructions are passed from parents to offspring."],
+                  "hints": ["Think about traits and characteristics."]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Reproduction",
+          "concepts": [
+            {
+              "name": "Types and Process of Reproduction",
+              "summary": "Reproduction is the process of producing new individuals. It can be asexual (one parent, identical offspring) or sexual (two parents, genetic variation). Human reproduction involves complex processes of gamete formation, fertilization, and development.",
+              "steps": [
+                "Compare asexual and sexual reproduction, giving examples of each.",
+                "Describe the human reproductive system (male and female).",
+                "Explain the process of fertilization and early development.",
+                "Describe the stages of pregnancy and birth.",
+                "Discuss the importance of reproductive health and family planning.",
+                "Explain the role of hormones in reproduction."
+              ],
+              "questions": [
+                {
+                  "question": "What is the difference between asexual and sexual reproduction?",
+                  "acceptable_answers": ["Asexual reproduction involves one parent and produces identical offspring, while sexual reproduction involves two parents and produces genetically diverse offspring."],
+                  "hints": ["Think about number of parents and genetic variation."]
+                },
+                {
+                  "question": "Where does fertilization occur in humans?",
+                  "acceptable_answers": ["In the fallopian tube, where the sperm meets the egg."],
+                  "hints": ["Think about the path of the egg."]
+                },
+                {
+                  "question": "What is the role of the placenta during pregnancy?",
+                  "acceptable_answers": ["It provides oxygen and nutrients to the fetus and removes waste products."],
+                  "hints": ["Think about exchange of materials."]
+                },
+                {
+                  "question": "Why is genetic variation important in sexual reproduction?",
+                  "acceptable_answers": ["It increases the chances of survival in changing environments and helps prevent genetic disorders."],
+                  "hints": ["Think about adaptation and evolution."]
+                },
+                {
+                  "question": "What hormones control the menstrual cycle?",
+                  "acceptable_answers": ["Estrogen and progesterone, produced by the ovaries."],
+                  "hints": ["Think about female reproductive hormones."]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Blood Circulation in Human Body",
+          "concepts": [
+            {
+              "name": "Structure and Function of Heart and Blood Vessels",
+              "summary": "The circulatory system consists of the heart, blood vessels, and blood. It transports oxygen, nutrients, and waste products throughout the body. The heart pumps blood through arteries, veins, and capillaries, ensuring all cells receive what they need.",
+              "steps": [
+                "Describe the structure of the heart (chambers, valves, blood vessels).",
+                "Explain the cardiac cycle (heartbeat).",
+                "Describe the types of blood vessels and their functions.",
+                "Explain the composition of blood (plasma, red cells, white cells, platelets).",
+                "Describe the process of blood clotting.",
+                "Explain the importance of blood groups and transfusions."
+              ],
+              "questions": [
+                {
+                  "question": "What are the main functions of the circulatory system?",
+                  "acceptable_answers": ["Transport of oxygen, nutrients, and waste products; regulation of body temperature; protection against disease."],
+                  "hints": ["Think about what blood carries."]
+                },
+                {
+                  "question": "How does the heart pump blood?",
+                  "acceptable_answers": ["Through rhythmic contractions (systole) and relaxations (diastole) of its chambers, coordinated by electrical signals."],
+                  "hints": ["Think about the heartbeat cycle."]
+                },
+                {
+                  "question": "What is the difference between arteries and veins?",
+                  "acceptable_answers": ["Arteries carry blood away from the heart under high pressure, while veins carry blood back to the heart under lower pressure."],
+                  "hints": ["Think about direction and pressure."]
+                },
+                {
+                  "question": "Why is blood clotting important?",
+                  "acceptable_answers": ["It prevents excessive blood loss when blood vessels are damaged."],
+                  "hints": ["Think about injuries and healing."]
+                },
+                {
+                  "question": "What happens during a heart attack?",
+                  "acceptable_answers": ["Blood flow to part of the heart muscle is blocked, causing damage to the heart tissue."],
+                  "hints": ["Think about blocked blood vessels."]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Heredity",
+          "concepts": [
+            {
+              "name": "Principles of Heredity and Mendel's Laws",
+              "summary": "Heredity is the passing of traits from parents to offspring. Gregor Mendel's experiments with pea plants established the basic principles of inheritance, including dominance, segregation, and independent assortment.",
+              "steps": [
+                "Explain Mendel's experiments and his laws of inheritance.",
+                "Define key terms: gene, allele, dominant, recessive, genotype, phenotype.",
+                "Describe how traits are inherited (Punnett squares).",
+                "Explain the inheritance of blood groups.",
+                "Discuss genetic disorders and their inheritance patterns.",
+                "Explain the role of environment in gene expression."
+              ],
+              "questions": [
+                {
+                  "question": "What are Mendel's laws of inheritance?",
+                  "acceptable_answers": ["Law of Segregation (alleles separate during gamete formation) and Law of Independent Assortment (genes for different traits are inherited independently)."],
+                  "hints": ["Think about how traits are passed on."]
+                },
+                {
+                  "question": "What is the difference between genotype and phenotype?",
+                  "acceptable_answers": ["Genotype is the genetic makeup (e.g., BB, Bb, bb), while phenotype is the physical expression of traits (e.g., brown eyes, blue eyes)."],
+                  "hints": ["Think about genes vs. appearance."]
+                },
+                {
+                  "question": "How are blood groups inherited?",
+                  "acceptable_answers": ["Through multiple alleles (A, B, O) where A and B are codominant, and O is recessive."],
+                  "hints": ["Think about dominant and recessive alleles."]
+                },
+                {
+                  "question": "What is a carrier of a genetic disorder?",
+                  "acceptable_answers": ["A person who has one copy of a recessive allele for a genetic disorder but does not show symptoms."],
+                  "hints": ["Think about recessive traits."]
+                },
+                {
+                  "question": "How can environment affect gene expression?",
+                  "acceptable_answers": ["Environmental factors like nutrition, temperature, and chemicals can influence how genes are expressed, even if the genetic code remains the same."],
+                  "hints": ["Think about nature vs. nurture."]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Invertebrates",
+          "concepts": [
+            {
+              "name": "Types and Characteristics of Invertebrates",
+              "summary": "Invertebrates are animals without a backbone. They include a diverse group of organisms such as insects, mollusks, worms, and arthropods. They play vital roles in ecosystems and have adapted to various environments.",
+              "steps": [
+                "List major groups of invertebrates and their characteristics.",
+                "Describe the body structure and adaptations of each group.",
+                "Explain their ecological roles (pollination, decomposition, food chain).",
+                "Describe their economic importance (beneficial and harmful).",
+                "Explain their role in maintaining ecosystem balance.",
+                "Discuss conservation of invertebrate species."
+              ],
+              "questions": [
+                {
+                  "question": "What are the main groups of invertebrates?",
+                  "acceptable_answers": ["Arthropods (insects, spiders), Mollusks (snails, clams), Annelids (earthworms), Cnidarians (jellyfish), Echinoderms (starfish)."],
+                  "hints": ["Think about different body structures."]
+                },
+                {
+                  "question": "Why are earthworms important for soil?",
+                  "acceptable_answers": ["They aerate the soil, improve drainage, and decompose organic matter, making nutrients available to plants."],
+                  "hints": ["Think about soil health."]
+                },
+                {
+                  "question": "How do insects contribute to pollination?",
+                  "acceptable_answers": ["They transfer pollen from one flower to another while collecting nectar, enabling plant reproduction."],
+                  "hints": ["Think about flower reproduction."]
+                },
+                {
+                  "question": "What adaptations help insects survive?",
+                  "acceptable_answers": ["Exoskeleton for protection, wings for flight, compound eyes for vision, and specialized mouthparts for feeding."],
+                  "hints": ["Think about survival needs."]
+                },
+                {
+                  "question": "Why is invertebrate conservation important?",
+                  "acceptable_answers": ["They are essential for ecosystem functioning, pollination, decomposition, and as food for other animals."],
+                  "hints": ["Think about ecosystem balance."]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Environment Pollution and Management",
+          "concepts": [
+            {
+              "name": "Types, Causes, and Control of Pollution",
+              "summary": "Pollution is the introduction of harmful substances into the environment. It can be air, water, soil, or noise pollution. Effective management requires understanding causes, effects, and implementing control measures.",
+              "steps": [
+                "Define different types of pollution and their sources.",
+                "Explain the effects of pollution on health and environment.",
+                "Describe methods of pollution control and prevention.",
+                "Explain the importance of waste management.",
+                "Discuss the role of individuals and government in pollution control.",
+                "Describe sustainable practices for environmental protection."
+              ],
+              "questions": [
+                {
+                  "question": "What are the main types of pollution?",
+                  "acceptable_answers": ["Air pollution, water pollution, soil pollution, noise pollution, and thermal pollution."],
+                  "hints": ["Think about different environmental media."]
+                },
+                {
+                  "question": "How does air pollution affect human health?",
+                  "acceptable_answers": ["It can cause respiratory diseases, heart problems, and other health issues."],
+                  "hints": ["Think about breathing and lungs."]
+                },
+                {
+                  "question": "What are the main sources of water pollution?",
+                  "acceptable_answers": ["Industrial waste, agricultural runoff, sewage, and oil spills."],
+                  "hints": ["Think about human activities."]
+                },
+                {
+                  "question": "How can individuals help reduce pollution?",
+                  "acceptable_answers": ["By reducing waste, recycling, using public transport, and conserving energy."],
+                  "hints": ["Think about daily activities."]
+                },
+                {
+                  "question": "What is sustainable development?",
+                  "acceptable_answers": ["Development that meets present needs without compromising the ability of future generations to meet their needs."],
+                  "hints": ["Think about long-term impact."]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Cell Biology",
+          "concepts": [
+            {
+              "name": "Cell Structure and Function",
+              "summary": "Cells are the basic units of life. Understanding cell structure and function is fundamental to biology, as all living organisms are made of cells.",
+              "steps": [
+                "Describe the cell theory.",
+                "Compare plant and animal cells.",
+                "Explain the function of cell organelles.",
+                "Describe cell membrane structure and function.",
+                "Explain cell division (mitosis and meiosis).",
+                "Describe cellular transport mechanisms."
+              ],
+              "questions": [
+                {
+                  "question": "What are the main differences between plant and animal cells?",
+                  "acceptable_answers": ["Plant cells have cell walls, chloroplasts, and large vacuoles, while animal cells do not."],
+                  "hints": ["Think about cell structure."]
+                },
+                {
+                  "question": "What is the function of mitochondria?",
+                  "acceptable_answers": ["To produce energy (ATP) through cellular respiration."],
+                  "hints": ["Think about energy production."]
+                },
+                {
+                  "question": "How does the cell membrane maintain homeostasis?",
+                  "acceptable_answers": ["By controlling what enters and exits the cell through selective permeability."],
+                  "hints": ["Think about cell boundaries."]
+                },
+                {
+                  "question": "What is the difference between mitosis and meiosis?",
+                  "acceptable_answers": ["Mitosis produces two identical daughter cells, while meiosis produces four genetically different cells for reproduction."],
+                  "hints": ["Think about cell division purpose."]
+                },
+                {
+                  "question": "How do cells communicate with each other?",
+                  "acceptable_answers": ["Through chemical signals, hormones, and direct contact between cells."],
+                  "hints": ["Think about cell signaling."]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Plant Physiology",
+          "concepts": [
+            {
+              "name": "Plant Growth and Development",
+              "summary": "Plants have unique physiological processes that enable them to grow, reproduce, and respond to their environment. Understanding these processes is crucial for agriculture and environmental science.",
+              "steps": [
+                "Explain photosynthesis and its importance.",
+                "Describe plant growth regulators (hormones).",
+                "Explain plant responses to stimuli (tropisms).",
+                "Describe plant reproduction.",
+                "Explain nutrient uptake and transport.",
+                "Describe plant adaptations to different environments."
+              ],
+              "questions": [
+                {
+                  "question": "What is photosynthesis?",
+                  "acceptable_answers": ["The process by which plants convert light energy into chemical energy (glucose) using carbon dioxide and water."],
+                  "hints": ["Think about energy conversion."]
+                },
+                {
+                  "question": "How do plants respond to light?",
+                  "acceptable_answers": ["Through phototropism, where they grow towards light to maximize photosynthesis."],
+                  "hints": ["Think about plant movement."]
+                },
+                {
+                  "question": "What is the role of auxins in plant growth?",
+                  "acceptable_answers": ["They promote cell elongation, root formation, and control plant responses to light and gravity."],
+                  "hints": ["Think about plant hormones."]
+                },
+                {
+                  "question": "How do plants transport water and nutrients?",
+                  "acceptable_answers": ["Through xylem (water and minerals) and phloem (sugars and other nutrients)."],
+                  "hints": ["Think about vascular tissue."]
+                },
+                {
+                  "question": "What adaptations help plants survive in dry conditions?",
+                  "acceptable_answers": ["Thick cuticles, reduced leaf surface area, water storage tissues, and deep root systems."],
+                  "hints": ["Think about water conservation."]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Human Physiology",
+          "concepts": [
+            {
+              "name": "Body Systems and Homeostasis",
+              "summary": "The human body consists of several systems that work together to maintain homeostasis. Understanding these systems is essential for health and medicine.",
+              "steps": [
+                "Describe the digestive system and nutrient absorption.",
+                "Explain the respiratory system and gas exchange.",
+                "Describe the excretory system and waste removal.",
+                "Explain the immune system and disease defense.",
+                "Describe the skeletal and muscular systems.",
+                "Explain the role of hormones in body regulation."
+              ],
+              "questions": [
+                {
+                  "question": "How does the digestive system break down food?",
+                  "acceptable_answers": ["Through mechanical and chemical digestion, involving enzymes and various organs like the stomach and intestines."],
+                  "hints": ["Think about food processing."]
+                },
+                {
+                  "question": "What is the role of the respiratory system?",
+                  "acceptable_answers": ["To exchange oxygen and carbon dioxide between the body and environment, and to maintain blood pH."],
+                  "hints": ["Think about gas exchange."]
+                },
+                {
+                  "question": "How does the immune system protect the body?",
+                  "acceptable_answers": ["Through physical barriers, white blood cells, antibodies, and the inflammatory response."],
+                  "hints": ["Think about disease defense."]
+                },
+                {
+                  "question": "What is homeostasis?",
+                  "acceptable_answers": ["The maintenance of stable internal conditions despite external changes."],
+                  "hints": ["Think about body balance."]
+                },
+                {
+                  "question": "How do muscles and bones work together?",
+                  "acceptable_answers": ["Muscles attach to bones via tendons, and their contraction causes movement at joints."],
+                  "hints": ["Think about movement."]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Geology and Astronomy",
+      "subtopics": [
+        {
+          "name": "History of Earth",
+          "concepts": [
+            {
+              "name": "Formation and Structure of Earth",
+              "summary": "Earth formed about 4.5 billion years ago from dust and gas. It has layers: crust, mantle, core. Geological processes shape the surface.",
+              "steps": [
+                "Describe the formation of Earth.",
+                "List and explain Earth's layers.",
+                "Discuss geological processes (earthquakes, volcanoes, erosion)."
+              ],
+              "questions": [
+                {"question": "Name the three main layers of the Earth.", "acceptable_answers": ["Crust, mantle, core."], "hints": ["Surface to center."]},
+                {"question": "What causes earthquakes?", "acceptable_answers": ["Sudden movement of tectonic plates."], "hints": ["Earth's crust."]}
+              ]
+            }
+          ]
+        },
+        {
+          "name": "The Atmosphere",
+          "concepts": [
+            {
+              "name": "Layers, Composition, and Importance of Atmosphere",
+              "summary": "The atmosphere is a layer of gases around Earth. Layers: troposphere, stratosphere, mesosphere, thermosphere, exosphere. It protects life and regulates climate.",
+              "steps": [
+                "List the layers of the atmosphere.",
+                "Describe the composition of air (nitrogen, oxygen, etc.).",
+                "Explain the importance of the atmosphere (protection, weather, breathing)."
+              ],
+              "questions": [
+                {"question": "Name two main gases in the atmosphere.", "acceptable_answers": ["Nitrogen, oxygen."], "hints": ["Breathing air."]},
+                {"question": "Which layer contains the ozone layer?", "acceptable_answers": ["Stratosphere."], "hints": ["UV protection."]}
+              ]
+            }
+          ]
+        },
+        {
+          "name": "The Universe",
+          "concepts": [
+            {
+              "name": "Solar System, Stars, and Galaxies",
+              "summary": "The universe contains billions of galaxies. The solar system includes the Sun, planets, moons, asteroids, and comets. Stars are huge balls of gas; galaxies are collections of stars.",
+              "steps": [
+                "Describe the structure of the solar system.",
+                "Explain the life cycle of a star.",
+                "Discuss types of galaxies and their features."
+              ],
+              "questions": [
+                {"question": "Name the largest planet in the solar system.", "acceptable_answers": ["Jupiter."], "hints": ["Gas giant."]},
+                {"question": "What is a galaxy?", "acceptable_answers": ["A large collection of stars, gas, and dust bound together by gravity."], "hints": ["Milky Way."]}
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Earth's Resources",
+          "concepts": [
+            {
+              "name": "Natural Resources and Conservation",
+              "summary": "Earth's resources include minerals, fossil fuels, water, and renewable energy sources. Understanding these resources and their sustainable use is crucial for environmental conservation.",
+              "steps": [
+                "List different types of natural resources.",
+                "Explain the formation of fossil fuels.",
+                "Describe methods of resource extraction.",
+                "Explain the importance of resource conservation.",
+                "Describe renewable energy sources.",
+                "Discuss sustainable resource management."
+              ],
+              "questions": [
+                {
+                  "question": "What are the main types of natural resources?",
+                  "acceptable_answers": ["Renewable (solar, wind, water) and non-renewable (fossil fuels, minerals) resources."],
+                  "hints": ["Think about resource availability."]
+                },
+                {
+                  "question": "How are fossil fuels formed?",
+                  "acceptable_answers": ["From the remains of ancient plants and animals that were buried and subjected to heat and pressure over millions of years."],
+                  "hints": ["Think about ancient life."]
+                },
+                {
+                  "question": "Why is water conservation important?",
+                  "acceptable_answers": ["Because fresh water is a limited resource essential for life, and many regions face water scarcity."],
+                  "hints": ["Think about water availability."]
+                },
+                {
+                  "question": "What are the advantages of renewable energy?",
+                  "acceptable_answers": ["They are sustainable, produce less pollution, and help reduce dependence on fossil fuels."],
+                  "hints": ["Think about environmental impact."]
+                },
+                {
+                  "question": "How can we practice sustainable resource management?",
+                  "acceptable_answers": ["Through recycling, reducing consumption, using renewable resources, and implementing conservation practices."],
+                  "hints": ["Think about long-term use."]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Weather and Climate",
+          "concepts": [
+            {
+              "name": "Weather Systems and Climate Change",
+              "summary": "Weather refers to short-term atmospheric conditions, while climate describes long-term patterns. Understanding these concepts is essential for predicting weather and addressing climate change.",
+              "steps": [
+                "Define weather and climate.",
+                "Explain factors affecting weather.",
+                "Describe weather forecasting methods.",
+                "Explain climate zones and their characteristics.",
+                "Describe evidence of climate change.",
+                "Discuss measures to address climate change."
+              ],
+              "questions": [
+                {
+                  "question": "What is the difference between weather and climate?",
+                  "acceptable_answers": ["Weather refers to short-term atmospheric conditions, while climate describes long-term weather patterns in a region."],
+                  "hints": ["Think about time scale."]
+                },
+                {
+                  "question": "How do air pressure and wind affect weather?",
+                  "acceptable_answers": ["Air pressure differences create wind, which moves weather systems and affects temperature and precipitation patterns."],
+                  "hints": ["Think about air movement."]
+                },
+                {
+                  "question": "What are the main climate zones?",
+                  "acceptable_answers": ["Tropical, temperate, and polar zones, each with distinct temperature and precipitation patterns."],
+                  "hints": ["Think about latitude."]
+                },
+                {
+                  "question": "What evidence supports climate change?",
+                  "acceptable_answers": ["Rising global temperatures, melting ice caps, sea level rise, and changes in precipitation patterns."],
+                  "hints": ["Think about environmental changes."]
+                },
+                {
+                  "question": "How can we reduce our impact on climate change?",
+                  "acceptable_answers": ["By reducing greenhouse gas emissions, using renewable energy, and practicing sustainable living."],
+                  "hints": ["Think about carbon footprint."]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Space Science",
+          "concepts": [
+            {
+              "name": "Solar System and Beyond",
+              "summary": "Space science explores the universe beyond Earth, including the solar system, stars, galaxies, and the evolution of the universe. Understanding these concepts helps us appreciate our place in the cosmos.",
+              "steps": [
+                "Describe the structure of the solar system.",
+                "Explain the life cycle of stars.",
+                "Describe different types of galaxies.",
+                "Explain the Big Bang theory.",
+                "Describe space exploration and its importance.",
+                "Discuss the search for extraterrestrial life."
+              ],
+              "questions": [
+                {
+                  "question": "What are the main components of the solar system?",
+                  "acceptable_answers": ["The Sun, planets, moons, asteroids, comets, and dwarf planets."],
+                  "hints": ["Think about celestial bodies."]
+                },
+                {
+                  "question": "How do stars form and evolve?",
+                  "acceptable_answers": ["Stars form from clouds of gas and dust, undergo nuclear fusion, and eventually die, sometimes becoming supernovae or black holes."],
+                  "hints": ["Think about stellar life cycle."]
+                },
+                {
+                  "question": "What is the Big Bang theory?",
+                  "acceptable_answers": ["The theory that the universe began as a hot, dense point and has been expanding ever since."],
+                  "hints": ["Think about universe origin."]
+                },
+                {
+                  "question": "Why is space exploration important?",
+                  "acceptable_answers": ["It advances scientific knowledge, develops new technologies, and helps us understand Earth's place in the universe."],
+                  "hints": ["Think about scientific progress."]
+                },
+                {
+                  "question": "What methods do scientists use to search for extraterrestrial life?",
+                  "acceptable_answers": ["By studying exoplanets, searching for radio signals, and analyzing conditions that could support life."],
+                  "hints": ["Think about life requirements."]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

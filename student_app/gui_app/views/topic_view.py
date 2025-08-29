@@ -18,7 +18,9 @@ class TopicView(ctk.CTkFrame):
         # Add topic buttons to scrollable frame
         self.topic_buttons = []
         for topic in topics:
-            btn = ctk.CTkButton(self.scrollable_frame, text=topic, width=220, command=lambda t=topic: self.on_select(t))
+            # When receiving flattened entries, prefer 'label' for display and pass the full object back
+            label = topic.get("label") if isinstance(topic, dict) and "label" in topic else (topic.get("name") if isinstance(topic, dict) else topic)
+            btn = ctk.CTkButton(self.scrollable_frame, text=label, width=220, command=lambda t=topic: self.on_select(t))
             btn.pack(pady=8)
             self.topic_buttons.append(btn)
 
