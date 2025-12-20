@@ -433,6 +433,13 @@ python -m student_app.gui_app.main_window
 
 # Run tests
 pytest tests/
+
+# Fast launch (packaged scripts)
+scripts/release/run_cli.sh   # or run_cli.bat on Windows
+scripts/release/run_gui.sh   # or run_gui.bat on Windows
+
+# Build offline bundle (models + content + Chroma)
+python scripts/release/build_offline_bundle.py
 ```
 
 ## 🔄 Maintenance

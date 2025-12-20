@@ -1,3 +1,35 @@
+import os
+import pytest
+from pathlib import Path
+
+from ai_model.model_utils.model_handler import ModelHandler
+
+
+@pytest.fixture(scope="session")
+def model_path():
+    base = Path(__file__).resolve().parents[1]
+    path = base / "satya_data" / "models" / "phi_1_5"
+    if not path.exists():
+        pytest.skip("Model path missing; skipping model handler tests.")
+    return path
+
+
+def test_model_info_defaults(model_path):
+    handler = ModelHandler(str(model_path), enable_streaming=False)
+    info = handler.get_model_info()
+    assert info["context_size"] <= 2048
+    assert info["threads"] >= 1
+
+
+def test_answer_length_control(model_path):
+    handler = ModelHandler(str(model_path), enable_streaming=False)
+    q = "Define algorithm."
+    ctx = "An algorithm is a step-by-step set of instructions."
+    ans_short, _ = handler.get_answer(q, ctx, "very_short")
+    ans_long, _ = handler.get_answer(q, ctx, "long")
+    assert isinstance(ans_short, str)
+    assert isinstance(ans_long, str)
+    assert len(ans_long) >= len(ans_short)
 """
 Test suite for the ModelHandler class.
 """

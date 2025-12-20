@@ -26,15 +26,19 @@ class ModelHandler:
         phi15_handler (Phi15Handler): Handler for Phi 1.5 model
     """
     
-    def __init__(self, model_path: str):
+    def __init__(self, model_path: str, enable_streaming: bool = False):
         """
         Initialize the lightweight model handler.
-        
+
         Args:
-            model_path (str): Path to model directory
+            model_path (str): Path to model directory.
+            enable_streaming: Enable token streaming when backend supports it.
         """
         self.model_path = model_path
-        self.phi15_handler = Phi15Handler(model_path)
+        self.phi15_handler = Phi15Handler(
+            model_path=model_path,
+            enable_streaming=enable_streaming,
+        )
         
         # Pre-load model for efficiency
         try:

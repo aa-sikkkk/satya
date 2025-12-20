@@ -13,6 +13,7 @@ from typing import Dict, List, Optional, Tuple, Any
 from pathlib import Path
 import chromadb
 from datetime import datetime
+from collections import OrderedDict
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -28,16 +29,20 @@ class RAGRetrievalEngine:
         collections: Available ChromaDB collections
     """
     
-    def __init__(self, chroma_db_path: str = "satya_data/chroma_db"):
+    def __init__(self, chroma_db_path: str = "satya_data/chroma_db", cache_size: int = 128):
         """
         Initialize the RAG retrieval engine.
-        
+
         Args:
             chroma_db_path: Path to ChromaDB database
+            cache_size: Max entries for query and embedding caches.
         """
         self.chroma_db_path = Path(chroma_db_path)
         self.chroma_client = None
         self.collections = {}
+        self.cache_size = cache_size
+        self._query_cache: OrderedDict[str, Dict[str, Any]] = OrderedDict()
+        self._embedding_cache: OrderedDict[str, np.ndarray] = OrderedDict()
         
         # Initialize ChromaDB
         self._initialize_chromadb()
@@ -85,11 +90,13 @@ class RAGRetrievalEngine:
         Returns:
             Text embedding vector
         """
-        if self.embedding_model == "hash_based":
-            return self._generate_hash_embedding(text)
-        else:
-            # Placeholder for Phi 1.5 embeddings
-            return self._generate_hash_embedding(text)
+        cached = self._embedding_cache.get(text)
+        if cached is not None:
+            return cached
+
+        embedding = self._generate_hash_embedding(text)
+        self._remember(self._embedding_cache, text, embedding)
+        return embedding
     
     def _prepare_query_embeddings(self, embedding: Any) -> List[List[float]]:
         """Normalize a single or batched embedding into the format Chroma expects.
@@ -323,15 +330,19 @@ class RAGRetrievalEngine:
     def retrieve_relevant_content(self, query: str, max_results: int = 5) -> Dict:
         """
         Retrieve relevant content using semantic search.
-        
+
         Args:
             query: Search query
             max_results: Maximum number of results to return
-            
+
         Returns:
             Dictionary with chunks and metadata
         """
         try:
+            cached = self._query_cache.get(query)
+            if cached:
+                return cached
+
             # Generate query embedding
             query_embedding = self.generate_embedding(query)
             
@@ -345,7 +356,7 @@ class RAGRetrievalEngine:
                         # Query the collection
                         results = collection.query(
                             query_embeddings=self._prepare_query_embeddings(query_embedding),
-                            n_results=max_results,
+                            n_results=max_results * 2,
                             include=['documents', 'metadatas', 'distances']
                         )
                         hit_count = len(results['documents'][0]) if results.get('documents') and results['documents'] and results['documents'][0] else 0
@@ -353,10 +364,14 @@ class RAGRetrievalEngine:
                         
                         if results['documents']:
                             for i, doc in enumerate(results['documents'][0]):
+                                distance = results['distances'][0][i] if results['distances'] else 1.0
+                                # Filter aggressive distance to reduce noisy context
+                                if distance is None or distance > 0.65:
+                                    continue
                                 result = {
                                     'content': doc,
                                     'metadata': results['metadatas'][0][i] if results['metadatas'] else {},
-                                    'distance': results['distances'][0][i] if results['distances'] else 0.0,
+                                    'distance': distance,
                                     'collection': collection_name
                                 }
                                 all_results.append(result)
@@ -383,7 +398,10 @@ class RAGRetrievalEngine:
             # Backstop: if nothing found (or distances missing), try a lenient include
             if not all_results:
                 logger.info("RAG: no results from vector or keyword fallback across collections")
-                return {'chunks': [], 'total_found': 0, 'query': query}
+                empty = {'chunks': [], 'total_found': 0, 'query': query}
+                self._remember(self._query_cache, query, empty)
+                return empty
+
             top_results = all_results[:max_results]
             
             # Convert to chunks format
@@ -398,16 +416,24 @@ class RAGRetrievalEngine:
                 }
                 chunks.append(chunk)
             logger.debug(f"RAG: returning {len(chunks)} chunks (max_results={max_results})")
-            
-            return {
+            response = {
                 'chunks': chunks,
                 'total_found': len(chunks),
                 'query': query
             }
+            self._remember(self._query_cache, query, response)
+            return response
             
         except Exception as e:
             logger.error(f"Error in retrieve_relevant_content: {e}")
             return {'chunks': [], 'total_found': 0, 'query': query, 'error': str(e)}
+
+    def _remember(self, cache: OrderedDict, key: str, value: Any) -> None:
+        """LRU helper for small in-memory caches."""
+        cache[key] = value
+        cache.move_to_end(key)
+        if len(cache) > self.cache_size:
+            cache.popitem(last=False)
     
     def get_statistics(self) -> Dict:
         """Get RAG system statistics."""

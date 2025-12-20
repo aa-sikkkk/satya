@@ -554,7 +554,8 @@ Type 'back' to return to previous menu
                     if (not base_context or len(base_context.strip()) == 0):
                         cs = concept_summary or self._last_concept_summary
                         if cs:
-                            base_context = get_most_relevant_sentence(cs, q_text)
+                            # Fast: use first 240 chars instead of sentence matching
+                            base_context = cs[:240]
                     base_context = (base_context or "").strip()[:240]
                     # Ask with the actual question to keep it on-topic
                     ask_text = (
@@ -649,33 +650,14 @@ Type 'back' to return to previous menu
                 if normalized_question != original_question:
                     console.print(f"[yellow]Note: I'll answer: '{normalized_question}'[/yellow]")
             
-            # Ask user for answer length preference
-            console.print("\n[cyan]Choose answer length:[/cyan]")
-            console.print("1. Very Short (quick fact)")
-            console.print("2. Short (basic explanation)")
-            console.print("3. Medium (detailed explanation) - [bold]Recommended[/bold]")
-            console.print("4. Long (comprehensive coverage)")
-            console.print("5. Very Long (extensive coverage)")
-            
-            length_choice = input("\nEnter choice (1-5, default 3): ").strip()
-            
-            # Map choice to length parameter
-            length_map = {
-                "1": "very_short",
-                "2": "short", 
-                "3": "medium",
-                "4": "long",
-                "5": "very_long"
-            }
-            
-            answer_length = length_map.get(length_choice, "medium")
-            console.print(f"[green]Selected: {answer_length.replace('_', ' ').title()}[/green]")
+            # Always use medium for detailed answers (optimized for speed)
+            answer_length = "medium"
             
             # Ensure model is loaded
             if not self.model_handler.phi15_handler.llm:
                 self.model_handler.phi15_handler.load_model()
                 
-            with console.status("[bold green]Thinking...[/bold green]"):
+            with console.status("[bold green]Generating detailed answer...[/bold green]"):
                 log_resource_usage("Before model inference")
                 
                 # First try to find relevant content using RAG (if available) or fallback to basic search
@@ -686,34 +668,15 @@ Type 'back' to return to previous menu
                     # Try RAG first if available
                     if self.rag_engine:
                         try:
-                            rag_results = self.rag_engine.retrieve_relevant_content(question, max_results=8)
+                            # Ultra-fast RAG retrieval - get top 2 chunks only for speed
+                            rag_results = self.rag_engine.retrieve_relevant_content(question, max_results=2)
                             rag_context = None
                             if rag_results and rag_results.get('chunks'):
-                                # Filter by distance to keep only highly relevant chunks
-                                safe_chunks = []
-                                for ch in rag_results['chunks']:
-                                    dist = ch.get('distance')
-                                    if dist is None:
-                                        # Fall back to relevance_score if distance not present
-                                        rel = ch.get('relevance_score', 0.0)
-                                        if rel >= 0.50:
-                                            safe_chunks.append(ch)
-                                    elif dist <= 0.50:
-                                        safe_chunks.append(ch)
-                                if safe_chunks:
-                                    # If too few pass threshold, backstop with top-2 by relevance
-                                    selected = safe_chunks
-                                    if len(selected) < 2:
-                                        top_any = sorted(rag_results['chunks'], key=lambda c: c.get('distance', 1.0))[:2]
-                                        ids = set(id(ch) for ch in selected)
-                                        for item in top_any:
-                                            if id(item) not in ids:
-                                                selected.append(item)
-                                            if len(selected) >= 2:
-                                                break
-                                    rag_context = "\n\n".join([ch['content'] for ch in selected])
-                                    # Trim context to reduce latency and prevent timeouts
-                                    rag_context = rag_context[:1200]
+                                # Take top chunks directly (already sorted by relevance)
+                                chunks = rag_results['chunks'][:2]
+                                rag_context = "\n\n".join([ch['content'] for ch in chunks])
+                                # Trim context aggressively for speed (matches model prompt limit)
+                                rag_context = rag_context[:600]
                             # Also try to find structured content
                             relevant_content = self.content_manager.search_content(question)
                             if not rag_context and not relevant_content:
@@ -783,32 +746,12 @@ Type 'back' to return to previous menu
                             concept = relevant_content[0]['concept']
                             concept_data = self.content_manager.get_concept(subject, topic, concept)
                             
-                            if concept_data and 'questions' in concept_data:
-                                # Try to find a matching question
-                                for q in concept_data['questions']:
-                                    if isinstance(q, dict) and 'question' in q:
-                                        # Use fuzzy matching to find similar questions
-                                        if difflib.SequenceMatcher(None, q['question'].lower(), question.lower()).ratio() > 0.6:
-                                            # Found a matching question, use its answer as context
-                                            if 'acceptable_answers' in q and q['acceptable_answers']:
-                                                context = ". ".join(q['acceptable_answers'])
-                                                source_info = "Structured content (matching question)"
-                                                confidence = 0.9
-                                                # Use the question's hints if available
-                                                hints = q.get('hints', [])
-                                                break
-                                else:
-                                    # No matching question found, use the summary
-                                    summary = relevant_content[0]['summary']
-                                    context = get_most_relevant_sentence(summary, question)
-                                    source_info = "Structured content"
-                                    confidence = 0.8
-                            else:
-                                # No questions found, use the summary
-                                summary = relevant_content[0]['summary']
-                                context = get_most_relevant_sentence(summary, question)
-                                source_info = "Structured content"
-                                confidence = 0.8
+                            # Skip fuzzy matching for speed - just use summary directly
+                            summary = relevant_content[0]['summary']
+                            # Use first 400 chars of summary for fast context
+                            context = summary[:400] if len(summary) > 400 else summary
+                            source_info = "Structured content"
+                            confidence = 0.8
                         
                         # Generate answer using the context (for structured content)
                         if 'answer' not in locals():
@@ -927,37 +870,35 @@ Type 'back' to return to previous menu
                         border_style="blue"
                     ))
 
-            # Show hints
+            # Generate hints quickly (optimized for speed)
             try:
-                if 'hints' in locals() and hints:
-                    # Use the hints from the matching question
+                # Use better context for relevant hints (use the same context as answer)
+                hint_context = rag_context if rag_context else (relevant_content[0]['summary'] if relevant_content else context)
+                # Generate hints in background for better UX
+                hints = self.model_handler.get_hints(question, hint_context)
+                if hints:
                     console.print("\n💡 Here are some hints to help you understand better:")
                     for hint in hints:
                         console.print(f"• {hint}")
-                else:
-                    # Generate hints using the model
-                    hint_context = relevant_content[0]['summary'] if relevant_content else context
-                    hints = self.model_handler.get_hints(question, hint_context)
-                    if hints:
-                        console.print("\n💡 Here are some hints to help you understand better:")
-                        for hint in hints:
-                            console.print(f"• {hint}")
-                    else:
-                        console.print("\n💡 Sorry, no hints are available for this question.")
             except Exception as e:
-                logger.error(f"Error generating hints: {str(e)}")
-                console.print("\n💡 Sorry, no hints are available for this question.")
+                logger.debug(f"Hints generation skipped: {e}")
+                # Don't show error - hints are optional
             
-            # Show related concepts
+            # Show related concepts - only if they're from the same subject
             if len(relevant_content) > 1:
-                console.print("\n📚 Related concepts you might want to study:")
-                for item in relevant_content[1:3]:  # Show up to 2 additional related concepts
-                    console.print(Panel(
-                        f"Subject: {item['subject']}\n"
-                        f"Topic: {item['topic']}\n"
-                        f"Concept: {item['concept']}",
-                        border_style="blue"
-                    ))
+                # Filter to same subject for relevance
+                first_subject = relevant_content[0].get('subject', '')
+                related = [item for item in relevant_content[1:4] 
+                          if item.get('subject', '') == first_subject]
+                if related:
+                    console.print("\n📚 Related concepts you might want to study:")
+                    for item in related[:2]:  # Show up to 2 related concepts from same subject
+                        console.print(Panel(
+                            f"Subject: {item['subject']}\n"
+                            f"Topic: {item['topic']}\n"
+                            f"Concept: {item['concept']}",
+                            border_style="blue"
+                        ))
                     
         except Exception as e:
             logger.error(f"Error in _handle_free_text_question: {str(e)}")

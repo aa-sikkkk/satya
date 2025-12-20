@@ -132,7 +132,7 @@ class NEBeduApp(ctk.CTk):
         self._safe_destroy_widgets()
         label = ctk.CTkLabel(
             self.main_frame,
-            text=f"Welcome, {self.username}!\n\n- Browse subjects and study organized content\n- Ask questions with RAG-powered intelligent answers\n- Choose answer length (very short to very long)\n- Track your learning progress\n\nLet\'s start your learning journey! 🚀",
+            text=f"Welcome, {self.username}!\n\n- Browse subjects and study organized content\n- Ask questions with RAG-powered intelligent answers\n- Get detailed, accurate explanations\n- Track your learning progress\n\nLet\'s start your learning journey! 🚀",
             font=ctk.CTkFont(size=18),
             justify='left',
         )
@@ -392,6 +392,7 @@ class NEBeduApp(ctk.CTk):
         self._loading = False
 
     def on_ask_submit(self, question, answer_length="medium"):
+        # Always use medium for detailed answers (optimized)
         if self._loading:
             return
         self._loading = True
@@ -468,7 +469,12 @@ class NEBeduApp(ctk.CTk):
                     source_info = "General knowledge (no specific content found)"
                 
                 # Get answer from Phi 1.5
-                answer, confidence = self.model_handler.get_answer(normalized_question, rag_context, answer_length)
+                trimmed_ctx = rag_context[:900] if rag_context else ""
+                answer, confidence = self.model_handler.get_answer(
+                    normalized_question,
+                    trimmed_ctx,
+                    answer_length,
+                )
                 
                 # Get hints if confidence is low
                 hints = []

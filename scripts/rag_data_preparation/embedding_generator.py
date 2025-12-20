@@ -17,23 +17,10 @@ from typing import Dict, List, Optional, Tuple, Any, Union
 import numpy as np
 from datetime import datetime
 
-# Import embedding models
+# Import embedding models (all optional; default to lightweight hash embeddings)
 PHI_AVAILABLE = False
 CLIP_AVAILABLE = False
 CHROMA_AVAILABLE = False
-
-try:
-    from llama_cpp import Llama
-    PHI_AVAILABLE = True
-except ImportError:
-    print("Warning: GGUF Phi 1.5 not available. Install llama-cpp-python.")
-
-try:
-    import clip
-    import torch
-    CLIP_AVAILABLE = True
-except ImportError:
-    print("Warning: CLIP not available. Install clip.")
 
 try:
     import chromadb
@@ -46,7 +33,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class EmbeddingGenerator:
-    """Generates embeddings for text and images using Phi 1.5 and CLIP."""
+    """Generates embeddings for text and images using lightweight defaults."""
     
     def __init__(self, chroma_db_path: str = "satya_data/chroma_db"):
         """
@@ -57,11 +44,11 @@ class EmbeddingGenerator:
         """
         self.chroma_db_path = Path(chroma_db_path)
         
-        # Initialize models
+        # Initialize models (kept optional to stay within 4GB CPU-only)
         self.phi_model = None
         self.clip_model = None
         self.clip_preprocess = None
-        
+
         # Initialize Chroma client
         if CHROMA_AVAILABLE:
             self.chroma_client = chromadb.PersistentClient(path=str(self.chroma_db_path))
@@ -70,16 +57,15 @@ class EmbeddingGenerator:
             self.chroma_client = None
             logger.error("Chroma not available!")
         
-        # Model configuration
-        self.phi_model_path = "satya_data/models/phi_1_5/phi-1_5-Q5_K_S.gguf"
-        self.clip_model_name = "ViT-B/32"  # Standard CLIP model name
-        
-        # Performance settings
+        # Model configuration (keep minimal for offline CPU-only)
+        self.phi_model_path = "satya_data/models/phi_1_5/phi-1_5-Q4_K_M.gguf"
+        self.clip_model_name = "ViT-B/32"
         self.batch_size = 8
         self.max_length = 512
-        
-        # Load models
-        self._load_models()
+
+        # Avoid heavy model loads by default; callers can opt-in via env flags
+        if os.getenv("SATYA_LOAD_EMBED_MODELS", "").lower() in {"1", "true", "yes"}:
+            self._load_models()
     
     def _load_models(self):
         """Load Phi 1.5 GGUF and CLIP models."""

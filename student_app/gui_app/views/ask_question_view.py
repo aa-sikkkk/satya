@@ -15,24 +15,6 @@ class AskQuestionView(ctk.CTkFrame):
         self.entry.pack(pady=10)
         self.entry.bind('<Return>', lambda e: self.submit())
 
-        # Answer length selection
-        length_frame = ctk.CTkFrame(self)
-        length_frame.pack(pady=10)
-        
-        ctk.CTkLabel(length_frame, text="Answer Length:", font=ctk.CTkFont(size=14, weight="bold")).pack(pady=(10, 5))
-        
-        self.length_var = ctk.StringVar(value="medium")
-        length_options = [
-            ("Very Short", "very_short"),
-            ("Short", "short"), 
-            ("Medium", "medium"),
-            ("Long", "long"),
-            ("Very Long", "very_long")
-        ]
-        
-        for text, value in length_options:
-            ctk.CTkRadioButton(length_frame, text=text, variable=self.length_var, value=value).pack(side='left', padx=5, pady=2)
-
         self.submit_btn = ctk.CTkButton(self, text="Ask", command=self.submit)
         self.submit_btn.pack(pady=10)
 
@@ -49,8 +31,8 @@ class AskQuestionView(ctk.CTkFrame):
         question = self.entry.get().strip()
         if question:
             self.set_loading(True)
-            answer_length = self.length_var.get()
-            self.on_submit(question, answer_length)
+            # Always use medium for detailed answers
+            self.on_submit(question, "medium")
 
     def set_loading(self, loading):
         if loading:

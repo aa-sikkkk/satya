@@ -104,7 +104,8 @@ Satya is architected for straightforward local deployment on target machines wit
 1. **Obtaining Project Files**: Clone the repository or download the student package
 2. **Installing Dependencies**: Python dependencies managed via `requirements.txt`
 3. **Downloading Phi 1.5 Model**: Lightweight GGUF model (~1GB) for AI capabilities
-4. **Running Applications**: Simple commands for CLI or GUI versions
+4. **Running Applications**: Simple commands for CLI or GUI versions (`scripts/release/run_cli.*` / `run_gui.*`)
+5. **Offline Bundle**: Build-and-ship archive via `python scripts/release/build_offline_bundle.py`
 
 Maintenance activities include applying updates to the application and content, potential model optimizations, and addressing any reported issues, facilitated by the version-controlled content repository and comprehensive documentation.
 

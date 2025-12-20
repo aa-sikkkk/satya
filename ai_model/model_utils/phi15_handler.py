@@ -29,17 +29,26 @@ class Phi15Handler:
     Handles Q&A, hints, and content generation in one efficient model.
     """
     
-    def __init__(self, model_path: str):
+    def __init__(self, model_path: str, enable_streaming: bool = False):
         """
         Initialize Phi 1.5 handler.
-        
+
         Args:
-            model_path (str): Path to model directory containing GGUF file
+            model_path: Path to model directory containing GGUF file.
+            enable_streaming: Whether to request streaming responses when supported.
         """
         self.model_path = Path(model_path)
         self.llm = None
         self.config = self._load_config()
         self.model_file = self._find_model_file()
+        self.enable_streaming = enable_streaming
+        # Optimized system prompt for speed and accuracy
+        self.system_prompt = (
+            "You are Satya, a helpful Grade 10 tutor. "
+            "Answer the question using the context provided. "
+            "Give a detailed explanation in 4-6 sentences (80-120 words). "
+            "Be clear, accurate, and educational."
+        )
         
     def _find_model_file(self) -> str:
         """Find the model file (GGUF or other format)."""
@@ -65,15 +74,16 @@ class Phi15Handler:
             except Exception as e:
                 logger.error(f"Error loading config: {e}")
         
-        # Default configuration optimized for low-end hardware
+        # Default configuration optimized for ~4GB RAM, CPU-only
         return {
-            'n_ctx': 2048,          # Context window
-            'n_threads': 2,          # Conservative thread count
-            'n_gpu_layers': 0,       # CPU only
-            'max_tokens': 256,       # Increased for better responses
-            'temperature': 0.3,      # Lower for more focused answers
-            'top_p': 0.9,            # Nucleus sampling
-            'stop': ["\n\n", "###", "Question:", "Context:", "Answer:"]  # Better stop sequences
+            "n_ctx": 1024,
+            "n_threads": max(1, os.cpu_count() // 2 or 1),
+            "n_gpu_layers": 0,
+            "max_tokens": 180,  # Reduced for faster generation
+            "temperature": 0.25,  # Lower for faster, more focused generation
+            "top_p": 0.9,
+            "repeat_penalty": 1.08,
+            "stop": ["</s>", "\n\nContext:", "\n\nQuestion:", "\n\nQ:", "\n\nProvide"],
         }
             
     def load_model(self) -> None:
@@ -105,15 +115,18 @@ class Phi15Handler:
             logger.error(f"Error loading model: {e}")
             raise
                 
-    def get_answer(self, question: str, context: str, answer_length: str = "medium") -> Tuple[str, float]:
+    def get_answer(
+        self, question: str, context: str, answer_length: str = "medium"
+    ) -> Tuple[str, float]:
         """
-        Generate answer using Phi 1.5 with length control.
-        
+        Generate detailed answer using optimized prompt template.
+        Always uses "medium" length for consistent, detailed responses.
+
         Args:
             question (str): User's question
             context (str): Relevant context from RAG
-            answer_length (str): "very_short", "short", "medium", "long", "very_long"
-            
+            answer_length (str): Ignored - always uses "medium" for detailed answers
+
         Returns:
             Tuple[str, float]: Answer and confidence score
         """
@@ -127,55 +140,56 @@ class Phi15Handler:
         elif normalized_question.islower():
             normalized_question = normalized_question.capitalize()
             
-        # Configure answer length parameters
-        length_config = self._get_length_config(answer_length)
-            
+        # Optimized for speed: reduced tokens for faster generation
+        max_tokens = 180  # Reduced from 256 for faster responses (still detailed: 3-5 sentences)
+
         try:
-            # Optimized prompt for Phi 1.5 with length control
-            prompt = (
-                "You are a helpful AI tutor for Grade 10 students. "
-                "Answer the question clearly and in detail, regardless of how it's written. "
-                "Use the context provided to give an accurate and educational response.\n\n"
-                "Answer Length: {length_instruction}\n\n"
-                "Context: {context}\n\n"
-                "Question: {question}\n\n"
-                "Answer:"
-            ).format(
-                length_instruction=length_config['instruction'],
-                context=context[:1500], 
-                question=normalized_question
+            prompt = self._build_prompt(
+                normalized_question,
+                context=context,
             )
-            
+
             start_time = time.time()
-            
-            if hasattr(self.llm, '__call__'):  # llama-cpp
+
+            if hasattr(self.llm, "__call__"):  # llama-cpp
                 response = self.llm(
                     prompt,
-                    max_tokens=length_config['max_tokens'],  # Use length-specific token limit
-                    temperature=self.config.get('temperature', 0.3),  # Lower for more focused answers
-                    top_p=self.config.get('top_p', 0.9),
-                    stop=self.config.get('stop', ["\n\n", "###", "Question:", "Context:", "Answer:"]),  # Better stop sequences
+                    max_tokens=max_tokens,
+                    temperature=self.config.get("temperature", 0.2),
+                    top_p=self.config.get("top_p", 0.9),
+                    stop=self.config.get(
+                        "stop", ["</s>", "\n\nContext:", "\n\nQuestion:", "\n\nQ:", "\n\nProvide"]
+                    ),
                     echo=False,
-                    stream=False
+                    stream=False,  # Disabled for reliability and speed
+                    repeat_penalty=self.config.get("repeat_penalty", 1.08),
                 )
-                answer = response['choices'][0]['text'].strip()
-                logger.debug(f"Raw model response: '{response}'")
-                logger.debug(f"Extracted answer: '{answer}'")
-                
+                # Streamed responses yield generator; non-stream yields dict
+                answer = self._extract_text(response)
+                logger.debug(f"Raw model response type: {type(response)}")
+                logger.debug(f"Extracted answer length: {len(answer) if answer else 0}")
+                logger.debug(f"Extracted answer preview: '{answer[:100] if answer else 'None'}...'")
+
             else:  # fallback
                 answer = "Model not properly loaded. Please check llama-cpp-python installation."
-            
+
             inference_time = time.time() - start_time
+
+            # Clean up answer - be more lenient with extraction
+            if not answer:
+                answer = ""
+            answer = answer.strip()
             
-            # Clean up answer
-            if not answer or len(answer.strip()) == 0:
+            # Remove common prompt artifacts
+            if answer.lower().startswith("answer:"):
+                answer = answer[7:].strip()
+            if answer.lower().startswith("a:"):
+                answer = answer[2:].strip()
+            
+            # Validate answer quality
+            if not answer or len(answer) < 10:
+                logger.warning(f"Answer too short or empty: '{answer}'")
                 answer = "I couldn't generate a proper answer. Please try rephrasing your question."
-            elif len(answer.strip()) < 5:  # Reduced from 10 to allow valid short answers
-                answer = "I couldn't generate a proper answer. Please try rephrasing your question."
-            elif answer.lower().startswith("answer:"):  # Remove prompt artifacts
-                answer = answer[8:].strip()
-                if not answer or len(answer.strip()) < 5:
-                    answer = "I couldn't generate a proper answer. Please try rephrasing your question."
             
             # Calculate confidence
             confidence = self._calculate_confidence(answer, context, question)
@@ -185,42 +199,75 @@ class Phi15Handler:
         except Exception as e:
             logger.error(f"Error generating answer: {e}")
             return "I'm having trouble processing your question. Please try again.", 0.1
-    
-    def _get_length_config(self, answer_length: str) -> dict:
-        """Get configuration for different answer lengths."""
-        length_configs = {
-            "very_short": {
-                "instruction": "Give a very brief, one-sentence answer (10-20 words). Focus on the core concept only.",
-                "max_tokens": 64,
-                "description": "Quick fact or definition"
-            },
-            "short": {
-                "instruction": "Give a concise answer in 2-3 sentences (30-50 words). Include key points and basic explanation.",
-                "max_tokens": 128,
-                "description": "Basic explanation with key points"
-            },
-            "medium": {
-                "instruction": "Give a detailed answer in 4-6 sentences (80-120 words). Include explanation, examples, and important details.",
-                "max_tokens": 256,
-                "description": "Detailed explanation with examples"
-            },
-            "long": {
-                "instruction": "Give a comprehensive answer in 8-12 sentences (150-250 words). Include detailed explanation, multiple examples, and step-by-step breakdown.",
-                "max_tokens": 512,
-                "description": "Comprehensive coverage with examples"
-            },
-            "very_long": {
-                "instruction": "Give an extensive answer in 15-20 sentences (300-500 words). Include comprehensive coverage, multiple perspectives, detailed examples, and thorough explanation.",
-                "max_tokens": 1024,
-                "description": "Extensive coverage with multiple perspectives"
-            }
-        }
+
+    def _build_prompt(self, question: str, context: str) -> str:
+        """
+        Build optimized prompt template for fast, accurate responses.
+        Balanced between speed and clarity for Phi 1.5.
+        """
+        # Trim context aggressively for speed (600 chars max for faster processing)
+        trimmed_context = (context or "").strip()
+        if len(trimmed_context) > 600:
+            trimmed_context = trimmed_context[:600] + "..."
+
+        # Ultra-optimized template for speed: minimal, direct format
+        return (
+            f"{self.system_prompt}\n\n"
+            f"C: {trimmed_context}\n\n"
+            f"Q: {question}\n"
+            f"A:"
+        )
+
+    def _extract_text(self, response: Any) -> str:
+        """
+        Extract text from llama-cpp response (non-streaming for reliability).
+        """
+        if response is None:
+            logger.warning("Response is None")
+            return ""
         
-        return length_configs.get(answer_length, length_configs["medium"])
+        # Handle generator (streaming) - consume it properly
+        if hasattr(response, "__iter__") and not isinstance(response, (dict, str)):
+            # Check if it's a generator
+            try:
+                import types
+                if isinstance(response, types.GeneratorType):
+                    parts: List[str] = []
+                    for chunk in response:
+                        if isinstance(chunk, dict):
+                            choice = chunk.get("choices", [{}])[0]
+                            delta = choice.get("delta", {})
+                            content = delta.get("content", "")
+                            if content:
+                                parts.append(content)
+                    result = "".join(parts).strip()
+                    if result:
+                        return result
+            except Exception as e:
+                logger.error(f"Error consuming generator: {e}")
+                return ""
+        
+        # Non-stream call returns dict
+        if isinstance(response, dict):
+            try:
+                if "choices" in response and len(response["choices"]) > 0:
+                    choice = response["choices"][0]
+                    # Standard llama-cpp format
+                    if "text" in choice:
+                        text = choice["text"].strip()
+                        if text:
+                            return text
+            except Exception as e:
+                logger.error(f"Error extracting from dict: {e}")
+        
+        # Last resort: log and return empty
+        logger.error(f"Could not extract text from response type: {type(response)}")
+        return ""
+    
             
     def get_hints(self, question: str, context: str) -> List[str]:
         """
-        Generate hints using Phi 1.5.
+        Generate fast hints using Phi 1.5 - optimized for speed.
         
         Args:
             question (str): User's question
@@ -232,109 +279,114 @@ class Phi15Handler:
         if self.llm is None:
             self.load_model()
             
-        # Normalize question text for better model performance
-        normalized_question = question.strip()
-        if normalized_question.isupper():
-            normalized_question = normalized_question.lower().capitalize()
-        elif normalized_question.islower():
-            normalized_question = normalized_question.capitalize()
-            
         try:
-            # Optimized prompt for hints
+            # Better context for relevant hints (500 chars for enough info)
+            trimmed_context = (context or "").strip()
+            if len(trimmed_context) > 500:
+                # Try to get a complete sentence/paragraph, not cut mid-word
+                trimmed_context = trimmed_context[:500]
+                last_period = trimmed_context.rfind('.')
+                if last_period > 400:  # If we have a period near the end, use it
+                    trimmed_context = trimmed_context[:last_period + 1]
+            
+            # Better prompt that guides the model to give relevant hints
             prompt = (
-                "Context: {context}\n\n"
-                "Question: {question}\n\n"
-                "Generate 3 short, helpful hints to answer this question:\n"
-                "1."
-            ).format(context=context[:1000], question=normalized_question)  # Use normalized question
+                f"You are a helpful tutor. Based on the context, give 3 specific hints to answer this question.\n\n"
+                f"Context: {trimmed_context}\n\n"
+                f"Question: {question}\n\n"
+                f"Hints (be specific and related to the question):\n"
+                f"1."
+            )
             
             if hasattr(self.llm, '__call__'):  # llama-cpp
                 response = self.llm(
                     prompt,
-                    max_tokens=150,
-                    temperature=0.8,  # Slightly higher for creativity
-                    top_p=0.95,
-                    stop=["\n4", "###"],
+                    max_tokens=100,  # Slightly more for better hints
+                    temperature=0.5,  # Balanced for relevant but creative hints
+                    top_p=0.9,
+                    stop=["\n4", "4.", "###", "\n\nQuestion:", "\n\nContext:"],
                     echo=False,
                     stream=False
                 )
-                hints_text = response['choices'][0]['text'].strip()
+                hints_text = self._extract_text(response)
                 
             else:  # fallback
-                hints_text = "1. Check the context carefully.\n2. Look for key terms.\n3. Connect related concepts."
+                hints_text = "1. Check the context\n2. Look for key terms\n3. Connect concepts"
             
-            # Parse hints
+            # Improved parsing - handle various formats
             hints = []
-            for line in hints_text.split('\n'):
+            lines = hints_text.split('\n')
+            for line in lines:
                 line = line.strip()
-                if line and line[0].isdigit() and '.' in line:
-                    hint = line.split('.', 1)[1].strip()
-                    if hint and len(hint) > 10:  # Filter out very short hints
-                        hints.append(hint)
+                if not line:
+                    continue
+                # Look for numbered hints (1., 2., 3. or 1) 2) 3))
+                if line[0].isdigit():
+                    # Extract hint after number
+                    if '.' in line:
+                        parts = line.split('.', 1)
+                    elif ')' in line:
+                        parts = line.split(')', 1)
+                    else:
+                        parts = line.split(' ', 1)
+                    
+                    if len(parts) > 1:
+                        hint = parts[1].strip()
+                        # Remove common prefixes
+                        for prefix in ["Hint:", "•", "-"]:
+                            if hint.startswith(prefix):
+                                hint = hint[len(prefix):].strip()
+                        if hint and len(hint) > 8:  # Minimum length for meaningful hints
+                            hints.append(hint)
+            
+            # Filter out generic/unhelpful hints
+            generic_phrases = ["review the context", "look for key terms", "think about", 
+                             "consider the", "examine the", "check the"]
+            filtered_hints = []
+            for hint in hints:
+                hint_lower = hint.lower()
+                # Skip if it's too generic
+                if not any(phrase in hint_lower for phrase in generic_phrases) or len(hint) > 30:
+                    filtered_hints.append(hint)
             
             # Ensure we have exactly 3 hints
-            if len(hints) > 3:
-                hints = hints[:3]
-            elif len(hints) < 3:
-                # Add default hints if needed
-                default_hints = [
-                    "Look for key terms in the context that relate to the question.",
-                    "Think about how different concepts in the context connect to each other.",
-                    "Identify the main idea or purpose mentioned in the context."
+            if len(filtered_hints) >= 3:
+                return filtered_hints[:3]
+            elif len(filtered_hints) > 0:
+                # Use what we have, don't add generic defaults
+                return filtered_hints[:3]
+            else:
+                # Only use defaults if we got nothing useful
+                return [
+                    "Review the specific details mentioned in the context.",
+                    "Focus on the key concepts related to your question.",
+                    "Consider how the information connects to answer the question."
                 ]
-                for i in range(3 - len(hints)):
-                    hints.append(default_hints[i])
-            
-            return hints
             
         except Exception as e:
             logger.error(f"Error generating hints: {e}")
             return [
-                "Break the question into smaller parts.",
-                "Look for clues in the provided context.",
-                "Connect what you know to the new information."
+                "Review the context carefully.",
+                "Look for key terms and concepts.",
+                "Think about how the information connects."
             ]
     
     def _calculate_confidence(self, answer: str, context: str, question: str) -> float:
-        """Calculate confidence score based on answer quality."""
-        # Check if answer is an error message or invalid
-        error_phrases = [
-            "i couldn't generate a proper answer",
-            "i'm having trouble processing",
-            "please try rephrasing",
-            "model not properly loaded",
-            "check llama-cpp-python installation"
-        ]
-        
+        """Fast confidence calculation based on answer quality."""
+        # Quick error check
         answer_lower = answer.lower()
-        if any(phrase in answer_lower for phrase in error_phrases):
-            return 0.1  # Very low confidence for error messages
+        if any(phrase in answer_lower for phrase in ["i couldn't", "i'm having trouble", "please try"]):
+            return 0.1
         
-        # Base confidence
-        confidence = 0.7
-        
-        # Adjust based on answer length
+        # Fast length-based confidence (most answers are 50-150 words)
         word_count = len(answer.split())
-        if word_count < 5:
-            confidence *= 0.6
-        elif word_count > 100:
-            confidence *= 0.8
+        if word_count < 10:
+            return 0.3
+        elif word_count > 200:
+            return 0.8
         else:
-            confidence += min(0.2, word_count * 0.01)
-        
-        # Adjust based on content relevance
-        question_words = set(question.lower().split())
-        answer_words = set(answer.lower().split())
-        overlap = len(question_words.intersection(answer_words))
-        if overlap > 0:
-            confidence += min(0.1, overlap * 0.02)
-        
-        # Adjust based on context usage
-        if any(word in answer.lower() for word in context.lower().split()[:20]):
-            confidence += 0.1
-        
-        # Ensure confidence is within bounds
-        return max(0.1, min(0.95, confidence))
+            # Good length range - base confidence
+            return 0.75
     
     def get_model_info(self) -> Dict[str, Any]:
         """Get model information."""
@@ -345,9 +397,11 @@ class Phi15Handler:
             'context_size': self.config.get('n_ctx', 2048),
             'threads': self.config.get('n_threads', 2),
             'max_tokens': self.config.get('max_tokens', 512),
-            'temperature': self.config.get('temperature', 0.7),
+            'temperature': self.config.get('temperature', 0.2),
             'top_p': self.config.get('top_p', 0.9),
-            'model_path': str(self.model_file)
+            'repeat_penalty': self.config.get('repeat_penalty', 1.08),
+            'model_path': str(self.model_file),
+            'quantization': Path(self.model_file).name,
         }
     
     def cleanup(self):
