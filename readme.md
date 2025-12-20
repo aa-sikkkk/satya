@@ -14,26 +14,20 @@ An **offline-first, RAG-powered** learning companion for students. Built with in
 
 ## 📋 Table of Contents
 - [Features](#-features)
-- [Technical Architecture](#-technical-architecture)
 - [Project Structure](#-project-structure)
 - [Installation](#-installation)
 - [Usage](#-usage)
-- [GUI Usage](#gui-usage)
 - [AI Models](#-ai-models)
-- [RAG System](#rag-system)
-- [Content Management](#content-management)
-- [OpenAI Proxy Integration (Online Q&A)](#openai-proxy-integration-online-qa)
-- [Development](#-development)
+- [Content Management](#-content-management)
 - [Contributing](#-contributing)
 - [License](#-license)
-- [FAQ](#faq)
+
 
 ## ✨ Features
 
 ### For Students
 - 📚 **RAG-Enhanced Content Discovery**: Intelligent search through study materials
 - 🤖 **Single AI Model**: Phi 1.5 handles Q&A, hints, and content generation
-- 🎯 **Answer Length Control**: Choose from 5 different detail levels (very short to very long)
 - 📊 Progress tracking and analytics
 - 🔄 **100% Offline**: No internet required for core functionality
 - 🎯 Adaptive learning paths
@@ -58,13 +52,12 @@ https://github.com/user-attachments/assets/27e34daf-0919-4393-bb60-50ff6dedc716
 1. **RAG (Retrieval-Augmented Generation) Engine**
    - **ChromaDB**: Local vector database for intelligent content search
    - **Phi 1.5 Embeddings**: Lightweight text embeddings for content discovery
-   - **Smart Content Retrieval**: Finds most relevant study materials for any question
+   - **Smart Content Retrieval**: Finds the most relevant study materials for any question
    - **Offline Vector Search**: No internet required for content discovery
 
 2. **AI Engine**
    - **Single Phi 1.5 Model**: Handles all AI tasks (Q&A, hints, content generation)
    - **Lightweight GGUF Format**: Optimized for low-end hardware
-   - **Answer Length Control**: 5 different detail levels for varied learning needs
    - **Offline Model Inference**: No internet required for AI responses
 
 3. **CustomTkinter GUI**
@@ -166,7 +159,6 @@ python -m student_app.interface.cli_interface
 ```
 
 **New Features:**
-- **Answer Length Selection**: Choose from 5 detail levels
 - **RAG-Enhanced Q&A**: Intelligent content discovery
 - **Smart Fallbacks**: Always get meaningful answers
 
@@ -198,35 +190,6 @@ python -m student_app.gui_app.main_window
 - **Lightweight**: GGUF format optimized for low-end hardware
 - **Offline**: 100% local, no internet required
 - **Smart**: Handles text normalization, case sensitivity, and answer validation
-
-### Answer Length Control
-1. **Very Short** (10-20 words): Quick facts and definitions
-2. **Short** (30-50 words): Basic explanations with key points
-3. **Medium** (80-120 words): Detailed explanations with examples - **Recommended**
-4. **Long** (150-250 words): Comprehensive coverage with step-by-step breakdown
-5. **Very Long** (300-500 words): Extensive coverage with multiple perspectives
-
----
-
-## 🔍 RAG System
-
-### What is RAG?
-**Retrieval-Augmented Generation** combines intelligent content search with AI-powered answer generation.
-
-### How It Works
-1. **Content Processing**: PDFs and documents are chunked and embedded
-2. **Vector Storage**: ChromaDB stores text and image embeddings
-3. **Smart Retrieval**: Finds most relevant content for any question
-4. **AI Enhancement**: Phi 1.5 generates answers using retrieved context
-5. **Fallback System**: Multiple fallback levels ensure students always get help
-
-### Benefits
-- **Intelligent Search**: Finds relevant content even with vague questions
-- **Context-Aware**: AI understands the context before answering
-- **Offline**: No internet required for content discovery
-- **Scalable**: Easy to add new subjects and content
-
----
 
 ## 📚 Content Management
 
