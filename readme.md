@@ -930,7 +930,7 @@ Special thanks to all contributors, educators, and students who have helped shap
 **Major Changes:**
 - Single Phi 1.5 model architecture (replaced multi-model approach)
 - RAG system integration with ChromaDB
-- Further code optimizations for CLI
+- Optimized for 4GB RAM systems
 - Performance improvements (30-50% faster)
 - Enhanced answer quality with context-aware generation
 
