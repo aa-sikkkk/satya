@@ -2,7 +2,7 @@
 """
 Lightweight Model Handler for Satya Learning System
 
-Single Phi 1.5 model for all tasks - optimized for low-end hardware.
+Single Phi 1.5 model for all tasks
 """
 
 import os

@@ -12,6 +12,7 @@ import logging
 from pathlib import Path
 
 from student_app.interface.cli_interface import CLIInterface
+from system.utils.resource_path import resolve_content_dir, resolve_model_dir
 
 # Configure logging
 logging.basicConfig(
@@ -63,14 +64,26 @@ def main():
         logging.getLogger().setLevel(logging.DEBUG)
         
     try:
-        # Ensure content directory exists
-        content_dir = Path(args.content_dir)
+        # Resolve paths using resource_path utility (PyInstaller compatible)
+        if args.content_dir and args.content_dir != "data/content":
+            # User provided custom path
+            content_dir = Path(args.content_dir)
+        else:
+            # Use default with resource path resolution
+            content_dir = resolve_content_dir("satya_data/content")
+        
         if not content_dir.exists():
             logger.error(f"Content directory not found: {content_dir}")
             sys.exit(1)
             
-        # Ensure model directory exists
-        model_path = Path(args.model_path)
+        # Resolve model path
+        if args.model_path and args.model_path != "models/albert":
+            # User provided custom path
+            model_path = Path(args.model_path)
+        else:
+            # Use default with resource path resolution
+            model_path = resolve_model_dir("satya_data/models/phi_1_5")
+        
         if not model_path.exists():
             logger.error(f"Model directory not found: {model_path}")
             sys.exit(1)

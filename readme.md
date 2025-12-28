@@ -437,6 +437,42 @@ rag.retrieve: X.XXs | ok=True
 
 ---
 
+## Packaging for Distribution
+
+The application can be packaged into standalone executables that **do not require Python** to be installed on the target system. This is ideal for distributing to rural schools where Python may not be available.
+
+### Quick Build
+
+**Windows:**
+```cmd
+scripts\release\build.bat
+```
+
+**Linux/Mac:**
+```bash
+python scripts/release/build_executables.py
+```
+
+This creates standalone executables in `dist/`:
+- `SatyaGUI.exe` - Graphical user interface
+- `SatyaCLI.exe` - Command-line interface
+- `Satya_Standalone/` - Complete distribution package
+
+### System Requirements for Packaged Executables
+
+- **Windows 10 or later** (executables are Windows-specific)
+- **4GB RAM minimum** (8GB recommended)
+- **2GB free disk space**
+- **No Python installation required!**
+
+### Distribution
+
+Simply copy the `dist/Satya_Standalone/` folder to the target system. Users can run `SatyaGUI.exe` or `SatyaCLI.exe` directly without any setup.
+
+For detailed packaging instructions, see [Packaging Guide](docs/PACKAGING.md).
+
+---
+
 ## Quick Start
 
 ### CLI Mode

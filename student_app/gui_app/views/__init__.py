@@ -6,4 +6,5 @@ from .concept_detail_view import ConceptDetailView
 from .question_view import QuestionView
 from .progress_view import ProgressView
 from .ask_question_view import AskQuestionView
-from .progress_ops_view import ProgressOpsView 
+from .progress_ops_view import ProgressOpsView
+from .about_view import AboutView 

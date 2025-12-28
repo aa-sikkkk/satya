@@ -1,9 +1,11 @@
 import customtkinter as ctk
-from student_app.gui_app.views import WelcomeView, SubjectView, TopicView, ConceptView, ConceptDetailView, QuestionView, ProgressView, AskQuestionView, ProgressOpsView
+from student_app.gui_app.views import WelcomeView, SubjectView, TopicView, ConceptView, ConceptDetailView, QuestionView, ProgressView, AskQuestionView, ProgressOpsView, AboutView
 from system.data_manager.content_manager import ContentManager
 from system.rag.rag_retrieval_engine import RAGRetrievalEngine
 from student_app.progress import progress_manager
 from ai_model.model_utils.model_handler import ModelHandler
+from student_app.learning.openai_proxy_client import OpenAIProxyClient
+from system.utils.resource_path import resolve_model_dir, resolve_content_dir, resolve_chroma_db_dir
 import difflib
 import tkinter.filedialog as fd
 import tkinter.messagebox as mb
@@ -34,9 +36,8 @@ class NEBeduApp(ctk.CTk):
         self.rag_engine = None
         self._rag_initialized = False
         
-        # Model path logic (updated for new architecture)
-        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        model_path = os.path.join(base_dir, "satya_data", "models", "phi_1_5")
+        # Model path logic (updated for new architecture and PyInstaller compatibility)
+        model_path = str(resolve_model_dir("satya_data/models/phi_1_5"))
         if not os.path.exists(model_path):
             mb.showerror("Model Error", f"Model directory not found: {model_path}")
             raise FileNotFoundError(f"Model directory not found: {model_path}")
@@ -47,6 +48,11 @@ class NEBeduApp(ctk.CTk):
             mb.showerror("Model Error", f"Could not initialize the AI model: {e}")
             raise
         
+        # Configure OpenAI proxy client
+        proxy_url = os.getenv("OPENAI_PROXY_URL")
+        proxy_api_key = os.getenv("OPENAI_PROXY_KEY")
+        self.openai_client = OpenAIProxyClient(proxy_url=proxy_url, api_key=proxy_api_key)
+
         atexit.register(self.cleanup_model)
         self.selected_subject = None
         self.selected_topic = None
@@ -78,18 +84,57 @@ class NEBeduApp(ctk.CTk):
         self.btn_progress.pack(pady=10, fill='x', padx=20)
         self.btn_ops = ctk.CTkButton(self.sidebar, text='Progress Ops', command=self.show_progress_ops)
         self.btn_ops.pack(pady=10, fill='x', padx=20)
+        self.btn_about = ctk.CTkButton(self.sidebar, text='About', command=self.show_about)
+        self.btn_about.pack(pady=10, fill='x', padx=20)
         self.btn_exit = ctk.CTkButton(self.sidebar, text='Exit', fg_color='#e57373', hover_color='#ef5350', command=self.quit)
         self.btn_exit.pack(pady=(40,0), fill='x', padx=20)
 
+        # Model info display
+        self.model_info_frame = ctk.CTkFrame(self.sidebar, fg_color="transparent")
+        self.model_info_frame.pack(side="bottom", pady=20, padx=20, fill="x")
+        
+        try:
+            model_info = self.model_handler.get_model_info()
+            if model_info:
+                ctk.CTkLabel(self.model_info_frame, text="AI Model Info", font=ctk.CTkFont(size=14, weight="bold")).pack(anchor="w")
+                for key, value in model_info.items():
+                    ctk.CTkLabel(self.model_info_frame, text=f"{key.capitalize()}: {value}", font=ctk.CTkFont(size=12)).pack(anchor="w")
+        except Exception as e:
+            ctk.CTkLabel(self.model_info_frame, text="Could not load model info.", font=ctk.CTkFont(size=12)).pack(anchor="w")
+
         # Main content area
-        self.main_frame = ctk.CTkFrame(self.container, corner_radius=10)
-        self.main_frame.grid(row=0, column=1, sticky='nsew', padx=30, pady=30)
+        self.main_content = ctk.CTkFrame(self.container, corner_radius=10)
+        self.main_content.grid(row=0, column=1, sticky='nsew', padx=30, pady=30)
         self.container.grid_rowconfigure(0, weight=1)
         self.container.grid_columnconfigure(1, weight=1)
+
+        # Top bar
+        self.top_bar = ctk.CTkFrame(self.main_content, height=50, corner_radius=0)
+        self.top_bar.pack(side="top", fill="x")
+
+        self.sidebar_toggle_btn = ctk.CTkButton(self.top_bar, text="☰", width=30, command=self.toggle_sidebar)
+        self.sidebar_toggle_btn.pack(side="left", padx=10, pady=10)
+        
+        self.title_label = ctk.CTkLabel(self.top_bar, text="Satya", font=ctk.CTkFont(size=22, weight="bold"))
+        self.title_label.pack(side="left", padx=10)
+
+        self.sidebar_shown = True
+
+        # Main frame for views
+        self.main_frame = ctk.CTkFrame(self.main_content, corner_radius=10)
+        self.main_frame.pack(side="bottom", fill="both", expand=True, padx=10, pady=10)
 
         # Start with WelcomeView
         self.welcome_view = WelcomeView(self.main_frame, self.on_login)
         self.welcome_view.pack(fill='both', expand=True)
+
+    def toggle_sidebar(self):
+        if self.sidebar_shown:
+            self.sidebar.grid_remove()
+            self.sidebar_shown = False
+        else:
+            self.sidebar.grid()
+            self.sidebar_shown = True
 
     def cleanup_model(self):
         try:
@@ -102,7 +147,8 @@ class NEBeduApp(ctk.CTk):
         """Initialize RAG system only when needed"""
         if not self._rag_initialized:
             try:
-                self.rag_engine = RAGRetrievalEngine()
+                chroma_db_path = str(resolve_chroma_db_dir("satya_data/chroma_db"))
+                self.rag_engine = RAGRetrievalEngine(chroma_db_path=chroma_db_path)
                 self._rag_initialized = True
             except Exception as e:
                 self.rag_engine = None
@@ -130,9 +176,22 @@ class NEBeduApp(ctk.CTk):
 
     def show_main_menu(self):
         self._safe_destroy_widgets()
+        
+        welcome_text = f"""
+        Welcome, {self.username}!
+
+        This is your personal learning dashboard. From here, you can:
+
+        - **Browse Subjects:** Explore a wide range of subjects and topics.
+        - **Ask Questions:** Get instant answers from our AI assistant.
+        - **Track Your Progress:** See how you're doing and where you can improve.
+
+        To get started, select an option from the sidebar.
+        """
+
         label = ctk.CTkLabel(
             self.main_frame,
-            text=f"Welcome, {self.username}!\n\n- Browse subjects and study organized content\n- Ask questions with RAG-powered intelligent answers\n- Get detailed, accurate explanations\n- Track your learning progress\n\nLet\'s start your learning journey! 🚀",
+            text=welcome_text,
             font=ctk.CTkFont(size=18),
             justify='left',
         )
@@ -322,10 +381,51 @@ class NEBeduApp(ctk.CTk):
         if self._loading:
             return
         self._loading = True
+
+        # Advanced correctness check using rubric-based scoring
+        import re
+        from difflib import SequenceMatcher
+
+        STOPWORDS = set([
+            "the","is","are","a","an","to","of","and","or","for","in","on","at","by","that",
+            "this","it","as","be","with","from","into","their","its","they","them","can","will",
+            "about","how","what","why","which","who","whose","when","where","than","then","also"
+        ])
+
+        def _stem(token: str) -> str:
+            for suf in ("ing", "ed", "es", "s"):
+                if token.endswith(suf) and len(token) - len(suf) >= 3:
+                    return token[:-len(suf)]
+            return token
+
+        def tokenize(text: str):
+            tokens = re.findall(r"[a-zA-Z]+", text.lower())
+            return [_stem(t) for t in tokens if len(t) >= 3 and t not in STOPWORDS]
+
+        def build_rubric(ref_texts):
+            freq = {}
+            for rt in ref_texts:
+                for t in set(tokenize(rt)):
+                    freq[t] = freq.get(t, 0) + 1
+            common = [t for t, c in freq.items() if c >= max(1, len(ref_texts)//2)]
+            if not common:
+                common = [t for t, _ in sorted(freq.items(), key=lambda kv: kv[1], reverse=True)[:8]]
+            return set(common)
+
+        explicit_rubric = set(question.get('rubric_keywords', []))
+        acc = [a for a in question.get('acceptable_answers', []) if isinstance(a, str)]
+        rubric = explicit_rubric if explicit_rubric else build_rubric(acc) if acc else set()
+        user_tokens = set(tokenize(answer))
+
+        keyword_overlap = len(user_tokens & rubric) / max(1, len(rubric)) if rubric else 0.0
+        fuzzy_max = max((SequenceMatcher(None, answer.lower(), rt.lower()).ratio() for rt in acc), default=0.0)
         
-        # Check correctness (simple substring match for now)
-        correct = any(ans.lower() in answer.lower() for ans in question.get('acceptable_answers', []))
+        score = 0.8 * keyword_overlap + 0.2 * fuzzy_max
         
+        threshold = float(question.get('rubric_threshold', 0.45))
+        min_coverage = float(question.get('rubric_min_coverage', 0.50))
+        correct = (score >= threshold) and (keyword_overlap >= min_coverage)
+
         # Update progress in background
         def update_progress():
             try:
@@ -387,12 +487,33 @@ class NEBeduApp(ctk.CTk):
         self._loading = True
         
         self._safe_destroy_widgets()
-        self.ask_view = AskQuestionView(self.main_frame, self.on_ask_submit, self.show_main_menu)
+        self.ask_view = AskQuestionView(self.main_frame, self.on_ask_submit, self.show_main_menu, self.on_ask_openai)
         self.ask_view.pack(fill='both', expand=True)
         self._loading = False
 
+    def on_ask_openai(self, question):
+        if self._loading:
+            return
+        self._loading = True
+        self.ask_view.set_loading(True)
+
+        def worker():
+            try:
+                answer = self.openai_client.ask(question, user_id=self.username)
+                def show_result():
+                    self.ask_view.set_result(answer, is_openai=True)
+                    self._loading = False
+                self.after(0, show_result)
+            except Exception as e:
+                def show_error():
+                    mb.showerror("OpenAI Error", f"Failed to get answer from OpenAI: {e}")
+                    self.ask_view.set_loading(False)
+                    self._loading = False
+                self.after(0, show_error)
+
+        threading.Thread(target=worker, daemon=True).start()
+
     def on_ask_submit(self, question, answer_length="medium"):
-        # Always use medium for detailed answers (optimized)
         if self._loading:
             return
         self._loading = True
@@ -405,78 +526,47 @@ class NEBeduApp(ctk.CTk):
                 if not self._rag_initialized:
                     self._lazy_init_rag()
                 
-                # Text normalization for better model understanding
-                normalized_question = question
-                if question.isupper():
-                    normalized_question = question.capitalize()
-                elif question.islower():
-                    normalized_question = question.capitalize()
+                normalized_question = question.strip().capitalize()
                 
-                # Step 1: Try RAG retrieval first (non-blocking)
                 rag_context = None
-                source_info = "RAG-powered content discovery"
-                related = []  # Initialize related variable
-                
+                source_info = "AI General Knowledge"
+                related = []
+
+                # 1. RAG Retrieval
                 if self.rag_engine:
                     try:
-                        rag_results = self.rag_engine.retrieve_relevant_content(question, max_results=3)
+                        rag_results = self.rag_engine.retrieve_relevant_content(question, max_results=2)
                         if rag_results and rag_results.get('chunks'):
-                            # Apply lightweight distance filtering if available
-                            chunks = rag_results['chunks']
-                            safe_chunks = []
-                            for ch in chunks:
-                                dist = ch.get('distance', 0.0)
-                                if dist is None or dist <= 0.35:
-                                    safe_chunks.append(ch)
-                            if safe_chunks:
-                                rag_context = "\n\n".join([ch['content'] for ch in safe_chunks])
-                                source_info = f"RAG found {len(safe_chunks)} relevant content chunks"
-                    except Exception:
-                        # RAG failed, continue with fallback
-                        pass
-                
-                # Step 2: Fallback to structured content search
+                            chunks = rag_results['chunks'][:2]
+                            rag_context = "\n\n".join([ch['content'] for ch in chunks])
+                            rag_context = rag_context[:600]
+                            source_info = "RAG-enhanced content"
+                    except Exception as e:
+                        print(f"RAG search failed: {e}")
+
+                # 2. Structured Content Search (Fallback)
                 if not rag_context:
                     relevant = self.content_manager.search_content(question)
                     if relevant:
-                        subject = relevant[0]['subject']
-                        topic = relevant[0]['topic']
-                        concept = relevant[0]['concept']
-                        concept_data = self.content_manager.get_concept(subject, topic, concept)
-                        if concept_data and 'questions' in concept_data:
-                            for q in concept_data['questions']:
-                                if isinstance(q, dict) and 'question' in q:
-                                    ratio = difflib.SequenceMatcher(None, q['question'].lower(), question.lower()).ratio()
-                                    if ratio > 0.7:
-                                        if 'acceptable_answers' in q and q['acceptable_answers']:
-                                            answer = q['acceptable_answers'][0]
-                                            confidence = 0.9
-                                            hints = q.get('hints', [])
-                                            related = [f"{item['subject']} > {item['topic']} > {item['concept']}" for item in relevant[1:3]]
-                                            
-                                            def show_structured_result():
-                                                self.ask_view.set_result(answer, confidence, hints, related, source_info="Structured content match")
-                                                self._loading = False
-                                            self.after(0, show_structured_result)
-                                            return
                         rag_context = relevant[0]['summary']
-                        source_info = "Structured content search"
+                        source_info = "Structured content"
                         related = [f"{item['subject']} > {item['topic']} > {item['concept']}" for item in relevant[1:3]]
-                
-                # Step 3: Use Phi 1.5 with context
+
+                # 3. General Knowledge (Final Fallback)
                 if not rag_context:
-                    rag_context = "General knowledge about computer science and English for Grade 10 students."
-                    source_info = "General knowledge (no specific content found)"
-                
-                # Get answer from Phi 1.5
-                trimmed_ctx = rag_context[:900] if rag_context else ""
+                    rag_context = (
+                        "You are a helpful AI tutor for Grade 10 students. "
+                        "Use your general knowledge to provide accurate, educational answers. "
+                        "Keep answers comprehensive but appropriate for high school level."
+                    )
+
+                # Get answer from local model
                 answer, confidence = self.model_handler.get_answer(
                     normalized_question,
-                    trimmed_ctx,
+                    rag_context,
                     answer_length,
                 )
                 
-                # Get hints if confidence is low
                 hints = []
                 if confidence < 0.7:
                     try:
@@ -484,12 +574,10 @@ class NEBeduApp(ctk.CTk):
                     except Exception:
                         pass
                 
-                # Show result
                 def show_result():
-                    if not answer or (isinstance(answer, str) and len(answer.strip()) < 5) or confidence < 0.1:
-                        # Very low confidence - show context and fallback
-                        fallback_msg = "I'm not sure about that. Let me help you find the right information:"
-                        self.ask_view.set_result(fallback_msg + "\n\n" + rag_context, 0.0, hints, related, source_info)
+                    if not answer or len(answer.strip()) < 5 or confidence < 0.1:
+                        fallback_msg = "I'm not sure about that. Here's some related information:"
+                        self.ask_view.set_result(fallback_msg + "\n\n" + (rag_context or ""), 0.0, hints, related, source_info)
                     else:
                         self.ask_view.set_result(answer, confidence, hints, related, source_info)
                     self._loading = False
@@ -596,6 +684,16 @@ class NEBeduApp(ctk.CTk):
         
         self._safe_destroy_widgets()
         view = ProgressOpsView(self.main_frame, self.export_progress, self.import_progress, self.reset_progress, self.show_main_menu)
+        view.pack(fill='both', expand=True)
+        self._loading = False
+
+    def show_about(self):
+        if self._loading:
+            return
+        self._loading = True
+        
+        self._safe_destroy_widgets()
+        view = AboutView(self.main_frame, self.show_main_menu)
         view.pack(fill='both', expand=True)
         self._loading = False
 
