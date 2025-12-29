@@ -45,11 +45,19 @@ class Phi15Handler:
         self.enable_streaming = enable_streaming
         
         # SATYA'S ORIGINAL PERSONALITY - Wise Nepali tutor
+        # Enhanced to encourage ASCII diagrams and focused, intelligent answers
         self.system_prompt = (
-            "You are Satya, a wise and friendly Grade 10 tutor from Nepal who loves teaching. "
-            "Use simple analogies, real-world examples, and occasional Nepali cultural references. "
-            "Be encouraging but not overly sweet - like a good teacher who believes in your potential. "
-            "Answer in 4-6 sentences with clear explanations and practical examples."
+            "You are Satya, a Grade 10 tutor. Answer ONLY what is asked. Be direct and complete. "
+            "ABSOLUTE RULES - NO EXCEPTIONS: "
+            "1. Answer the question in 2-4 sentences + ONE code example. Then STOP. "
+            "2. NEVER add: exercises, practice problems, use cases, real-world examples, 'let's explore', or extra content. "
+            "3. NEVER say: 'Now let's', 'Use Case', 'Real-world', 'Another example', or similar phrases. "
+            "4. 'How does X work?' → Explain mechanism + one example. STOP. "
+            "5. 'How to do X?' → Show code directly. STOP. "
+            "6. 'What is X?' → Definition + one example. STOP. "
+            "7. Complete your sentences. End with proper punctuation. "
+            "8. Maximum 5 sentences total. Answer the question, then STOP immediately. "
+            "9. If you finish explaining, STOP. Do not continue."
         )
         
     def _find_model_file(self) -> str:
@@ -129,13 +137,46 @@ class Phi15Handler:
             # Prompt building
             prompt = self._build_prompt(normalized_question, context)
             
+            # Adjust max_tokens based on answer_length (balanced for focused answers)
+            max_tokens_map = {
+                "very_short": 80,
+                "short": 160,
+                "medium": 250,  # Reduced to encourage stopping after answer
+                "long": 400,
+                "very_long": 800
+            }
+            max_tokens = max_tokens_map.get(answer_length, 250)
+            
+            # Comprehensive stop sequences to prevent off-topic content
+            stop_sequences = [
+                "</s>",
+                # Exercise/practice patterns
+                "\n\nExercise:", "\nExercise:", "Exercise:",
+                "\n\nPractice:", "\nPractice:", "Practice:",
+                "\n\nTry this:", "\nTry this:", "Try this:",
+                "\n\nNow try", "\nNow try", "Now try",
+                # Use case/real-world patterns (multiple variations)
+                "\n\nNow, let's", "\nNow, let's", "Now, let's",
+                "\n\nLet's explore", "\nLet's explore", "Let's explore",
+                "Now, let's explore",  # Catch without newline prefix
+                "\n\nUse Case", "\nUse Case", "Use Case",
+                "\n\nReal-world", "\nReal-world", "Real-world",
+                "\n\nAnother example", "\nAnother example", "Another example",
+                # Continuation patterns (after first example)
+                "\n\nAdditionally,", "\nAdditionally,",
+                "\n\nFurthermore,", "\nFurthermore,",
+                "\n\nMoreover,", "\nMoreover,",
+                # Multiple example patterns
+                "\n\nFor example,",  # Only stop on second "For example" (after newline)
+            ]
+            
             # Inference settings
             response = self.llm(
                 prompt,
-                max_tokens=self.config.get("max_tokens", 256),
+                max_tokens=max_tokens,
                 temperature=self.config.get("temperature", 0.35),
                 top_p=self.config.get("top_p", 0.92),
-                stop=self.config.get("stop", ["</s>"]),
+                stop=stop_sequences,
                 echo=False,
                 stream=False
             )
@@ -150,6 +191,44 @@ class Phi15Handler:
             answer = answer.strip()
             if answer.lower().startswith("answer:"):
                 answer = answer[7:].strip()
+            
+            # Remove off-topic content if it slips through (comprehensive cleanup)
+            off_topic_markers = [
+                # Exercise/practice patterns
+                "\n\nExercise:", "\nExercise:", "Exercise:",
+                "\n\nPractice:", "\nPractice:", "Practice:",
+                "\n\nTry this:", "\nTry this:", "Try this:",
+                "\n\nNow try", "\nNow try",
+                # Use case/real-world patterns
+                "\n\nNow, let's", "\nNow, let's", "Now, let's",
+                "\n\nLet's explore", "\nLet's explore", "Let's explore",
+                "\n\nUse Case", "\nUse Case", "Use Case",
+                "\n\nReal-world", "\nReal-world", "Real-world",
+                "\n\nAnother example", "\nAnother example", "Another example",
+                # Continuation patterns
+                "\n\nAdditionally,", "\nAdditionally,",
+                "\n\nFurthermore,", "\nFurthermore,",
+                "\n\nMoreover,", "\nMoreover,",
+            ]
+            for marker in off_topic_markers:
+                if marker in answer:
+                    # Split at the marker and keep only the part before it
+                    answer = answer.split(marker)[0].strip()
+                    logger.debug(f"Removed off-topic content after {marker}")
+                    break
+            
+            # Check if answer seems incomplete and try to fix it
+            if answer and len(answer) > 20:
+                trimmed = answer.rstrip()
+                # Check if answer ends properly
+                if not trimmed.endswith(('.', '!', '?', ':', '\n', ')', ']', '}')):
+                    # Might be incomplete - try to find last complete sentence
+                    for punct in ['.', '!', '?', ':']:
+                        last_punct = trimmed.rfind(punct)
+                        if last_punct > len(trimmed) * 0.6:  # If punctuation is in last 40%
+                            answer = trimmed[:last_punct + 1].strip()
+                            logger.debug(f"Fixed incomplete answer by trimming at {punct}")
+                            break
                 
             # Confidence calculation
             confidence = self._calculate_confidence(answer, context, question)
@@ -193,15 +272,38 @@ class Phi15Handler:
             # Prompt building
             prompt = self._build_prompt(normalized_question, context)
             
-            # Adjust max_tokens based on answer_length
+            # Adjust max_tokens based on answer_length (balanced for focused answers)
             max_tokens_map = {
-                "very_short": 64,
-                "short": 128,
-                "medium": 256,
-                "long": 512,
-                "very_long": 1024
+                "very_short": 80,
+                "short": 160,
+                "medium": 250,  # Reduced to encourage stopping after answer
+                "long": 400,
+                "very_long": 800
             }
-            max_tokens = max_tokens_map.get(answer_length, 256)
+            max_tokens = max_tokens_map.get(answer_length, 250)
+            
+            # Comprehensive stop sequences to prevent off-topic content
+            stop_sequences = [
+                "</s>",
+                # Exercise/practice patterns
+                "\n\nExercise:", "\nExercise:", "Exercise:",
+                "\n\nPractice:", "\nPractice:", "Practice:",
+                "\n\nTry this:", "\nTry this:", "Try this:",
+                "\n\nNow try", "\nNow try", "Now try",
+                # Use case/real-world patterns (multiple variations)
+                "\n\nNow, let's", "\nNow, let's", "Now, let's",
+                "\n\nLet's explore", "\nLet's explore", "Let's explore",
+                "Now, let's explore",  # Catch without newline prefix
+                "\n\nUse Case", "\nUse Case", "Use Case",
+                "\n\nReal-world", "\nReal-world", "Real-world",
+                "\n\nAnother example", "\nAnother example", "Another example",
+                # Continuation patterns (after first example)
+                "\n\nAdditionally,", "\nAdditionally,",
+                "\n\nFurthermore,", "\nFurthermore,",
+                "\n\nMoreover,", "\nMoreover,",
+                # Multiple example patterns
+                "\n\nFor example,",  # Only stop on second "For example" (after newline)
+            ]
             
             # Stream inference
             full_answer = ""
@@ -210,7 +312,7 @@ class Phi15Handler:
                 max_tokens=max_tokens,
                 temperature=self.config.get("temperature", 0.35),
                 top_p=self.config.get("top_p", 0.92),
-                stop=self.config.get("stop", ["</s>"]),
+                stop=stop_sequences,
                 echo=False,
                 stream=True
             ):
@@ -245,17 +347,39 @@ class Phi15Handler:
                     logger.debug(f"Error extracting token from chunk: {e}")
                     continue
             
-            # Clean up answer if needed
-            if full_answer.lower().startswith("answer:"):
-                # This won't affect already-yielded tokens, but good for logging
-                pass
+            # Clean up answer if needed (post-streaming check)
+            # Note: This won't affect already-streamed tokens, but we can log if off-topic content was added
+            off_topic_markers = [
+                "\n\nExercise:", "\nExercise:", "Exercise:",
+                "\n\nPractice:", "\nPractice:", "Practice:",
+                "\n\nTry this:", "\nTry this:", "Try this:",
+                "\n\nNow try", "\nNow try",
+                "\n\nNow, let's", "\nNow, let's", "Now, let's",
+                "\n\nLet's explore", "\nLet's explore", "Let's explore",
+                "\n\nUse Case", "\nUse Case", "Use Case",
+                "\n\nReal-world", "\nReal-world", "Real-world",
+            ]
+            for marker in off_topic_markers:
+                if marker in full_answer:
+                    logger.warning(f"Off-topic marker detected in streamed answer: {marker}")
+                    # Note: Can't remove from already-streamed tokens, but stop sequences should prevent this
+                    break
                 
         except Exception as e:
             logger.error(f"Streaming inference error: {e}")
             yield "I'm having trouble processing your question. Please try again."
 
     def _build_prompt(self, question: str, context: str) -> str:
-        """Prompt template."""
+        """
+        Build prompt template with optional diagram encouragement.
+        
+        Args:
+            question: Student's question
+            context: Relevant context for the answer
+            
+        Returns:
+            Formatted prompt string
+        """
         # Your ORIGINAL generous context handling
         trimmed_context = (context or "").strip()
         if len(trimmed_context) > 800:  # More context = better answers
@@ -265,12 +389,29 @@ class Phi15Handler:
             if last_period > 700:
                 trimmed_context = trimmed_context[:last_period + 1]
         
-        # Your ORIGINAL rich prompt format
+        # Detect if question would benefit from a diagram
+        diagram_keywords = [
+            "how does", "explain the process", "show the structure",
+            "what is the flow", "describe the steps", "visualize",
+            "algorithm", "process", "flow", "structure", "steps"
+        ]
+        question_lower = question.lower()
+        needs_diagram = any(kw in question_lower for kw in diagram_keywords)
+        
+        # Optional diagram instruction (only when appropriate)
+        diagram_hint = ""
+        if needs_diagram:
+            diagram_hint = (
+                "\n\nNote: This question would benefit from a visual diagram. "
+                "If helpful, include an ASCII diagram after your explanation using box-drawing characters."
+            )
+        
+        # Enhanced prompt format that emphasizes answering the specific question
         return (
             f"{self.system_prompt}\n\n"
             f"Context: {trimmed_context}\n\n"
-            f"Student Question: {question}\n\n"
-            f"Satya's Answer:"
+            f"Student Question: {question}{diagram_hint}\n\n"
+            f"Answer:"
         )
 
     def _extract_text(self, response: Any) -> str:
