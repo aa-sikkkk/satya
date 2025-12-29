@@ -7,7 +7,7 @@ Single Phi 1.5 model for all tasks
 
 import os
 import logging
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List, Tuple, Iterator
 from .phi15_handler import Phi15Handler
 
 # Configure logging
@@ -65,6 +65,24 @@ class ModelHandler:
         except Exception as e:
             logger.error(f"Error getting answer: {e}")
             return "I'm having trouble processing your question. Please try again.", 0.1
+    
+    def get_answer_stream(self, question: str, context: str, answer_length: str = "medium") -> Iterator[str]:
+        """
+        Stream answer tokens as they're generated for real-time display.
+        
+        Args:
+            question (str): User's question
+            context (str): Relevant context
+            answer_length (str): "very_short", "short", "medium", "long", "very_long"
+            
+        Yields:
+            str: Token chunks as they're generated
+        """
+        try:
+            yield from self.phi15_handler.get_answer_stream(question, context, answer_length)
+        except Exception as e:
+            logger.error(f"Error streaming answer: {e}")
+            yield "I'm having trouble processing your question. Please try again."
             
     def get_hints(self, question: str, context: str) -> List[str]:
         """

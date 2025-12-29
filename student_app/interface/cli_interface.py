@@ -9,12 +9,14 @@ import os
 import sys
 import logging
 import difflib
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Tuple
 from rich.console import Console
 from rich.prompt import Prompt, Confirm
 from rich.panel import Panel
 from rich.table import Table
 from rich.markdown import Markdown
+from rich.live import Live
+from rich.text import Text
 from prompt_toolkit import PromptSession
 from prompt_toolkit.completion import WordCompleter
 from prompt_toolkit.styles import Style
@@ -618,9 +620,74 @@ Type 'back' to return to previous menu
             except Exception:
                 pass
             
+    def _stream_answer(self, question: str, context: str, answer_length: str, source_info: str = "") -> Tuple[str, float]:
+        """
+        Stream answer tokens and display them in real-time.
+        
+        Returns:
+            Tuple[str, float]: Complete answer and confidence score
+        """
+        accumulated_answer = ""
+        confidence = 0.8  # Default confidence, will be calculated after
+        
+        def create_panel():
+            """Create a panel with current accumulated answer."""
+            content = f"[bold]{accumulated_answer}[/bold]"
+            if source_info:
+                content += f"\n\n[cyan]Source: {source_info}[/cyan]"
+            return Panel(
+                content,
+                title="Answer",
+                border_style="green"
+            )
+        
+        try:
+            # Start streaming with live display
+            with Live(create_panel(), refresh_per_second=10, console=console) as live:
+                for token in self.model_handler.get_answer_stream(question, context, answer_length):
+                    accumulated_answer += token
+                    # Update the panel with new content
+                    live.update(create_panel())
+            
+            # Calculate confidence after streaming completes
+            if accumulated_answer and len(accumulated_answer.strip()) >= 10:
+                # Use a quick confidence calculation
+                confidence = self._calculate_quick_confidence(accumulated_answer, context)
+            else:
+                confidence = 0.1
+                
+        except Exception as e:
+            logger.error(f"Streaming error: {e}")
+            accumulated_answer = "I'm having trouble processing your question. Please try again."
+            confidence = 0.1
+        
+        return accumulated_answer.strip(), confidence
+    
+    def _calculate_quick_confidence(self, answer: str, context: str) -> float:
+        """Quick confidence calculation for streaming answers."""
+        answer_lower = answer.lower()
+        
+        # Error detection
+        if any(phrase in answer_lower for phrase in ["i couldn't", "i'm having trouble", "error"]):
+            return 0.1
+        
+        # Quality indicators
+        has_examples = any(word in answer_lower for word in ["example", "like", "similar to"])
+        has_structure = answer.count(".") >= 2
+        word_count = len(answer.split())
+        
+        # Scoring
+        base_score = min(0.8, word_count / 100)
+        if has_examples:
+            base_score += 0.1
+        if has_structure:
+            base_score += 0.1
+            
+        return min(1.0, base_score)
+    
     @timeit
     def _handle_free_text_question(self, question: str) -> None:
-        """Handle free-text questions using the AI model."""
+        """Handle free-text questions using the AI model with streaming."""
         def _quick_answer(prompt: str, context: str, length: str, timeout_seconds: int = 30):
             """Call model with a timeout; on failure/timeout return (None, 0.0)."""
             try:
@@ -696,10 +763,10 @@ Type 'back' to return to previous menu
                             source_info = "RAG-enhanced content"
                             confidence = 0.85
                             
-                            # Try to generate answer from RAG context
+                            # Try to generate answer from RAG context with streaming
                             try:
-                                # Respect user-selected length; no timeout to avoid premature fallback
-                                answer, confidence = _quick_answer(question, context, answer_length, timeout_seconds=0)
+                                # Use streaming for real-time display
+                                answer, confidence = self._stream_answer(question, context, answer_length, source_info)
                                 if not answer or len(answer.strip()) == 0:
                                     raise ValueError("Model generated empty answer")
                             except Exception as e:
@@ -719,7 +786,7 @@ Type 'back' to return to previous menu
                                     )
                                     
                                     try:
-                                        answer, confidence = _quick_answer(question, general_context, answer_length)
+                                        answer, confidence = self._stream_answer(question, general_context, answer_length, "AI General Knowledge (RAG Fallback)")
                                         if not answer or len(answer.strip()) == 0:
                                             raise ValueError("Model generated empty answer")
                                         source_info = "AI General Knowledge (RAG Fallback)"
@@ -753,10 +820,10 @@ Type 'back' to return to previous menu
                             source_info = "Structured content"
                             confidence = 0.8
                         
-                        # Generate answer using the context (for structured content)
+                        # Generate answer using the context (for structured content) with streaming
                         if 'answer' not in locals():
                             try:
-                                answer, confidence = _quick_answer(question, context, answer_length)
+                                answer, confidence = self._stream_answer(question, context, answer_length, source_info)
                                 if not answer or len(answer.strip()) == 0:
                                     raise ValueError("Model generated empty answer")
                             except Exception as e:
@@ -775,7 +842,7 @@ Type 'back' to return to previous menu
                                 )
                                 
                                 try:
-                                    answer, confidence = _quick_answer(question, general_context, answer_length)
+                                    answer, confidence = self._stream_answer(question, general_context, answer_length, "AI General Knowledge (Fallback)")
                                     if not answer or len(answer.strip()) == 0:
                                         raise ValueError("Model generated empty answer")
                                     source_info = "AI General Knowledge (Fallback)"
@@ -805,7 +872,7 @@ Type 'back' to return to previous menu
                         )
                         
                         try:
-                            answer, confidence = _quick_answer(question, general_context, answer_length)
+                            answer, confidence = self._stream_answer(question, general_context, answer_length, "AI General Knowledge")
                             if not answer or len(answer.strip()) == 0:
                                 raise ValueError("Model generated empty answer")
                             source_info = "AI General Knowledge"
@@ -843,20 +910,21 @@ Type 'back' to return to previous menu
                         ))
                 return
                 
-            # Display answer with confidence indicator and source info
+            # Display final answer with confidence indicator and source info
+            # (Answer was already displayed during streaming, now show final stats)
             confidence_color = "green" if confidence > 0.7 else "yellow" if confidence > 0.4 else "red"
             
             # Add source information if available
             source_display = ""
             if 'source_info' in locals():
-                source_display = f"\n\n[cyan]Source: {source_info}[/cyan]"
+                source_display = f"\n[cyan]Source: {source_info}[/cyan]"
             
+            # Print final panel with confidence
             console.print(Panel(
-                f"[bold]{answer}[/bold]\n\n"
                 f"[{confidence_color}]Confidence: {confidence:.1%}[/{confidence_color}]"
                 f"{source_display}",
-                title="Answer",
-                border_style="green"
+                title="Answer Statistics",
+                border_style="cyan"
             ))
 
             # Offer to ask OpenAI if confidence is low or on user request

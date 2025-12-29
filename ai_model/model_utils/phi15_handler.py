@@ -17,7 +17,7 @@ if sys.platform == "win32":
 import json
 import logging
 import time
-from typing import Tuple, List, Dict, Any, Optional
+from typing import Tuple, List, Dict, Any, Optional, Iterator
 from pathlib import Path
 
 # Try to import llama-cpp-python
@@ -158,6 +158,101 @@ class Phi15Handler:
         except Exception as e:
             logger.error(f"Inference error: {e}")
             return "I'm having trouble processing your question. Please try again.", 0.1
+
+    def get_answer_stream(self, question: str, context: str, answer_length: str = "medium") -> Iterator[str]:
+        """
+        Stream answer tokens as they're generated for real-time display.
+        
+        Args:
+            question (str): User's question
+            context (str): Relevant context
+            answer_length (str): "very_short", "short", "medium", "long", "very_long"
+            
+        Yields:
+            str: Token chunks as they're generated
+        """
+        if self.llm is None:
+            self.load_model()
+            
+        # Input validation
+        if not question or not context:
+            yield "I need both a question and context to help you."
+            return
+            
+        # Question normalization
+        normalized_question = question.strip()
+        if normalized_question.isupper():
+            normalized_question = normalized_question.lower().capitalize()
+        elif normalized_question.islower():
+            normalized_question = normalized_question.capitalize()
+        if len(normalized_question) < 3:
+            yield "Please provide a more detailed question."
+            return
+            
+        try:
+            # Prompt building
+            prompt = self._build_prompt(normalized_question, context)
+            
+            # Adjust max_tokens based on answer_length
+            max_tokens_map = {
+                "very_short": 64,
+                "short": 128,
+                "medium": 256,
+                "long": 512,
+                "very_long": 1024
+            }
+            max_tokens = max_tokens_map.get(answer_length, 256)
+            
+            # Stream inference
+            full_answer = ""
+            for chunk in self.llm(
+                prompt,
+                max_tokens=max_tokens,
+                temperature=self.config.get("temperature", 0.35),
+                top_p=self.config.get("top_p", 0.92),
+                stop=self.config.get("stop", ["</s>"]),
+                echo=False,
+                stream=True
+            ):
+                if chunk is None:
+                    continue
+                    
+                # Extract text from chunk
+                try:
+                    if isinstance(chunk, dict):
+                        # Handle llama-cpp-python format: {"choices": [{"text": "..."}]}
+                        if "choices" in chunk and len(chunk["choices"]) > 0:
+                            choice = chunk["choices"][0]
+                            if "text" in choice:
+                                token = choice["text"]
+                                if token:  # Only yield non-empty tokens
+                                    full_answer += token
+                                    yield token
+                            # Handle OpenAI-style delta format (if supported)
+                            elif "delta" in choice and isinstance(choice["delta"], dict):
+                                if "content" in choice["delta"]:
+                                    token = choice["delta"]["content"]
+                                    if token:  # Only yield non-empty tokens
+                                        full_answer += token
+                                        yield token
+                        # Handle direct text in chunk (fallback)
+                        elif "text" in chunk:
+                            token = chunk["text"]
+                            if token:
+                                full_answer += token
+                                yield token
+                except (KeyError, IndexError, TypeError) as e:
+                    logger.debug(f"Error extracting token from chunk: {e}")
+                    continue
+            
+            # Clean up answer if needed
+            if full_answer.lower().startswith("answer:"):
+                # This won't affect already-yielded tokens, but good for logging
+                pass
+                
+        except Exception as e:
+            logger.error(f"Streaming inference error: {e}")
+            yield "I'm having trouble processing your question. Please try again."
 
     def _build_prompt(self, question: str, context: str) -> str:
         """Prompt template."""

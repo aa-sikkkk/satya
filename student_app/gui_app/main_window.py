@@ -560,29 +560,91 @@ class NEBeduApp(ctk.CTk):
                         "Keep answers comprehensive but appropriate for high school level."
                     )
 
-                # Get answer from local model
-                answer, confidence = self.model_handler.get_answer(
-                    normalized_question,
-                    rag_context,
-                    answer_length,
-                )
+                # Stream answer from local model for real-time display
+                accumulated_answer = ""
                 
-                hints = []
-                if confidence < 0.7:
-                    try:
-                        hints = self.model_handler.get_hints(normalized_question, rag_context)
-                    except Exception:
-                        pass
+                def update_answer(token):
+                    """Update the answer display with new token."""
+                    nonlocal accumulated_answer
+                    accumulated_answer += token
+                    self.after(0, lambda t=token: self.ask_view.append_answer_token(t))
                 
-                def show_result():
-                    if not answer or len(answer.strip()) < 5 or confidence < 0.1:
-                        fallback_msg = "I'm not sure about that. Here's some related information:"
-                        self.ask_view.set_result(fallback_msg + "\n\n" + (rag_context or ""), 0.0, hints, related, source_info)
+                # Start streaming
+                try:
+                    for token in self.model_handler.get_answer_stream(
+                        normalized_question,
+                        rag_context,
+                        answer_length,
+                    ):
+                        update_answer(token)
+                    
+                    # Calculate confidence after streaming completes
+                    if accumulated_answer and len(accumulated_answer.strip()) >= 10:
+                        # Quick confidence calculation
+                        answer_lower = accumulated_answer.lower()
+                        has_examples = any(word in answer_lower for word in ["example", "like", "similar to"])
+                        has_structure = accumulated_answer.count(".") >= 2
+                        word_count = len(accumulated_answer.split())
+                        base_score = min(0.8, word_count / 100)
+                        if has_examples:
+                            base_score += 0.1
+                        if has_structure:
+                            base_score += 0.1
+                        confidence = min(1.0, base_score)
                     else:
-                        self.ask_view.set_result(answer, confidence, hints, related, source_info)
-                    self._loading = False
-                
-                self.after(0, show_result)
+                        confidence = 0.1
+                    
+                    hints = []
+                    if confidence < 0.7:
+                        try:
+                            hints = self.model_handler.get_hints(normalized_question, rag_context)
+                        except Exception:
+                            pass
+                    
+                    def show_result():
+                        if not accumulated_answer or len(accumulated_answer.strip()) < 5 or confidence < 0.1:
+                            fallback_msg = "I'm not sure about that. Here's some related information:"
+                            self.ask_view.set_result(fallback_msg + "\n\n" + (rag_context or ""), 0.0, hints, related, source_info)
+                        else:
+                            self.ask_view.finalize_answer(confidence, hints, related, source_info)
+                        self._loading = False
+                    
+                    self.after(0, show_result)
+                    
+                except Exception as stream_error:
+                    # Fallback to non-streaming if streaming fails
+                    def fallback():
+                        try:
+                            answer, confidence = self.model_handler.get_answer(
+                                normalized_question,
+                                rag_context,
+                                answer_length,
+                            )
+                            
+                            hints = []
+                            if confidence < 0.7:
+                                try:
+                                    hints = self.model_handler.get_hints(normalized_question, rag_context)
+                                except Exception:
+                                    pass
+                            
+                            def show_result():
+                                if not answer or len(answer.strip()) < 5 or confidence < 0.1:
+                                    fallback_msg = "I'm not sure about that. Here's some related information:"
+                                    self.ask_view.set_result(fallback_msg + "\n\n" + (rag_context or ""), 0.0, hints, related, source_info)
+                                else:
+                                    self.ask_view.set_result(answer, confidence, hints, related, source_info)
+                                self._loading = False
+                            
+                            self.after(0, show_result)
+                        except Exception as e:
+                            def show_error():
+                                mb.showerror("Ask Question", f"Failed to answer: {e}")
+                                self.ask_view.set_result("An error occurred. Please try again.", 0.0, None, None, "Error")
+                                self._loading = False
+                            self.after(0, show_error)
+                    
+                    fallback()
                 
             except Exception as e:
                 def show_error():
