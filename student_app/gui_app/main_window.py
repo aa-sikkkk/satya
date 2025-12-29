@@ -17,10 +17,19 @@ import atexit
 import time
 
 class NEBeduApp(ctk.CTk):
+    """
+    Main application window for Satya Learning System.
+    
+    Provides a responsive, modern GUI with non-blocking operations.
+    """
+    
     def __init__(self):
         super().__init__()
         self.title('Satya: Learning Companion')
-        self.geometry('900x600')
+        self.geometry('1200x750')
+        self.minsize(900, 600)
+        
+        # Modern appearance settings
         ctk.set_appearance_mode('light')
         ctk.set_default_color_theme('green')
         
@@ -28,25 +37,18 @@ class NEBeduApp(ctk.CTk):
         self._cache = {}  # Widget and data caching
         self._loading = False  # Prevent multiple simultaneous operations
         self._update_timer = None  # Debounced updates
+        self._initialization_done = False
         
         self.username = None
-        self.content_manager = ContentManager()
+        self.content_manager = None  # Will be initialized in background
         
         # Initialize RAG system (lazy)
         self.rag_engine = None
         self._rag_initialized = False
         
-        # Model path logic (updated for new architecture and PyInstaller compatibility)
-        model_path = str(resolve_model_dir("satya_data/models/phi_1_5"))
-        if not os.path.exists(model_path):
-            mb.showerror("Model Error", f"Model directory not found: {model_path}")
-            raise FileNotFoundError(f"Model directory not found: {model_path}")
-        
-        try:
-            self.model_handler = ModelHandler(model_path)
-        except Exception as e:
-            mb.showerror("Model Error", f"Could not initialize the AI model: {e}")
-            raise
+        # Model handler (will be initialized in background)
+        self.model_handler = None
+        self.model_path = None
         
         # Configure OpenAI proxy client
         proxy_url = os.getenv("OPENAI_PROXY_URL")
@@ -60,73 +62,233 @@ class NEBeduApp(ctk.CTk):
         self.selected_concept_data = None
         self.question_index = 0
 
+        # Create UI structure first (non-blocking)
+        self._create_ui_structure()
+        
+        # Initialize heavy components in background
+        self._initialize_in_background()
+    
+    def _create_ui_structure(self):
+        """Create the UI structure without blocking operations."""
         # Main container
-        self.container = ctk.CTkFrame(self)
+        self.container = ctk.CTkFrame(self, fg_color="transparent")
         self.container.pack(fill='both', expand=True)
 
         # Sidebar (hidden until login)
-        self.sidebar = ctk.CTkFrame(self.container, width=180, corner_radius=0)
+        self.sidebar = ctk.CTkFrame(
+            self.container,
+            width=220,
+            corner_radius=0,
+            fg_color="#F5F5F5"
+        )
         self.sidebar.grid(row=0, column=0, sticky='ns')
         self.sidebar.grid_propagate(False)
         self.sidebar.grid_remove()
 
-        # Logo image at the top of the sidebar
-        logo_path = os.path.join(os.path.dirname(__file__), "images", "logo.png")
-        logo_img = ctk.CTkImage(light_image=Image.open(logo_path), size=(120, 120))
-        self.logo_image_label = ctk.CTkLabel(self.sidebar, image=logo_img, text="")
-        self.logo_image_label.pack(pady=(20, 10))
-
-        self.btn_browse = ctk.CTkButton(self.sidebar, text='Browse Subjects', command=self.show_browse)
-        self.btn_browse.pack(pady=10, fill='x', padx=20)
-        self.btn_ask = ctk.CTkButton(self.sidebar, text='Ask Question', command=self.show_ask)
-        self.btn_ask.pack(pady=10, fill='x', padx=20)
-        self.btn_progress = ctk.CTkButton(self.sidebar, text='Progress', command=self.show_progress)
-        self.btn_progress.pack(pady=10, fill='x', padx=20)
-        self.btn_ops = ctk.CTkButton(self.sidebar, text='Progress Ops', command=self.show_progress_ops)
-        self.btn_ops.pack(pady=10, fill='x', padx=20)
-        self.btn_about = ctk.CTkButton(self.sidebar, text='About', command=self.show_about)
-        self.btn_about.pack(pady=10, fill='x', padx=20)
-        self.btn_exit = ctk.CTkButton(self.sidebar, text='Exit', fg_color='#e57373', hover_color='#ef5350', command=self.quit)
-        self.btn_exit.pack(pady=(40,0), fill='x', padx=20)
-
-        # Model info display
-        self.model_info_frame = ctk.CTkFrame(self.sidebar, fg_color="transparent")
-        self.model_info_frame.pack(side="bottom", pady=20, padx=20, fill="x")
-        
-        try:
-            model_info = self.model_handler.get_model_info()
-            if model_info:
-                ctk.CTkLabel(self.model_info_frame, text="AI Model Info", font=ctk.CTkFont(size=14, weight="bold")).pack(anchor="w")
-                for key, value in model_info.items():
-                    ctk.CTkLabel(self.model_info_frame, text=f"{key.capitalize()}: {value}", font=ctk.CTkFont(size=12)).pack(anchor="w")
-        except Exception as e:
-            ctk.CTkLabel(self.model_info_frame, text="Could not load model info.", font=ctk.CTkFont(size=12)).pack(anchor="w")
+        # Sidebar content
+        self._create_sidebar()
 
         # Main content area
-        self.main_content = ctk.CTkFrame(self.container, corner_radius=10)
-        self.main_content.grid(row=0, column=1, sticky='nsew', padx=30, pady=30)
+        self.main_content = ctk.CTkFrame(
+            self.container,
+            corner_radius=0,
+            fg_color="#FFFFFF"
+        )
+        self.main_content.grid(row=0, column=1, sticky='nsew', padx=0, pady=0)
         self.container.grid_rowconfigure(0, weight=1)
         self.container.grid_columnconfigure(1, weight=1)
 
-        # Top bar
-        self.top_bar = ctk.CTkFrame(self.main_content, height=50, corner_radius=0)
+        # Top bar with modern design
+        self.top_bar = ctk.CTkFrame(
+            self.main_content,
+            height=60,
+            corner_radius=0,
+            fg_color="#FFFFFF",
+            border_width=0,
+            border_color="#E0E0E0"
+        )
         self.top_bar.pack(side="top", fill="x")
+        self.top_bar.pack_propagate(False)
 
-        self.sidebar_toggle_btn = ctk.CTkButton(self.top_bar, text="☰", width=30, command=self.toggle_sidebar)
-        self.sidebar_toggle_btn.pack(side="left", padx=10, pady=10)
+        self.sidebar_toggle_btn = ctk.CTkButton(
+            self.top_bar,
+            text="☰",
+            width=40,
+            height=40,
+            corner_radius=8,
+            command=self.toggle_sidebar,
+            fg_color="#E8F5E9",
+            hover_color="#C8E6C9",
+            text_color="#2E7D32"
+        )
+        self.sidebar_toggle_btn.pack(side="left", padx=15, pady=10)
         
-        self.title_label = ctk.CTkLabel(self.top_bar, text="Satya", font=ctk.CTkFont(size=22, weight="bold"))
-        self.title_label.pack(side="left", padx=10)
+        self.title_label = ctk.CTkLabel(
+            self.top_bar,
+            text="Satya Learning System",
+            font=ctk.CTkFont(size=24, weight="bold"),
+            text_color="#2E7D32"
+        )
+        self.title_label.pack(side="left", padx=15)
 
-        self.sidebar_shown = True
+        self.sidebar_shown = False
 
         # Main frame for views
-        self.main_frame = ctk.CTkFrame(self.main_content, corner_radius=10)
-        self.main_frame.pack(side="bottom", fill="both", expand=True, padx=10, pady=10)
+        self.main_frame = ctk.CTkFrame(
+            self.main_content,
+            corner_radius=0,
+            fg_color="#FAFAFA"
+        )
+        self.main_frame.pack(side="bottom", fill="both", expand=True, padx=0, pady=0)
 
         # Start with WelcomeView
         self.welcome_view = WelcomeView(self.main_frame, self.on_login)
         self.welcome_view.pack(fill='both', expand=True)
+    
+    def _create_sidebar(self):
+        """Create the sidebar with modern design."""
+        # Logo/Title at top
+        logo_frame = ctk.CTkFrame(self.sidebar, fg_color="transparent")
+        logo_frame.pack(pady=(25, 20), fill="x")
+        
+        try:
+            logo_path = os.path.join(os.path.dirname(__file__), "images", "logo.png")
+            if os.path.exists(logo_path):
+                logo_img = ctk.CTkImage(light_image=Image.open(logo_path), size=(100, 100))
+                self.logo_image_label = ctk.CTkLabel(logo_frame, image=logo_img, text="")
+                self.logo_image_label.pack()
+            else:
+                # Fallback text logo
+                ctk.CTkLabel(
+                    logo_frame,
+                    text="🌟 Satya",
+                    font=ctk.CTkFont(size=24, weight="bold"),
+                    text_color="#2E7D32"
+                ).pack()
+        except Exception:
+            # Fallback text logo
+            ctk.CTkLabel(
+                logo_frame,
+                text="🌟 Satya",
+                font=ctk.CTkFont(size=24, weight="bold"),
+                text_color="#2E7D32"
+            ).pack()
+
+        # Navigation buttons with modern styling
+        nav_buttons = [
+            ('📚 Browse Subjects', self.show_browse, "#2E7D32"),
+            ('❓ Ask Question', self.show_ask, "#1976D2"),
+            ('📊 Progress', self.show_progress, "#7B1FA2"),
+            ('⚙️ Progress Ops', self.show_progress_ops, "#F57C00"),
+            ('ℹ️ About', self.show_about, "#616161"),
+        ]
+        
+        for text, command, color in nav_buttons:
+            btn = ctk.CTkButton(
+                self.sidebar,
+                text=text,
+                command=command,
+                height=45,
+                font=ctk.CTkFont(size=15, weight="normal"),
+                corner_radius=10,
+                fg_color=color,
+                hover_color=self._darken_color(color),
+                anchor="w"
+            )
+            btn.pack(pady=8, fill='x', padx=15)
+
+        # Exit button
+        self.btn_exit = ctk.CTkButton(
+            self.sidebar,
+            text='🚪 Exit',
+            command=self.quit,
+            height=45,
+            font=ctk.CTkFont(size=15, weight="normal"),
+            corner_radius=10,
+            fg_color='#E53935',
+            hover_color='#C62828',
+            anchor="w"
+        )
+        self.btn_exit.pack(pady=(30, 0), fill='x', padx=15)
+
+        # Model info display (will be updated after initialization)
+        self.model_info_frame = ctk.CTkFrame(
+            self.sidebar,
+            fg_color="#E8F5E9",
+            corner_radius=10
+        )
+        self.model_info_frame.pack(side="bottom", pady=15, padx=15, fill="x")
+        
+        self.model_info_label = ctk.CTkLabel(
+            self.model_info_frame,
+            text="Initializing...",
+            font=ctk.CTkFont(size=11),
+            text_color="#424242",
+            wraplength=180
+        )
+        self.model_info_label.pack(pady=10, padx=10)
+    
+    def _darken_color(self, hex_color):
+        """Darken a hex color for hover effect."""
+        # Simple darkening - remove # and darken each component
+        if hex_color.startswith('#'):
+            hex_color = hex_color[1:]
+        # Convert to RGB and darken by 20%
+        r = max(0, int(hex_color[0:2], 16) - 30)
+        g = max(0, int(hex_color[2:4], 16) - 30)
+        b = max(0, int(hex_color[4:6], 16) - 30)
+        return f"#{r:02x}{g:02x}{b:02x}"
+    
+    def _initialize_in_background(self):
+        """Initialize heavy components in background thread."""
+        def init_components():
+            try:
+                # Initialize content manager
+                self.after(0, lambda: self._update_status("Loading content..."))
+                self.content_manager = ContentManager()
+                
+                # Initialize model
+                self.after(0, lambda: self._update_status("Loading AI model..."))
+                self.model_path = str(resolve_model_dir("satya_data/models/phi_1_5"))
+                if not os.path.exists(self.model_path):
+                    self.after(0, lambda: self._show_model_error(f"Model directory not found: {self.model_path}"))
+                    return
+                
+                self.model_handler = ModelHandler(self.model_path)
+                
+                # Update model info
+                self.after(0, self._update_model_info)
+                self.after(0, lambda: self._update_status("Ready!"))
+                
+                self._initialization_done = True
+            except Exception as e:
+                self.after(0, lambda: self._show_model_error(f"Initialization error: {e}"))
+        
+        threading.Thread(target=init_components, daemon=True).start()
+    
+    def _update_status(self, message):
+        """Update status message."""
+        if hasattr(self, 'model_info_label'):
+            self.model_info_label.configure(text=message)
+    
+    def _update_model_info(self):
+        """Update model info display."""
+        try:
+            if self.model_handler:
+                model_info = self.model_handler.get_model_info()
+                if model_info:
+                    info_text = f"🤖 {model_info.get('name', 'AI Model')}\n"
+                    info_text += f"Context: {model_info.get('context_size', 'N/A')}"
+                    self.model_info_label.configure(text=info_text)
+        except Exception:
+            self.model_info_label.configure(text="Model loaded")
+    
+    def _show_model_error(self, error_msg):
+        """Show model error without blocking."""
+        self.model_info_label.configure(
+            text=f"⚠️ Error: {error_msg[:50]}...",
+            text_color="#E53935"
+        )
 
     def toggle_sidebar(self):
         if self.sidebar_shown:
@@ -169,45 +331,135 @@ class NEBeduApp(ctk.CTk):
             pass
 
     def on_login(self, username):
+        """Handle user login and transition to main interface."""
         self.username = username
         self.welcome_view.pack_forget()
         self.sidebar.grid()
+        self.sidebar_shown = True
         self.show_main_menu()
 
     def show_main_menu(self):
-        self._safe_destroy_widgets()
-        
-        welcome_text = f"""
-        Welcome, {self.username}!
-
-        This is your personal learning dashboard. From here, you can:
-
-        - **Browse Subjects:** Explore a wide range of subjects and topics.
-        - **Ask Questions:** Get instant answers from our AI assistant.
-        - **Track Your Progress:** See how you're doing and where you can improve.
-
-        To get started, select an option from the sidebar.
-        """
-
-        label = ctk.CTkLabel(
-            self.main_frame,
-            text=welcome_text,
-            font=ctk.CTkFont(size=18),
-            justify='left',
-        )
-        label.pack(pady=60, padx=40)
-
-    def show_browse(self):
+        """Show the main menu dashboard with welcome message."""
         if self._loading:
             return
-        self._loading = True
         
         self._safe_destroy_widgets()
         
-        # Show loading immediately
-        loading = ctk.CTkLabel(self.main_frame, text="Loading subjects...", font=ctk.CTkFont(size=16))
-        loading.pack(pady=40)
-        self.main_frame.update()
+        # Create a modern dashboard layout
+        dashboard_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
+        dashboard_frame.pack(fill='both', expand=True, padx=40, pady=40)
+        
+        # Welcome header
+        welcome_header = ctk.CTkFrame(dashboard_frame, fg_color="transparent")
+        welcome_header.pack(fill='x', pady=(0, 30))
+        
+        welcome_title = ctk.CTkLabel(
+            welcome_header,
+            text=f"Welcome back, {self.username}! 👋",
+            font=ctk.CTkFont(size=36, weight="bold"),
+            text_color="#2E7D32"
+        )
+        welcome_title.pack(anchor='w')
+        
+        welcome_subtitle = ctk.CTkLabel(
+            welcome_header,
+            text="Your personal learning dashboard",
+            font=ctk.CTkFont(size=18),
+            text_color="#666666"
+        )
+        welcome_subtitle.pack(anchor='w', pady=(5, 0))
+        
+        # Feature cards
+        features_frame = ctk.CTkFrame(dashboard_frame, fg_color="transparent")
+        features_frame.pack(fill='both', expand=True)
+        
+        features = [
+            ("📚", "Browse Subjects", "Explore a wide range of subjects and topics", self.show_browse, "#2E7D32"),
+            ("❓", "Ask Questions", "Get instant answers from our AI assistant", self.show_ask, "#1976D2"),
+            ("📊", "Track Progress", "See how you're doing and where to improve", self.show_progress, "#7B1FA2"),
+        ]
+        
+        for icon, title, desc, command, color in features:
+            card = ctk.CTkFrame(
+                features_frame,
+                corner_radius=15,
+                fg_color="#FFFFFF",
+                border_width=1,
+                border_color="#E0E0E0"
+            )
+            card.pack(side='left', fill='both', expand=True, padx=10, pady=10)
+            
+            # Card content
+            icon_label = ctk.CTkLabel(
+                card,
+                text=icon,
+                font=ctk.CTkFont(size=48)
+            )
+            icon_label.pack(pady=(20, 10))
+            
+            title_label = ctk.CTkLabel(
+                card,
+                text=title,
+                font=ctk.CTkFont(size=18, weight="bold"),
+                text_color=color
+            )
+            title_label.pack(pady=(0, 10))
+            
+            desc_label = ctk.CTkLabel(
+                card,
+                text=desc,
+                font=ctk.CTkFont(size=14),
+                text_color="#666666",
+                wraplength=200,
+                justify='center'
+            )
+            desc_label.pack(pady=(0, 20), padx=20)
+            
+            action_btn = ctk.CTkButton(
+                card,
+                text="Get Started",
+                command=command,
+                fg_color=color,
+                hover_color=self._darken_color(color),
+                width=150,
+                height=35
+            )
+            action_btn.pack(pady=(0, 20))
+
+    def show_browse(self):
+        """Show browse subjects view with non-blocking loading."""
+        if self._loading:
+            return
+        
+        # Wait for initialization if needed
+        if not self.content_manager:
+            self._show_loading_message("Initializing... Please wait.")
+            self.after(100, self.show_browse)  # Retry after a short delay
+            return
+        
+        self._loading = True
+        self._safe_destroy_widgets()
+        
+        # Show loading with modern design
+        loading_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
+        loading_frame.pack(fill='both', expand=True)
+        
+        loading_icon = ctk.CTkLabel(
+            loading_frame,
+            text="⏳",
+            font=ctk.CTkFont(size=48)
+        )
+        loading_icon.pack(pady=40)
+        
+        loading_label = ctk.CTkLabel(
+            loading_frame,
+            text="Loading subjects...",
+            font=ctk.CTkFont(size=18),
+            text_color="#666666"
+        )
+        loading_label.pack(pady=10)
+        
+        self.update()
         
         def load_subjects():
             try:
@@ -231,6 +483,19 @@ class NEBeduApp(ctk.CTk):
                 self.after(0, show_error)
         
         threading.Thread(target=load_subjects, daemon=True).start()
+    
+    def _show_loading_message(self, message):
+        """Show a loading message in the main frame."""
+        self._safe_destroy_widgets()
+        loading_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
+        loading_frame.pack(fill='both', expand=True)
+        
+        ctk.CTkLabel(
+            loading_frame,
+            text=message,
+            font=ctk.CTkFont(size=16),
+            text_color="#666666"
+        ).pack(pady=40)
 
     def on_subject_selected(self, subject):
         if self._loading:
