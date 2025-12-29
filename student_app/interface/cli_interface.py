@@ -649,6 +649,16 @@ Type 'back' to return to previous menu
                     # Update the panel with new content
                     live.update(create_panel())
             
+            # After streaming completes, generate and append diagram (non-blocking)
+            try:
+                from system.diagrams import generate_and_append_diagram
+                accumulated_answer = generate_and_append_diagram(question, accumulated_answer)
+                # Update display with diagram if added
+                live.update(create_panel())
+            except Exception as e:
+                # Graceful fallback: continue with original answer if diagram generation fails
+                logger.debug(f"Diagram generation failed: {e}")
+            
             # Calculate confidence after streaming completes
             if accumulated_answer and len(accumulated_answer.strip()) >= 10:
                 # Use a quick confidence calculation
@@ -739,11 +749,24 @@ Type 'back' to return to previous menu
                             rag_results = self.rag_engine.retrieve_relevant_content(question, max_results=2)
                             rag_context = None
                             if rag_results and rag_results.get('chunks'):
-                                # Take top chunks directly (already sorted by relevance)
+                                # Validate relevance - check if chunks actually relate to the question
+                                question_lower = question.lower()
                                 chunks = rag_results['chunks'][:2]
-                                rag_context = "\n\n".join([ch['content'] for ch in chunks])
-                                # Trim context aggressively for speed (matches model prompt limit)
-                                rag_context = rag_context[:600]
+                                relevant_chunks = []
+                                for chunk in chunks:
+                                    chunk_content = chunk.get('content', '').lower()
+                                    # Check if chunk has keywords from question
+                                    question_words = set(question_lower.split())
+                                    chunk_words = set(chunk_content.split())
+                                    # At least 2 words should overlap
+                                    overlap = len(question_words.intersection(chunk_words))
+                                    if overlap >= 2 or any(word in chunk_content for word in question_words if len(word) > 4):
+                                        relevant_chunks.append(chunk)
+                                
+                                if relevant_chunks:
+                                    rag_context = "\n\n".join([ch['content'] for ch in relevant_chunks])
+                                    # Trim context aggressively for speed (matches model prompt limit)
+                                    rag_context = rag_context[:600]
                             # Also try to find structured content
                             relevant_content = self.content_manager.search_content(question)
                             if not rag_context and not relevant_content:

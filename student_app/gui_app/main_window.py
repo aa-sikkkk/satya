@@ -797,15 +797,32 @@ class NEBeduApp(ctk.CTk):
                 source_info = "AI General Knowledge"
                 related = []
 
-                # 1. RAG Retrieval
+                # 1. RAG Retrieval with relevance validation
                 if self.rag_engine:
                     try:
                         rag_results = self.rag_engine.retrieve_relevant_content(question, max_results=2)
                         if rag_results and rag_results.get('chunks'):
                             chunks = rag_results['chunks'][:2]
-                            rag_context = "\n\n".join([ch['content'] for ch in chunks])
-                            rag_context = rag_context[:600]
-                            source_info = "RAG-enhanced content"
+                            # Validate relevance - check if chunks actually relate to the question
+                            question_lower = question.lower()
+                            relevant_chunks = []
+                            for chunk in chunks:
+                                chunk_content = chunk.get('content', '').lower()
+                                # Check if chunk has keywords from question
+                                question_words = set(question_lower.split())
+                                chunk_words = set(chunk_content.split())
+                                # At least 2 words should overlap
+                                overlap = len(question_words.intersection(chunk_words))
+                                if overlap >= 2 or any(word in chunk_content for word in question_words if len(word) > 4):
+                                    relevant_chunks.append(chunk)
+                            
+                            if relevant_chunks:
+                                rag_context = "\n\n".join([ch['content'] for ch in relevant_chunks])
+                                rag_context = rag_context[:600]
+                                source_info = "RAG-enhanced content"
+                            else:
+                                # RAG returned irrelevant results, skip it
+                                rag_context = None
                     except Exception as e:
                         print(f"RAG search failed: {e}")
 
@@ -871,7 +888,8 @@ class NEBeduApp(ctk.CTk):
                             fallback_msg = "I'm not sure about that. Here's some related information:"
                             self.ask_view.set_result(fallback_msg + "\n\n" + (rag_context or ""), 0.0, hints, related, source_info)
                         else:
-                            self.ask_view.finalize_answer(confidence, hints, related, source_info)
+                            # Pass question for diagram generation
+                            self.ask_view.finalize_answer(confidence, hints, related, source_info, question=normalized_question)
                         self._loading = False
                     
                     self.after(0, show_result)

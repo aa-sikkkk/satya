@@ -110,9 +110,23 @@ class AskQuestionView(ctk.CTkFrame):
         self.answer_box.see('end')  # Auto-scroll to bottom
         self.update_idletasks()  # Force UI update
     
-    def finalize_answer(self, confidence, hints=None, related=None, source_info=None):
+    def finalize_answer(self, confidence, hints=None, related=None, source_info=None, question=None):
         """Finalize the streaming answer display with confidence and metadata."""
         self.set_loading(False)
+        
+        # Generate and append diagram if needed (non-blocking)
+        if question and self.streaming_answer:
+            try:
+                from system.diagrams import generate_and_append_diagram
+                self.streaming_answer = generate_and_append_diagram(question, self.streaming_answer)
+                # Update answer box with diagram if added
+                if self.answer_box:
+                    self.answer_box.delete("1.0", "end")
+                    self.answer_box.insert("1.0", self.streaming_answer)
+            except Exception as e:
+                # Graceful fallback: continue with original answer if diagram generation fails
+                import logging
+                logging.getLogger(__name__).debug(f"Diagram generation failed: {e}")
         
         if self.answer_box is None:
             # Fallback if streaming didn't initialize

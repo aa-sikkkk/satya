@@ -49,15 +49,16 @@ class Phi15Handler:
         self.system_prompt = (
             "You are Satya, a Grade 10 tutor. Answer ONLY what is asked. Be direct and complete. "
             "ABSOLUTE RULES - NO EXCEPTIONS: "
-            "1. Answer the question in 2-4 sentences + ONE code example. Then STOP. "
+            "1. Answer the question in 2-4 sentences + ONE code example (if programming). Then STOP. "
             "2. NEVER add: exercises, practice problems, use cases, real-world examples, 'let's explore', or extra content. "
             "3. NEVER say: 'Now let's', 'Use Case', 'Real-world', 'Another example', or similar phrases. "
-            "4. 'How does X work?' → Explain mechanism + one example. STOP. "
-            "5. 'How to do X?' → Show code directly. STOP. "
-            "6. 'What is X?' → Definition + one example. STOP. "
+            "4. 'How does X work?' → Explain mechanism in 2-3 sentences. STOP. "
+            "5. 'How to do X?' → Show code/process directly. STOP. "
+            "6. 'What is X?' → Definition in 1-2 sentences + one example. STOP. "
             "7. Complete your sentences. End with proper punctuation. "
-            "8. Maximum 5 sentences total. Answer the question, then STOP immediately. "
-            "9. If you finish explaining, STOP. Do not continue."
+            "8. Maximum 4 sentences total. Answer the question, then STOP immediately. "
+            "9. If you finish explaining, STOP. Do not continue. "
+            "10. Answer ONLY the question asked. Do not answer different questions."
         )
         
     def _find_model_file(self) -> str:
@@ -137,15 +138,15 @@ class Phi15Handler:
             # Prompt building
             prompt = self._build_prompt(normalized_question, context)
             
-            # Adjust max_tokens based on answer_length (balanced for focused answers)
+            # Adjust max_tokens based on answer_length (strict limits to prevent verbosity)
             max_tokens_map = {
-                "very_short": 80,
-                "short": 160,
-                "medium": 250,  # Reduced to encourage stopping after answer
-                "long": 400,
-                "very_long": 800
+                "very_short": 60,
+                "short": 120,
+                "medium": 180,  # Reduced further to enforce conciseness
+                "long": 300,
+                "very_long": 600
             }
-            max_tokens = max_tokens_map.get(answer_length, 250)
+            max_tokens = max_tokens_map.get(answer_length, 180)
             
             # Comprehensive stop sequences to prevent off-topic content
             stop_sequences = [
@@ -272,15 +273,15 @@ class Phi15Handler:
             # Prompt building
             prompt = self._build_prompt(normalized_question, context)
             
-            # Adjust max_tokens based on answer_length (balanced for focused answers)
+            # Adjust max_tokens based on answer_length (strict limits to prevent verbosity)
             max_tokens_map = {
-                "very_short": 80,
-                "short": 160,
-                "medium": 250,  # Reduced to encourage stopping after answer
-                "long": 400,
-                "very_long": 800
+                "very_short": 60,
+                "short": 120,
+                "medium": 180,  # Reduced further to enforce conciseness
+                "long": 300,
+                "very_long": 600
             }
-            max_tokens = max_tokens_map.get(answer_length, 250)
+            max_tokens = max_tokens_map.get(answer_length, 180)
             
             # Comprehensive stop sequences to prevent off-topic content
             stop_sequences = [
