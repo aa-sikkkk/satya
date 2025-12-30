@@ -34,6 +34,42 @@ class Phi15Handler:
     Satya personality + Windows compatible
     """
     
+    # Stop sequences to prevent off-topic content (shared across methods)
+    STOP_SEQUENCES = [
+        "</s>",
+        # Exercise/practice patterns
+        "\n\nExercise:", "\nExercise:", "Exercise:",
+        "\n\nPractice:", "\nPractice:", "Practice:",
+        "\n\nTry this:", "\nTry this:", "Try this:",
+        "\n\nNow try", "\nNow try", "Now try",
+        # Use case/real-world patterns (multiple variations)
+        "\n\nNow, let's", "\nNow, let's", "Now, let's",
+        "\n\nLet's explore", "\nLet's explore", "Let's explore",
+        "Now, let's explore",  # Catch without newline prefix
+        "\n\nUse Case", "\nUse Case", "Use Case",
+        "\n\nReal-world", "\nReal-world", "Real-world",
+        "\n\nAnother example", "\nAnother example", "Another example",
+        # Continuation patterns (after first example)
+        "\n\nAdditionally,", "\nAdditionally,",
+        "\n\nFurthermore,", "\nFurthermore,",
+        "\n\nMoreover,", "\nMoreover,",
+        # Multiple example patterns
+        "\n\nFor example,",  # Only stop on second "For example" (after newline)
+        # Diagram/visualization patterns (prevent verbosity after answer)
+        "\n\nDiagram:", "\nDiagram:", "Diagram:",
+        "\nDiagram", "\n\nDiagram",
+        # Box-drawing character patterns (ASCII art diagrams)
+        "\n┌", "\n│", "\n└", "\n├", "\n┐", "\n┘", "\n┤", "\n─",
+        "\n\n┌", "\n\n│", "\n\n└", "\n\n├",
+        # Reference context patterns (when model starts explaining the prompt structure)
+        "\n\nReference Context", "\nReference Context",
+        "\n\nStudent Question", "\nStudent Question",
+        "\n\nAnswer (in your own words", "\nAnswer (in your own words",
+    ]
+    
+    # Fixed max tokens for concise answers (system prompt enforces 2-4 sentences)
+    DEFAULT_MAX_TOKENS = 180
+    
     def __init__(self, model_path: str, enable_streaming: bool = False):
         """
         Initialize with SATYA PERSONALITY.
@@ -44,24 +80,28 @@ class Phi15Handler:
         self.model_file = self._find_model_file()
         self.enable_streaming = enable_streaming
         
-        # SATYA'S ORIGINAL PERSONALITY - Wise Nepali tutor
-        # Enhanced to USE RAG context properly and generate intelligent answers
+        # SATYA PERSONALITY - Grade 8-12 Nepal Curriculum Tutor
+        # Optimized for curriculum questions with intelligent RAG + own knowledge integration
         self.system_prompt = (
-            "You are Satya, a Grade 10 tutor. Use the provided context to answer the student's question. "
-            "CRITICAL: The context contains relevant information - USE IT to generate your answer. "
-            "Do NOT just copy the context. Synthesize and explain based on the context. "
+            "You are Satya, an expert tutor for Grade 8-12 students in Nepal. "
+            "You specialize in Nepal's curriculum (NEB - National Examination Board) covering: "
+            "Computer Science, English, Mathematics, Science, Social Studies, and other subjects. "
+            "Answer ONLY curriculum-related questions. Be direct, clear, and age-appropriate. "
             "ABSOLUTE RULES - NO EXCEPTIONS: "
-            "1. READ the context carefully. Extract key information relevant to the question. "
-            "2. USE the context to answer. Synthesize information - don't just repeat it verbatim. "
-            "3. Answer the question in 2-4 sentences based on the context. Then STOP. "
-            "4. If context mentions specific steps/processes, explain them clearly. "
-            "5. If context defines something, provide a clear definition based on it. "
-            "6. NEVER add: exercises, practice problems, use cases, real-world examples, 'let's explore', or extra content. "
-            "7. NEVER say: 'Now let's', 'Use Case', 'Real-world', 'Another example', or similar phrases. "
-            "8. Complete your sentences. End with proper punctuation. "
-            "9. Maximum 4 sentences total. Answer the question, then STOP immediately. "
-            "10. If you finish explaining, STOP. Do not continue. "
-            "11. Answer ONLY the question asked using information from the context."
+            "1. Answer the question in 2-4 sentences + ONE code example (if programming). Then STOP. "
+            "2. NEVER add: exercises, practice problems, use cases, real-world examples, 'let's explore', or extra content. "
+            "3. NEVER say: 'Now let's', 'Use Case', 'Real-world', 'Another example', or similar phrases. "
+            "4. NEVER generate diagrams, ASCII art, box-drawing characters, or visual representations. "
+            "5. NEVER explain the prompt structure, reference context labels, or student question labels. "
+            "6. 'How does X work?' → Explain mechanism in 2-3 sentences. STOP. "
+            "7. 'How to do X?' → Show code/process directly. STOP. "
+            "8. 'What is X?' → Definition in 1-2 sentences + one example. STOP. "
+            "9. Complete your sentences. End with proper punctuation. "
+            "10. Maximum 4 sentences total. Answer the question, then STOP immediately. "
+            "11. If you finish explaining, STOP. Do not continue. Do not add diagrams. Do not add extra content. "
+            "12. Answer ONLY the question asked. Do not answer different questions. "
+            "13. Use your own knowledge to explain concepts clearly. If context is provided, use it as reference but explain in your own words. "
+            "14. If no relevant context is provided, answer using your knowledge of Grade 8-12 curriculum topics."
         )
         
     def _find_model_file(self) -> str:
@@ -82,16 +122,16 @@ class Phi15Handler:
             except Exception as e:
                 logger.error(f"Error loading config: {e}")
         
-        # SETTINGS - Optimized for synthesis, not copying
+        # SETTINGS
         return {
             "n_ctx": 2048,                    # context size
             "n_threads": max(1, os.cpu_count() // 2 or 1),  # threading
             "n_gpu_layers": 0,
-            "max_tokens": 256,                # More tokens for detailed answers
-            "temperature": 0.4,               # Higher for synthesis/creativity (not just copying)
-            "top_p": 0.9,                     # Balanced for coherent generation
-            "repeat_penalty": 1.15,           # Higher to prevent verbatim copying
-            "stop": ["</s>", "\n\nContext:", "\n\nQuestion:", "\n\nQ:", "\n\nProvide", "\n\nRELEVANT CONTEXT"],
+            "max_tokens": 300,                # More tokens for detailed answers
+            "temperature": 0.4,              # Slightly higher for creativity
+            "top_p": 0.92,                    # Slightly relaxed for variety
+            "repeat_penalty": 1.06,           
+            "stop": ["</s>", "\n\nContext:", "\n\nQuestion:", "\n\nQ:", "\n\nProvide"],
         }
             
     def load_model(self) -> None:
@@ -120,13 +160,23 @@ class Phi15Handler:
             raise RuntimeError(f"Could not load Phi 1.5 model: {e}")
                 
     def get_answer(self, question: str, context: str, answer_length: str = "medium") -> Tuple[str, float]:
-        """Satya answer generation restored."""
+        """
+        Generate answer using RAG context when available, otherwise use Phi's own knowledge.
+        
+        Args:
+            question: Student's question
+            context: RAG context (can be empty/minimal - Phi will use own knowledge)
+            answer_length: Deprecated - kept for API compatibility, not used
+            
+        Returns:
+            Tuple of (answer, confidence)
+        """
         if self.llm is None:
             self.load_model()
             
-        # Input validation
-        if not question or not context:
-            return "I need both a question and context to help you.", 0.1
+        # Input validation - allow empty context (Phi will use own knowledge)
+        if not question or len(question.strip()) < 3:
+            return "Please provide a question about your Grade 8-12 curriculum.", 0.1
             
         # Question normalization
         normalized_question = question.strip()
@@ -141,46 +191,13 @@ class Phi15Handler:
             # Prompt building
             prompt = self._build_prompt(normalized_question, context)
             
-            # Adjust max_tokens based on answer_length (strict limits to prevent verbosity)
-            max_tokens_map = {
-                "very_short": 60,
-                "short": 120,
-                "medium": 180,  # Reduced further to enforce conciseness
-                "long": 300,
-                "very_long": 600
-            }
-            max_tokens = max_tokens_map.get(answer_length, 180)
-            
-            # Comprehensive stop sequences to prevent off-topic content
-            stop_sequences = [
-                "</s>",
-                # Exercise/practice patterns
-                "\n\nExercise:", "\nExercise:", "Exercise:",
-                "\n\nPractice:", "\nPractice:", "Practice:",
-                "\n\nTry this:", "\nTry this:", "Try this:",
-                "\n\nNow try", "\nNow try", "Now try",
-                # Use case/real-world patterns (multiple variations)
-                "\n\nNow, let's", "\nNow, let's", "Now, let's",
-                "\n\nLet's explore", "\nLet's explore", "Let's explore",
-                "Now, let's explore",  # Catch without newline prefix
-                "\n\nUse Case", "\nUse Case", "Use Case",
-                "\n\nReal-world", "\nReal-world", "Real-world",
-                "\n\nAnother example", "\nAnother example", "Another example",
-                # Continuation patterns (after first example)
-                "\n\nAdditionally,", "\nAdditionally,",
-                "\n\nFurthermore,", "\nFurthermore,",
-                "\n\nMoreover,", "\nMoreover,",
-                # Multiple example patterns
-                "\n\nFor example,",  # Only stop on second "For example" (after newline)
-            ]
-            
-            # Inference settings
+            # Inference settings (using fixed max_tokens - system prompt enforces conciseness)
             response = self.llm(
                 prompt,
-                max_tokens=max_tokens,
+                max_tokens=self.DEFAULT_MAX_TOKENS,
                 temperature=self.config.get("temperature", 0.35),
                 top_p=self.config.get("top_p", 0.92),
-                stop=stop_sequences,
+                stop=self.STOP_SEQUENCES,
                 echo=False,
                 stream=False
             )
@@ -213,6 +230,16 @@ class Phi15Handler:
                 "\n\nAdditionally,", "\nAdditionally,",
                 "\n\nFurthermore,", "\nFurthermore,",
                 "\n\nMoreover,", "\nMoreover,",
+                # Diagram/visualization patterns (prevent verbosity after answer)
+                "\n\nDiagram:", "\nDiagram:", "Diagram:",
+                "\nDiagram", "\n\nDiagram",
+                # Box-drawing character patterns (ASCII art diagrams)
+                "\n┌", "\n│", "\n└", "\n├",
+                "\n\n┌", "\n\n│", "\n\n└", "\n\n├",
+                # Reference context patterns (when model starts explaining the prompt structure)
+                "\n\nReference Context", "\nReference Context",
+                "\n\nStudent Question", "\nStudent Question",
+                "\n\nAnswer (in your own words", "\nAnswer (in your own words",
             ]
             for marker in off_topic_markers:
                 if marker in answer:
@@ -245,11 +272,12 @@ class Phi15Handler:
     def get_answer_stream(self, question: str, context: str, answer_length: str = "medium") -> Iterator[str]:
         """
         Stream answer tokens as they're generated for real-time display.
+        Uses RAG context when available, otherwise uses Phi's own knowledge.
         
         Args:
             question (str): User's question
-            context (str): Relevant context
-            answer_length (str): "very_short", "short", "medium", "long", "very_long"
+            context (str): RAG context (can be empty - Phi will use own knowledge)
+            answer_length (str): Deprecated - kept for API compatibility, not used
             
         Yields:
             str: Token chunks as they're generated
@@ -257,9 +285,9 @@ class Phi15Handler:
         if self.llm is None:
             self.load_model()
             
-        # Input validation
-        if not question or not context:
-            yield "I need both a question and context to help you."
+        # Input validation - allow empty context (Phi will use own knowledge)
+        if not question or len(question.strip()) < 3:
+            yield "Please provide a question about your Grade 8-12 curriculum."
             return
             
         # Question normalization
@@ -276,47 +304,14 @@ class Phi15Handler:
             # Prompt building
             prompt = self._build_prompt(normalized_question, context)
             
-            # Adjust max_tokens based on answer_length (strict limits to prevent verbosity)
-            max_tokens_map = {
-                "very_short": 60,
-                "short": 120,
-                "medium": 180,  # Reduced further to enforce conciseness
-                "long": 300,
-                "very_long": 600
-            }
-            max_tokens = max_tokens_map.get(answer_length, 180)
-            
-            # Comprehensive stop sequences to prevent off-topic content
-            stop_sequences = [
-                "</s>",
-                # Exercise/practice patterns
-                "\n\nExercise:", "\nExercise:", "Exercise:",
-                "\n\nPractice:", "\nPractice:", "Practice:",
-                "\n\nTry this:", "\nTry this:", "Try this:",
-                "\n\nNow try", "\nNow try", "Now try",
-                # Use case/real-world patterns (multiple variations)
-                "\n\nNow, let's", "\nNow, let's", "Now, let's",
-                "\n\nLet's explore", "\nLet's explore", "Let's explore",
-                "Now, let's explore",  # Catch without newline prefix
-                "\n\nUse Case", "\nUse Case", "Use Case",
-                "\n\nReal-world", "\nReal-world", "Real-world",
-                "\n\nAnother example", "\nAnother example", "Another example",
-                # Continuation patterns (after first example)
-                "\n\nAdditionally,", "\nAdditionally,",
-                "\n\nFurthermore,", "\nFurthermore,",
-                "\n\nMoreover,", "\nMoreover,",
-                # Multiple example patterns
-                "\n\nFor example,",  # Only stop on second "For example" (after newline)
-            ]
-            
-            # Stream inference
+            # Stream inference (using fixed max_tokens - system prompt enforces conciseness)
             full_answer = ""
             for chunk in self.llm(
                 prompt,
-                max_tokens=max_tokens,
+                max_tokens=self.DEFAULT_MAX_TOKENS,
                 temperature=self.config.get("temperature", 0.35),
                 top_p=self.config.get("top_p", 0.92),
-                stop=stop_sequences,
+                stop=self.STOP_SEQUENCES,
                 echo=False,
                 stream=True
             ):
@@ -362,6 +357,15 @@ class Phi15Handler:
                 "\n\nLet's explore", "\nLet's explore", "Let's explore",
                 "\n\nUse Case", "\nUse Case", "Use Case",
                 "\n\nReal-world", "\nReal-world", "Real-world",
+                # Diagram/visualization patterns
+                "\n\nDiagram:", "\nDiagram:", "Diagram:",
+                "\nDiagram", "\n\nDiagram",
+                # Box-drawing character patterns
+                "\n┌", "\n│", "\n└", "\n├",
+                "\n\n┌", "\n\n│", "\n\n└", "\n\n├",
+                # Reference context patterns
+                "\n\nReference Context", "\nReference Context",
+                "\n\nStudent Question", "\nStudent Question",
             ]
             for marker in off_topic_markers:
                 if marker in full_answer:
@@ -375,50 +379,51 @@ class Phi15Handler:
 
     def _build_prompt(self, question: str, context: str) -> str:
         """
-        Build prompt template with optional diagram encouragement.
+        Build prompt template that intelligently handles RAG context.
+        Encourages Phi to use its own knowledge even when RAG context is provided.
         
         Args:
             question: Student's question
-            context: Relevant context for the answer
+            context: RAG context (can be empty/minimal)
             
         Returns:
             Formatted prompt string
         """
-        # Your ORIGINAL generous context handling
+        # Handle context intelligently
         trimmed_context = (context or "").strip()
-        if len(trimmed_context) > 800:  # More context = better answers
-            # Try to end at sentence boundary
-            trimmed_context = trimmed_context[:800]
-            last_period = trimmed_context.rfind('.')
-            if last_period > 700:
-                trimmed_context = trimmed_context[:last_period + 1]
+        has_rag_context = len(trimmed_context) > 50  # Meaningful context threshold
         
-        # Detect if question would benefit from a diagram
-        diagram_keywords = [
-            "how does", "explain the process", "show the structure",
-            "what is the flow", "describe the steps", "visualize",
-            "algorithm", "process", "flow", "structure", "steps"
-        ]
-        question_lower = question.lower()
-        needs_diagram = any(kw in question_lower for kw in diagram_keywords)
-        
-        # Optional diagram instruction (only when appropriate)
-        diagram_hint = ""
-        if needs_diagram:
-            diagram_hint = (
-                "\n\nNote: This question would benefit from a visual diagram. "
-                "If helpful, include an ASCII diagram after your explanation using box-drawing characters."
+        if has_rag_context:
+            # Trim context if too long
+            if len(trimmed_context) > 800:
+                trimmed_context = trimmed_context[:800]
+                last_period = trimmed_context.rfind('.')
+                if last_period > 700:
+                    trimmed_context = trimmed_context[:last_period + 1]
+            
+            # When RAG context exists, encourage using it as reference but explaining in own words
+            context_instruction = (
+                "Reference Context (from study materials):\n"
+                f"{trimmed_context}\n\n"
+                "IMPORTANT: Use the reference context above as a guide, but explain the answer "
+                "in your own words using your knowledge. Do not simply copy from the context. "
+                "If the context is not directly relevant, use your own knowledge to answer."
+            )
+        else:
+            # No RAG context - use own knowledge
+            context_instruction = (
+                "No specific study material found for this question. "
+                "Use your knowledge of Grade 8-12 curriculum (NEB standards) to provide an accurate answer. "
+                "Focus on curriculum-appropriate explanations for students in Nepal."
             )
         
-        # Enhanced prompt format that explicitly instructs using context
+        # Enhanced prompt format that emphasizes using own knowledge
+        # Note: Diagrams are handled by a separate service, not generated by the model
         return (
             f"{self.system_prompt}\n\n"
-            f"RELEVANT CONTEXT (use this information to answer):\n{trimmed_context}\n\n"
-            f"STUDENT QUESTION: {question}\n\n"
-            f"INSTRUCTIONS: Read the context above. Use the information in the context to answer the student's question. "
-            f"Synthesize the information - explain it clearly in your own words. Do NOT just copy the context verbatim. "
-            f"Provide a clear, concise answer based on what you learned from the context.{diagram_hint}\n\n"
-            f"ANSWER:"
+            f"{context_instruction}\n\n"
+            f"Student Question: {question}\n\n"
+            f"Answer (in your own words, appropriate for Grade 8-12 curriculum):"
         )
 
     def _extract_text(self, response: Any) -> str:
@@ -461,7 +466,7 @@ class Phi15Handler:
             response = self.llm(
                 prompt,
                 max_tokens=120,  # More tokens for better hints
-                temperature=0.5,  # Balanced for creativity
+                temperature=0.2,  # Balanced for creativity
                 top_p=0.9,
                 stop=["\n4", "4.", "###", "\n\nQuestion:", "\n\nContext:"],
                 echo=False,
@@ -521,25 +526,40 @@ class Phi15Handler:
             ]
     
     def _calculate_confidence(self, answer: str, context: str, question: str) -> float:
-        """Your ORIGINAL sophisticated confidence calculation."""
+        """
+        Calculate confidence score for the answer.
+        Works with or without RAG context - Phi's own knowledge answers are still valid.
+        """
         answer_lower = answer.lower()
         
-        # Your original error detection
-        if any(phrase in answer_lower for phrase in ["i couldn't", "i'm having trouble", "error"]):
+        # Error detection
+        if any(phrase in answer_lower for phrase in ["i couldn't", "i'm having trouble", "error", "i need both"]):
             return 0.1
         
-        # Your original quality indicators
-        has_examples = any(word in answer_lower for word in ["example", "like", "similar to"])
+        # Quality indicators
+        has_examples = any(word in answer_lower for word in ["example", "like", "similar to", "for instance"])
         has_structure = answer.count(".") >= 2  # At least 2 sentences
         word_count = len(answer.split())
         
-        # Your original scoring logic
-        base_score = min(0.8, word_count / 100)  # Length-based
+        # Check if answer seems curriculum-relevant
+        curriculum_keywords = ["function", "variable", "loop", "class", "method", "algorithm", 
+                             "syntax", "program", "code", "data", "structure", "concept",
+                             "definition", "explain", "works", "process", "step"]
+        is_curriculum_relevant = any(kw in answer_lower for kw in curriculum_keywords) or word_count > 15
+        
+        # Base scoring logic
+        base_score = min(0.75, word_count / 100)  # Length-based
+        
+        # Boost for quality indicators
         if has_examples:
             base_score += 0.1
         if has_structure:
             base_score += 0.1
+        if is_curriculum_relevant:
+            base_score += 0.05  # Slight boost for curriculum relevance
             
+        # Context availability doesn't significantly impact confidence
+        # Phi can provide good answers with or without RAG context
         return min(1.0, base_score)
     
     def get_model_info(self) -> Dict[str, Any]:

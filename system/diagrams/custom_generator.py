@@ -250,6 +250,7 @@ def extract_steps_from_answer(answer: str) -> List[str]:
     
     # Strategy 1: Numbered steps (most reliable) - multiple patterns
     numbered_patterns = [
+        r'(?:^|\n)\s*Stage\s+(\d+)[:\.]\s+(.+?)(?=\n\s*Stage\s+\d+[:\.]|\n\n|$)',  # "Stage 1: text" (prioritize this)
         r'(?:^|\n)\s*(\d+)[\.\)]\s+(.+?)(?=\n\s*\d+[\.\)]|\n\n|$)',  # "1. Step text"
         r'(?:step|stage|phase|part)\s+(\d+)[:\.]\s*(.+?)(?=\n|\.|$)',  # "Step 1: text"
         r'(?:first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|1st|2nd|3rd|4th|5th)[\s:,]+(.+?)(?=\n|\.|$)',  # "First, text"
@@ -261,15 +262,30 @@ def extract_steps_from_answer(answer: str) -> List[str]:
             for match in matches:
                 # Handle tuple matches (number + text) or single matches
                 if isinstance(match, tuple):
-                    step_text = match[-1].strip()  # Take last element (the text)
+                    # For "Stage 1: text" pattern, match[0] is number, match[1] is text
+                    if len(match) == 2:
+                        step_text = match[1].strip()  # Take the text part
+                    else:
+                        step_text = match[-1].strip()  # Take last element
                 else:
                     step_text = match.strip()
                 
                 if step_text and len(step_text) > 3:
-                    # Extract meaningful content
-                    cleaned = _extract_meaningful_phrase(step_text)
-                    if cleaned and cleaned not in steps:
-                        steps.append(cleaned)
+                    # Extract stage name (first sentence or key term)
+                    # For "Stage 1: Egg" -> extract "Egg"
+                    # For "Stage 2: Pupa\nThe pupae grow..." -> extract "Pupa"
+                    first_line = step_text.split('\n')[0].strip()
+                    # Remove common prefixes
+                    first_line = re.sub(r'^(?:the|a|an)\s+', '', first_line, flags=re.IGNORECASE)
+                    # Take first meaningful word/phrase (usually the stage name)
+                    words = first_line.split()
+                    meaningful = [w for w in words[:2] if w.lower() not in STOPWORDS and len(w) > 1]
+                    if meaningful:
+                        cleaned = ' '.join(meaningful).capitalize()
+                        # Remove trailing punctuation
+                        cleaned = re.sub(r'[.,;:]+$', '', cleaned)
+                        if cleaned and cleaned not in steps:
+                            steps.append(cleaned)
             
             if steps:
                 break  # Found numbered steps, use them
@@ -316,15 +332,19 @@ def extract_steps_from_answer(answer: str) -> List[str]:
     # Works for: any list format in any subject (processes, steps, components, etc.)
     if not steps:
         process_list_patterns = [
-            # Explicit lists: "including X, Y, Z" or "such as X, Y, Z"
-            r'(?:including|such as|like|namely|consists of|comprises|involves|contains|has)\s+([^\.]+?)(?:\.|$)',
-            # Labeled lists: "processes: X, Y, Z" or "steps: A, B, C"
+            # Pattern 1: "involves processes such as X, Y, Z" - handle "processes such as" explicitly
+            r'(?:involves|includes|contains|has)\s+(?:processes?|steps?|stages?|phases?|parts?|components?)\s+(?:such as|like|including|namely)\s+([^\.]+?)(?:\.|$)',
+            # Pattern 2: "including X, Y, Z" or "such as X, Y, Z" (direct)
+            r'(?:including|such as|like|namely)\s+([^\.]+?)(?:\.|$)',
+            # Pattern 3: "consists of X, Y, Z" or "comprises X, Y, Z"
+            r'(?:consists of|comprises)\s+([^\.]+?)(?:\.|$)',
+            # Pattern 4: Labeled lists: "processes: X, Y, Z" or "steps: A, B, C"
             r'(?:processes?|steps?|stages?|phases?|parts?|components?|elements?|items?)\s*[:]\s*([^\.]+?)(?:\.|$)',
-            # Verb lists: "processes are X, Y, Z" or "steps include A, B, C"
+            # Pattern 5: Verb lists: "processes are X, Y, Z" or "steps include A, B, C"
             r'(?:processes?|steps?|stages?|phases?)\s+(?:are|is|include|consist of|comprise|contain)\s+([^\.]+?)(?:\.|$)',
-            # Generic lists: "are X, Y, and Z" (works for any subject)
+            # Pattern 6: Generic lists: "are X, Y, and Z" (works for any subject)
             r'(?:are|is)\s+([^\.]+?)(?:\.|$)',
-            # Action lists: "X, Y, Z occur" or "X, Y, Z happen"
+            # Pattern 7: Action lists: "X, Y, Z occur" or "X, Y, Z happen"
             r'([^\.]+?)\s+(?:occur|happen|take place|begin|start)(?:\.|$)',
         ]
         

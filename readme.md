@@ -10,9 +10,9 @@
 </div>
 
 
-An **offline-first, RAG-powered** learning companion for students. Built with intelligent content discovery and a lightweight Phi 1.5 AI model, designed to work with **low-end hardware**.
+An intelligent _**learning companion**_, Satya is built with RAG-powered content discovery and Microsoft's efficient Phi 1.5 model. It delivers education that scales from offline rural classrooms to connected urban schools, all while running smoothly on the hardware you already have.
 
-*Built with RAG and a lightweight Phi 1.5 AI model, optimized for low-end hardware*
+Smart enough to handle complex questions. Efficient enough to work anywhere. Simple enough for anyone to deploy.
 
 </div>
 
@@ -38,31 +38,26 @@ An **offline-first, RAG-powered** learning companion for students. Built with in
 
 ---
 
-https://github.com/user-attachments/assets/27e34daf-0919-4393-bb60-50ff6dedc716
+[![Satya Demo Video](https://img.youtube.com/vi/CIUmyQ4sMOo/maxresdefault.jpg)](https://www.youtube.com/watch?v=CIUmyQ4sMOo)
 
 ## Overview
 
-Satya is a comprehensive educational technology platform designed to bridge educational disparities for Grade 10 students in Nepal, particularly in areas with limited or no internet connectivity. The system delivers an **offline-first, RAG-powered learning companion** that covers Computer Science, Science, and English curricula using a single lightweight Phi 1.5 AI model.
+Satya reimagines AI-powered education for the real world. This comprehensive learning platform is designed for students in Nepal. It brings intelligent tutoring to any environment. Whether in a connected classroom, a rural school, or a home with unreliable internet, Satya aims to support every learner. With RAG-enhanced content discovery and the efficient Phi 1.5 model, Satya transforms how students engage with their curricula.
+
+## The Problem
+While AI is transforming education globally, Millions of students still face significant barriers. Unreliable internet, outdated hardware, and weak infrastructure leave them excluded from the benefits of the AI revolution. Most traditional ed-tech solutions assume access to high-speed connections and modern devices, which only widens the gap in educational opportunities.
+
+## The Solution
+Satya aims to close the accessibility gap by delivering intelligent learning that works in any environment. Designed for students across Nepal and offering a framework for the world, Satya provides AI-powered tutoring through RAG-enhanced content discovery and Microsoft’s efficient Phi 1.5 model. Whether you are in a well-connected classroom in Kathmandu or a rural village with intermittent power, Satya aims to transform education for everyone.
 
 ### Core Principles
 
-- **Offline-First Architecture**: Complete functionality without internet connectivity
-- **Low-Resource Optimization**: Designed for systems with 4GB RAM minimum, CPU-only operation
-- **RAG-Enhanced Intelligence**: Intelligent content discovery using ChromaDB vector database
-- **Single Model Efficiency**: One Phi 1.5 model handles all AI tasks (Q&A, hints, content generation)
-- **Community-Driven Content**: Transparent workflow for content contribution and validation
+- **Offline-First Architecture**: Providing full functionality without requiring a persistent internet connection.
+- **Low-Resource Optimization**: Running smoothly on older hardware in rural classrooms, using only a CPU.
+- **RAG-Enhanced Intelligence**: Leveraging the ChromaDB vector database for intelligent and efficient content discovery.
+- **Single Model Efficiency**: Phi 1.5 model seamlessly handles all AI tasks, including answering questions and offering hints.
+- **Community-Driven Content**: Ensuring a transparent and collaborative workflow for content contribution and validation.
 
-### Target Hardware Specifications
-
-| Component | Minimum | Recommended |
-|-----------|---------|-------------|
-| RAM | 4GB | 8GB+ |
-| CPU | Any x86_64 | Multi-core |
-| GPU | Not required | Optional (not utilized) |
-| Storage | 5GB free | 10GB+ free |
-| OS | Windows 10+, Linux, macOS | Latest stable version |
-
----
 
 ## Key Features
 
@@ -70,37 +65,37 @@ Satya is a comprehensive educational technology platform designed to bridge educ
 
 #### RAG-Enhanced Content Discovery
 
-- **Intelligent Semantic Search**: Uses ChromaDB vector database for content retrieval
-- **Context-Aware Answers**: Retrieves relevant study materials before generating responses
-- **Multi-Source Fallback**: Falls back to structured content when RAG retrieval fails
-- **Subject-Aware Filtering**: Ensures related concepts are from the same subject
+- **Intelligent Semantic Search**: Utilizes the ChromaDB vector database to retrieve relevant content.
+- **Context-Aware Answers**: Find and reference appropriate study materials before generating responses.
+- **Multi-Source Fallback**: Switches to structured content if RAG retrieval is unsuccessful.
+- **Subject-Aware Filtering**: Ensures that related concepts are always drawn from the same subject.
 
 #### AI-Powered Learning Assistance
 
-- **Detailed Question Answering**: Generates comprehensive answers (3-5 sentences, 80-120 words)
-- **Progressive Hint Generation**: Provides context-specific hints to guide learning
-- **Text Normalization**: Automatically handles uppercase, lowercase, and mixed case input
-- **Confidence Scoring**: Provides confidence metrics for generated answers
+- **Detailed Question Answering**: Produces comprehensive answers in three to five sentences (80–120 words).
+- **Progressive Hint Generation**: Offers context-specific hints to guide student learning.
+- **Text Normalization**: Automatically processes input regardless of letter case.
+- **Confidence Scoring**: Provides confidence metrics for each generated answer.
 
 #### User Interfaces
 
-- **Command-Line Interface (CLI)**: Rich terminal interface with progress indicators
-- **Graphical User Interface (GUI)**: Modern CustomTkinter interface with responsive design
-- **Progress Tracking**: Detailed analytics and learning path visualization
-- **Export/Import**: Save and restore learning progress
+- **Command-Line Interface (CLI)**: Features a rich terminal interface with progress indicators.
+- **Graphical User Interface (GUI)**: Offers a modern CustomTkinter interface with responsive design.
+- **Progress Tracking**: Delivers detailed analytics and visualizations of learning paths.
+- **Export/Import**: Enables saving and restoring of learning progress.
 
 ### Teacher-Facing Features
 
 #### Content Management
 
-- **Structured Content Editor**: CLI-based editor for educational content
-- **Schema Validation**: Automated JSON schema validation
-- **Content Quality Control**: Duplicate detection and reference validation
+- **Structured Content Editor**: Offers a CLI-based editor for educational content creation.
+- **Schema Validation**: Performs automated validation using JSON schema.
+- **Content Quality Control**: Detects duplicates and validates references.
 - **Version Control**: Git-based content versioning
 
 #### Analytics and Monitoring
 
-- **Student Progress Analytics**: Individual and class-level performance metrics
+- **Student Progress Analytics**: Individual Performance metrics
 - **Content Usage Statistics**: Track which content is most accessed
 - **Performance Monitoring**: System resource usage and response time tracking
 - **Error Logging**: Comprehensive audit trails
