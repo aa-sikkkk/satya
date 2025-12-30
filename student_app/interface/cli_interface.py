@@ -771,7 +771,7 @@ Type 'back' to return to previous menu
                         self.rag_engine,
                         question,
                         content_manager=self.content_manager,
-                        timeout_seconds=2.0  # 2 second timeout - don't wait longer
+                        timeout_seconds=0.5  # 0.5 second timeout - fast fallback to structured content
                     )
                     
                     # Get relevant content for display (non-blocking, quick)

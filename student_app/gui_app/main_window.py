@@ -800,7 +800,7 @@ class NEBeduApp(ctk.CTk):
                     self.rag_engine,
                     question,
                     content_manager=self.content_manager,
-                    timeout_seconds=2.0  # 2 second timeout - don't wait longer
+                    timeout_seconds=0.5  # 0.5 second timeout - fast fallback to structured content
                 )
                 
                 # Get related content for display (non-blocking, quick)
@@ -868,7 +868,7 @@ class NEBeduApp(ctk.CTk):
                             else:
                                 base_score += 0.05  # Own knowledge is also reliable
                             
-                            confidence = min(1.0, base_score)
+                        confidence = min(1.0, base_score)
                     else:
                         confidence = 0.1
                     

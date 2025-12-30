@@ -145,23 +145,24 @@ def validate_rag_relevance(question: str, rag_results: Dict) -> Tuple[bool, Opti
 def get_context_non_blocking(
     rag_engine,
     question: str,
-    content_manager=None,  # Kept for compatibility but not used for context
+    content_manager=None,
     timeout_seconds: float = 2.0
 ) -> Tuple[Optional[str], str]:
     """
     Get context for answer generation using non-blocking RAG.
-    Always returns quickly - either with RAG context or general knowledge.
+    Always returns quickly - either with RAG context, structured content, or general knowledge.
     
     Strategy:
     1. Quick check if RAG is worth trying
     2. Start RAG in parallel (with timeout)
-    3. Return RAG context if available, otherwise general knowledge
-    4. Structured content is NOT used (slows down generation)
+    3. Return RAG context if available
+    4. Fallback to structured content (fast, concise - helps generation speed)
+    5. Final fallback to general knowledge
     
     Args:
         rag_engine: RAGRetrievalEngine instance (can be None)
         question: Student's question
-        content_manager: Not used for context (kept for compatibility)
+        content_manager: ContentManager for structured content fallback
         timeout_seconds: RAG timeout (default 2 seconds)
         
     Returns:
@@ -177,25 +178,37 @@ def get_context_non_blocking(
         )
         return general_context, "AI General Knowledge"
     
-    # Try RAG with timeout (non-blocking)
+    # Try RAG with SHORT timeout (1 second max - don't wait long)
+    # If RAG takes >1s, skip it and use structured content instead
     rag_results = None
     if rag_engine:
         rag_results = retrieve_rag_with_timeout(
             rag_engine,
             question,
-            timeout_seconds=timeout_seconds,
+            timeout_seconds=1.0,  # Reduced from 2.0 - faster fallback
             max_results=2
         )
     
-    # Validate and use RAG if relevant
+    # Validate and use RAG if relevant (only if it returned quickly)
     if rag_results:
         is_relevant, rag_context = validate_rag_relevance(question, rag_results)
         if is_relevant and rag_context:
-            # RAG succeeded - use RAG context only
+            # RAG succeeded quickly - use RAG context
             return rag_context, "RAG-enhanced content"
     
-    # Fallback: General knowledge only (NO structured content - it slows down generation)
-    # Structured content is only used for UI display, not for model context
+    # Fallback 1: Try structured content (fast, concise context helps generation speed)
+    # This is faster than waiting for slow RAG
+    if content_manager:
+        try:
+            # Quick search with limited results for fast generation
+            relevant = content_manager.search_content(question, max_results=1)
+            if relevant and relevant[0].get('summary'):
+                # Limit to 250 chars to keep prompt short and fast
+                return relevant[0]['summary'][:250], "Structured content"
+        except Exception as e:
+            logger.debug(f"Structured content search failed: {e}")
+    
+    # Fallback 2: General knowledge
     general_context = (
         "You are a helpful AI tutor for Grade 8-12 students in Nepal. "
         "Use your knowledge of Grade 8-12 curriculum (NEB standards) to provide an accurate answer. "

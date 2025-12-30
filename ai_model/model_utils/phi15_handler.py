@@ -35,52 +35,34 @@ class Phi15Handler:
     Satya personality + Windows compatible
     """
     
-    # Stop sequences to prevent off-topic content (OPTIMIZED: Safe 25 stops - 6.7x faster)
-    # Reduced from 97 to 28 essential stops based on performance testing
-    # This configuration provides best speed (9.9s vs 66s) while maintaining quality
+    # Essential stop sequences for quality + speed balance
     STOP_SEQUENCES = [
-        "</s>",  # Model's end token
-        # Exercise/practice patterns
-        "\n\nExercise:",
-        "\n\nPractice:",
-        "\n\nTry this:",
-        "\n\nNow try",
-        # Use case/real-world patterns
-        "\n\nNow, let's",
-        "\n\nLet's explore",
-        "\n\nUse Case",
-        "\n\nReal-world",
-        "\n\nAnother example",
-        # Continuation phrases (edge cases)
-        "\n\nAdditionally,",
-        "\n\nFurthermore,",
-        "\n\nMoreover,",
-        # Explanation/elaboration patterns
-        "\n\nExplanation:",
-        "\n\nIn summary",
-        "\n\nTo summarize",
-        "\n\nIn other words",
-        "\n\nSimilarly,",
-        # Numbered lists
-        "\n1.",
-        "\n2.",
-        "\n3.",
-        # Diagram patterns
-        "\n\nDiagram:",
-        # Box-drawing characters (edge cases)
-        "\n┌",
-        "\n│",
-        "\n└",
-        # Prompt leakage prevention
-        "\n\nQuestion:",
-        "\n\nAnswer:",
-        "\n\nIMPORTANT:",
+        "</s>",  # Model's end token (critical)
+        "\n\nQuestion:",  # Question format (prevent prompt leakage)
+        "\nQuestion:",  # Question format (prevent prompt leakage)
+        "\n\nQ:", 
+        "\nQ:", 
+        "\n\nAnswer:", 
+        "\nAnswer:", 
+        "\n\nA:",  
+        "\nA:",  
+        "\n\nExercise:",  
+        "\n\nPractice:", 
+        "\n\nNow, let's",  
+        "\n\nExplanation:",  
+        "\n\nIn summary", 
+        "\n\nDiagram:",  # Diagram patterns (prevent ASCII art)
+        "\nDiagram:",  
+        "\n┌",  
+        "\n│",  
+        "\n└",  
+        "\n1.",  
+        "\n2.",  
+        "\n3.",  
     ]
     
-    # Fixed max tokens for concise answers (system prompt enforces 2-3 sentences)
-    # Reduced to 50 tokens to enforce strict conciseness and ensure fast generation
-    # 50 tokens ≈ 2-3 sentences for most answers - prevents slow generation
-    DEFAULT_MAX_TOKENS = 50
+    # BALANCED: 45 tokens for quality answers while maintaining speed
+    DEFAULT_MAX_TOKENS = 45
     
     def __init__(self, model_path: str, enable_streaming: bool = False):
         """
@@ -92,33 +74,13 @@ class Phi15Handler:
         self.model_file = self._find_model_file()
         self.enable_streaming = enable_streaming
         
-        # SATYA PERSONALITY - Grade 8-12 Nepal Curriculum Tutor
-        # Optimized for curriculum questions with intelligent RAG + own knowledge integration
+    
+        # Encourages specific, curriculum-focused answers without verbosity
         self.system_prompt = (
-            "You are Satya, an expert tutor for Grade 8-12 students in Nepal. "
-            "You specialize in Nepal's curriculum (NEB - National Examination Board) covering: "
-            "Computer Science, English, Mathematics, Science, Social Studies, and other subjects. "
-            "Answer ONLY curriculum-related questions. Be direct, clear, and age-appropriate. "
-            "ABSOLUTE RULES - NO EXCEPTIONS: "
-            "1. Answer the question in 2-3 sentences maximum + ONE code example (if programming). Then STOP immediately. "
-            "2. NEVER add: exercises, practice problems, use cases, real-world examples, 'let's explore', or extra content. "
-            "3. NEVER say: 'Now let's', 'Use Case', 'Real-world', 'Another example', or similar phrases. "
-            "4. NEVER add sections like 'Explanation:', 'In summary', 'To summarize', or any additional explanations. "
-            "5. NEVER generate diagrams, ASCII art, box-drawing characters, or visual representations. "
-            "6. NEVER repeat or copy instruction text, prompt labels, or context labels in your answer. "
-            "7. NEVER explain the prompt structure, reference context labels, or student question labels. "
-            "8. 'How does X work?' → Explain mechanism in 2-3 sentences. STOP. "
-            "9. 'How to do X?' → Show code/process directly. STOP. "
-            "10. 'What is X?' → Definition in 1-2 sentences + one example. STOP. "
-            "11. Complete your sentences. End with proper punctuation. "
-            "12. Maximum 3 sentences total. Answer the question, then STOP immediately. "
-            "13. NEVER use numbered lists (1., 2., 3., etc.). Answer in flowing sentences, not a list. "
-            "14. If you finish explaining, STOP. Do not continue. Do not add 'Explanation:' sections. Do not add diagrams. Do not add extra content. "
-            "15. Answer ONLY the question asked. Do not answer different questions. "
-            "16. KNOWLEDGE PRIORITY: If reference material is provided, USE IT as your primary knowledge source. It contains accurate curriculum content from study materials. "
-            "17. If no reference material is provided, use your own knowledge of Grade 8-12 curriculum (NEB standards). "
-            "18. Answer in clear, direct sentences. Use the information from reference material when available, but explain it naturally. "
-            "19. CRITICAL: After answering the question in 2-3 sentences, STOP immediately. Do not add explanations, summaries, or additional sections. Do not continue describing processes in detail."
+            "Satya: Grade 8-12 Nepal tutor (NEB curriculum). "
+            "Answer in 3-4 sentences with specific curriculum details. Be specific, not generic. "
+            "NEVER add: Question:, Answer:, Q:, A:, exercises, diagrams, ASCII art (┌, │, └), lists. "
+            "Answer directly, then STOP."
         )
         
     def _find_model_file(self) -> str:
@@ -139,9 +101,8 @@ class Phi15Handler:
             except Exception as e:
                 logger.error(f"Error loading config: {e}")
         
-        # SETTINGS
         return {
-            "n_ctx": 2048,                    # context size
+            "n_ctx": 256,                     
             "n_threads": max(1, os.cpu_count() // 2 or 1),  # threading
             "n_gpu_layers": 0,
             "max_tokens": 300,                # More tokens for detailed answers
@@ -160,12 +121,15 @@ class Phi15Handler:
             start_time = time.time()
             
             if LLAMA_AVAILABLE:
+                
                 self.llm = Llama(
                     model_path=self.model_file,
-                    n_ctx=self.config.get('n_ctx', 2048),        
+                    n_ctx=self.config.get('n_ctx', 256),      
                     n_threads=self.config.get('n_threads', 4),
+                    n_batch=256,           
                     n_gpu_layers=self.config.get('n_gpu_layers', 0),
-                    use_mmap=False,         
+                    use_mmap=True,         
+                    use_mlock=False,       
                     verbose=False            
                 )
                 logger.info(f"Model loaded successfully in {time.time() - start_time:.2f}s")
@@ -208,16 +172,14 @@ class Phi15Handler:
             # Prompt building
             prompt = self._build_prompt(normalized_question, context)
             
-            # Inference settings (optimized for speed and conciseness)
-            # Lower temperature = faster, more deterministic generation
-            # Lower top_p = faster token selection
+            
             response = self.llm(
                 prompt,
-                max_tokens=self.DEFAULT_MAX_TOKENS,
-                temperature=0.2,  # Lower for faster generation (was 0.35)
-                top_p=0.85,  # Lower for faster selection (was 0.92)
-                repeat_penalty=1.1,  # Prevent repetition
-                stop=self.STOP_SEQUENCES,
+                max_tokens=self.DEFAULT_MAX_TOKENS,  
+                temperature=0.2,  
+                top_p=0.85,  
+                repeat_penalty=1.1, 
+                stop=self.STOP_SEQUENCES, 
                 echo=False,
                 stream=False
             )
@@ -228,10 +190,29 @@ class Phi15Handler:
             if not answer or len(answer.strip()) < 10:
                 return "I couldn't generate a proper response. Please try rephrasing your question.", 0.1
             
-            # Answer cleaning
+            # Answer cleaning - remove prompt echoes and formatting
             answer = answer.strip()
+            
+            # Remove common prompt echoes
             if answer.lower().startswith("answer:"):
                 answer = answer[7:].strip()
+            if answer.lower().startswith("a:"):
+                answer = answer[2:].strip()
+            if answer.lower().startswith("q:"):
+                # If it starts with Q:, it's echoing the prompt - find the actual answer
+                if "\n\n" in answer:
+                    parts = answer.split("\n\n")
+                    # Find the part that looks like an answer (not a question)
+                    for part in parts:
+                        if not part.strip().lower().startswith("q:") and len(part.strip()) > 10:
+                            answer = part.strip()
+                            break
+            
+            # Remove any Q: or A: patterns from the answer
+            answer = re.sub(r'^Q:\s*', '', answer, flags=re.IGNORECASE | re.MULTILINE)
+            answer = re.sub(r'^A:\s*', '', answer, flags=re.IGNORECASE | re.MULTILINE)
+            answer = re.sub(r'\nQ:\s*', '\n', answer, flags=re.IGNORECASE)
+            answer = re.sub(r'\nA:\s*', '\n', answer, flags=re.IGNORECASE)
             
             # Remove off-topic content if it slips through (comprehensive cleanup)
             off_topic_markers = [
@@ -267,16 +248,19 @@ class Phi15Handler:
                 # Box-drawing character patterns (ASCII art diagrams)
                 "\n┌", "\n│", "\n└", "\n├",
                 "\n\n┌", "\n\n│", "\n\n└", "\n\n├",
-                # Reference context patterns (when model starts explaining the prompt structure)
-                "\n\nReference Context", "\nReference Context",
-                "\n\nReference material", "\nReference material",
-                "\n\nStudy material", "\nStudy material",
-                "\n\nStudent Question", "\nStudent Question",
-                "\n\nQuestion:", "\nQuestion:",
-                "\n\nAnswer:", "\nAnswer:",
-                "\n\nAnswer using the study material", "\nAnswer using the study material",
-                "\n\nIMPORTANT:", "\nIMPORTANT:",
-                "IMPORTANT:",
+            # Reference context patterns (when model starts explaining the prompt structure)
+            "\n\nReference Context", "\nReference Context",
+            "\n\nReference material", "\nReference material",
+            "\n\nStudy material", "\nStudy material",
+            "\n\nStudent Question", "\nStudent Question",
+            "\n\nQuestion:", "\nQuestion:", "Question:",
+            "\n\nAnswer:", "\nAnswer:", "Answer:",
+            "\n\nAnswer using the study material", "\nAnswer using the study material",
+            "\n\nIMPORTANT:", "\nIMPORTANT:",
+            "IMPORTANT:",
+            # Prompt echo patterns (prevent Q:/A: format in output)
+            "\nQ:", "\n\nQ:", "Q:",
+            "\nA:", "\n\nA:", "A:",
             ]
             for marker in off_topic_markers:
                 if marker in answer:
@@ -295,18 +279,30 @@ class Phi15Handler:
                 answer = re.sub(r'\s+', ' ', answer)
                 answer = answer.strip()
             
-            # Enforce maximum sentence limit (3 sentences max) - prevent verbosity
-            # More aggressive limiting for faster, concise answers
+            # Remove any Q:/A: echo patterns that might remain
+            if "\nQ:" in answer or "\nA:" in answer or answer.startswith("Q:") or answer.startswith("A:"):
+                # Split on Q: or A: and take only the actual answer part
+                parts = re.split(r'\n?[QA]:\s*', answer, flags=re.IGNORECASE)
+                # Find the longest part that looks like an answer (not a question)
+                best_part = ""
+                for part in parts:
+                    part = part.strip()
+                    # Skip if it looks like a question (ends with ?) or is too short
+                    if len(part) > len(best_part) and not part.endswith("?") and len(part) > 10:
+                        best_part = part
+                if best_part:
+                    answer = best_part.strip()
+            
+            # Enforce reasonable sentence limit (3-4 sentences) - balance quality and conciseness
             if answer:
                 # Split on sentence endings, but preserve abbreviations
                 sentences = re.split(r'(?<=[.!?])\s+', answer)
                 sentences = [s.strip() for s in sentences if s.strip() and len(s.strip()) > 5]
                 
-                # Early stopping: if we have 2+ complete sentences, that's enough
-                # This prevents unnecessary generation for questions that need short answers
-                if len(sentences) >= 2:
-                    # Keep 2-3 sentences max (prefer 2 if available, max 3)
-                    keep_count = min(3, len(sentences))
+                # Allow 3-4 sentences for quality answers, but cap at 4 to prevent verbosity
+                if len(sentences) >= 4:
+                    # Keep up to 4 sentences for detailed answers
+                    keep_count = min(4, len(sentences))
                     answer = '. '.join(sentences[:keep_count])
                     if not answer.endswith(('.', '!', '?')):
                         answer += '.'
@@ -369,15 +365,15 @@ class Phi15Handler:
             # Prompt building
             prompt = self._build_prompt(normalized_question, context)
             
-            # Stream inference (optimized for speed and conciseness)
+            # ULTRA-OPTIMIZED inference: Lower temperature, simpler sampling for speed
             full_answer = ""
             for chunk in self.llm(
                 prompt,
-                max_tokens=self.DEFAULT_MAX_TOKENS,
-                temperature=0.2,  # Lower for faster generation
-                top_p=0.85,  # Lower for faster selection
+                max_tokens=self.DEFAULT_MAX_TOKENS,  # Now 35 tokens
+                temperature=0.2,  # Lower temperature for faster, more deterministic generation
+                top_p=0.85,  # Slightly more restrictive for speed
                 repeat_penalty=1.1,  # Prevent repetition
-                stop=self.STOP_SEQUENCES,
+                stop=self.STOP_SEQUENCES,  # Minimal 10 stops
                 echo=False,
                 stream=True
             ):
@@ -460,11 +456,12 @@ class Phi15Handler:
         has_rag_context = len(trimmed_context) > 50  # Meaningful context threshold
         
         if has_rag_context:
-            # Trim context if too long
-            if len(trimmed_context) > 700:  # Allow more context for better answers
-                trimmed_context = trimmed_context[:700]
+            # EXTREME: Reduced to 150 chars for maximum speed
+            # Minimal context to keep prompt short and fast
+            if len(trimmed_context) > 150:
+                trimmed_context = trimmed_context[:150]
                 last_period = trimmed_context.rfind('.')
-                if last_period > 600:
+                if last_period > 120:
                     trimmed_context = trimmed_context[:last_period + 1]
             
             # Present RAG context as the primary knowledge source
@@ -474,20 +471,18 @@ class Phi15Handler:
             # No RAG context - use own knowledge
             context_section = None
         
-        # Simple, direct prompt format
-        # When RAG context exists, Phi should use it as primary knowledge
+        # Optimized prompt format - prevent leakage, encourage specific answers
         if context_section:
             return (
                 f"{self.system_prompt}\n\n"
                 f"{context_section}\n\n"
-                f"Question: {question}\n\n"
-                f"Answer using the study material above:"
+                f"{question}\n\nAnswer:"
             )
         else:
+            # No context - encourage specific NEB curriculum knowledge
             return (
                 f"{self.system_prompt}\n\n"
-                f"Question: {question}\n\n"
-                f"Answer:"
+                f"{question}\n\nAnswer:"
             )
 
     def _extract_text(self, response: Any) -> str:
@@ -561,7 +556,7 @@ class Phi15Handler:
                         if hint and len(hint) > 8:
                             hints.append(hint)
             
-            # Your ORIGINAL hint filtering
+            # Hint filtering
             generic_phrases = ["review the context", "look for key terms", "think about", 
                              "consider the", "examine the", "check the"]
             filtered_hints = []

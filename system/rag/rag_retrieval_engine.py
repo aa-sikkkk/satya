@@ -397,8 +397,8 @@ class RAGRetrievalEngine:
                             })
                             
                 except Exception as e:
-                        logger.warning(f"Error querying collection {collection_name}: {e}")
-                        continue
+                    logger.warning(f"Error querying collection {collection_name}: {e}")
+                    continue
             
             # Sort by distance (lower is better) and take top results
             all_results.sort(key=lambda x: x['distance'])
