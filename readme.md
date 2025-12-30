@@ -84,6 +84,9 @@ Satya aims to close the accessibility gap by delivering intelligent learning tha
 - **Progress Tracking**: Delivers detailed analytics and visualizations of learning paths.
 - **Export/Import**: Enables saving and restoring of learning progress.
 
+  <img width="1358" height="715" alt="Screenshot 2025-12-30 191502" src="https://github.com/user-attachments/assets/d552dc22-f26c-4574-b656-3df7b7c1540d" />
+
+
 ### Teacher-Facing Features
 
 #### Content Management
