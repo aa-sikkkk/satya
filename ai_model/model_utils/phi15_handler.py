@@ -45,20 +45,23 @@ class Phi15Handler:
         self.enable_streaming = enable_streaming
         
         # SATYA'S ORIGINAL PERSONALITY - Wise Nepali tutor
-        # Enhanced to encourage ASCII diagrams and focused, intelligent answers
+        # Enhanced to USE RAG context properly and generate intelligent answers
         self.system_prompt = (
-            "You are Satya, a Grade 10 tutor. Answer ONLY what is asked. Be direct and complete. "
+            "You are Satya, a Grade 10 tutor. Use the provided context to answer the student's question. "
+            "CRITICAL: The context contains relevant information - USE IT to generate your answer. "
+            "Do NOT just copy the context. Synthesize and explain based on the context. "
             "ABSOLUTE RULES - NO EXCEPTIONS: "
-            "1. Answer the question in 2-4 sentences + ONE code example (if programming). Then STOP. "
-            "2. NEVER add: exercises, practice problems, use cases, real-world examples, 'let's explore', or extra content. "
-            "3. NEVER say: 'Now let's', 'Use Case', 'Real-world', 'Another example', or similar phrases. "
-            "4. 'How does X work?' → Explain mechanism in 2-3 sentences. STOP. "
-            "5. 'How to do X?' → Show code/process directly. STOP. "
-            "6. 'What is X?' → Definition in 1-2 sentences + one example. STOP. "
-            "7. Complete your sentences. End with proper punctuation. "
-            "8. Maximum 4 sentences total. Answer the question, then STOP immediately. "
-            "9. If you finish explaining, STOP. Do not continue. "
-            "10. Answer ONLY the question asked. Do not answer different questions."
+            "1. READ the context carefully. Extract key information relevant to the question. "
+            "2. USE the context to answer. Synthesize information - don't just repeat it verbatim. "
+            "3. Answer the question in 2-4 sentences based on the context. Then STOP. "
+            "4. If context mentions specific steps/processes, explain them clearly. "
+            "5. If context defines something, provide a clear definition based on it. "
+            "6. NEVER add: exercises, practice problems, use cases, real-world examples, 'let's explore', or extra content. "
+            "7. NEVER say: 'Now let's', 'Use Case', 'Real-world', 'Another example', or similar phrases. "
+            "8. Complete your sentences. End with proper punctuation. "
+            "9. Maximum 4 sentences total. Answer the question, then STOP immediately. "
+            "10. If you finish explaining, STOP. Do not continue. "
+            "11. Answer ONLY the question asked using information from the context."
         )
         
     def _find_model_file(self) -> str:
@@ -79,16 +82,16 @@ class Phi15Handler:
             except Exception as e:
                 logger.error(f"Error loading config: {e}")
         
-        # SETTINGS
+        # SETTINGS - Optimized for synthesis, not copying
         return {
             "n_ctx": 2048,                    # context size
             "n_threads": max(1, os.cpu_count() // 2 or 1),  # threading
             "n_gpu_layers": 0,
             "max_tokens": 256,                # More tokens for detailed answers
-            "temperature": 0.35,              # Slightly higher for creativity
-            "top_p": 0.92,                    # Slightly relaxed for variety
-            "repeat_penalty": 1.06,           
-            "stop": ["</s>", "\n\nContext:", "\n\nQuestion:", "\n\nQ:", "\n\nProvide"],
+            "temperature": 0.4,               # Higher for synthesis/creativity (not just copying)
+            "top_p": 0.9,                     # Balanced for coherent generation
+            "repeat_penalty": 1.15,           # Higher to prevent verbatim copying
+            "stop": ["</s>", "\n\nContext:", "\n\nQuestion:", "\n\nQ:", "\n\nProvide", "\n\nRELEVANT CONTEXT"],
         }
             
     def load_model(self) -> None:
@@ -407,12 +410,15 @@ class Phi15Handler:
                 "If helpful, include an ASCII diagram after your explanation using box-drawing characters."
             )
         
-        # Enhanced prompt format that emphasizes answering the specific question
+        # Enhanced prompt format that explicitly instructs using context
         return (
             f"{self.system_prompt}\n\n"
-            f"Context: {trimmed_context}\n\n"
-            f"Student Question: {question}{diagram_hint}\n\n"
-            f"Answer:"
+            f"RELEVANT CONTEXT (use this information to answer):\n{trimmed_context}\n\n"
+            f"STUDENT QUESTION: {question}\n\n"
+            f"INSTRUCTIONS: Read the context above. Use the information in the context to answer the student's question. "
+            f"Synthesize the information - explain it clearly in your own words. Do NOT just copy the context verbatim. "
+            f"Provide a clear, concise answer based on what you learned from the context.{diagram_hint}\n\n"
+            f"ANSWER:"
         )
 
     def _extract_text(self, response: Any) -> str:

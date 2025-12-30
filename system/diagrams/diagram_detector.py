@@ -489,39 +489,62 @@ def _estimate_step_count(answer: str) -> int:
 
 
 def _extract_variables(answer: str) -> List[str]:
-    """Extract variable names and identifiers from answer."""
-    variables = set()
+    """
+    Extract key entities/identifiers from answer (universal, not just programming).
+    Works for: variables (programming), concepts (science), terms (English), etc.
+    """
+    entities = set()
     
-    # Python-style variables
+    # Universal patterns for key entities (works for ANY domain)
     patterns = [
-        r'\b([a-z_][a-z0-9_]*)\s*=',  # Variable assignment
-        r'for\s+(\w+)\s+in',  # For loop variable
-        r'while\s+(\w+)\s*[<>=!]',  # While loop variable
-        r'def\s+(\w+)\s*\(',  # Function name
-        r'(\w+)\s*=\s*\d+',  # Variable with numeric assignment
+        r'\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\b',  # Capitalized terms (concepts, proper nouns)
+        r'\b([a-z_][a-z0-9_]*)\s*=',  # Assignment patterns (programming or general)
+        r'(?:the|a|an)\s+(\w+)\s+(?:is|are|was|were|has|have)',  # "the process is", "a variable is"
+        r'\b(\w+)\s+(?:in|of|from|to)\s+(?:the|a|an)?\s+\w+',  # Relationships
     ]
     
     for pattern in patterns:
         matches = re.findall(pattern, answer, re.IGNORECASE)
-        variables.update(matches)
+        entities.update(matches)
     
-    # Filter out common words
-    filtered = [v for v in variables if v.lower() not in STOPWORDS and len(v) > 1]
-    return filtered
+    # Filter out common words and keep meaningful entities
+    filtered = [e for e in entities if e.lower() not in STOPWORDS and len(e) > 2]
+    return filtered[:5]  # Limit to 5
 
 
 def _detect_loop_type(text: str) -> Optional[str]:
-    """Detect type of loop mentioned."""
+    """
+    Detect type of iterative/cyclic process (universal, not just programming).
+    Works for: loops (programming), cycles (science), repeating processes (any subject).
+    """
     text_lower = text.lower()
     
-    if re.search(r'\bfor\s+.*\s+in\b', text_lower):
+    # Universal iterative patterns (works for ANY domain)
+    # Pattern 1: "for each X" or "for X in Y" (programming or general iteration)
+    if re.search(r'\bfor\s+(?:each|every)?\s*\w+\s+in\s+', text_lower):
         return "for"
-    elif re.search(r'\bwhile\s+', text_lower):
+    # Pattern 2: "while condition" (programming or general conditional iteration)
+    elif re.search(r'\bwhile\s+\w+.*(?::|do|then|process|cycle)', text_lower):
         return "while"
-    elif re.search(r'\buntil\s+', text_lower):
+    # Pattern 3: "repeat until" or "until condition" (universal)
+    elif re.search(r'\b(?:repeat|continue)\s+until\s+', text_lower):
         return "until"
-    elif re.search(r'\bdo\s+.*\s+while\b', text_lower):
+    # Pattern 4: "do ... while" (programming or general)
+    elif re.search(r'\bdo\s+.*\s+while\s+', text_lower):
         return "do_while"
+    # Pattern 5: "cycle continues" or "process repeats" (universal)
+    elif re.search(r'\b(?:cycle|process|iteration)\s+(?:continues|repeats|loops)', text_lower):
+        return "cycle"
+    
+    # Exclude common false positives (universal patterns)
+    false_positives = [
+        r'\bfor\s+(?:example|instance|the|a|an|this|that)',  # "for example"
+        r'\bwhile\s+(?:studying|learning|reading|the|a|an|this|that|you|we|they)',  # "while studying"
+    ]
+    
+    # If matches false positive pattern, don't detect as iteration
+    if any(re.search(pattern, text_lower, re.IGNORECASE) for pattern in false_positives):
+        return None
     
     return None
 
