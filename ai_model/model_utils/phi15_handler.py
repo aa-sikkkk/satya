@@ -61,8 +61,9 @@ class Phi15Handler:
         "\n3.",  
     ]
     
-    # BALANCED: 45 tokens for quality answers while maintaining speed
-    DEFAULT_MAX_TOKENS = 45
+    # EDUCATIONAL FOCUS: 100 tokens for comprehensive, complete answers
+    # Students need detailed explanations to learn - ensure sentences are complete
+    DEFAULT_MAX_TOKENS = 100
     
     def __init__(self, model_path: str, enable_streaming: bool = False):
         """
@@ -75,12 +76,16 @@ class Phi15Handler:
         self.enable_streaming = enable_streaming
         
     
-        # Encourages specific, curriculum-focused answers without verbosity
+        # Educational focus: Helpful, detailed answers for student learning
         self.system_prompt = (
-            "Satya: Grade 8-12 Nepal tutor (NEB curriculum). "
-            "Answer in 3-4 sentences with specific curriculum details. Be specific, not generic. "
-            "NEVER add: Question:, Answer:, Q:, A:, exercises, diagrams, ASCII art (┌, │, └), lists. "
-            "Answer directly, then STOP."
+            "You are Satya, an expert tutor for Grade 8-12 students in Nepal (NEB curriculum). "
+            "Your goal is to help students learn and understand. Provide clear, detailed explanations. "
+            "Answer in 4-6 COMPLETE sentences with specific examples and curriculum-relevant details. "
+            "CRITICAL: Always finish each sentence completely with proper punctuation (., !, or ?). "
+            "Never cut off mid-sentence. Be educational, helpful, and thorough. "
+            "Explain concepts clearly so students can understand. "
+            "NEVER add: Question:, Answer:, Q:, A:, exercises, diagrams, ASCII art (┌, │, └), numbered lists. "
+            "Give complete, educational answers that help students learn."
         )
         
     def _find_model_file(self) -> str:
@@ -102,7 +107,7 @@ class Phi15Handler:
                 logger.error(f"Error loading config: {e}")
         
         return {
-            "n_ctx": 256,                     
+            "n_ctx": 512,                     # Increased for longer, more detailed educational answers
             "n_threads": max(1, os.cpu_count() // 2 or 1),  # threading
             "n_gpu_layers": 0,
             "max_tokens": 300,                # More tokens for detailed answers
@@ -124,9 +129,9 @@ class Phi15Handler:
                 
                 self.llm = Llama(
                     model_path=self.model_file,
-                    n_ctx=self.config.get('n_ctx', 256),      
+                    n_ctx=self.config.get('n_ctx', 512),      # Increased for longer answers
                     n_threads=self.config.get('n_threads', 4),
-                    n_batch=256,           
+                    n_batch=512,           # Batch size for prompt processing
                     n_gpu_layers=self.config.get('n_gpu_layers', 0),
                     use_mmap=True,         
                     use_mlock=False,       
@@ -293,34 +298,61 @@ class Phi15Handler:
                 if best_part:
                     answer = best_part.strip()
             
-            # Enforce reasonable sentence limit (3-4 sentences) - balance quality and conciseness
+            # Allow comprehensive answers (4-6 sentences) for educational value
+            # CRITICAL: Never cut off mid-sentence - always ensure completeness
             if answer:
                 # Split on sentence endings, but preserve abbreviations
                 sentences = re.split(r'(?<=[.!?])\s+', answer)
                 sentences = [s.strip() for s in sentences if s.strip() and len(s.strip()) > 5]
                 
-                # Allow 3-4 sentences for quality answers, but cap at 4 to prevent verbosity
-                if len(sentences) >= 4:
-                    # Keep up to 4 sentences for detailed answers
-                    keep_count = min(4, len(sentences))
+                # Only trim if we have more than 6 complete sentences
+                if len(sentences) > 6:
+                    # Check if the 6th sentence is complete
+                    if sentences[5].endswith(('.', '!', '?')):
+                        # 6th sentence is complete - keep 6
+                        keep_count = 6
+                    else:
+                        # 6th sentence incomplete - keep only 5 complete sentences
+                        keep_count = 5
+                    
                     answer = '. '.join(sentences[:keep_count])
                     if not answer.endswith(('.', '!', '?')):
                         answer += '.'
                     if len(sentences) > keep_count:
-                        logger.debug(f"Trimmed answer from {len(sentences)} to {keep_count} sentences")
+                        logger.debug(f"Trimmed answer from {len(sentences)} to {keep_count} complete sentences")
+                
+                # CRITICAL: Always ensure the final answer ends with proper punctuation
+                if answer and not answer.rstrip().endswith(('.', '!', '?')):
+                    # Answer doesn't end properly - find last complete sentence
+                    trimmed = answer.rstrip()
+                    for punct in ['.', '!', '?']:
+                        last_punct = trimmed.rfind(punct)
+                        if last_punct > len(trimmed) * 0.3:  # If punctuation is in last 70%
+                            # Found a complete sentence - use everything up to that point
+                            answer = trimmed[:last_punct + 1].strip()
+                            logger.debug(f"Fixed incomplete answer by using last complete sentence ending at {punct}")
+                            break
+                    else:
+                        # No sentence-ending punctuation found - add a period
+                        answer = trimmed + '.'
+                        logger.debug("Added period to ensure answer completeness")
             
-            # Check if answer seems incomplete and try to fix it
+            # Final completeness check - ensure answer ends properly
+            # This is a safety net after all other processing
             if answer and len(answer) > 20:
                 trimmed = answer.rstrip()
-                # Check if answer ends properly
-                if not trimmed.endswith(('.', '!', '?', ':', '\n', ')', ']', '}')):
-                    # Might be incomplete - try to find last complete sentence
-                    for punct in ['.', '!', '?', ':']:
+                if not trimmed.endswith(('.', '!', '?')):
+                    # Still incomplete - find last complete sentence
+                    for punct in ['.', '!', '?']:
                         last_punct = trimmed.rfind(punct)
-                        if last_punct > len(trimmed) * 0.6:  # If punctuation is in last 40%
+                        if last_punct > len(trimmed) * 0.3:  # If punctuation is in last 70%
                             answer = trimmed[:last_punct + 1].strip()
-                            logger.debug(f"Fixed incomplete answer by trimming at {punct}")
+                            logger.debug(f"Final fix: used last complete sentence ending at {punct}")
                             break
+                    else:
+                        # No punctuation found - add period
+                        answer = trimmed + '.'
+                        logger.debug("Final fix: added period to complete answer")
                 
             # Confidence calculation
             confidence = self._calculate_confidence(answer, context, question)
@@ -365,17 +397,18 @@ class Phi15Handler:
             # Prompt building
             prompt = self._build_prompt(normalized_question, context)
             
-            # ULTRA-OPTIMIZED inference: Lower temperature, simpler sampling for speed
+            # Streaming inference - always stream for better UX
+            # Users need to see tokens appearing in real-time
             full_answer = ""
             for chunk in self.llm(
                 prompt,
-                max_tokens=self.DEFAULT_MAX_TOKENS,  # Now 35 tokens
-                temperature=0.2,  # Lower temperature for faster, more deterministic generation
-                top_p=0.85,  # Slightly more restrictive for speed
-                repeat_penalty=1.1,  # Prevent repetition
-                stop=self.STOP_SEQUENCES,  # Minimal 10 stops
+                max_tokens=self.DEFAULT_MAX_TOKENS,
+                temperature=0.3,
+                top_p=0.85,
+                repeat_penalty=1.1,
+                stop=self.STOP_SEQUENCES,
                 echo=False,
-                stream=True
+                stream=True  # Always stream for real-time feedback
             ):
                 if chunk is None:
                     continue
@@ -407,6 +440,25 @@ class Phi15Handler:
                 except (KeyError, IndexError, TypeError) as e:
                     logger.debug(f"Error extracting token from chunk: {e}")
                     continue
+            
+            # Post-streaming: Ensure answer is complete
+            # Check if the streamed answer ends properly
+            if full_answer and len(full_answer) > 20:
+                trimmed = full_answer.rstrip()
+                if not trimmed.endswith(('.', '!', '?')):
+                    # Answer is incomplete - find last complete sentence
+                    for punct in ['.', '!', '?']:
+                        last_punct = trimmed.rfind(punct)
+                        if last_punct > len(trimmed) * 0.3:  # If punctuation is in last 70%
+                            # Found complete sentence - yield the missing punctuation if needed
+                            missing = trimmed[last_punct + 1:].strip()
+                            if missing:
+                                # There's incomplete text after last punctuation - don't yield it
+                                logger.debug(f"Streamed answer incomplete - last complete sentence at position {last_punct}")
+                            break
+                    else:
+                        # No punctuation found - answer needs completion
+                        logger.debug("Streamed answer has no sentence-ending punctuation")
             
             # Clean up answer if needed (post-streaming check)
             # Note: This won't affect already-streamed tokens, but we can log if off-topic content was added
@@ -456,12 +508,12 @@ class Phi15Handler:
         has_rag_context = len(trimmed_context) > 50  # Meaningful context threshold
         
         if has_rag_context:
-            # EXTREME: Reduced to 150 chars for maximum speed
-            # Minimal context to keep prompt short and fast
-            if len(trimmed_context) > 150:
-                trimmed_context = trimmed_context[:150]
+            # Educational focus: Allow more context for better answers
+            # Students need comprehensive information to learn effectively
+            if len(trimmed_context) > 300:
+                trimmed_context = trimmed_context[:300]
                 last_period = trimmed_context.rfind('.')
-                if last_period > 120:
+                if last_period > 250:
                     trimmed_context = trimmed_context[:last_period + 1]
             
             # Present RAG context as the primary knowledge source
@@ -471,18 +523,20 @@ class Phi15Handler:
             # No RAG context - use own knowledge
             context_section = None
         
-        # Optimized prompt format - prevent leakage, encourage specific answers
+        # Educational prompt format - encourage detailed, helpful explanations
         if context_section:
             return (
                 f"{self.system_prompt}\n\n"
                 f"{context_section}\n\n"
-                f"{question}\n\nAnswer:"
+                f"Question: {question}\n\n"
+                f"Provide a clear, detailed explanation to help the student understand:"
             )
         else:
-            # No context - encourage specific NEB curriculum knowledge
+            # No context - encourage detailed NEB curriculum knowledge
             return (
                 f"{self.system_prompt}\n\n"
-                f"{question}\n\nAnswer:"
+                f"Question: {question}\n\n"
+                f"Provide a clear, detailed explanation using Grade 8-12 NEB curriculum knowledge:"
             )
 
     def _extract_text(self, response: Any) -> str:

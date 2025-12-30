@@ -804,14 +804,20 @@ class NEBeduApp(ctk.CTk):
                 )
                 
                 # Get related content for display (non-blocking, quick)
+                # Show related concepts for all sources, filtered by same subject for relevance
                 related = []
-                if source_info == "Structured content":
-                    try:
-                        relevant = self.content_manager.search_content(question)
-                        if relevant and len(relevant) > 1:
-                            related = [f"{item['subject']} > {item['topic']} > {item['concept']}" for item in relevant[1:3]]
-                    except Exception:
-                        pass
+                try:
+                    relevant = self.content_manager.search_content(question, max_results=5)
+                    if relevant and len(relevant) > 1:
+                        # Filter to same subject as first result for relevance (like CLI does)
+                        first_subject = relevant[0].get('subject', '')
+                        related_items = [item for item in relevant[1:5] 
+                                        if item.get('subject', '') == first_subject]
+                        # Format as "Subject > Topic > Concept" and limit to 2 for display
+                        related = [f"{item['subject']} > {item['topic']} > {item['concept']}" 
+                                  for item in related_items[:2]]
+                except Exception:
+                    pass
 
                 # Stream answer from local model for real-time display
                 accumulated_answer = ""
