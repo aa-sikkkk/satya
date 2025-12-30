@@ -16,6 +16,7 @@ if sys.platform == "win32":
     
 import json
 import logging
+import re
 import time
 from typing import Tuple, List, Dict, Any, Optional, Iterator
 from pathlib import Path
@@ -55,6 +56,17 @@ class Phi15Handler:
         "\n\nMoreover,", "\nMoreover,",
         # Multiple example patterns
         "\n\nFor example,",  # Only stop on second "For example" (after newline)
+        # Explanation/elaboration patterns (prevent repetitive explanations)
+        "\n\nExplanation:", "\nExplanation:", "Explanation:",
+        "\nExplanation", "\n\nExplanation",
+        "\n\nIn summary", "\nIn summary",
+        "\n\nTo summarize", "\nTo summarize",
+        "\n\nIn other words", "\nIn other words",
+        "\n\nSimilarly,", "\nSimilarly,",
+        # Numbered list patterns (prevent lists)
+        "\n1.", "\n2.", "\n3.", "\n4.", "\n5.", "\n6.",
+        "\n\n1.", "\n\n2.", "\n\n3.", "\n\n4.",
+        "\n1 ", "\n2 ", "\n3 ", "\n4 ",
         # Diagram/visualization patterns (prevent verbosity after answer)
         "\n\nDiagram:", "\nDiagram:", "Diagram:",
         "\nDiagram", "\n\nDiagram",
@@ -63,12 +75,19 @@ class Phi15Handler:
         "\n\n┌", "\n\n│", "\n\n└", "\n\n├",
         # Reference context patterns (when model starts explaining the prompt structure)
         "\n\nReference Context", "\nReference Context",
+        "\n\nReference material", "\nReference material",
+        "\n\nStudy material", "\nStudy material",
         "\n\nStudent Question", "\nStudent Question",
-        "\n\nAnswer (in your own words", "\nAnswer (in your own words",
+        "\n\nQuestion:", "\nQuestion:",
+        "\n\nAnswer:", "\nAnswer:",
+        "\n\nAnswer using the study material", "\nAnswer using the study material",
+        "\n\nIMPORTANT:", "\nIMPORTANT:",
+        "IMPORTANT:",
     ]
     
     # Fixed max tokens for concise answers (system prompt enforces 2-4 sentences)
-    DEFAULT_MAX_TOKENS = 180
+    # Reduced to 120 to prevent verbosity and repetitive explanations
+    DEFAULT_MAX_TOKENS = 120
     
     def __init__(self, model_path: str, enable_streaming: bool = False):
         """
@@ -91,17 +110,22 @@ class Phi15Handler:
             "1. Answer the question in 2-4 sentences + ONE code example (if programming). Then STOP. "
             "2. NEVER add: exercises, practice problems, use cases, real-world examples, 'let's explore', or extra content. "
             "3. NEVER say: 'Now let's', 'Use Case', 'Real-world', 'Another example', or similar phrases. "
-            "4. NEVER generate diagrams, ASCII art, box-drawing characters, or visual representations. "
-            "5. NEVER explain the prompt structure, reference context labels, or student question labels. "
-            "6. 'How does X work?' → Explain mechanism in 2-3 sentences. STOP. "
-            "7. 'How to do X?' → Show code/process directly. STOP. "
-            "8. 'What is X?' → Definition in 1-2 sentences + one example. STOP. "
-            "9. Complete your sentences. End with proper punctuation. "
-            "10. Maximum 4 sentences total. Answer the question, then STOP immediately. "
-            "11. If you finish explaining, STOP. Do not continue. Do not add diagrams. Do not add extra content. "
-            "12. Answer ONLY the question asked. Do not answer different questions. "
-            "13. Use your own knowledge to explain concepts clearly. If context is provided, use it as reference but explain in your own words. "
-            "14. If no relevant context is provided, answer using your knowledge of Grade 8-12 curriculum topics."
+            "4. NEVER add sections like 'Explanation:', 'In summary', 'To summarize', or any additional explanations. "
+            "5. NEVER generate diagrams, ASCII art, box-drawing characters, or visual representations. "
+            "6. NEVER repeat or copy instruction text, prompt labels, or context labels in your answer. "
+            "7. NEVER explain the prompt structure, reference context labels, or student question labels. "
+            "8. 'How does X work?' → Explain mechanism in 2-3 sentences. STOP. "
+            "9. 'How to do X?' → Show code/process directly. STOP. "
+            "10. 'What is X?' → Definition in 1-2 sentences + one example. STOP. "
+            "11. Complete your sentences. End with proper punctuation. "
+            "12. Maximum 4 sentences total. Answer the question, then STOP immediately. "
+            "13. NEVER use numbered lists (1., 2., 3., etc.). Answer in flowing sentences, not a list. "
+            "14. If you finish explaining, STOP. Do not continue. Do not add 'Explanation:' sections. Do not add diagrams. Do not add extra content. "
+            "15. Answer ONLY the question asked. Do not answer different questions. "
+            "16. KNOWLEDGE PRIORITY: If reference material is provided, USE IT as your primary knowledge source. It contains accurate curriculum content from study materials. "
+            "17. If no reference material is provided, use your own knowledge of Grade 8-12 curriculum (NEB standards). "
+            "18. Answer in clear, direct sentences. Use the information from reference material when available, but explain it naturally. "
+            "19. CRITICAL: After answering the question in 2-4 sentences, STOP. Do not add explanations, summaries, or additional sections."
         )
         
     def _find_model_file(self) -> str:
@@ -230,6 +254,17 @@ class Phi15Handler:
                 "\n\nAdditionally,", "\nAdditionally,",
                 "\n\nFurthermore,", "\nFurthermore,",
                 "\n\nMoreover,", "\nMoreover,",
+                # Explanation/elaboration patterns (prevent repetitive explanations)
+                "\n\nExplanation:", "\nExplanation:", "Explanation:",
+                "\nExplanation", "\n\nExplanation",
+                "\n\nIn summary", "\nIn summary",
+                "\n\nTo summarize", "\nTo summarize",
+                "\n\nIn other words", "\nIn other words",
+                "\n\nSimilarly,", "\nSimilarly,",
+                # Numbered list patterns (prevent lists)
+                "\n1.", "\n2.", "\n3.", "\n4.", "\n5.", "\n6.",
+                "\n\n1.", "\n\n2.", "\n\n3.", "\n\n4.",
+                "\n1 ", "\n2 ", "\n3 ", "\n4 ",
                 # Diagram/visualization patterns (prevent verbosity after answer)
                 "\n\nDiagram:", "\nDiagram:", "Diagram:",
                 "\nDiagram", "\n\nDiagram",
@@ -238,8 +273,14 @@ class Phi15Handler:
                 "\n\n┌", "\n\n│", "\n\n└", "\n\n├",
                 # Reference context patterns (when model starts explaining the prompt structure)
                 "\n\nReference Context", "\nReference Context",
+                "\n\nReference material", "\nReference material",
+                "\n\nStudy material", "\nStudy material",
                 "\n\nStudent Question", "\nStudent Question",
-                "\n\nAnswer (in your own words", "\nAnswer (in your own words",
+                "\n\nQuestion:", "\nQuestion:",
+                "\n\nAnswer:", "\nAnswer:",
+                "\n\nAnswer using the study material", "\nAnswer using the study material",
+                "\n\nIMPORTANT:", "\nIMPORTANT:",
+                "IMPORTANT:",
             ]
             for marker in off_topic_markers:
                 if marker in answer:
@@ -247,6 +288,29 @@ class Phi15Handler:
                     answer = answer.split(marker)[0].strip()
                     logger.debug(f"Removed off-topic content after {marker}")
                     break
+            
+            # Remove numbered lists if they appear (convert to flowing sentences)
+            if answer:
+                # Pattern: "1. Text" or "1 Text" -> remove numbering
+                answer = re.sub(r'^\d+\.\s*', '', answer, flags=re.MULTILINE)  # Remove "1. " at start of lines
+                answer = re.sub(r'\n\d+\.\s*', '. ', answer)  # Replace "\n2. " with ". "
+                answer = re.sub(r'\n\d+\s+', '. ', answer)  # Replace "\n2 " with ". "
+                # Clean up multiple spaces
+                answer = re.sub(r'\s+', ' ', answer)
+                answer = answer.strip()
+            
+            # Enforce maximum sentence limit (2-4 sentences max) - prevent verbosity
+            if answer:
+                # Split on sentence endings, but preserve abbreviations
+                sentences = re.split(r'(?<=[.!?])\s+', answer)
+                sentences = [s.strip() for s in sentences if s.strip() and len(s.strip()) > 5]
+                
+                if len(sentences) > 4:
+                    # Keep only first 4 sentences
+                    answer = '. '.join(sentences[:4])
+                    if not answer.endswith(('.', '!', '?')):
+                        answer += '.'
+                    logger.debug(f"Trimmed answer from {len(sentences)} to 4 sentences")
             
             # Check if answer seems incomplete and try to fix it
             if answer and len(answer) > 20:
@@ -395,36 +459,34 @@ class Phi15Handler:
         
         if has_rag_context:
             # Trim context if too long
-            if len(trimmed_context) > 800:
-                trimmed_context = trimmed_context[:800]
+            if len(trimmed_context) > 700:  # Allow more context for better answers
+                trimmed_context = trimmed_context[:700]
                 last_period = trimmed_context.rfind('.')
-                if last_period > 700:
+                if last_period > 600:
                     trimmed_context = trimmed_context[:last_period + 1]
             
-            # When RAG context exists, encourage using it as reference but explaining in own words
-            context_instruction = (
-                "Reference Context (from study materials):\n"
-                f"{trimmed_context}\n\n"
-                "IMPORTANT: Use the reference context above as a guide, but explain the answer "
-                "in your own words using your knowledge. Do not simply copy from the context. "
-                "If the context is not directly relevant, use your own knowledge to answer."
-            )
+            # Present RAG context as the primary knowledge source
+            # Make it clear this is the curriculum content to use
+            context_section = f"Study material:\n{trimmed_context}"
         else:
             # No RAG context - use own knowledge
-            context_instruction = (
-                "No specific study material found for this question. "
-                "Use your knowledge of Grade 8-12 curriculum (NEB standards) to provide an accurate answer. "
-                "Focus on curriculum-appropriate explanations for students in Nepal."
-            )
+            context_section = None
         
-        # Enhanced prompt format that emphasizes using own knowledge
-        # Note: Diagrams are handled by a separate service, not generated by the model
-        return (
-            f"{self.system_prompt}\n\n"
-            f"{context_instruction}\n\n"
-            f"Student Question: {question}\n\n"
-            f"Answer (in your own words, appropriate for Grade 8-12 curriculum):"
-        )
+        # Simple, direct prompt format
+        # When RAG context exists, Phi should use it as primary knowledge
+        if context_section:
+            return (
+                f"{self.system_prompt}\n\n"
+                f"{context_section}\n\n"
+                f"Question: {question}\n\n"
+                f"Answer using the study material above:"
+            )
+        else:
+            return (
+                f"{self.system_prompt}\n\n"
+                f"Question: {question}\n\n"
+                f"Answer:"
+            )
 
     def _extract_text(self, response: Any) -> str:
         """Your ORIGINAL text extraction."""
@@ -527,39 +589,68 @@ class Phi15Handler:
     
     def _calculate_confidence(self, answer: str, context: str, question: str) -> float:
         """
-        Calculate confidence score for the answer.
-        Works with or without RAG context - Phi's own knowledge answers are still valid.
+        Calculate confidence score based on answer quality and accuracy.
+        Focuses on whether the answer actually addresses the question correctly.
         """
         answer_lower = answer.lower()
+        question_lower = question.lower()
         
-        # Error detection
+        # Error detection - very low confidence for errors
         if any(phrase in answer_lower for phrase in ["i couldn't", "i'm having trouble", "error", "i need both"]):
             return 0.1
         
-        # Quality indicators
-        has_examples = any(word in answer_lower for word in ["example", "like", "similar to", "for instance"])
-        has_structure = answer.count(".") >= 2  # At least 2 sentences
+        # Check if answer is too short to be meaningful
         word_count = len(answer.split())
+        if word_count < 5:
+            return 0.3
         
-        # Check if answer seems curriculum-relevant
-        curriculum_keywords = ["function", "variable", "loop", "class", "method", "algorithm", 
-                             "syntax", "program", "code", "data", "structure", "concept",
-                             "definition", "explain", "works", "process", "step"]
-        is_curriculum_relevant = any(kw in answer_lower for kw in curriculum_keywords) or word_count > 15
+        # Check if RAG context was provided (higher accuracy source)
+        has_rag_context = context and len(context.strip()) > 50
         
-        # Base scoring logic
-        base_score = min(0.75, word_count / 100)  # Length-based
+        # KEY: Check if answer actually addresses the question
+        # Extract key terms from question (remove common words)
+        question_words = set(word for word in question_lower.split() 
+                           if len(word) > 3 and word not in ["what", "how", "why", "when", "where", "which", "explain", "describe", "define"])
+        answer_words = set(word for word in answer_lower.split() if len(word) > 3)
         
-        # Boost for quality indicators
+        # Calculate relevance - how well answer matches question
+        if question_words:
+            question_relevance = len(question_words.intersection(answer_words)) / len(question_words)
+            # If answer contains key terms from question, it's likely addressing it
+            addresses_question = question_relevance > 0.3  # At least 30% of question terms in answer
+        else:
+            addresses_question = True  # If no specific terms, assume it addresses it
+        
+        # Quality indicators
+        has_structure = answer.count(".") >= 2  # At least 2 sentences (complete answer)
+        has_definition = any(phrase in answer_lower for phrase in ["is a", "is an", "are", "means", "refers to"])
+        has_examples = any(word in answer_lower for word in ["example", "like", "such as", "for instance"])
+        is_complete = word_count >= 15 and has_structure  # Complete, well-formed answer
+        
+        # Base confidence - start high for valid answers that address the question
+        if addresses_question and is_complete:
+            base_score = 0.85  # High confidence for complete, relevant answers
+        elif addresses_question:
+            base_score = 0.75  # Good confidence if it addresses question
+        elif is_complete:
+            base_score = 0.70  # Medium confidence if complete but may not fully address
+        else:
+            base_score = 0.60  # Lower confidence for incomplete or off-topic
+        
+        # Quality boosts
+        if has_definition:
+            base_score += 0.05  # Definitions are clear and accurate
         if has_examples:
-            base_score += 0.1
-        if has_structure:
-            base_score += 0.1
-        if is_curriculum_relevant:
-            base_score += 0.05  # Slight boost for curriculum relevance
+            base_score += 0.05  # Examples show understanding
+        if has_structure and word_count >= 20:
+            base_score += 0.05  # Well-structured, detailed answers
+        
+        # Knowledge source boost
+        if has_rag_context:
+            base_score += 0.10  # RAG = study materials, highest accuracy
+        else:
+            base_score += 0.05  # Own knowledge is also reliable for curriculum
             
-        # Context availability doesn't significantly impact confidence
-        # Phi can provide good answers with or without RAG context
         return min(1.0, base_score)
     
     def get_model_info(self) -> Dict[str, Any]:

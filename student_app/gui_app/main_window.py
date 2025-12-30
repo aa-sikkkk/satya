@@ -793,54 +793,25 @@ class NEBeduApp(ctk.CTk):
                 
                 normalized_question = question.strip().capitalize()
                 
-                rag_context = None
-                source_info = "AI General Knowledge"
+                # Use optimized non-blocking RAG helper (fast, with timeout)
+                from system.rag.rag_helper import get_context_non_blocking
+                
+                rag_context, source_info = get_context_non_blocking(
+                    self.rag_engine,
+                    question,
+                    content_manager=self.content_manager,
+                    timeout_seconds=2.0  # 2 second timeout - don't wait longer
+                )
+                
+                # Get related content for display (non-blocking, quick)
                 related = []
-
-                # 1. RAG Retrieval with relevance validation
-                if self.rag_engine:
+                if source_info == "Structured content":
                     try:
-                        rag_results = self.rag_engine.retrieve_relevant_content(question, max_results=2)
-                        if rag_results and rag_results.get('chunks'):
-                            chunks = rag_results['chunks'][:2]
-                            # Validate relevance - check if chunks actually relate to the question
-                            question_lower = question.lower()
-                            relevant_chunks = []
-                            for chunk in chunks:
-                                chunk_content = chunk.get('content', '').lower()
-                                # Check if chunk has keywords from question
-                                question_words = set(question_lower.split())
-                                chunk_words = set(chunk_content.split())
-                                # At least 2 words should overlap
-                                overlap = len(question_words.intersection(chunk_words))
-                                if overlap >= 2 or any(word in chunk_content for word in question_words if len(word) > 4):
-                                    relevant_chunks.append(chunk)
-                            
-                            if relevant_chunks:
-                                rag_context = "\n\n".join([ch['content'] for ch in relevant_chunks])
-                                rag_context = rag_context[:600]
-                                source_info = "RAG-enhanced content"
-                            else:
-                                # RAG returned irrelevant results, skip it
-                                rag_context = None
-                    except Exception as e:
-                        print(f"RAG search failed: {e}")
-
-                # 2. Structured Content Search (Fallback)
-                if not rag_context:
-                    relevant = self.content_manager.search_content(question)
-                    if relevant:
-                        rag_context = relevant[0]['summary']
-                        source_info = "Structured content"
-                        related = [f"{item['subject']} > {item['topic']} > {item['concept']}" for item in relevant[1:3]]
-
-                # 3. General Knowledge (Final Fallback)
-                if not rag_context:
-                    rag_context = (
-                        "You are a helpful AI tutor for Grade 10 students. "
-                        "Use your general knowledge to provide accurate, educational answers. "
-                        "Keep answers comprehensive but appropriate for high school level."
-                    )
+                        relevant = self.content_manager.search_content(question)
+                        if relevant and len(relevant) > 1:
+                            related = [f"{item['subject']} > {item['topic']} > {item['concept']}" for item in relevant[1:3]]
+                    except Exception:
+                        pass
 
                 # Stream answer from local model for real-time display
                 accumulated_answer = ""
@@ -862,17 +833,42 @@ class NEBeduApp(ctk.CTk):
                     
                     # Calculate confidence after streaming completes
                     if accumulated_answer and len(accumulated_answer.strip()) >= 10:
-                        # Quick confidence calculation
+                        # Quick confidence calculation - focuses on answer quality
                         answer_lower = accumulated_answer.lower()
-                        has_examples = any(word in answer_lower for word in ["example", "like", "similar to"])
-                        has_structure = accumulated_answer.count(".") >= 2
+                        has_rag_context = rag_context and len(rag_context.strip()) > 50
                         word_count = len(accumulated_answer.split())
-                        base_score = min(0.8, word_count / 100)
-                        if has_examples:
-                            base_score += 0.1
-                        if has_structure:
-                            base_score += 0.1
-                        confidence = min(1.0, base_score)
+                        
+                        if word_count < 5:
+                            confidence = 0.3
+                        else:
+                            has_structure = accumulated_answer.count(".") >= 2
+                            has_definition = any(phrase in answer_lower for phrase in ["is a", "is an", "are", "means", "refers to"])
+                            has_examples = any(word in answer_lower for word in ["example", "like", "such as"])
+                            is_complete = word_count >= 15 and has_structure
+                            
+                            # Base confidence - high for complete, quality answers
+                            if is_complete:
+                                base_score = 0.85
+                            elif has_structure:
+                                base_score = 0.75
+                            else:
+                                base_score = 0.65
+                            
+                            # Quality boosts
+                            if has_definition:
+                                base_score += 0.05
+                            if has_examples:
+                                base_score += 0.05
+                            if has_structure and word_count >= 20:
+                                base_score += 0.05
+                            
+                            # Knowledge source boost
+                            if has_rag_context:
+                                base_score += 0.10  # RAG = study materials
+                            else:
+                                base_score += 0.05  # Own knowledge is also reliable
+                            
+                            confidence = min(1.0, base_score)
                     else:
                         confidence = 0.1
                     

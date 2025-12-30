@@ -348,48 +348,55 @@ class RAGRetrievalEngine:
             
             all_results = []
             
-            # Search across all text collections
-            for collection_name, collection in self.collections.items():
-                if "grade_10" in collection_name:  # Only text collections
-                    try:
-                        logger.debug(f"RAG: querying collection '{collection_name}' for '{query}'")
-                        # Query the collection
-                        results = collection.query(
-                            query_embeddings=self._prepare_query_embeddings(query_embedding),
-                            n_results=max_results * 2,
-                            include=['documents', 'metadatas', 'distances']
-                        )
-                        hit_count = len(results['documents'][0]) if results.get('documents') and results['documents'] and results['documents'][0] else 0
-                        logger.debug(f"RAG: '{collection_name}' vector hits: {hit_count}")
-                        
-                        if results['documents']:
-                            for i, doc in enumerate(results['documents'][0]):
-                                distance = results['distances'][0][i] if results['distances'] else 1.0
-                                # Filter aggressive distance to reduce noisy context
-                                if distance is None or distance > 0.65:
-                                    continue
-                                result = {
-                                    'content': doc,
-                                    'metadata': results['metadatas'][0][i] if results['metadatas'] else {},
-                                    'distance': distance,
-                                    'collection': collection_name
-                                }
-                                all_results.append(result)
-                        
-                        # If no vector hits here, try keyword fallback per collection
-                        if hit_count == 0:
-                            fallback = self._keyword_fallback_search(collection, query, max_results=max_results)
-                            logger.debug(f"RAG: '{collection_name}' keyword-fallback hits: {len(fallback)}")
-                            for f in fallback:
-                                f['collection'] = collection_name
-                                all_results.append({
-                                    'content': f['content'],
-                                    'metadata': f.get('metadata', {}),
-                                    'distance': f.get('distance', 0.75),
-                                    'collection': collection_name
-                                })
-                                
-                    except Exception as e:
+            # Optimize: Limit to first 3 collections to speed up search
+            # Prioritize most common subjects (Computer Science, English, etc.)
+            collections_to_search = [
+                name for name in self.collections.keys() 
+                if "grade_10" in name
+            ][:3]  # Limit to 3 collections max
+            
+            # Search across limited text collections
+            for collection_name in collections_to_search:
+                collection = self.collections[collection_name]
+                try:
+                    logger.debug(f"RAG: querying collection '{collection_name}' for '{query}'")
+                    # Query the collection with reduced results for speed
+                    results = collection.query(
+                        query_embeddings=self._prepare_query_embeddings(query_embedding),
+                        n_results=max_results,  # Reduced from max_results * 2
+                        include=['documents', 'metadatas', 'distances']
+                    )
+                    hit_count = len(results['documents'][0]) if results.get('documents') and results['documents'] and results['documents'][0] else 0
+                    logger.debug(f"RAG: '{collection_name}' vector hits: {hit_count}")
+                    
+                    if results['documents']:
+                        for i, doc in enumerate(results['documents'][0]):
+                            distance = results['distances'][0][i] if results['distances'] else 1.0
+                            # Filter aggressive distance to reduce noisy context
+                            if distance is None or distance > 0.65:
+                                continue
+                            result = {
+                                'content': doc,
+                                'metadata': results['metadatas'][0][i] if results['metadatas'] else {},
+                                'distance': distance,
+                                'collection': collection_name
+                            }
+                            all_results.append(result)
+                    
+                    # If no vector hits here, try keyword fallback per collection
+                    if hit_count == 0:
+                        fallback = self._keyword_fallback_search(collection, query, max_results=max_results)
+                        logger.debug(f"RAG: '{collection_name}' keyword-fallback hits: {len(fallback)}")
+                        for f in fallback:
+                            f['collection'] = collection_name
+                            all_results.append({
+                                'content': f['content'],
+                                'metadata': f.get('metadata', {}),
+                                'distance': f.get('distance', 0.75),
+                                'collection': collection_name
+                            })
+                            
+                except Exception as e:
                         logger.warning(f"Error querying collection {collection_name}: {e}")
                         continue
             

@@ -674,24 +674,50 @@ Type 'back' to return to previous menu
         return accumulated_answer.strip(), confidence
     
     def _calculate_quick_confidence(self, answer: str, context: str) -> float:
-        """Quick confidence calculation for streaming answers."""
+        """
+        Quick confidence calculation for streaming answers.
+        Focuses on answer quality and completeness, not just word count.
+        """
         answer_lower = answer.lower()
         
         # Error detection
         if any(phrase in answer_lower for phrase in ["i couldn't", "i'm having trouble", "error"]):
             return 0.1
         
-        # Quality indicators
-        has_examples = any(word in answer_lower for word in ["example", "like", "similar to"])
-        has_structure = answer.count(".") >= 2
         word_count = len(answer.split())
+        if word_count < 5:
+            return 0.3
         
-        # Scoring
-        base_score = min(0.8, word_count / 100)
+        # Check if RAG context was provided
+        has_rag_context = context and len(context.strip()) > 50
+        
+        # Quality indicators
+        has_structure = answer.count(".") >= 2
+        has_definition = any(phrase in answer_lower for phrase in ["is a", "is an", "are", "means", "refers to"])
+        has_examples = any(word in answer_lower for word in ["example", "like", "such as"])
+        is_complete = word_count >= 15 and has_structure
+        
+        # Base confidence - high for complete, quality answers
+        if is_complete:
+            base_score = 0.85  # High confidence for complete answers
+        elif has_structure:
+            base_score = 0.75  # Good confidence for structured answers
+        else:
+            base_score = 0.65  # Lower for incomplete answers
+        
+        # Quality boosts
+        if has_definition:
+            base_score += 0.05
         if has_examples:
-            base_score += 0.1
-        if has_structure:
-            base_score += 0.1
+            base_score += 0.05
+        if has_structure and word_count >= 20:
+            base_score += 0.05
+        
+        # Knowledge source boost
+        if has_rag_context:
+            base_score += 0.10  # RAG = study materials
+        else:
+            base_score += 0.05  # Own knowledge is also reliable
             
         return min(1.0, base_score)
     
@@ -737,176 +763,45 @@ Type 'back' to return to previous menu
             with console.status("[bold green]Generating detailed answer...[/bold green]"):
                 log_resource_usage("Before model inference")
                 
-                # First try to find relevant content using RAG (if available) or fallback to basic search
+                # Use optimized non-blocking RAG helper (fast, with timeout)
+                from system.rag.rag_helper import get_context_non_blocking
+                
                 try:
+                    context, source_info = get_context_non_blocking(
+                        self.rag_engine,
+                        question,
+                        content_manager=self.content_manager,
+                        timeout_seconds=2.0  # 2 second timeout - don't wait longer
+                    )
+                    
+                    # Get relevant content for display (non-blocking, quick)
                     relevant_content = None
-                    rag_context = None
-                    
-                    # Try RAG first if available
-                    if self.rag_engine:
+                    if source_info == "Structured content":
                         try:
-                            # Ultra-fast RAG retrieval - get top 2 chunks only for speed
-                            rag_results = self.rag_engine.retrieve_relevant_content(question, max_results=2)
-                            rag_context = None
-                            if rag_results and rag_results.get('chunks'):
-                                # Validate relevance - check if chunks actually relate to the question
-                                question_lower = question.lower()
-                                chunks = rag_results['chunks'][:2]
-                                relevant_chunks = []
-                                for chunk in chunks:
-                                    chunk_content = chunk.get('content', '').lower()
-                                    # Check if chunk has keywords from question
-                                    question_words = set(question_lower.split())
-                                    chunk_words = set(chunk_content.split())
-                                    # At least 2 words should overlap
-                                    overlap = len(question_words.intersection(chunk_words))
-                                    if overlap >= 2 or any(word in chunk_content for word in question_words if len(word) > 4):
-                                        relevant_chunks.append(chunk)
-                                
-                                if relevant_chunks:
-                                    rag_context = "\n\n".join([ch['content'] for ch in relevant_chunks])
-                                    # Trim context aggressively for speed (matches model prompt limit)
-                                    rag_context = rag_context[:600]
-                            # Also try to find structured content
                             relevant_content = self.content_manager.search_content(question)
-                            if not rag_context and not relevant_content:
-                                # Nothing useful from RAG or content; proceed without context
-                                pass
-                        except Exception as e:
-                            logger.warning(f"RAG search failed, falling back to basic search: {str(e)}")
-                            relevant_content = self.content_manager.search_content(question)
-                    else:
-                        # No RAG engine, use basic search
-                        relevant_content = self.content_manager.search_content(question)
+                        except Exception:
+                            pass
                     
-                    if relevant_content or rag_context:
-                        # Use RAG context if available, otherwise use structured content
-                        if rag_context:
-                            context = rag_context
-                            source_info = "RAG-enhanced content"
-                            confidence = 0.85
-                            
-                            # Try to generate answer from RAG context with streaming
-                            try:
-                                # Use streaming for real-time display
-                                answer, confidence = self._stream_answer(question, context, answer_length, source_info)
-                                if not answer or len(answer.strip()) == 0:
-                                    raise ValueError("Model generated empty answer")
-                            except Exception as e:
-                                logger.error(f"RAG model inference error: {str(e)}")
-                                if not answer or len(str(answer).strip()) == 0:
-                                    console.print(Panel(
-                                        "I'm having trouble with the RAG content. Let me try using my general knowledge instead!",
-                                        title="Fallback to AI Knowledge",
-                                        border_style="blue"
-                                    ))
-                                    
-                                    # Fallback to general knowledge
-                                    general_context = (
-                                        "You are a helpful AI tutor for Grade 10 students. "
-                                        "Use your general knowledge to provide accurate, educational answers. "
-                                        "Keep answers comprehensive but appropriate for high school level."
-                                    )
-                                    
-                                    try:
-                                        answer, confidence = self._stream_answer(question, general_context, answer_length, "AI General Knowledge (RAG Fallback)")
-                                        if not answer or len(answer.strip()) == 0:
-                                            raise ValueError("Model generated empty answer")
-                                        source_info = "AI General Knowledge (RAG Fallback)"
-                                    except Exception as e2:
-                                        logger.error(f"RAG fallback model inference also failed: {str(e2)}")
-                                        # Avoid dumping raw RAG chunks; show a brief content pointer instead
-                                        console.print(Panel(
-                                            "I'm having trouble generating an answer. Here's a related summary from your materials.",
-                                            title="Model Error",
-                                            border_style="yellow"
-                                        ))
-                                        summary_snippet = ""
-                                        if relevant_content:
-                                            summary_snippet = relevant_content[0].get('summary', '')[:400]
-                                        elif rag_context:
-                                            summary_snippet = rag_context[:400]
-                                        answer = summary_snippet or "No suitable answer could be generated."
-                                        confidence = 0.4
-                                        source_info = "Structured/RAG summary (Fallback)"
-                        else:
-                            # Get the full concept data to access questions and answers
-                            subject = relevant_content[0]['subject']
-                            topic = relevant_content[0]['topic']
-                            concept = relevant_content[0]['concept']
-                            concept_data = self.content_manager.get_concept(subject, topic, concept)
-                            
-                            # Skip fuzzy matching for speed - just use summary directly
-                            summary = relevant_content[0]['summary']
-                            # Use first 400 chars of summary for fast context
-                            context = summary[:400] if len(summary) > 400 else summary
-                            source_info = "Structured content"
-                            confidence = 0.8
-                        
-                        # Generate answer using the context (for structured content) with streaming
-                        if 'answer' not in locals():
-                            try:
-                                answer, confidence = self._stream_answer(question, context, answer_length, source_info)
-                                if not answer or len(answer.strip()) == 0:
-                                    raise ValueError("Model generated empty answer")
-                            except Exception as e:
-                                logger.error(f"Model inference error: {str(e)}")
-                                console.print(Panel(
-                                    "I'm having trouble with the specific content. Let me try using my general knowledge instead!",
-                                    title="Fallback to AI Knowledge",
-                                    border_style="blue"
-                                ))
-                                
-                                # Fallback to general knowledge
-                                general_context = (
-                                    "You are a helpful AI tutor for Grade 10 students. "
-                                    "Use your general knowledge to provide accurate, educational answers. "
-                                    "Keep answers comprehensive but appropriate for high school level."
-                                )
-                                
-                                try:
-                                    answer, confidence = self._stream_answer(question, general_context, answer_length, "AI General Knowledge (Fallback)")
-                                    if not answer or len(answer.strip()) == 0:
-                                        raise ValueError("Model generated empty answer")
-                                    source_info = "AI General Knowledge (Fallback)"
-                                except Exception as e2:
-                                    logger.error(f"Fallback model inference also failed: {str(e2)}")
-                                    console.print(Panel(
-                                        "I'm having trouble generating an answer. Let me show you the relevant content instead:",
-                                        title="Model Error",
-                                        border_style="yellow"
-                                    ))
-                                    answer = context
-                                    confidence = 0.8
-                                    source_info = "Structured content (Fallback)"
-                    else:
-                        # No RAG or structured content found - use Phi 1.5 for general knowledge
-                        console.print(Panel(
-                            "I couldn't find specific content in your study materials, but I'll use my knowledge to help you!",
-                            title="AI Knowledge",
-                            border_style="blue"
-                        ))
-                        
-                        # Create a general knowledge context for Phi 1.5
+                    # Generate answer with streaming (context is already ready, no blocking)
+                    try:
+                        answer, confidence = self._stream_answer(question, context, answer_length, source_info)
+                        if not answer or len(answer.strip()) == 0:
+                            raise ValueError("Model generated empty answer")
+                    except Exception as e:
+                        logger.error(f"Model inference error: {str(e)}")
+                        # Final fallback
                         general_context = (
-                            "You are a helpful AI tutor for Grade 10 students. "
-                            "Use your general knowledge to provide accurate, educational answers. "
-                            "Keep answers comprehensive but appropriate for high school level."
+                            "You are a helpful AI tutor for Grade 8-12 students in Nepal. "
+                            "Use your knowledge of Grade 8-12 curriculum (NEB standards) to provide an accurate answer."
                         )
-                        
                         try:
-                            answer, confidence = self._stream_answer(question, general_context, answer_length, "AI General Knowledge")
-                            if not answer or len(answer.strip()) == 0:
-                                raise ValueError("Model generated empty answer")
-                            source_info = "AI General Knowledge"
-                        except Exception as e:
-                            logger.error(f"Model inference error: {str(e)}")
-                            console.print(Panel(
-                                "I'm having trouble generating an answer. Please try rephrasing your question or ask about a specific topic.",
-                                title="Model Error",
-                                border_style="yellow"
-                            ))
-                            return
+                            answer, confidence = self._stream_answer(question, general_context, answer_length, "AI General Knowledge (Fallback)")
+                            source_info = "AI General Knowledge (Fallback)"
+                        except Exception as e2:
+                            logger.error(f"Fallback also failed: {str(e2)}")
+                            answer = "I'm having trouble processing your question. Please try rephrasing it."
+                            confidence = 0.1
+                            source_info = "Error"
                 except Exception as e:
                     logger.error(f"Error searching content: {str(e)}")
                     console.print("[red]Error searching content. Please try again.[/red]")
@@ -964,7 +859,7 @@ Type 'back' to return to previous menu
             # Generate hints quickly (optimized for speed)
             try:
                 # Use better context for relevant hints (use the same context as answer)
-                hint_context = rag_context if rag_context else (relevant_content[0]['summary'] if relevant_content else context)
+                hint_context = context if context else (relevant_content[0]['summary'] if relevant_content else context)
                 # Generate hints in background for better UX
                 hints = self.model_handler.get_hints(question, hint_context)
                 if hints:

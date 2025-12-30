@@ -38,34 +38,38 @@ def generate_and_append_diagram(question: str, answer: str) -> str:
     original_answer = answer
     
     try:
-        # Edge case: Handle incomplete/truncated answers gracefully
-        # If answer ends mid-sentence, it's likely truncated by model
-        # Still try to generate diagram if possible
+        # Quick pre-check: Skip if inputs are too short (fastest possible exit)
+        if not question or not answer or len(question.strip()) < 3 or len(answer.strip()) < 10:
+            return original_answer
         
-        # Step 1: Detect if diagram needed (fast check)
+        # Step 1: Quick question-based check first (faster than full analysis)
+        if not should_attempt_diagram(question):
+            return original_answer  # Early exit - no diagram needed
+        
+        # Step 2: Full detection if question suggests diagram might help
         should_generate, diagram_type = should_generate_diagram(question, answer)
         
         if not should_generate or not diagram_type:
             return original_answer  # Return unchanged
         
-        # Step 2: Extract context from question/answer
+        # Step 3: Extract context from question/answer
         # Use full answer even if truncated - extract what we can
         context = extract_context_for_diagram(question, answer, diagram_type)
         
-        # Step 3: Generate diagram
+        # Step 4: Generate diagram
         diagram = generate_diagram(diagram_type, context)
         
         if not diagram:
             logger.debug("Diagram generation returned None")
             return original_answer  # Return unchanged
         
-        # Step 4: Validate diagram
+        # Step 5: Validate diagram
         is_valid, error_msg = validate_diagram(diagram)
         if not is_valid:
             logger.debug(f"Diagram validation failed: {error_msg}")
             return original_answer  # Return unchanged
         
-        # Step 5: Format diagram (lightweight cleanup)
+        # Step 6: Format diagram (lightweight cleanup)
         formatted_diagram = format_diagram(diagram)
         
         # Step 6: Append to answer (preserve original, add diagram)
