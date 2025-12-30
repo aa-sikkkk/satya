@@ -67,8 +67,8 @@ def generate_and_append_diagram(question: str, answer: str) -> str:
 
 def should_attempt_diagram(question: str) -> bool:
     """
-    Quick check if question type typically needs a diagram.
-    Used for early filtering to avoid unnecessary processing.
+    Quick adaptive check if question type typically needs a diagram.
+    Uses semantic patterns instead of hardcoded keywords.
     
     Args:
         question: Student's question
@@ -76,19 +76,36 @@ def should_attempt_diagram(question: str) -> bool:
     Returns:
         True if diagram might be helpful, False otherwise
     """
-    if not question:
+    if not question or len(question.strip()) < 3:
         return False
     
     question_lower = question.lower()
     
-    # Quick keyword check
-    diagram_keywords = [
-        "how does", "how do", "how is", "how can",
-        "explain the process", "explain the flow",
-        "what happens", "what is the flow",
-        "steps", "procedure", "algorithm",
-        "structure", "loop", "iteration"
+    # Use semantic patterns instead of hardcoded keywords
+    import re
+    
+    # Process/flow patterns
+    process_patterns = [
+        r'\b(how|what|explain|describe)\s+(do|does|is|are)\s+.*\s+(work|happen|flow|process)',
+        r'\b(step|stage|phase|procedure|method|way)',
+        r'\b(sequence|order|series|chain|cycle)',
     ]
     
-    return any(kw in question_lower for kw in diagram_keywords)
+    # Structure patterns
+    structure_patterns = [
+        r'\b(what|how)\s+(is|are)\s+.*\s+(structure|organization|layout|form)',
+        r'\b(show|display|draw|illustrate)\s+.*\s+(structure|organization)',
+        r'\b(component|part|element|piece)\s+(of|in)',
+    ]
+    
+    # Flowchart/decision patterns
+    flowchart_patterns = [
+        r'\b(how|what)\s+(do|does)\s+.*\s+(decide|choose|determine)',
+        r'\b(if|when|whether|condition|decision)',
+        r'\b(loop|iterate|repeat|while|for)',
+    ]
+    
+    # Check if any pattern matches
+    all_patterns = process_patterns + structure_patterns + flowchart_patterns
+    return any(re.search(pattern, question_lower, re.IGNORECASE) for pattern in all_patterns)
 

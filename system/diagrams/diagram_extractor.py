@@ -25,13 +25,15 @@ def extract_diagram_from_answer(answer: str) -> Tuple[str, Optional[str]]:
     if not answer:
         return answer, None
     
-    # Look for common diagram markers
+    # Adaptive diagram markers - common patterns across languages/styles
     diagram_markers = [
-        "Diagram:",
-        "Visual Representation:",
-        "ASCII Diagram:",
-        "Visual:",
-        "Diagram",
+        "Diagram:", "Diagram", "diagram:",
+        "Visual Representation:", "Visual representation:",
+        "ASCII Diagram:", "ASCII diagram:",
+        "Visual:", "visual:",
+        "Chart:", "chart:",
+        "Flowchart:", "flowchart:",
+        "Structure:", "structure:",
     ]
     
     # Check for box-drawing characters (indicates diagram)
@@ -71,19 +73,23 @@ def extract_diagram_from_answer(answer: str) -> Tuple[str, Optional[str]]:
             break
     
     if diagram_start is not None:
-        # Check if there's substantial diagram content (at least 3 lines)
+        # Adaptive check: minimum diagram content based on answer length
         potential_diagram_lines = lines[diagram_start:]
         diagram_line_count = sum(
             1 for line in potential_diagram_lines 
             if any(char in line for char in box_chars)
         )
         
-        if diagram_line_count >= 2:  # At least 2 lines with box chars
+        # Adaptive threshold: at least 2 lines, or 1 line if answer is short
+        min_diagram_lines = 2 if len(answer) > 200 else 1
+        min_diagram_size = max(15, len(answer) // 20)  # Adaptive minimum size
+        
+        if diagram_line_count >= min_diagram_lines:
             answer_text = '\n'.join(lines[:diagram_start]).strip()
             diagram_text = '\n'.join(lines[diagram_start:]).strip()
             
             # Additional validation: diagram should have some structure
-            if len(diagram_text) > 20:  # Reasonable minimum size
+            if len(diagram_text) > min_diagram_size:
                 return answer_text, diagram_text
     
     # No diagram detected

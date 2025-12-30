@@ -37,19 +37,31 @@ def format_diagram(diagram: str) -> str:
     return '\n'.join(lines)
 
 
-def trim_diagram(diagram: str, max_width: int = 100) -> str:
+def trim_diagram(diagram: str, max_width: Optional[int] = None) -> str:
     """
     Trim diagram if it exceeds maximum width.
+    Adaptive width calculation based on content.
     
     Args:
         diagram: Diagram string
-        max_width: Maximum allowed width
+        max_width: Maximum allowed width (None = auto-calculate)
     
     Returns:
         Trimmed diagram string
     """
     if not diagram:
         return ""
+    
+    # Adaptive max width calculation
+    if max_width is None:
+        # Calculate based on diagram content
+        lines = diagram.split('\n')
+        if lines:
+            avg_line_len = sum(len(line) for line in lines) / len(lines)
+            # Set max width to 1.5x average, but between 60-120
+            max_width = max(60, min(120, int(avg_line_len * 1.5)))
+        else:
+            max_width = 100  # Default fallback
     
     lines = diagram.split('\n')
     trimmed_lines = []
