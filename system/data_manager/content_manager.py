@@ -512,12 +512,14 @@ class ContentManager:
                 if topic.get('subtopics'):
                     print(f"    First subtopic keys: {list(topic['subtopics'][0].keys())}")
 
-    def search_content(self, query: str) -> List[Dict[str, Any]]:
+    def search_content(self, query: str, max_results: int = 3) -> List[Dict[str, Any]]:
         """
         Search through all content for relevant information.
+        Optimized to return early when enough results are found.
         
         Args:
             query (str): The search query
+            max_results (int): Maximum results to return (default 3 for speed)
             
         Returns:
             List[Dict[str, Any]]: List of matching content items with subject, topic, concept, and summary
@@ -542,16 +544,24 @@ class ContentManager:
                             "concept": concept.get("name", ""),
                             "summary": concept.get("summary", "")
                         })
+                        # Early exit: if we have enough results, return immediately
+                        if len(results) >= max_results:
+                            return results
                 
-                # Search in subtopics
-                for subtopic in topic.get("subtopics", []):
-                    self._search_in_subtopic(subtopic, subject, topic_name, query, results)
+                # Search in subtopics (only if we don't have enough results yet)
+                if len(results) < max_results:
+                    for subtopic in topic.get("subtopics", []):
+                        self._search_in_subtopic(subtopic, subject, topic_name, query, results, max_results)
+                        # Check again after subtopic search
+                        if len(results) >= max_results:
+                            return results
                     
         return results
         
-    def _search_in_subtopic(self, subtopic: Dict, subject: str, topic: str, query: str, results: List[Dict]) -> None:
+    def _search_in_subtopic(self, subtopic: Dict, subject: str, topic: str, query: str, results: List[Dict], max_results: int = 3) -> None:
         """
         Recursively search through a subtopic and its nested subtopics.
+        Optimized to stop early when enough results are found.
         
         Args:
             subtopic (Dict): The subtopic to search
@@ -559,9 +569,12 @@ class ContentManager:
             topic (str): The topic name
             query (str): The search query
             results (List[Dict]): List to append results to
+            max_results (int): Maximum results to collect (for early exit)
         """
         # Search in concepts
         for concept in subtopic.get("concepts", []):
+            if len(results) >= max_results:
+                return  # Early exit
             if self._content_matches_query(concept, query):
                 results.append({
                     "subject": subject,
@@ -569,10 +582,15 @@ class ContentManager:
                     "concept": concept.get("name", ""),
                     "summary": concept.get("summary", "")
                 })
+                if len(results) >= max_results:
+                    return  # Early exit
         
-        # Recursively search in nested subtopics
-        for nested_subtopic in subtopic.get("subtopics", []):
-            self._search_in_subtopic(nested_subtopic, subject, topic, query, results)
+        # Recursively search in nested subtopics (only if we need more results)
+        if len(results) < max_results:
+            for nested_subtopic in subtopic.get("subtopics", []):
+                self._search_in_subtopic(nested_subtopic, subject, topic, query, results, max_results)
+                if len(results) >= max_results:
+                    return  # Early exit
             
     def _content_matches_query(self, content: Dict, query: str) -> bool:
         """

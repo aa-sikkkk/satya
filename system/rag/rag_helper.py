@@ -145,23 +145,23 @@ def validate_rag_relevance(question: str, rag_results: Dict) -> Tuple[bool, Opti
 def get_context_non_blocking(
     rag_engine,
     question: str,
-    content_manager=None,
+    content_manager=None,  # Kept for compatibility but not used for context
     timeout_seconds: float = 2.0
 ) -> Tuple[Optional[str], str]:
     """
     Get context for answer generation using non-blocking RAG.
-    Always returns quickly - either with RAG context or fallback.
+    Always returns quickly - either with RAG context or general knowledge.
     
     Strategy:
     1. Quick check if RAG is worth trying
     2. Start RAG in parallel (with timeout)
-    3. Immediately return fallback context
-    4. RAG can enhance answer later if it finishes
+    3. Return RAG context if available, otherwise general knowledge
+    4. Structured content is NOT used (slows down generation)
     
     Args:
         rag_engine: RAGRetrievalEngine instance (can be None)
         question: Student's question
-        content_manager: ContentManager for structured content fallback
+        content_manager: Not used for context (kept for compatibility)
         timeout_seconds: RAG timeout (default 2 seconds)
         
     Returns:
@@ -191,18 +191,11 @@ def get_context_non_blocking(
     if rag_results:
         is_relevant, rag_context = validate_rag_relevance(question, rag_results)
         if is_relevant and rag_context:
+            # RAG succeeded - use RAG context only
             return rag_context, "RAG-enhanced content"
     
-    # Fallback 1: Try structured content (fast, synchronous)
-    if content_manager:
-        try:
-            relevant = content_manager.search_content(question)
-            if relevant and relevant[0].get('summary'):
-                return relevant[0]['summary'][:600], "Structured content"
-        except Exception as e:
-            logger.debug(f"Structured content search failed: {e}")
-    
-    # Fallback 2: General knowledge
+    # Fallback: General knowledge only (NO structured content - it slows down generation)
+    # Structured content is only used for UI display, not for model context
     general_context = (
         "You are a helpful AI tutor for Grade 8-12 students in Nepal. "
         "Use your knowledge of Grade 8-12 curriculum (NEB standards) to provide an accurate answer. "
