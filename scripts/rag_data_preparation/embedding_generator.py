@@ -60,8 +60,12 @@ class EmbeddingGenerator:
         # Model configuration (keep minimal for offline CPU-only)
         self.phi_model_path = "satya_data/models/phi_1_5/phi-1_5-Q4_K_M.gguf"
         self.clip_model_name = "ViT-B/32"
-        self.batch_size = 8
+        self.batch_size = 64  # Increased for faster processing
         self.max_length = 512
+        
+        # Embedding cache for faster repeated queries
+        self._embedding_cache = {}
+        self._cache_size_limit = 10000  # Limit cache size
 
         # Avoid heavy model loads by default; callers can opt-in via env flags
         if os.getenv("SATYA_LOAD_EMBED_MODELS", "").lower() in {"1", "true", "yes"}:
@@ -98,7 +102,8 @@ class EmbeddingGenerator:
     
     def generate_text_embedding(self, text: str) -> Optional[np.ndarray]:
         """
-        Generate embedding for text using a simple hash-based approach.
+        Generate embedding for text using optimized hash-based approach.
+        Fast, deterministic, and cacheable.
         
         Args:
             text: Input text to embed
@@ -114,36 +119,44 @@ class EmbeddingGenerator:
                 logger.warning(f"Text input is not a string: {type(text)}, converting...")
                 text = str(text)
             
-            # Create a simple 32-dimensional embedding
-            # Use text hash to create consistent embeddings
+            # Check cache first
+            text_hash_key = hashlib.md5(text.encode('utf-8')).hexdigest()
+            if text_hash_key in self._embedding_cache:
+                return self._embedding_cache[text_hash_key]
             
-            # Hash the text
-            text_hash = hashlib.md5(text.encode('utf-8')).hexdigest()
+            # Fast vectorized embedding generation
+            # Use multiple hash functions for better distribution
+            text_bytes = text.encode('utf-8')
+            hash1 = hashlib.md5(text_bytes).digest()
+            hash2 = hashlib.sha1(text_bytes).digest()
             
-            # Create 32-dimensional embedding from hash
-            embedding = []
-            for i in range(0, 32, 2):
-                if i + 1 < len(text_hash):
-                    # Convert two hex characters to a float
-                    hex_pair = text_hash[i:i+2]
-                    value = int(hex_pair, 16) / 255.0  # Normalize to 0-1
-                    embedding.append(value)
-                else:
-                    embedding.append(0.0)
+            # Combine hashes for 32 dimensions (16 from each)
+            embedding = np.zeros(32, dtype=np.float32)
             
-            # Pad to exactly 32 dimensions
-            while len(embedding) < 32:
-                embedding.append(0.0)
+            # Use first 16 bytes from MD5
+            for i in range(min(16, len(hash1))):
+                embedding[i] = hash1[i] / 255.0
             
-            # Convert to numpy array
-            embedding_array = np.array(embedding[:32], dtype=np.float32)
+            # Use first 16 bytes from SHA1
+            for i in range(min(16, len(hash2))):
+                embedding[16 + i] = hash2[i] / 255.0
             
-            # Normalize
-            norm = np.linalg.norm(embedding_array)
+            # Normalize using vectorized operation
+            norm = np.linalg.norm(embedding)
             if norm > 0:
-                embedding_array = embedding_array / norm
+                embedding = embedding / norm
             
-            return embedding_array
+            # Cache the result (with size limit)
+            if len(self._embedding_cache) < self._cache_size_limit:
+                self._embedding_cache[text_hash_key] = embedding
+            elif len(self._embedding_cache) >= self._cache_size_limit:
+                # Clear 20% of cache (FIFO-like, but simple)
+                keys_to_remove = list(self._embedding_cache.keys())[:self._cache_size_limit // 5]
+                for key in keys_to_remove:
+                    del self._embedding_cache[key]
+                self._embedding_cache[text_hash_key] = embedding
+            
+            return embedding
                 
         except Exception as e:
             logger.error(f"Text embedding generation failed: {e}")
@@ -240,13 +253,14 @@ class EmbeddingGenerator:
             logger.error(f"CLIP text embedding generation failed: {e}")
             return None
     
-    def process_text_chunks(self, chunks_file: str, subject: str) -> bool:
+    def process_text_chunks(self, chunks_file: str, subject: str, content_type: str = "book") -> bool:
         """
         Process text chunks and store embeddings in Chroma.
         
         Args:
             chunks_file: Path to JSON file containing text chunks
             subject: Subject name (computer_science, english, science)
+            content_type: Type of content - "book" (textbook) or "notes" (study notes)
             
         Returns:
             True if successful, False otherwise
@@ -332,91 +346,102 @@ class EmbeddingGenerator:
                     else:
                         logger.info(f"  Content: {str(chunk)[:100]}...")
             
-            # Get or create collection
-            collection_name = f"{subject}_grade_10"
+            # Get or create collection based on content type
+            if content_type == "notes":
+                collection_name = f"{subject}_notes_grade_10"
+            else:
+                collection_name = f"{subject}_grade_10"
+            
             try:
                 collection = self.chroma_client.get_collection(name=collection_name)
                 logger.info(f"Using existing collection: {collection_name}")
             except Exception:
                 # Collection doesn't exist, create it
-                collection = self.chroma_client.create_collection(name=collection_name)
-                logger.info(f"Created new collection: {collection_name}")
+                collection = self.chroma_client.create_collection(
+                    name=collection_name,
+                    metadata={"content_type": content_type, "subject": subject}
+                )
+                logger.info(f"Created new collection: {collection_name} (type: {content_type})")
             
-            # Process chunks in batches
+            # Process chunks in batches with optimized batch processing
             successful_chunks = 0
             failed_chunks = 0
             
-            for i in range(0, len(chunks), self.batch_size):
-                batch_end = min(i + self.batch_size, len(chunks))
-                batch = chunks[i:batch_end]
-                
-                logger.debug(f"Processing batch {i//self.batch_size + 1}: chunks {i} to {batch_end-1}")
+            # Pre-process all chunks to extract data efficiently
+            processed_chunks = []
+            for idx, chunk in enumerate(chunks):
+                try:
+                    if isinstance(chunk, dict):
+                        # Prefer raw_text for embedding (faster, no formatting overhead)
+                        # Use formatted text for document storage
+                        text_content = chunk.get('raw_text', chunk.get('text', chunk.get('content', '')))
+                        formatted_text = chunk.get('text', text_content)  # For document storage
+                        chunk_id = chunk.get('chunk_id', chunk.get('id', f"{subject}_chunk_{idx}"))
+                        page_num = chunk.get('page_number', chunk.get('page', 0))
+                        chapter = chunk.get('chapter', chunk.get('section', f'page_{page_num}'))
+                        difficulty = chunk.get('difficulty', 'beginner')
+                    elif isinstance(chunk, str):
+                        text_content = chunk
+                        formatted_text = chunk
+                        chunk_id = f"{subject}_chunk_{idx}"
+                        page_num = 0
+                        chapter = 'unknown'
+                        difficulty = 'beginner'
+                    else:
+                        continue
+                    
+                    if text_content.strip():
+                        processed_chunks.append({
+                            'text': text_content.strip(),  # Raw text for embedding
+                            'formatted_text': formatted_text.strip(),  # Formatted for storage
+                            'id': str(chunk_id),
+                            'page': page_num,
+                            'chapter': str(chapter),
+                            'difficulty': str(difficulty)
+                        })
+                except Exception as e:
+                    logger.warning(f"Error pre-processing chunk {idx}: {e}")
+                    failed_chunks += 1
+            
+            # Generate embeddings in batches (vectorized where possible)
+            total_batches = (len(processed_chunks) + self.batch_size - 1) // self.batch_size
+            
+            for batch_idx in range(0, len(processed_chunks), self.batch_size):
+                batch = processed_chunks[batch_idx:batch_idx + self.batch_size]
                 
                 batch_ids = []
                 batch_texts = []
                 batch_embeddings = []
                 batch_metadata = []
                 
-                for j, chunk in enumerate(batch):
-                    try:
-                        # Handle different chunk formats
-                        if isinstance(chunk, dict):
-                            text_content = chunk.get('text', chunk.get('content', ''))
-                            chunk_id = chunk.get('chunk_id', chunk.get('id', f"{subject}_chunk_{i + j}"))
-                            chapter = chunk.get('chapter', chunk.get('section', 'unknown'))
-                            difficulty = chunk.get('difficulty', 'beginner')
-                        elif isinstance(chunk, str):
-                            text_content = chunk
-                            chunk_id = f"{subject}_chunk_{i + j}"
-                            chapter = 'unknown'
-                            difficulty = 'beginner'
-                        else:
-                            logger.warning(f"Unexpected chunk format at index {i + j}: {type(chunk)}")
-                            failed_chunks += 1
-                            continue
-                        
-                        if not text_content.strip():
-                            logger.warning(f"Empty text content at index {i + j}, skipping")
-                            failed_chunks += 1
-                            continue
-                        
-                        # Generate embedding
-                        embedding = self.generate_text_embedding(text_content)
-                        if embedding is not None:
-                            batch_ids.append(str(chunk_id))
-                            batch_texts.append(text_content)
-                            batch_embeddings.append(embedding.tolist())
-                            batch_metadata.append({
-                                "content_type": "text",
-                                "subject": subject,
-                                "grade": "10",
-                                "chapter": str(chapter),
-                                "difficulty": str(difficulty),
-                                "language": "en",
-                                "file_path": chunks_file,
-                                "related_content": "",
-                                "created_at": datetime.now().isoformat(),
-                                "updated_at": datetime.now().isoformat()
-                            })
-                            successful_chunks += 1
-                        else:
-                            logger.warning(f"Failed to generate embedding for chunk {i + j}")
-                            failed_chunks += 1
-                    
-                    except Exception as e:
-                        logger.error(f"Error processing chunk {i + j}: {e}")
+                # Generate embeddings for entire batch (use raw text for faster embedding)
+                for chunk_data in batch:
+                    # Use raw text for embedding generation (faster)
+                    embedding = self.generate_text_embedding(chunk_data['text'])
+                    if embedding is not None:
+                        batch_ids.append(chunk_data['id'])
+                        # Store formatted text in document for better model parsing
+                        batch_texts.append(chunk_data.get('formatted_text', chunk_data['text']))
+                        batch_embeddings.append(embedding.tolist())
+                        batch_metadata.append({
+                            "content_type": "text",
+                            "source_type": content_type,  # "book" or "notes"
+                            "subject": subject,
+                            "grade": "10",
+                            "chapter": chunk_data['chapter'],
+                            "page_number": chunk_data['page'],
+                            "difficulty": chunk_data['difficulty'],
+                            "language": "en",
+                            "file_path": chunks_file,
+                            "created_at": datetime.now().isoformat()
+                        })
+                        successful_chunks += 1
+                    else:
                         failed_chunks += 1
-                        continue
                 
                 # Add batch to collection
                 if batch_ids:
                     try:
-                        # Debug: Check embedding dimensions
-                        embedding_dims = [len(emb) for emb in batch_embeddings]
-                        if not all(dim == 32 for dim in embedding_dims):
-                            logger.error(f"Inconsistent embedding dimensions: {embedding_dims}")
-                            return False
-                        
                         collection.add(
                             ids=batch_ids,
                             documents=batch_texts,
@@ -424,11 +449,10 @@ class EmbeddingGenerator:
                             metadatas=batch_metadata
                         )
                         
-                        logger.info(f"Processed batch {i//self.batch_size + 1}/{(len(chunks) + self.batch_size - 1)//self.batch_size} - {len(batch_ids)} chunks")
+                        if (batch_idx // self.batch_size + 1) % 10 == 0 or (batch_idx // self.batch_size + 1) == total_batches:
+                            logger.info(f"Processed batch {batch_idx // self.batch_size + 1}/{total_batches} - {len(batch_ids)} chunks")
                     except Exception as e:
                         logger.error(f"Failed to add batch to collection: {e}")
-                        logger.error(f"Batch size: {len(batch_ids)}")
-                        logger.error(f"Embedding dimensions: {[len(emb) for emb in batch_embeddings]}")
                         return False
             
             logger.info(f"✅ Text chunks processed successfully for {subject}")
@@ -557,11 +581,18 @@ class EmbeddingGenerator:
             logger.info("Setting up ChromaDB collections...")
             
             # Define collection structure
+            # Books: comprehensive textbook content
+            # Notes: supplementary notes and study materials
             collections = {
                 "text": {
-                    "computer_science_grade_10": "Computer Science text chunks",
-                    "english_grade_10": "English text chunks", 
-                    "science_grade_10": "Science text chunks"
+                    # Book collections (from PDFs)
+                    "computer_science_grade_10": "Computer Science textbook chunks",
+                    "english_grade_10": "English textbook chunks", 
+                    "science_grade_10": "Science textbook chunks",
+                    # Notes collections (supplementary materials)
+                    "computer_science_notes_grade_10": "Computer Science notes",
+                    "english_notes_grade_10": "English notes",
+                    "science_notes_grade_10": "Science notes"
                 },
                 "image": {
                     "computer_science_images": "Computer Science images",
@@ -759,9 +790,12 @@ class EmbeddingGenerator:
             logger.error(f"Database setup failed: {e}")
             return False
 
-    def populate_chromadb_with_content(self) -> bool:
+    def populate_chromadb_with_content(self, include_notes: bool = False) -> bool:
         """
         Populate ChromaDB with educational content from processed chunks.
+        
+        Args:
+            include_notes: If True, also process notes files (default: False, only books)
         
         Returns:
             True if successful, False otherwise
@@ -773,16 +807,16 @@ class EmbeddingGenerator:
         try:
             logger.info("🚀 Populating ChromaDB with Educational Content")
             
-            # Define the chunks files to process
-            chunks_files = {
+            # Define the chunks files to process (books)
+            book_chunks_files = {
                 "computer_science": "processed_data_new/chunks/computer_science_grade_10_chunks.json",
                 "english": "processed_data_new/chunks/english_grade_10_chunks.json", 
                 "science": "processed_data_new/chunks/science_grade_10_chunks.json"
             }
             
-            # Process each subject
-            for subject, chunks_file in chunks_files.items():
-                logger.info(f"\n📚 Processing {subject.upper()} content...")
+            # Process each subject (books)
+            for subject, chunks_file in book_chunks_files.items():
+                logger.info(f"\n📚 Processing {subject.upper()} BOOK content...")
                 
                 # Check if file exists
                 if not os.path.exists(chunks_file):
@@ -792,17 +826,46 @@ class EmbeddingGenerator:
                 logger.info(f"📁 Found chunks file: {chunks_file}")
                 
                 try:
-                    # Process the chunks and populate ChromaDB
-                    success = self.process_text_chunks(chunks_file, subject)
+                    # Process the chunks and populate ChromaDB (content_type="book")
+                    success = self.process_text_chunks(chunks_file, subject, content_type="book")
                     
                     if success:
-                        logger.info(f"✅ {subject.upper()} content successfully populated in ChromaDB!")
+                        logger.info(f"✅ {subject.upper()} BOOK content successfully populated in ChromaDB!")
                     else:
-                        logger.error(f"❌ Failed to populate {subject.upper()} content")
+                        logger.error(f"❌ Failed to populate {subject.upper()} BOOK content")
                         
                 except Exception as e:
-                    logger.error(f"❌ Error processing {subject}: {e}")
+                    logger.error(f"❌ Error processing {subject} book: {e}")
                     continue
+            
+            # Process notes if requested
+            if include_notes:
+                notes_chunks_files = {
+                    "computer_science": "processed_data_new/chunks/computer_science_notes_grade_10_chunks.json",
+                    "english": "processed_data_new/chunks/english_notes_grade_10_chunks.json", 
+                    "science": "processed_data_new/chunks/science_notes_grade_10_chunks.json"
+                }
+                
+                for subject, chunks_file in notes_chunks_files.items():
+                    logger.info(f"\n📝 Processing {subject.upper()} NOTES content...")
+                    
+                    if not os.path.exists(chunks_file):
+                        logger.warning(f"Notes file not found: {chunks_file}")
+                        continue
+                    
+                    logger.info(f"📁 Found notes file: {chunks_file}")
+                    
+                    try:
+                        success = self.process_text_chunks(chunks_file, subject, content_type="notes")
+                        
+                        if success:
+                            logger.info(f"✅ {subject.upper()} NOTES successfully populated in ChromaDB!")
+                        else:
+                            logger.error(f"❌ Failed to populate {subject.upper()} NOTES")
+                            
+                    except Exception as e:
+                        logger.error(f"❌ Error processing {subject} notes: {e}")
+                        continue
             
             logger.info("\n🎉 ChromaDB population completed!")
             

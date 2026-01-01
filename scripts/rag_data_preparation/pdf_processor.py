@@ -31,21 +31,21 @@ class PDFProcessor:
     No intermediate files are saved.
     """
     
-    def __init__(self, output_dir: str, language: str = "en", chunk_size: int = 600, overlap: int = 100):
+    def __init__(self, output_dir: str, language: str = "en", chunk_size: int = 400, overlap: int = 50):
         """
         Initialize PDF processor.
         
         Args:
             output_dir: Directory to save chunks
             language: Language for OCR (en, ne, hi)
-            chunk_size: Target chunk size in words
-            overlap: Overlap size in words
+            chunk_size: Target chunk size in words (optimized for faster processing)
+            overlap: Overlap size in words (reduced for efficiency)
         """
         self.output_dir = output_dir
         self.language = language
-        self.chunk_size = chunk_size
-        self.overlap = overlap
-        self.min_chunk_size = 200
+        self.chunk_size = chunk_size  # Smaller chunks = faster processing
+        self.overlap = overlap  # Reduced overlap for speed
+        self.min_chunk_size = 100  # Reduced minimum for more granular chunks
         
         # OCR configuration
         self.ocr_config = self._get_ocr_config()
@@ -273,27 +273,50 @@ class PDFProcessor:
     
     def _chunk_page_text(self, page_text: str, page_num: int, start_chunk_id: int,
                         subject: str, grade: str, metadata: Dict) -> List[Dict]:
-        """Chunk a single page of text."""
-        
+        """
+        Chunk a single page of text with optimized strategy for faster processing.
+        Uses paragraph-aware chunking for better semantic coherence.
+        """
         # Clean and normalize text
         cleaned_text = self._clean_text(page_text)
         
-        # Split into sentences for better chunking
-        sentences = self._split_into_sentences(cleaned_text)
+        # Try to split by paragraphs first (better semantic chunks)
+        paragraphs = [p.strip() for p in cleaned_text.split('\n\n') if p.strip()]
         
-        # Create chunks with overlap
+        # If no clear paragraphs, fall back to sentence splitting
+        if len(paragraphs) <= 1:
+            sentences = self._split_into_sentences(cleaned_text)
+            paragraphs = []
+            current_para = []
+            current_para_words = 0
+            
+            for sentence in sentences:
+                sentence_words = len(sentence.split())
+                # Group sentences into logical paragraphs
+                if current_para_words + sentence_words > 150 and current_para:  # ~150 words per para
+                    paragraphs.append(" ".join(current_para))
+                    current_para = [sentence]
+                    current_para_words = sentence_words
+                else:
+                    current_para.append(sentence)
+                    current_para_words += sentence_words
+            
+            if current_para:
+                paragraphs.append(" ".join(current_para))
+        
+        # Create chunks from paragraphs (faster and more coherent)
         chunks = []
         current_chunk = []
         current_word_count = 0
         chunk_id = start_chunk_id
         
-        for sentence in sentences:
-            sentence_words = len(sentence.split())
+        for para in paragraphs:
+            para_words = len(para.split())
             
-            # If adding this sentence would exceed chunk size
-            if current_word_count + sentence_words > self.chunk_size and current_chunk:
+            # If adding this paragraph would exceed chunk size
+            if current_word_count + para_words > self.chunk_size and current_chunk:
                 # Save current chunk
-                chunk_text = " ".join(current_chunk)
+                chunk_text = "\n\n".join(current_chunk)
                 if len(chunk_text.split()) >= self.min_chunk_size:
                     chunk_data = self._create_chunk_data(
                         chunk_text, page_num, chunk_id, subject, grade, metadata
@@ -301,17 +324,22 @@ class PDFProcessor:
                     chunks.append(chunk_data)
                     chunk_id += 1
                 
-                # Start new chunk with overlap
-                overlap_sentences = self._get_overlap_sentences(current_chunk)
-                current_chunk = overlap_sentences + [sentence]
-                current_word_count = sum(len(s.split()) for s in current_chunk)
+                # Start new chunk with minimal overlap (just last paragraph if small)
+                if para_words <= self.overlap:
+                    current_chunk = [para]
+                    current_word_count = para_words
+                else:
+                    # Split large paragraph for overlap
+                    overlap_text = self._get_overlap_text(current_chunk, self.overlap)
+                    current_chunk = [overlap_text, para] if overlap_text else [para]
+                    current_word_count = sum(len(p.split()) for p in current_chunk)
             else:
-                current_chunk.append(sentence)
-                current_word_count += sentence_words
+                current_chunk.append(para)
+                current_word_count += para_words
         
         # Add final chunk
         if current_chunk:
-            chunk_text = " ".join(current_chunk)
+            chunk_text = "\n\n".join(current_chunk)
             if len(chunk_text.split()) >= self.min_chunk_size:
                 chunk_data = self._create_chunk_data(
                     chunk_text, page_num, chunk_id, subject, grade, metadata
@@ -320,18 +348,55 @@ class PDFProcessor:
         
         return chunks
     
+    def _get_overlap_text(self, paragraphs: List[str], target_words: int) -> str:
+        """Get overlap text from paragraphs for continuity."""
+        overlap_words = 0
+        overlap_paras = []
+        
+        for para in reversed(paragraphs):
+            para_words = len(para.split())
+            if overlap_words + para_words <= target_words:
+                overlap_paras.insert(0, para)
+                overlap_words += para_words
+            else:
+                # Take partial paragraph if needed
+                words = para.split()
+                if words:
+                    take_words = target_words - overlap_words
+                    if take_words > 0:
+                        overlap_paras.insert(0, " ".join(words[-take_words:]))
+                break
+        
+        return "\n\n".join(overlap_paras) if overlap_paras else ""
+    
     def _clean_text(self, text: str) -> str:
-        """Clean and normalize text."""
-        # Remove extra whitespace
-        text = re.sub(r'\s+', ' ', text)
+        """
+        Clean and normalize text while preserving structure.
+        Optimized for faster processing and better readability.
+        """
+        # Preserve paragraph breaks (double newlines)
+        paragraphs = text.split('\n\n')
+        cleaned_paragraphs = []
         
-        # Remove page headers/footers
-        text = re.sub(r'Page \d+', '', text)
+        for para in paragraphs:
+            # Remove extra whitespace within paragraph
+            para = re.sub(r'\s+', ' ', para)
+            
+            # Remove page headers/footers
+            para = re.sub(r'Page\s+\d+', '', para, flags=re.IGNORECASE)
+            para = re.sub(r'\d+\s+of\s+\d+', '', para, flags=re.IGNORECASE)
+            
+            # Clean up common OCR artifacts but preserve punctuation
+            para = re.sub(r'[^\w\s\.\,\;\:\!\?\-\(\)\[\]\'\"\n]+', ' ', para)
+            
+            # Remove leading/trailing whitespace
+            para = para.strip()
+            
+            if para:  # Only add non-empty paragraphs
+                cleaned_paragraphs.append(para)
         
-        # Clean up common OCR artifacts
-        text = re.sub(r'[^\w\s\.\,\;\:\!\?\-\(\)\[\]]+', ' ', text)
-        
-        return text.strip()
+        # Join with double newlines to preserve structure
+        return '\n\n'.join(cleaned_paragraphs)
     
     def _split_into_sentences(self, text: str) -> List[str]:
         """Split text into sentences."""
@@ -364,22 +429,33 @@ class PDFProcessor:
     
     def _create_chunk_data(self, chunk_text: str, page_num: int, chunk_id: int,
                           subject: str, grade: str, metadata: Dict) -> Dict:
-        """Create chunk data with metadata."""
+        """
+        Create chunk data with optimized structure for fast model parsing.
+        Chunks are formatted with clear separators and structured metadata.
+        """
+        # Format text with clear structure markers for easier parsing
+        word_count = len(chunk_text.split())
+        
+        # Add structured header to chunk for better model understanding
+        formatted_text = f"[SUBJECT: {subject.upper()}] [PAGE: {page_num}] [CHUNK: {chunk_id}]\n\n{chunk_text.strip()}\n\n[END_CHUNK]"
         
         return {
             "chunk_id": f"{subject}_grade{grade}_chunk_{chunk_id:04d}",
-            "text": chunk_text,
-            "word_count": len(chunk_text.split()),
+            "text": formatted_text,  # Formatted for easy parsing
+            "raw_text": chunk_text.strip(),  # Keep raw text for search
+            "word_count": word_count,
             "page_number": page_num,
             "subject": subject,
             "grade": grade,
             "language": metadata.get("language", "en"),
+            "chunk_index": chunk_id,
             "metadata": {
                 "source_pdf": metadata.get("title", ""),
                 "creation_date": metadata.get("creation_date", ""),
                 "processing_date": datetime.now().isoformat(),
                 "chunk_size": self.chunk_size,
-                "overlap": self.overlap
+                "overlap": self.overlap,
+                "formatted": True  # Flag indicating structured format
             }
         }
     

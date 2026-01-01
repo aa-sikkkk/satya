@@ -19,6 +19,9 @@ scripts/rag_data_preparation/
 ├── __init__.py                 # Package initialization
 ├── pdf_processor.py           # PDF processing + pipeline orchestration
 ├── embedding_generator.py     # AI models + ChromaDB integration
+├── process_all.py             # Unified script to process textbooks + notes
+├── QUICK_START.md             # Quick start guide
+├── NOTES_GUIDE.md             # Notes vs Books strategy guide
 └── README.md                  # This file
 ```
 
@@ -51,9 +54,31 @@ textbooks/
 
 ### 3. Run the Pipeline
 
-#### Option A: Process PDFs to Chunks
+#### ⚡ Recommended: Use process_all.py (One Command)
 ```bash
-# Process all subjects
+# Process everything (textbooks + notes)
+python scripts/rag_data_preparation/process_all.py
+
+# Only textbooks
+python scripts/rag_data_preparation/process_all.py --textbooks-only
+
+# Only notes
+python scripts/rag_data_preparation/process_all.py --notes-only
+```
+
+This single command will:
+- ✅ Process all PDFs from `textbooks/grade_10/` and `notes/grade_10/`
+- ✅ Create optimized chunks (400 words each)
+- ✅ Extract images
+- ✅ Generate embeddings
+- ✅ Add everything to ChromaDB
+
+#### 🔧 Advanced: Using Python API Directly
+
+> **Note**: Use `process_all.py` for most cases. The Python API is for custom processing needs.
+
+```bash
+# Process PDFs to chunks
 python -c "
 from scripts.rag_data_preparation.pdf_processor import PDFProcessor
 processor = PDFProcessor('processed_data_new')
@@ -61,21 +86,7 @@ results = processor.run_pipeline()
 print('Pipeline completed!')
 "
 
-# Process specific subjects
-python -c "
-from scripts.rag_data_preparation.pdf_processor import PDFProcessor
-processor = PDFProcessor('processed_data_new')
-results = processor.run_pipeline(['computer_science', 'english'])
-print('Pipeline completed!')
-"
-```
-
-#### Option B: Setup ChromaDB and Populate with Content
-```bash
-# Setup ChromaDB collections
-python scripts/rag_data_preparation/embedding_generator.py
-
-# Populate with existing content
+# Setup ChromaDB and populate
 python -c "
 from scripts.rag_data_preparation.embedding_generator import EmbeddingGenerator
 generator = EmbeddingGenerator()
