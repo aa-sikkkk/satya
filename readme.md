@@ -74,8 +74,17 @@ Satya aims to close the accessibility gap by delivering intelligent learning tha
 
 - **Detailed Question Answering**: Produces comprehensive answers in three to five sentences (80–120 words).
 - **Progressive Hint Generation**: Offers context-specific hints to guide student learning.
+- **ASCII Diagram Generation**: Automatically creates visual diagrams for processes, structures, and cycles to enhance understanding.
 - **Text Normalization**: Automatically processes input regardless of letter case.
 - **Confidence Scoring**: Provides confidence metrics for each generated answer.
+
+#### Visual Learning Enhancement
+
+- **Automatic Diagram Detection**: Intelligently determines when a visual representation would aid understanding.
+- **Multiple Diagram Types**: Generates process flows, cycle diagrams, structures, and flowcharts.
+- **Universal Subject Support**: Works across all subjects - Science, Math, Computer Science, English, and more.
+- **Fast Generation**: Creates diagrams in under 150ms with zero external dependencies.
+- **Adaptive Layout**: Diagrams automatically adjust size and format based on content complexity.
 
 #### User Interfaces
 
@@ -506,6 +515,17 @@ scripts\release\run_gui.bat
 3. Type your question (e.g., "What is a computer network?")
 4. Wait for the RAG-enhanced answer (typically 15-30 seconds)
 5. Review hints and related concepts
+6. **Look for ASCII diagrams** - automatically generated for processes, structures, and cycles!
+
+### ASCII Diagram Demo
+
+Want to see the diagram generation in action? Run the demo:
+
+```bash
+python scripts/demo_diagrams.py
+```
+
+This showcases 5 examples of automatic diagram generation across different subjects.
 
 ---
 
@@ -967,6 +987,14 @@ Special thanks to all contributors, educators, and students who have helped shap
 - Optimized for 4GB RAM systems
 - Performance improvements (30-50% faster)
 - Enhanced answer quality with context-aware generation
+- **ASCII Diagram Generation** - automatic visual representations for enhanced learning
+
+**Latest Features (v2.1):**
+- Intelligent ASCII diagram generation
+- Support for process flows, cycles, structures, and flowcharts
+- Universal subject support (Science, Math, CS, English, etc.)
+- Adaptive diagram layouts based on content complexity
+- Fast generation (< 150ms overhead)
 
 **Previous Versions:**
 - Version 1.0: Initial release with multi-model architecture
@@ -980,6 +1008,7 @@ Special thanks to all contributors, educators, and students who have helped shap
 - [Technical Implementation Guide](docs/TECHNICAL_IMPLEMENTATION.md)
 - [Project Overview](docs/PROJECT_OVERVIEW.md)
 - [Project Standards](docs/PROJECT_STANDARDS.md)
+- [ASCII Diagram Generation Guide](docs/ASCII_DIAGRAMS.md) ⭐ **New!**
 - [Student Guide](docs/STUDENT_GUIDE.md)
 - [Teacher Guide](docs/TEACHER_GUIDE.md)
 - [Contributing Guidelines](docs/CONTRIBUTING.md)
