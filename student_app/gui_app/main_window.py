@@ -814,9 +814,13 @@ class NEBeduApp(ctk.CTk):
                         related_items = [item for item in relevant[1:5] 
                                         if item.get('subject', '') == first_subject]
                         # Format as "Subject > Topic > Concept" and limit to 2 for display
-                        related = [f"{item['subject']} > {item['topic']} > {item['concept']}" 
+                        # Use .get() with defaults to prevent KeyError
+                        related = [f"{item.get('subject', 'N/A')} > {item.get('topic', 'N/A')} > {item.get('concept', 'N/A')}" 
                                   for item in related_items[:2]]
-                except Exception:
+                except Exception as e:
+                    # Log but don't show error - related concepts are optional
+                    import logging
+                    logging.debug(f"Error getting related concepts: {e}")
                     pass
 
                 # Stream answer from local model for real-time display
