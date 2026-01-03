@@ -231,6 +231,10 @@ def _calculate_adaptive_limits(content_length: int, num_items: int) -> Tuple[int
     return max_items, max_item_length
 
 
+# Constants for step extraction and formatting
+MAX_TRUNCATION_BUFFER = 5  # Buffer chars before truncation is applied
+MIN_STEP_LENGTH = 2  # Minimum step label length in characters
+
 def extract_steps_from_answer(answer: str) -> List[str]:
     """
     Extract steps or stages from the answer text using multiple strategies.
@@ -248,8 +252,8 @@ def extract_steps_from_answer(answer: str) -> List[str]:
     steps = []
     answer_lower = answer.lower()
     
-    # Strategy 1: Numbered steps (most reliable) - multiple patterns
-    # Note: Sequential word pattern (first, second, third) moved to Strategy 1.5
+    # Strategy 1: Numbered steps (most reliable)
+    # Handles explicit numbering like "Stage 1:", "1.", "Step 1:"
     numbered_patterns = [
         r'(?:^|\n)\s*Stage\s+(\d+)[:\.]\s+(.+?)(?=\n\s*Stage\s+\d+[:\.]|\n\n|$)',  # "Stage 1: text" (prioritize this)
         r'(?:^|\n)\s*(\d+)[\.\)]\s+(.+?)(?=\n\s*\d+[\.\)]|\n\n|$)',  # "1. Step text"
@@ -575,10 +579,10 @@ def extract_steps_from_answer(answer: str) -> List[str]:
         
         # Only truncate if significantly longer than max_length
         # Allow some flexibility to avoid truncating good short phrases
-        if len(step) > max_length + 5:  # Add 5 char buffer
+        if len(step) > max_length + MAX_TRUNCATION_BUFFER:
             step = _truncate_at_word_boundary(step, max_length)
         
-        if step and len(step) >= 2:  # Minimum 2 chars
+        if step and len(step) >= MIN_STEP_LENGTH:
             cleaned_steps.append(step)
     
     return cleaned_steps
