@@ -2,7 +2,7 @@
 CLI Interface Module
 
 This module provides the command-line interface for students to interact with
-the NEBedu learning system.
+the Satya learning system.
 """
 
 import os
@@ -643,21 +643,48 @@ Type 'back' to return to previous menu
         
         try:
             # Start streaming with live display
-            with Live(create_panel(), refresh_per_second=10, console=console) as live:
-                for token in self.model_handler.get_answer_stream(question, context, answer_length):
-                    accumulated_answer += token
-                    # Update the panel with new content
-                    live.update(create_panel())
+            tokens_received = 0
+            live = None
+            try:
+                with Live(create_panel(), refresh_per_second=10, console=console) as live:
+                    for token in self.model_handler.get_answer_stream(question, context, answer_length):
+                        if token and len(token.strip()) > 0:
+                            accumulated_answer += token
+                            tokens_received += 1
+                            # Update the panel with new content
+                            live.update(create_panel())
+            except Exception as stream_error:
+                logger.error(f"Streaming error: {stream_error}")
+                # Continue to fallback
+            
+            # If no tokens were received, try non-streaming fallback
+            if tokens_received == 0 and not accumulated_answer.strip():
+                logger.warning("Streaming yielded no tokens, trying non-streaming fallback")
+                try:
+                    answer_result, confidence_result = self.model_handler.get_answer(question, context, answer_length)
+                    if answer_result and len(answer_result.strip()) > 0:
+                        accumulated_answer = answer_result
+                        confidence = confidence_result
+                        logger.info("Non-streaming fallback succeeded")
+                        # Display the fallback answer
+                        console.print(Panel(
+                            f"[bold]{accumulated_answer}[/bold]\n\n[cyan]Source: {source_info}[/cyan]",
+                            title="Answer",
+                            border_style="green"
+                        ))
+                    else:
+                        logger.error("Non-streaming fallback also returned empty answer")
+                except Exception as e:
+                    logger.error(f"Non-streaming fallback failed: {e}")
             
             # After streaming completes, generate and append diagram (non-blocking)
-            try:
-                from system.diagrams import generate_and_append_diagram
-                accumulated_answer = generate_and_append_diagram(question, accumulated_answer)
-                # Update display with diagram if added
-                live.update(create_panel())
-            except Exception as e:
-                # Graceful fallback: continue with original answer if diagram generation fails
-                logger.debug(f"Diagram generation failed: {e}")
+            if accumulated_answer.strip():
+                try:
+                    from system.diagrams import generate_and_append_diagram
+                    accumulated_answer = generate_and_append_diagram(question, accumulated_answer)
+                except Exception as e:
+                    # Graceful fallback: continue with original answer if diagram generation fails
+                    logger.debug(f"Diagram generation failed: {e}")
             
             # Calculate confidence after streaming completes
             if accumulated_answer and len(accumulated_answer.strip()) >= 10:
@@ -859,7 +886,9 @@ Type 'back' to return to previous menu
             # Generate hints quickly (optimized for speed)
             try:
                 # Use better context for relevant hints (use the same context as answer)
-                hint_context = context if context else (relevant_content[0]['summary'] if relevant_content else context)
+                hint_context = context
+                if not hint_context and relevant_content and len(relevant_content) > 0:
+                    hint_context = relevant_content[0].get('summary', '')
                 # Generate hints in background for better UX
                 hints = self.model_handler.get_hints(question, hint_context)
                 if hints:
@@ -871,7 +900,7 @@ Type 'back' to return to previous menu
                 # Don't show error - hints are optional
             
             # Show related concepts - only if they're from the same subject
-            if len(relevant_content) > 1:
+            if relevant_content and len(relevant_content) > 1:
                 # Filter to same subject for relevance
                 first_subject = relevant_content[0].get('subject', '')
                 related = [item for item in relevant_content[1:4] 
@@ -880,9 +909,9 @@ Type 'back' to return to previous menu
                     console.print("\n📚 Related concepts you might want to study:")
                     for item in related[:2]:  # Show up to 2 related concepts from same subject
                         console.print(Panel(
-                            f"Subject: {item['subject']}\n"
-                            f"Topic: {item['topic']}\n"
-                            f"Concept: {item['concept']}",
+                            f"Subject: {item.get('subject', 'N/A')}\n"
+                            f"Topic: {item.get('topic', 'N/A')}\n"
+                            f"Concept: {item.get('concept', 'N/A')}",
                             border_style="blue"
                         ))
                     

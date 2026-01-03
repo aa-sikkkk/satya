@@ -57,11 +57,17 @@ class RAGRetrievalEngine:
             self.chroma_client = chromadb.PersistentClient(path=str(self.chroma_db_path))
 
             
-            # Get available collections
+            # Get available collections - store names only, retrieve fresh when needed
             collections = self.chroma_client.list_collections()
             for collection in collections:
-                self.collections[collection.name] = collection
+                # Store collection name for later retrieval
+                self.collections[collection.name] = collection.name
+                logger.debug(f"Found collection: {collection.name}")
 
+            if not self.collections:
+                logger.warning("No collections found in ChromaDB")
+            else:
+                logger.info(f"Initialized {len(self.collections)} ChromaDB collections")
                 
         except Exception as e:
             logger.error(f"Failed to initialize ChromaDB: {e}")
@@ -350,15 +356,33 @@ class RAGRetrievalEngine:
             
             # Optimize: Limit to first 3 collections to speed up search
             # Prioritize most common subjects (Computer Science, English, etc.)
+            all_collection_names = list(self.collections.keys())
+            logger.debug(f"RAG: Available collections: {all_collection_names}")
+            
             collections_to_search = [
-                name for name in self.collections.keys() 
+                name for name in all_collection_names 
                 if "grade_10" in name
             ][:3]  # Limit to 3 collections max
             
+            # If no grade_10 collections, try all collections (fallback)
+            if not collections_to_search:
+                logger.warning(f"No 'grade_10' collections found in {all_collection_names}, searching all available collections")
+                collections_to_search = all_collection_names[:3]
+            
+            # If still no collections, return empty
+            if not collections_to_search:
+                logger.warning(f"No collections available for RAG search. Available: {all_collection_names}")
+                empty = {'chunks': [], 'total_found': 0, 'query': query, 'error': 'No collections available'}
+                self._remember(self._query_cache, query, empty)
+                return empty
+            
+            logger.debug(f"RAG: Searching collections: {collections_to_search}")
+            
             # Search across limited text collections
             for collection_name in collections_to_search:
-                collection = self.collections[collection_name]
                 try:
+                    # Get fresh collection reference from ChromaDB
+                    collection = self.chroma_client.get_collection(name=collection_name)
                     logger.debug(f"RAG: querying collection '{collection_name}' for '{query}'")
                     # Query the collection with reduced results for speed
                     results = collection.query(
@@ -385,6 +409,8 @@ class RAGRetrievalEngine:
                     
                     # If no vector hits here, try keyword fallback per collection
                     if hit_count == 0:
+                        # Get collection again for fallback search
+                        collection = self.chroma_client.get_collection(name=collection_name)
                         fallback = self._keyword_fallback_search(collection, query, max_results=max_results)
                         logger.debug(f"RAG: '{collection_name}' keyword-fallback hits: {len(fallback)}")
                         for f in fallback:
@@ -451,16 +477,17 @@ class RAGRetrievalEngine:
                 "total_documents": 0
             }
             
-            for name, collection in self.collections.items():
+            for collection_name in self.collections.keys():
                 try:
+                    collection = self.chroma_client.get_collection(name=collection_name)
                     count = collection.count()
-                    stats["collections"][name] = {
+                    stats["collections"][collection_name] = {
                         "count": count,
                         "metadata": collection.metadata
                     }
                     stats["total_documents"] += count
                 except Exception as e:
-                    stats["collections"][name] = {"error": str(e)}
+                    stats["collections"][collection_name] = {"error": str(e)}
             
             return stats
             

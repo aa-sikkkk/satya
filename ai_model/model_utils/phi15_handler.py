@@ -61,9 +61,9 @@ class Phi15Handler:
         "\n3.",  
     ]
     
-    # EDUCATIONAL FOCUS: 100 tokens for comprehensive, complete answers
-    # Students need detailed explanations to learn - ensure sentences are complete
-    DEFAULT_MAX_TOKENS = 100
+    # Dynamic token limits based on question complexity
+    # Base token limit - will be adjusted based on question type
+    BASE_MAX_TOKENS = 80
     
     def __init__(self, model_path: str, enable_streaming: bool = False):
         """
@@ -79,11 +79,15 @@ class Phi15Handler:
         # Educational focus: Helpful, detailed answers for student learning
         self.system_prompt = (
             "You are Satya, an expert tutor for Grade 8-12 students in Nepal (NEB curriculum). "
-            "Your goal is to help students learn and understand. Provide clear, detailed explanations. "
-            "Answer in 4-6 COMPLETE sentences with specific examples and curriculum-relevant details. "
+            "Your goal is to help students learn and understand. "
+            "Provide clear, detailed explanations that directly answer the question. "
+            "Be thoughtful - consider what information is most important for understanding the concept. "
+            "Adjust answer length based on question type: "
+            "- Simple definitions: 2-3 sentences "
+            "- Explanations and descriptions: 4-6 sentences with examples "
+            "- Complex topics: 5-8 sentences with detailed explanations "
             "CRITICAL: Always finish each sentence completely with proper punctuation (., !, or ?). "
             "Never cut off mid-sentence. Be educational, helpful, and thorough. "
-            "Explain concepts clearly so students can understand. "
             "NEVER add: Question:, Answer:, Q:, A:, exercises, diagrams, ASCII art (┌, │, └), numbered lists. "
             "Give complete, educational answers that help students learn."
         )
@@ -110,11 +114,11 @@ class Phi15Handler:
             "n_ctx": 512,                     # Increased for longer, more detailed educational answers
             "n_threads": max(1, os.cpu_count() // 2 or 1),  # threading
             "n_gpu_layers": 0,
-            "max_tokens": 300,                # More tokens for detailed answers
+            "max_tokens": 80,                 # Base token limit - adjusted dynamically
             "temperature": 0.4,              # Slightly higher for creativity
             "top_p": 0.92,                    # Slightly relaxed for variety
             "repeat_penalty": 1.06,           
-            "stop": ["</s>", "\n\nContext:", "\n\nQuestion:", "\n\nQ:", "\n\nProvide"],
+            "stop": ["</s>", "\n\nContext:", "\n\nQuestion:", "\n\nQ:"],  # Removed "\n\nProvide" to avoid stopping on prompt
         }
             
     def load_model(self) -> None:
@@ -144,6 +148,44 @@ class Phi15Handler:
         except Exception as e:
             logger.error(f"Model loading failed: {e}")
             raise RuntimeError(f"Could not load Phi 1.5 model: {e}")
+    
+    def _calculate_max_tokens(self, question: str, context: str) -> int:
+        """
+        Dynamically calculate max_tokens based on question complexity.
+        
+        Args:
+            question: Student's question
+            context: RAG context (if available)
+            
+        Returns:
+            Appropriate max_tokens value
+        """
+        # Base tokens - adjusted based on question type
+        base_tokens = self.BASE_MAX_TOKENS
+        
+        # Adjust based on question length
+        question_words = len(question.split())
+        if question_words > 15:
+            base_tokens += 30  # Complex questions need more tokens
+        elif question_words > 8:
+            base_tokens += 15  # Medium questions
+        # Short questions stay at base
+        
+        # Adjust based on question type - more generous for explanatory questions
+        question_lower = question.lower()
+        if any(word in question_lower for word in ["explain", "describe", "discuss", "analyze", "how does", "how do"]):
+            base_tokens += 40  # Explanatory questions need detailed answers
+        elif any(word in question_lower for word in ["what is", "define", "what are"]):
+            base_tokens += 15  # Definition questions need clear explanations
+        elif any(word in question_lower for word in ["compare", "difference", "similarities"]):
+            base_tokens += 35  # Comparison questions need more detail
+        
+        # If RAG context is available, might need more tokens to incorporate it
+        if context and len(context.strip()) > 50:
+            base_tokens += 20
+        
+        # Cap at reasonable maximum - allow longer answers since generation is fast
+        return min(base_tokens, 150)
                 
     def get_answer(self, question: str, context: str, answer_length: str = "medium") -> Tuple[str, float]:
         """
@@ -163,6 +205,10 @@ class Phi15Handler:
         # Input validation - allow empty context (Phi will use own knowledge)
         if not question or len(question.strip()) < 3:
             return "Please provide a question about your Grade 8-12 curriculum.", 0.1
+        
+        # Ensure context is a string (handle None case)
+        if context is None:
+            context = ""
             
         # Question normalization
         normalized_question = question.strip()
@@ -177,22 +223,59 @@ class Phi15Handler:
             # Prompt building
             prompt = self._build_prompt(normalized_question, context)
             
+            # Log prompt for debugging
+            logger.info(f"Full prompt length: {len(prompt)}")
+            logger.info(f"Prompt (first 500 chars): {prompt[:500]}")
+            logger.info(f"Prompt (last 200 chars): {prompt[-200:]}")
+            logger.info(f"Question: {normalized_question}, Context length: {len(context) if context else 0}")
+            logger.info(f"Stop sequences: {self.STOP_SEQUENCES[:5]}... (showing first 5)")
             
+            # Check if model is loaded
+            if self.llm is None:
+                logger.error("Model not loaded for non-streaming inference!")
+                return "Error: Model not loaded. Please check model files.", 0.1
+            
+            # Try inference with logging - use more permissive parameters
+            logger.info(f"Calling model with max_tokens={self.DEFAULT_MAX_TOKENS}, temperature=0.7")
             response = self.llm(
                 prompt,
                 max_tokens=self.DEFAULT_MAX_TOKENS,  
-                temperature=0.2,  
-                top_p=0.85,  
+                temperature=0.7,  # Increased for better generation
+                top_p=0.9,  # More permissive
                 repeat_penalty=1.1, 
                 stop=self.STOP_SEQUENCES, 
                 echo=False,
                 stream=False
             )
             
+            # Log raw response for debugging
+            logger.info(f"Raw response type: {type(response)}")
+            if isinstance(response, dict):
+                logger.info(f"Response keys: {list(response.keys())}")
+                if "choices" in response:
+                    choices = response.get('choices', [])
+                    logger.info(f"Choices count: {len(choices)}")
+                    if len(choices) > 0:
+                        logger.info(f"First choice keys: {list(choices[0].keys()) if isinstance(choices[0], dict) else 'Not a dict'}")
+                        logger.info(f"First choice type: {type(choices[0])}")
+                        if isinstance(choices[0], dict):
+                            for key in choices[0].keys():
+                                value = choices[0][key]
+                                if isinstance(value, str):
+                                    logger.info(f"  {key}: {value[:100]}...")
+                                else:
+                                    logger.info(f"  {key}: {type(value)}")
+            
             answer = self._extract_text(response)
+            logger.info(f"Extracted answer length: {len(answer) if answer else 0}")
+            if answer:
+                logger.info(f"Extracted answer (first 200 chars): {answer[:200]}...")
+            else:
+                logger.warning("Extracted answer is empty or None!")
             
             # Answer validation
             if not answer or len(answer.strip()) < 10:
+                logger.warning(f"Answer too short or empty. Length: {len(answer) if answer else 0}, Content: {answer}")
                 return "I couldn't generate a proper response. Please try rephrasing your question.", 0.1
             
             # Answer cleaning - remove prompt echoes and formatting
@@ -382,6 +465,10 @@ class Phi15Handler:
         if not question or len(question.strip()) < 3:
             yield "Please provide a question about your Grade 8-12 curriculum."
             return
+        
+        # Ensure context is a string (handle None case)
+        if context is None:
+            context = ""
             
         # Question normalization
         normalized_question = question.strip()
@@ -397,49 +484,207 @@ class Phi15Handler:
             # Prompt building
             prompt = self._build_prompt(normalized_question, context)
             
+            # Calculate dynamic max_tokens based on question
+            max_tokens = self._calculate_max_tokens(normalized_question, context)
+            
+            # Log prompt for debugging (reduced verbosity)
+            logger.debug(f"Full prompt length: {len(prompt)}")
+            logger.debug(f"Question: {normalized_question}, Context length: {len(context) if context else 0}")
+            logger.debug(f"Calculated max_tokens: {max_tokens}")
+            
             # Streaming inference - always stream for better UX
             # Users need to see tokens appearing in real-time
             full_answer = ""
+            chunk_count = 0
+            tokens_yielded = 0
+            
+            # Check if model is loaded
+            if self.llm is None:
+                logger.error("Model not loaded!")
+                yield "Error: Model not loaded. Please check model files."
+                return
+            
             for chunk in self.llm(
                 prompt,
-                max_tokens=self.DEFAULT_MAX_TOKENS,
-                temperature=0.3,
-                top_p=0.85,
+                max_tokens=max_tokens,
+                temperature=0.5,
+                top_p=0.9,
                 repeat_penalty=1.1,
                 stop=self.STOP_SEQUENCES,
                 echo=False,
                 stream=True  # Always stream for real-time feedback
             ):
+                chunk_count += 1
                 if chunk is None:
                     continue
                     
-                # Extract text from chunk
+                # Extract text from chunk - handle multiple formats
+                token = None
                 try:
+                    # Log first few chunks to understand format
+                    if chunk_count <= 3:
+                        logger.info(f"Stream chunk #{chunk_count}: type={type(chunk)}")
+                        if isinstance(chunk, dict):
+                            logger.info(f"  Chunk keys: {list(chunk.keys())}")
+                            if "choices" in chunk:
+                                logger.info(f"  Choices count: {len(chunk.get('choices', []))}")
+                                if len(chunk.get('choices', [])) > 0:
+                                    choice = chunk["choices"][0]
+                                    logger.info(f"  First choice type: {type(choice)}, keys: {list(choice.keys()) if isinstance(choice, dict) else 'N/A'}")
+                    
                     if isinstance(chunk, dict):
-                        # Handle llama-cpp-python format: {"choices": [{"text": "..."}]}
+                        # Format 1: {"choices": [{"text": "..."}]}
                         if "choices" in chunk and len(chunk["choices"]) > 0:
                             choice = chunk["choices"][0]
+                            
+                            # Check for finish_reason - if model finished, stop processing
+                            if "finish_reason" in choice and choice["finish_reason"]:
+                                if chunk_count <= 3:
+                                    logger.info(f"  Model finished with reason: {choice['finish_reason']}")
+                                # Don't break, continue to process any remaining text
+                            
+                            # Format 1: Standard text field (may be None or empty in early chunks)
                             if "text" in choice:
                                 token = choice["text"]
-                                if token:  # Only yield non-empty tokens
-                                    full_answer += token
-                                    yield token
-                            # Handle OpenAI-style delta format (if supported)
+                                if chunk_count <= 3:
+                                    # Show full token for debugging (not truncated)
+                                    token_repr = repr(token) if token is not None else "None"
+                                    logger.info(f"  Extracted from choices[0]['text']: {token_repr} (len={len(token) if token else 0})")
+                                
+                                # If text is None or empty, this might be a metadata-only chunk
+                                # In llama-cpp-python streaming, first chunk is often metadata
+                                if token is None or (isinstance(token, str) and len(token) == 0):
+                                    if chunk_count <= 3:
+                                        logger.info(f"  Chunk #{chunk_count} has empty text field (likely metadata chunk), skipping")
+                                    # Don't set token to None - keep it as is so we can check later
+                                    # But don't yield empty tokens
+                                    
+                            # Format 2: OpenAI-style delta format
                             elif "delta" in choice and isinstance(choice["delta"], dict):
                                 if "content" in choice["delta"]:
                                     token = choice["delta"]["content"]
-                                    if token:  # Only yield non-empty tokens
-                                        full_answer += token
-                                        yield token
-                        # Handle direct text in chunk (fallback)
+                                    if chunk_count <= 3:
+                                        logger.info(f"  Extracted from choices[0]['delta']['content']: {repr(token)}")
+                            # Format 3: Direct text in choice
+                            elif isinstance(choice, str):
+                                token = choice
+                                if chunk_count <= 3:
+                                    logger.info(f"  Choice is string: {repr(token)}")
+                        # Format 4: Direct text in chunk
                         elif "text" in chunk:
                             token = chunk["text"]
-                            if token:
-                                full_answer += token
-                                yield token
-                except (KeyError, IndexError, TypeError) as e:
-                    logger.debug(f"Error extracting token from chunk: {e}")
+                            if chunk_count <= 3:
+                                logger.info(f"  Extracted from chunk['text']: '{token[:50]}...'")
+                        # Format 5: Direct content field
+                        elif "content" in chunk:
+                            token = chunk["content"]
+                            if chunk_count <= 3:
+                                logger.info(f"  Extracted from chunk['content']: '{token[:50]}...'")
+                        # Format 6: Check if chunk itself is a string-like value
+                        else:
+                            # Log chunk structure for debugging
+                            logger.warning(f"Chunk #{chunk_count} dict but no recognized format. Keys: {list(chunk.keys())}")
+                    elif isinstance(chunk, str):
+                        # Format 7: Chunk is directly a string
+                        token = chunk
+                        if chunk_count <= 3:
+                            logger.info(f"  Chunk is string: '{token[:50]}...'")
+                    else:
+                        # Unknown format - try to convert to string
+                        token = str(chunk) if chunk else None
+                        logger.warning(f"Chunk #{chunk_count} unknown type: {type(chunk)}, converted: '{token[:50] if token else None}...'")
+                    
+                    # Yield token if we found a valid one
+                    # IMPORTANT: In streaming, even single characters or whitespace might be valid tokens
+                    # Don't filter them out - let the model generate naturally
+                    if token is not None and isinstance(token, str) and len(token) > 0:
+                        # Valid token - add to full_answer and yield
+                        full_answer += token
+                        tokens_yielded += 1
+                        yield token
+                        if chunk_count <= 3:
+                            logger.info(f"  [OK] Yielded token #{tokens_yielded}: {repr(token)}")
+                    elif token is None:
+                        # Token is None - this is a metadata-only chunk, skip it
+                        if chunk_count <= 3:
+                            logger.info(f"  Chunk #{chunk_count} has None token (metadata chunk), skipping")
+                    elif isinstance(token, str) and len(token) == 0:
+                        # Empty string token - skip it
+                        if chunk_count <= 3:
+                            logger.info(f"  Chunk #{chunk_count} has empty string token, skipping")
+                    else:
+                        # Token exists but is not a string or has unexpected type
+                        if chunk_count <= 3:
+                            logger.warning(f"  Chunk #{chunk_count} has unexpected token type: {type(token)}, value: {token}")
+                        
+                except (KeyError, IndexError, TypeError, AttributeError) as e:
+                    logger.error(f"Error extracting token from chunk {chunk_count}: {e}, chunk type: {type(chunk)}", exc_info=True)
+                    if chunk_count <= 3:
+                        logger.error(f"Problematic chunk: {chunk}")
                     continue
+            
+            # Log streaming results
+            logger.info(f"Streaming completed: {chunk_count} chunks processed, {tokens_yielded} tokens yielded, answer length: {len(full_answer)}")
+            
+            # If no tokens were yielded, try non-streaming fallback
+            if tokens_yielded == 0 and not full_answer:
+                logger.warning(f"No tokens yielded from streaming. Chunk count: {chunk_count}, Prompt length: {len(prompt)}")
+                logger.info("Attempting non-streaming fallback...")
+                
+                try:
+                    # Try non-streaming inference with dynamic token limit
+                    max_tokens = self._calculate_max_tokens(normalized_question, context)
+                    logger.info(f"Trying non-streaming fallback with max_tokens={max_tokens}...")
+                    response = self.llm(
+                        prompt,
+                        max_tokens=max_tokens,
+                        temperature=0.5,
+                        top_p=0.9,
+                        repeat_penalty=1.1,
+                        stop=self.STOP_SEQUENCES,
+                        echo=False,
+                        stream=False
+                    )
+                    
+                    # Log full response structure
+                    logger.info(f"Non-streaming response type: {type(response)}")
+                    if isinstance(response, dict):
+                        logger.info(f"Response keys: {list(response.keys())}")
+                        if "choices" in response:
+                            choices = response.get("choices", [])
+                            logger.info(f"Choices count: {len(choices)}")
+                            if len(choices) > 0:
+                                choice = choices[0]
+                                logger.info(f"First choice keys: {list(choice.keys()) if isinstance(choice, dict) else 'N/A'}")
+                                if isinstance(choice, dict):
+                                    for key in choice.keys():
+                                        value = choice[key]
+                                        if isinstance(value, str):
+                                            logger.info(f"  {key}: {repr(value[:100])}...")
+                                        else:
+                                            logger.info(f"  {key}: {type(value)} = {value}")
+                    
+                    answer = self._extract_text(response)
+                    logger.info(f"Non-streaming fallback extracted answer: {repr(answer[:200]) if answer else 'None'} (length: {len(answer) if answer else 0})")
+                    
+                    if answer and len(answer.strip()) > 10:
+                        # Yield the answer in chunks to simulate streaming
+                        words = answer.split()
+                        for i, word in enumerate(words):
+                            if i == 0:
+                                yield word
+                            else:
+                                yield " " + word
+                        logger.info("Non-streaming fallback succeeded")
+                        return
+                    else:
+                        logger.error("Non-streaming fallback also returned empty answer")
+                except Exception as e:
+                    logger.error(f"Non-streaming fallback failed: {e}", exc_info=True)
+                
+                # Final fallback - yield error message
+                yield "I'm having trouble generating a response. Please try rephrasing your question."
+                return
             
             # Post-streaming: Ensure answer is complete
             # Check if the streamed answer ends properly
@@ -488,7 +733,9 @@ class Phi15Handler:
                     break
                 
         except Exception as e:
-            logger.error(f"Streaming inference error: {e}")
+            logger.error(f"Streaming inference error: {e}", exc_info=True)
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
             yield "I'm having trouble processing your question. Please try again."
 
     def _build_prompt(self, question: str, context: str) -> str:
@@ -505,7 +752,21 @@ class Phi15Handler:
         """
         # Handle context intelligently
         trimmed_context = (context or "").strip()
-        has_rag_context = len(trimmed_context) > 50  # Meaningful context threshold
+        
+        # Distinguish between actual RAG content and general knowledge instructions
+        # RAG content should be factual content, not instructions
+        is_instruction_context = any(phrase in trimmed_context.lower() for phrase in [
+            "you are a helpful", "use your knowledge", "provide an accurate answer",
+            "focus on curriculum", "grade 8-12 curriculum", "neb standards"
+        ])
+        
+        # Check if it's actual RAG content (not instructions and has meaningful content)
+        has_rag_context = (
+            len(trimmed_context) > 50 and 
+            not is_instruction_context and
+            # Additional check: RAG content usually has factual statements, not just instructions
+            not trimmed_context.lower().startswith("you are")
+        )
         
         if has_rag_context:
             # Educational focus: Allow more context for better answers
@@ -523,35 +784,94 @@ class Phi15Handler:
             # No RAG context - use own knowledge
             context_section = None
         
-        # Educational prompt format - encourage detailed, helpful explanations
+        # Educational prompt format - use direct Q&A format that Phi models work better with
         if context_section:
             return (
                 f"{self.system_prompt}\n\n"
                 f"{context_section}\n\n"
-                f"Question: {question}\n\n"
-                f"Provide a clear, detailed explanation to help the student understand:"
+                f"Q: {question}\n"
+                f"A:"
             )
         else:
-            # No context - encourage detailed NEB curriculum knowledge
+            # No context - use direct Q&A format
             return (
                 f"{self.system_prompt}\n\n"
-                f"Question: {question}\n\n"
-                f"Provide a clear, detailed explanation using Grade 8-12 NEB curriculum knowledge:"
+                f"Q: {question}\n"
+                f"A:"
             )
 
     def _extract_text(self, response: Any) -> str:
-        """Your ORIGINAL text extraction."""
+        """Extract text from llama-cpp-python response with multiple format support."""
         if response is None:
+            logger.debug("Response is None")
             return ""
         
         try:
-            if isinstance(response, dict) and "choices" in response:
-                choice = response["choices"][0]
-                if "text" in choice:
-                    return choice["text"].strip()
+            # Format 1: Standard dict with choices
+            if isinstance(response, dict):
+                if "choices" in response and len(response["choices"]) > 0:
+                    choice = response["choices"][0]
+                    # Check for text field
+                    if "text" in choice:
+                        text = choice["text"]
+                        logger.debug(f"Extracted text from choices[0]['text']: {len(text) if text else 0} chars")
+                        return text.strip() if text else ""
+                    # Check for content field (OpenAI-style)
+                    elif "content" in choice:
+                        text = choice["content"]
+                        logger.debug(f"Extracted text from choices[0]['content']: {len(text) if text else 0} chars")
+                        return text.strip() if text else ""
+                    # Check if choice itself is a string
+                    elif isinstance(choice, str):
+                        logger.debug(f"Choice is string: {len(choice)} chars")
+                        return choice.strip()
+                    # Check if choice is a dict with message
+                    elif isinstance(choice, dict) and "message" in choice:
+                        message = choice["message"]
+                        if isinstance(message, dict) and "content" in message:
+                            text = message["content"]
+                            logger.debug(f"Extracted text from choices[0]['message']['content']: {len(text) if text else 0} chars")
+                            return text.strip() if text else ""
+                
+                # Format 2: Direct text field
+                if "text" in response:
+                    text = response["text"]
+                    logger.debug(f"Extracted text from response['text']: {len(text) if text else 0} chars")
+                    return text.strip() if text else ""
+                
+                # Format 3: Direct content field
+                if "content" in response:
+                    text = response["content"]
+                    logger.debug(f"Extracted text from response['content']: {len(text) if text else 0} chars")
+                    return text.strip() if text else ""
+                
+                # Log what we got for debugging
+                logger.warning(f"Response dict but couldn't extract text. Keys: {response.keys()}")
+            
+            # Format 4: Response is directly a string
+            elif isinstance(response, str):
+                logger.debug(f"Response is string: {len(response)} chars")
+                return response.strip()
+            
+            # Format 5: Try to convert to string
+            else:
+                text = str(response)
+                logger.debug(f"Converted response to string: {len(text)} chars")
+                if len(text) > 1000:  # Probably not what we want
+                    logger.warning(f"Response converted to very long string ({len(text)} chars), might be wrong format")
+                return text.strip() if text else ""
+                
         except Exception as e:
-            logger.error(f"Text extraction error: {e}")
+            logger.error(f"Text extraction error: {e}", exc_info=True)
+            # Try one more time with str() conversion
+            try:
+                result = str(response).strip()
+                logger.debug(f"Fallback str() conversion: {len(result)} chars")
+                return result
+            except:
+                return ""
         
+        logger.warning(f"Could not extract text from response type: {type(response)}")
         return ""
 
     def get_hints(self, question: str, context: str) -> List[str]:

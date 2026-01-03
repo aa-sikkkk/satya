@@ -170,31 +170,34 @@ def get_context_non_blocking(
     """
     # Quick check: should we even try RAG?
     if not should_use_rag(question):
-        # Skip RAG, use general knowledge immediately
-        general_context = (
-            "You are a helpful AI tutor for Grade 8-12 students in Nepal. "
-            "Use your knowledge of Grade 8-12 curriculum (NEB standards) to provide an accurate answer. "
-            "Focus on curriculum-appropriate explanations for students in Nepal."
-        )
-        return general_context, "AI General Knowledge"
+        return "", "AI General Knowledge"
     
     # Try RAG with SHORT timeout (1 second max - don't wait long)
     # If RAG takes >1s, skip it and use structured content instead
     rag_results = None
     if rag_engine:
-        rag_results = retrieve_rag_with_timeout(
-            rag_engine,
-            question,
-            timeout_seconds=1.0,  # Reduced from 2.0 - faster fallback
-            max_results=2
-        )
+        try:
+            rag_results = retrieve_rag_with_timeout(
+                rag_engine,
+                question,
+                timeout_seconds=1.0,  # Reduced from 2.0 - faster fallback
+                max_results=2
+            )
+        except Exception as e:
+            logger.debug(f"RAG retrieval exception: {e}")
+            rag_results = None
     
     # Validate and use RAG if relevant (only if it returned quickly)
-    if rag_results:
+    if rag_results and rag_results.get('chunks'):
         is_relevant, rag_context = validate_rag_relevance(question, rag_results)
         if is_relevant and rag_context:
             # RAG succeeded quickly - use RAG context
+            logger.debug(f"RAG found relevant content for: {question[:50]}")
             return rag_context, "RAG-enhanced content"
+        else:
+            logger.debug(f"RAG results not relevant for: {question[:50]}")
+    elif rag_results and rag_results.get('error'):
+        logger.debug(f"RAG error: {rag_results.get('error')}")
     
     # Fallback 1: Try structured content (fast, concise context helps generation speed)
     # This is faster than waiting for slow RAG
@@ -209,10 +212,6 @@ def get_context_non_blocking(
             logger.debug(f"Structured content search failed: {e}")
     
     # Fallback 2: General knowledge
-    general_context = (
-        "You are a helpful AI tutor for Grade 8-12 students in Nepal. "
-        "Use your knowledge of Grade 8-12 curriculum (NEB standards) to provide an accurate answer. "
-        "Focus on curriculum-appropriate explanations for students in Nepal."
-    )
-    return general_context, "AI General Knowledge"
+    # Return empty context - Phi model will use its own knowledge based on system prompt
+    return "", "AI General Knowledge"
 
