@@ -1216,7 +1216,8 @@ def generate_cycle_diagram(steps: List[str]) -> str:
     
     # Calculate adaptive dimensions
     max_step_len = max(len(step) for step in steps) if steps else 12
-    content_width = max(12, min(max_step_len + 2, 22))
+    # Allow wider boxes for cycle diagrams to avoid unnecessary truncation
+    content_width = max(12, min(max_step_len + 2, 30))  # Increased from 22 to 30
     box_width = content_width + 4
     
     lines = []
