@@ -249,11 +249,11 @@ def extract_steps_from_answer(answer: str) -> List[str]:
     answer_lower = answer.lower()
     
     # Strategy 1: Numbered steps (most reliable) - multiple patterns
+    # Note: Sequential word pattern (first, second, third) moved to Strategy 1.5
     numbered_patterns = [
         r'(?:^|\n)\s*Stage\s+(\d+)[:\.]\s+(.+?)(?=\n\s*Stage\s+\d+[:\.]|\n\n|$)',  # "Stage 1: text" (prioritize this)
         r'(?:^|\n)\s*(\d+)[\.\)]\s+(.+?)(?=\n\s*\d+[\.\)]|\n\n|$)',  # "1. Step text"
         r'(?:step|stage|phase|part)\s+(\d+)[:\.]\s*(.+?)(?=\n|\.|$)',  # "Step 1: text"
-        r'(?:first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|1st|2nd|3rd|4th|5th)[\s:,]+(.+?)(?=\n|\.|$)',  # "First, text"
     ]
     
     for pattern in numbered_patterns:
@@ -290,22 +290,58 @@ def extract_steps_from_answer(answer: str) -> List[str]:
             if steps:
                 break  # Found numbered steps, use them
     
-    # Strategy 2: Sequential markers (then, next, after, etc.)
+    # Strategy 1.5: Sequential word enumeration (first, second, third, then, finally)
+    # This should catch sequences like "First, X. Then, Y. Finally, Z."
     if not steps:
-        sequential_patterns = [
-            r'(?:then|next|after|following|subsequently)[\s,]+(.+?)(?=\n|\.|,|$)',
-            r'(?:finally|lastly|ultimately)[\s,]+(.+?)(?=\n|\.|$)',
+        # Look for all sequential markers in order
+        sequential_word_patterns = [
+            (r'(?:^|\.\s+)(?:first|firstly)[\s:,]+(.+?)(?=\.\s+(?:then|next|second|finally)|$)', 'first'),
+            (r'(?:^|\.\s+)(?:second|secondly)[\s:,]+(.+?)(?=\.\s+(?:then|next|third|finally)|$)', 'second'),
+            (r'(?:^|\.\s+)(?:third|thirdly)[\s:,]+(.+?)(?=\.\s+(?:then|next|fourth|finally)|$)', 'third'),
+            (r'(?:^|\.\s+)(?:then|next|after that)[\s:,]+(.+?)(?=\.\s+(?:then|next|finally)|$)', 'then'),
+            (r'(?:^|\.\s+)(?:finally|lastly|ultimately)[\s:,]+(.+?)(?=\.|$)', 'finally'),
         ]
         
-        for pattern in sequential_patterns:
-            matches = re.findall(pattern, answer, re.IGNORECASE)
+        for pattern, label in sequential_word_patterns:
+            matches = re.findall(pattern, answer, re.IGNORECASE | re.DOTALL)
             if matches:
-                for match in matches[:10]:  # Limit to prevent too many
+                for match in matches[:2]:  # Max 2 per pattern type
                     cleaned = _extract_meaningful_phrase(match.strip())
-                    if cleaned and cleaned not in steps:
+                    if cleaned and len(cleaned) > 3 and cleaned not in steps:
                         steps.append(cleaned)
-                if len(steps) >= 3:  # Found enough sequential steps
-                    break
+    
+    # Strategy 2: Sequential markers (then, next, after, etc.)
+    # Enhanced to capture First, Second, Then, Finally sequences
+    if not steps:
+        # First, explicitly look for First/Then/Finally sequences
+        first_then_pattern = r'(?:first|firstly)[\s,]+(.+?)(?=\.|then|next|finally|$)'
+        then_pattern = r'(?:then|next|after|following|subsequently)[\s,]+(.+?)(?=\.|then|next|finally|$)'
+        finally_pattern = r'(?:finally|lastly|ultimately)[\s,]+(.+?)(?=\.|$)'
+        
+        # Try to extract First step
+        first_matches = re.findall(first_then_pattern, answer, re.IGNORECASE | re.DOTALL)
+        if first_matches:
+            for match in first_matches[:1]:  # Usually only one "First"
+                # Clean and extract just the action/process
+                cleaned = _extract_meaningful_phrase(match.strip())
+                if cleaned and cleaned not in steps:
+                    steps.append(cleaned)
+        
+        # Extract Then/Next steps
+        then_matches = re.findall(then_pattern, answer, re.IGNORECASE | re.DOTALL)
+        if then_matches:
+            for match in then_matches[:5]:  # Limit to 5 "then" steps
+                cleaned = _extract_meaningful_phrase(match.strip())
+                if cleaned and cleaned not in steps:
+                    steps.append(cleaned)
+        
+        # Extract Finally step
+        finally_matches = re.findall(finally_pattern, answer, re.IGNORECASE | re.DOTALL)
+        if finally_matches:
+            for match in finally_matches[:1]:  # Usually only one "Finally"
+                cleaned = _extract_meaningful_phrase(match.strip())
+                if cleaned and cleaned not in steps:
+                    steps.append(cleaned)
     
     # Strategy 3: Action verbs indicating processes
     if not steps:
@@ -533,12 +569,13 @@ def extract_steps_from_answer(answer: str) -> List[str]:
     cleaned_steps = []
     
     for step in steps[:max_items]:
-        # Remove filler words
-        step = re.sub(r'\b(?:' + '|'.join(STOPWORDS) + r')\b', '', step, flags=re.IGNORECASE)
-        step = ' '.join(step.split())  # Normalize whitespace
+        # Don't remove filler words here - already done in _extract_meaningful_phrase
+        # Just normalize whitespace
+        step = ' '.join(step.split())
         
-        # Adaptive truncation
-        if len(step) > max_length:
+        # Only truncate if significantly longer than max_length
+        # Allow some flexibility to avoid truncating good short phrases
+        if len(step) > max_length + 5:  # Add 5 char buffer
             step = _truncate_at_word_boundary(step, max_length)
         
         if step and len(step) >= 2:  # Minimum 2 chars
@@ -548,19 +585,38 @@ def extract_steps_from_answer(answer: str) -> List[str]:
 
 
 def _extract_meaningful_phrase(text: str) -> str:
-    """Extract meaningful phrase from text, removing filler words."""
+    """Extract meaningful phrase from text, keeping it concise (2-3 words max)."""
     if not text:
         return ""
     
+    # Clean up the text first
+    text = text.strip()
+    
+    # Split into words
     words = text.split()
-    # Take first 4-6 words, skipping stopwords
-    meaningful = [w for w in words[:6] if w.lower() not in STOPWORDS and len(w) > 1]
+    
+    # Extract just the main action/subject (first 2-3 meaningful words)
+    # Goal: "water evaporates" not "water evaporates bodies water"
+    meaningful = []
+    for word in words:
+        word_clean = word.strip('.,;:!?')
+        # Skip obvious stopwords (but keep first word even if it's a stopword)
+        if len(meaningful) == 0 or (word_clean.lower() not in STOPWORDS and len(word_clean) > 1):
+            meaningful.append(word_clean)
+        # Stop after 2-3 meaningful words (keep it short and clear)
+        if len(meaningful) >= 3:
+            break
     
     if not meaningful:
-        # If all words are stopwords, take first 3 words anyway
-        meaningful = words[:3]
+        # Fallback: take first 2 words
+        meaningful = [w.strip('.,;:!?') for w in words[:2]]
     
     result = ' '.join(meaningful)
+    
+    # Capitalize first letter
+    if result:
+        result = result[0].upper() + result[1:] if len(result) > 1 else result.upper()
+    
     return result.strip()
 
 
