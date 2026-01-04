@@ -226,7 +226,8 @@ graph TB
 
 **GUI Interface** (`student_app/gui_app/main_window.py`)
 
-<img width="1200" height="700" alt="Screenshot (124)" src="https://github.com/user-attachments/assets/cebd5966-77c3-4f94-9173-68a1a953f156" />
+
+[![Satya Demo Video](https://img.youtube.com/vi/PsK7alRhUkg/maxresdefault.jpg)](https://youtu.be/PsK7alRhUkg?si=5mzJDsVO3GxlIQO6)
 
 - CustomTkinter-based modern interface
 - Threaded model inference for responsiveness
