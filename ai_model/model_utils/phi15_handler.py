@@ -183,9 +183,13 @@ class Phi15Handler:
         # If RAG context is available, might need more tokens to incorporate it
         if context and len(context.strip()) > 50:
             base_tokens += 20
-        
-        # Cap at reasonable maximum - allow longer answers since generation is fast
-        return min(base_tokens, 150)
+            # Cap at reasonable maximum for context-based answers
+            return min(base_tokens, 150)
+        else:
+            # No context (fallback) - allow enough tokens for 2-4 complete sentences
+            # Let the model generate naturally but with a reasonable limit
+            # 80-100 tokens should allow 2-4 sentences without cutting off
+            return min(base_tokens, 100)
                 
     def get_answer(self, question: str, context: str, answer_length: str = "medium") -> Tuple[str, float]:
         """
@@ -235,11 +239,14 @@ class Phi15Handler:
                 logger.error("Model not loaded for non-streaming inference!")
                 return "Error: Model not loaded. Please check model files.", 0.1
             
+            # Calculate max_tokens based on context (shorter for fallback)
+            max_tokens = self._calculate_max_tokens(normalized_question, context)
+            
             # Try inference with logging - use more permissive parameters
-            logger.info(f"Calling model with max_tokens={self.DEFAULT_MAX_TOKENS}, temperature=0.7")
+            logger.info(f"Calling model with max_tokens={max_tokens}, temperature=0.7")
             response = self.llm(
                 prompt,
-                max_tokens=self.DEFAULT_MAX_TOKENS,  
+                max_tokens=max_tokens,  
                 temperature=0.7,  # Increased for better generation
                 top_p=0.9,  # More permissive
                 repeat_penalty=1.1, 
@@ -793,9 +800,16 @@ class Phi15Handler:
                 f"A:"
             )
         else:
-            # No context - use direct Q&A format
+            # No context - use concise fallback prompt
+            concise_prompt = (
+                "You are Satya, an expert tutor for Grade 8-12 students in Nepal (NEB curriculum). "
+                "Provide a brief, concise answer. Be direct and helpful. "
+                "Focus on answering the question clearly and completely. "
+                "CRITICAL: Always finish each sentence completely with proper punctuation (., !, or ?). "
+                "NEVER add: Question:, Answer:, Q:, A:, exercises, diagrams, ASCII art, numbered lists."
+            )
             return (
-                f"{self.system_prompt}\n\n"
+                f"{concise_prompt}\n\n"
                 f"Q: {question}\n"
                 f"A:"
             )
