@@ -34,6 +34,9 @@ class NEBeduApp(ctk.CTk):
         self.geometry('1200x750')
         self.minsize(900, 600)
         
+        # Hide main window initially
+        self.withdraw()
+        
         # Modern appearance settings
         ctk.set_appearance_mode('light')
         ctk.set_default_color_theme('green')
@@ -45,13 +48,13 @@ class NEBeduApp(ctk.CTk):
         self._initialization_done = False
         
         self.username = None
-        self.content_manager = None  # Will be initialized in background
+        self.content_manager = None
         
-        # Initialize RAG system (lazy)
+        # RAG system - will be eagerly initialized
         self.rag_engine = None
         self._rag_initialized = False
         
-        # Model handler (will be initialized in background)
+        # Model handler - will be eagerly initialized
         self.model_handler = None
         self.model_path = None
         
@@ -74,8 +77,8 @@ class NEBeduApp(ctk.CTk):
         # Create UI structure first (non-blocking)
         self._create_ui_structure()
         
-        # Initialize heavy components in background
-        self._initialize_in_background()
+        # EAGER LOADING: Initialize everything before showing window
+        self._eager_init_all_models()
     
     def _create_ui_structure(self):
         """Create the UI structure without blocking operations."""
@@ -270,31 +273,64 @@ class NEBeduApp(ctk.CTk):
         b = max(0, int(hex_color[4:6], 16) - 30)
         return f"#{r:02x}{g:02x}{b:02x}"
     
-    def _initialize_in_background(self):
-        """Initialize heavy components in background thread."""
-        def init_components():
-            try:
-                # Initialize content manager
-                self.after(0, lambda: self._update_status("Loading content..."))
-                self.content_manager = ContentManager()
-                
-                # Initialize model
-                self.after(0, lambda: self._update_status("Loading AI model..."))
-                # Updated to point to BitNet path, but using ModelHandler abstraction
-                self.model_path = str(resolve_model_dir("satya_data/models/bitnet_b1.58_2B_4T"))
-                
-                # Note: We rely on ModelHandler to safely handle if model is missing
-                self.model_handler = ModelHandler(self.model_path)
-                
-                # Update model info
-                self.after(0, self._update_model_info)
-                self.after(0, lambda: self._update_status("Ready!"))
-                
-                self._initialization_done = True
-            except Exception as e:
-                self.after(0, lambda: self._show_model_error(f"Initialization error: {e}"))
+    
+    def _eager_init_all_models(self):
+        """Eagerly initialize ALL models before showing GUI - with loading screen."""
+        from student_app.gui_app.startup_loader import StartupLoader
         
-        threading.Thread(target=init_components, daemon=True).start()
+        # Show loading screen
+        loader = StartupLoader(self)
+        loader.update()
+        loader.update_idletasks()
+        
+        try:
+            # Step 1: Content Manager
+            loader.update_status("Loading content...", "Initializing content manager", 0.1)
+            loader.update_idletasks()
+            self.content_manager = ContentManager()
+            
+            # Step 2: Model Path
+            loader.update_status("Locating model...", "Finding Phi 1.5 model files", 0.2)
+            loader.update_idletasks()
+            self.model_path = str(resolve_model_dir("satya_data/models/phi15"))
+            
+            # Step 3: Load Phi 1.5 Model (with warmup)
+            loader.update_status("Loading Phi 1.5...", "This may take 10-15 seconds", 0.3)
+            loader.update_idletasks()
+            self.model_handler = ModelHandler(self.model_path)
+            
+            # Step 4: Initialize RAG Engine (embeddings + ChromaDB)
+            # Pass the already-loaded model to avoid loading it twice
+            loader.update_status("Loading RAG Engine...", "Initializing embeddings and database", 0.6)
+            loader.update_idletasks()
+            chroma_db_path = str(resolve_model_dir("satya_data/chroma_db"))
+            self.rag_engine = RAGRetrievalEngine(
+                chroma_db_path=chroma_db_path,
+                llm_handler=self.model_handler  # Reuse already-loaded model
+            )
+            self._rag_initialized = True
+            
+            # Step 5: Done
+            loader.update_status("Ready!", "All systems loaded", 1.0)
+            loader.update_idletasks()
+            time.sleep(0.5)  # Brief pause to show completion
+            
+            # Update model info
+            self._update_model_info()
+            self._update_status("Ready!")
+            self._initialization_done = True
+            
+            # Close loader and show main window
+            loader.destroy()
+            self.deiconify()
+            self.update()  # Force window to show
+            
+        except Exception as e:
+            loader.destroy()
+            self._show_model_error(f"Initialization error: {e}")
+            self.deiconify()
+            self.update()  # Force window to show even on error
+
 
     def _update_status(self, message):
         """Update status message."""
@@ -628,51 +664,69 @@ class NEBeduApp(ctk.CTk):
         
         def worker():
             try:
-                # Lazy initialize RAG if needed
-                if not self._rag_initialized:
-                    self._lazy_init_rag()
-                
+                # RAG engine is already initialized during startup (eager loading)
                 normalized_question = question.strip().capitalize()
                 
-                # --- UPDATED RAG CALL ---
+                # Helper function for typing animation
+                def type_text(text, delay_ms=20):
+                    """Type text character-by-character for smooth UX"""
+                    for char in text:
+                        self.ask_view.append_answer_token(char)
+                        self.update()  # Force GUI update
+                        time.sleep(delay_ms / 1000.0)  # Convert ms to seconds
+                
+                # --- USE EXISTING RAG QUERY METHOD WITH STREAMING ---
                 if self.rag_engine:
-                    # Pass the filtered subject and grade
+                    # Define callback for Phase 1 (show immediately with typing animation)
+                    def on_phase1(phase1_text, phase1_confidence):
+                        import logging
+                        logging.info(f"🎯 Phase 1 callback triggered! Text: {phase1_text[:50]}...")
+                        def show_phase1():
+                            self.ask_view.set_loading(False)
+                            type_text(phase1_text, delay_ms=15)  # Fast typing
+                            self.ask_view.append_answer_token("\n\n")  # Separator
+                        self.after(0, show_phase1)
+                    
+                    # Define callback for Phase 2 (True Streaming)
+                    def on_phase2_token(token):
+                        def show_token():
+                            self.ask_view.append_answer_token(token)
+                        # Schedule token display
+                        self.after(0, show_token)
+
+                    # Pass callbacks to RAG engine
                     response = self.rag_engine.query(
                         query_text=normalized_question,
                         subject=self.current_subject_filter,
-                        grade=self.current_grade_filter
+                        grade="",  # Don't filter by grade
+                        phase1_callback=on_phase1,  # Stream Phase 1
+                        phase2_callback=on_phase2_token # Stream Phase 2 tokens
                     )
                     
-                    final_answer = response.get('answer', "I'm sorry, I couldn't generate an answer.")
-                    ascii_diagram = response.get('diagram', None)
+                    # Phase 2 is already displayed via streaming...
+                    # Just finalize the confidence and state
+                    confidence = response.get('confidence', 0.5)
+                    
+                    def finalize_ui():
+                        # We don't need to append text anymore, just finalize
+                        self.ask_view.finalize_answer(confidence, question=normalized_question)
+                        self._loading = False
+                    
+                    self.after(0, finalize_ui)
+                    
                 else:
                     final_answer = "RAG Engine not initialized."
-                    ascii_diagram = None
+                    
+                    def show_error():
+                        self.ask_view.set_result(final_answer, is_openai=False)
+                        self._loading = False
+                    
+                    self.after(0, show_error)
                 
-                def show_result():
-                    # Pass diagram to view if needed
-                    self.ask_view.set_result(final_answer, is_openai=False)
-                    
-                    # If diagram exists, show it in the new viewer
-                    if ascii_diagram and hasattr(self.ask_view, 'show_diagram'):
-                         # We need to extend view to support this or just append to answer text for now
-                         # Simple hack: Append to answer text
-                         divider = "\n\n" + "-"*30 + "\n" + "DIAGRAM:\n" + "-"*30 + "\n"
-                         full_text = final_answer + divider + ascii_diagram
-                         self.ask_view.set_result(full_text, is_openai=False)
-                         
-                    elif ascii_diagram:
-                         # Append manually if view update not possible
-                         full_text = final_answer + "\n\n[DIAGRAM AVAILABLE]\n" + ascii_diagram
-                         self.ask_view.set_result(full_text, is_openai=False)
-                    
-                    self._loading = False
-                    
-                self.after(0, show_result)
-                
-            except Exception as e:
+            except Exception as ex:
+                error_msg = str(ex)  # Capture error message before nested function
                 def show_error():
-                    mb.showerror("Error", f"An error occurred: {e}")
+                    mb.showerror("Error", f"An error occurred: {error_msg}")
                     self.ask_view.set_loading(False)
                     self._loading = False
                 self.after(0, show_error)

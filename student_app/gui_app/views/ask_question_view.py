@@ -235,7 +235,7 @@ class AskQuestionView(ctk.CTkFrame):
             source_frame.pack(pady=(0, 10), padx=10, fill='x')
             ctk.CTkLabel(source_frame, text=f"Source: {source_info}", font=ctk.CTkFont(size=12), text_color="#1976d2").pack(pady=5, padx=10, anchor='w')
         
-        if confidence is None or confidence < 0.1:
+        if confidence is None or confidence < 0.3:  # Raised from 0.1 to avoid false warnings
             # Yellow warning panel for low confidence
             warn_frame = ctk.CTkFrame(self.result_frame, fg_color="#fffde7", corner_radius=8)
             warn_frame.pack(pady=(0, 10), padx=10, fill='x', expand=True)

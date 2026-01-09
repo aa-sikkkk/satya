@@ -32,37 +32,38 @@ logger = logging.getLogger(__name__)
 
 class Phi15Handler:
     """
-    Satya personality + Windows compatible + Two-Phase Educational Pipeline
+    Satya personality + Windows compatible
     """
     
-    # Educational system prompt for structured teaching
-    EDUCATIONAL_SYSTEM_PROMPT = (
-        "You are an educational assistant. "
-        "Explain concepts clearly and step by step for a student.\n\n"
-        "Follow this structure strictly:\n"
-        "1. Core idea (1–2 sentences)\n"
-        "2. Why it matters\n"
-        "3. Step-by-step explanation\n"
-        "4. Simple example\n"
-        "5. Common mistake or misconception\n"
-        "6. Short summary\n\n"
-        "Be precise. Avoid repetition. Do not add unnecessary filler."
-    )
-    
-    # Essential stop sequences - REDUCED to prevent premature cutoff
+    # Essential stop sequences for quality + speed balance
     STOP_SEQUENCES = [
         "</s>",  # Model's end token (critical)
         "\n\nQuestion:",  # Question format (prevent prompt leakage)
+        "\nQuestion:",  # Question format (prevent prompt leakage)
         "\n\nQ:", 
+        "\nQ:", 
         "\n\nAnswer:", 
+        "\nAnswer:", 
         "\n\nA:",  
+        "\nA:",  
         "\n\nExercise:",  
         "\n\nPractice:", 
+        "\n\nNow, let's",  
+        "\n\nExplanation:",  
+        "\n\nIn summary", 
+        "\n\nDiagram:",  # Diagram patterns (prevent ASCII art)
+        "\nDiagram:",  
+        "\n┌",  
+        "\n│",  
+        "\n└",  
+        "\n1.",  
+        "\n2.",  
+        "\n3.",  
     ]
     
     # Dynamic token limits based on question complexity
-    # Base token limit - increased for detailed "Adult" answers
-    BASE_MAX_TOKENS = 120
+    # Base token limit - will be adjusted based on question type
+    BASE_MAX_TOKENS = 80
     
     def __init__(self, model_path: str, enable_streaming: bool = False):
         """
@@ -181,160 +182,14 @@ class Phi15Handler:
         
         # If RAG context is available, might need more tokens to incorporate it
         if context and len(context.strip()) > 50:
-            base_tokens += 30
+            base_tokens += 20
             # Cap at reasonable maximum for context-based answers
-            return min(base_tokens, 200)
+            return min(base_tokens, 150)
         else:
             # No context (fallback) - allow enough tokens for 2-4 complete sentences
             # Let the model generate naturally but with a reasonable limit
-            return min(base_tokens, 150)
-    
-    def get_answer_phase1(self, question: str) -> Tuple[str, float]:
-        """
-        Phase 1: Fast Framing (No RAG)
-        
-        Returns only the core idea (1-2 sentences) for immediate TTFR.
-        
-        Args:
-            question: Student's question
-            
-        Returns:
-            Tuple[str, float]: (Core idea answer, confidence)
-        """
-        if self.llm is None:
-            self.load_model()
-        
-        # Minimal prompt for fast response - FORCE single answer
-        prompt = (
-            f"You are an educational assistant. Answer in 1-2 sentences only.\n\n"
-            f"Question: {question}\n\n"
-            f"Answer (1-2 sentences, no sections, no structure):"
-        )
-        
-        try:
-            logger.info(f"Phase 1: Fast framing for '{question}'")
-            start_time = time.time()
-            
-            # Fast generation - greedy decoding, minimal tokens
-            response = self.llm(
-                prompt,
-                max_tokens=48,  # Very short for fast TTFR
-                temperature=0.0,  # Greedy
-                top_p=1.0,
-                repeat_penalty=1.0,
-                stop=self.STOP_SEQUENCES,
-                echo=False,
-                stream=False
-            )
-            
-            answer = self._extract_text(response)
-            logger.info(f"⚡ Phase 1 TTFR: {time.time() - start_time:.3f}s")
-            
-            # Basic cleaning
-            answer = answer.strip()
-            if not answer:
-                return "Let me explain this concept.", 0.5
-            
-            # Ensure completeness
-            if not answer.endswith(('.', '!', '?')):
-                # Find last complete sentence
-                for punct in ['.', '!', '?']:
-                    last_punct = answer.rfind(punct)
-                    if last_punct > len(answer) * 0.5:
-                        answer = answer[:last_punct + 1]
-                        break
-                else:
-                    answer += '.'
-            
-            return answer, 0.8
-            
-        except Exception as e:
-            logger.error(f"Phase 1 error: {e}")
-            return "Let me explain this concept.", 0.5
-    
-    def get_answer_phase2(self, question: str, context: str, phase1_answer: str) -> Tuple[str, float]:
-        """
-        Phase 2: Structured Depth (With RAG)
-        
-        Returns sections 2-6 of the structured explanation.
-        
-        Args:
-            question: Student's question
-            context: RAG context
-            phase1_answer: Answer from Phase 1 (core idea)
-            
-        Returns:
-            Tuple[str, float]: (Detailed explanation, confidence)
-        """
-        if self.llm is None:
-            self.load_model()
-        
-        # Trim context for speed (3 chunks * 120 chars max)
-        trimmed_context = (context or "").strip()
-        if len(trimmed_context) > 360:
-            trimmed_context = trimmed_context[:360]
-            last_period = trimmed_context.rfind('.')
-            if last_period > 300:
-                trimmed_context = trimmed_context[:last_period + 1]
-        
-        # Build Phase 2 prompt
-        if trimmed_context and len(trimmed_context) > 50:
-            prompt = (
-                f"{self.EDUCATIONAL_SYSTEM_PROMPT}\n\n"
-                f"Study material:\n{trimmed_context}\n\n"
-                f"Explain: {question}\n\n"
-                f"Core idea: {phase1_answer}\n\n"
-                f"Now provide sections 2-6 (Why it matters, Steps, Example, Mistake, Summary):"
-            )
-        else:
-            # No RAG context
-            prompt = (
-                f"{self.EDUCATIONAL_SYSTEM_PROMPT}\n\n"
-                f"Explain: {question}\n\n"
-                f"Core idea: {phase1_answer}\n\n"
-                f"Now provide sections 2-6 (Why it matters, Steps, Example, Mistake, Summary):"
-            )
-        
-        try:
-            logger.info(f"Phase 2: Structured depth")
-            start_time = time.time()
-            
-            # Structured generation
-            response = self.llm(
-                prompt,
-                max_tokens=128,  # Enough for structured sections
-                temperature=0.3,  # Slightly creative
-                top_p=0.9,
-                repeat_penalty=1.1,
-                stop=self.STOP_SEQUENCES,
-                echo=False,
-                stream=False
-            )
-            
-            answer = self._extract_text(response)
-            logger.info(f"📚 Phase 2 Time: {time.time() - start_time:.3f}s")
-            
-            # Basic cleaning
-            answer = answer.strip()
-            if not answer:
-                return "", 0.5
-            
-            # Ensure completeness
-            if not answer.endswith(('.', '!', '?')):
-                for punct in ['.', '!', '?']:
-                    last_punct = answer.rfind(punct)
-                    if last_punct > len(answer) * 0.5:
-                        answer = answer[:last_punct + 1]
-                        break
-                else:
-                    answer += '.'
-            
-            confidence = self._calculate_confidence(answer, context, question)
-            return answer, confidence
-            
-        except Exception as e:
-            logger.error(f"Phase 2 error: {e}")
-            return "", 0.5
+            # 80-100 tokens should allow 2-4 sentences without cutting off
+            return min(base_tokens, 100)
                 
     def get_answer(self, question: str, context: str, answer_length: str = "medium") -> Tuple[str, float]:
         """
@@ -493,9 +348,14 @@ class Phi15Handler:
             "\n\nReference material", "\nReference material",
             "\n\nStudy material", "\nStudy material",
             "\n\nStudent Question", "\nStudent Question",
+            "\n\nQuestion:", "\nQuestion:", "Question:",
+            "\n\nAnswer:", "\nAnswer:", "Answer:",
             "\n\nAnswer using the study material", "\nAnswer using the study material",
             "\n\nIMPORTANT:", "\nIMPORTANT:",
             "IMPORTANT:",
+            # Prompt echo patterns (prevent Q:/A: format in output)
+            "\nQ:", "\n\nQ:", "Q:",
+            "\nA:", "\n\nA:", "A:",
             ]
             for marker in off_topic_markers:
                 if marker in answer:
@@ -931,20 +791,27 @@ class Phi15Handler:
             # No RAG context - use own knowledge
             context_section = None
         
-        # Educational prompt format - use instructional format for detailed answers
+        # Educational prompt format - use direct Q&A format that Phi models work better with
         if context_section:
             return (
                 f"{self.system_prompt}\n\n"
                 f"{context_section}\n\n"
-                f"Student Question: {question}\n\n"
-                f"Provide a clear, detailed explanation that helps the student understand this concept:\n"
+                f"Q: {question}\n"
+                f"A:"
             )
         else:
             # No context - use concise fallback prompt
+            concise_prompt = (
+                "You are Satya, an expert tutor for Grade 8-12 students in Nepal (NEB curriculum). "
+                "Provide a brief, concise answer. Be direct and helpful. "
+                "Focus on answering the question clearly and completely. "
+                "CRITICAL: Always finish each sentence completely with proper punctuation (., !, or ?). "
+                "NEVER add: Question:, Answer:, Q:, A:, exercises, diagrams, ASCII art, numbered lists."
+            )
             return (
-                f"{self.system_prompt}\n\n"
-                f"Student Question: {question}\n\n"
-                f"Provide a clear, detailed explanation that helps the student understand this concept:\n"
+                f"{concise_prompt}\n\n"
+                f"Q: {question}\n"
+                f"A:"
             )
 
     def _extract_text(self, response: Any) -> str:
@@ -1022,20 +889,24 @@ class Phi15Handler:
         return ""
 
     def get_hints(self, question: str, context: str) -> List[str]:
-        """Generate hints using Phi 1.5 - restored to original quality."""
+        """Generate hints using Phi 1.5."""
         if self.llm is None:
             self.load_model()
             
         try:
-            # Your ORIGINAL context handling for hints
+            # Handle context
             trimmed_context = (context or "").strip()
             if len(trimmed_context) > 500:
                 last_period = trimmed_context.rfind('.')
                 if last_period > 400:
                     trimmed_context = trimmed_context[:last_period + 1]
             
-            # Your ORIGINAL hint prompt
             prompt = (
+                f"You are a helpful tutor. Based on the context, give 3 specific hints to answer this question.\n\n"
+                f"Context: {trimmed_context}\n\n"
+                f"Question: {question}\n\n"
+                f"Hints (be specific and related to the question):\n"
+                f"1."
                 f"You are a helpful tutor. Based on the context, give 3 specific hints to answer this question.\n\n"
                 f"Context: {trimmed_context}\n\n"
                 f"Question: {question}\n\n"

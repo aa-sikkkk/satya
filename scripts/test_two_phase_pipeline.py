@@ -23,7 +23,8 @@ def test_two_phase_pipeline():
     print("\n⚡ Initializing Phi 1.5...")
     start = time.time()
     model = ModelHandler(model_path="satya_data/models/phi15")
-    print(f"✅ Model loaded in {time.time() - start:.2f}s\n")
+    print(f"✅ Model loaded in {time.time() - start:.2f}s")
+    print("   (Warmup inference completed during load)\n")
     
     # Test question
     question = "What is acceleration?"

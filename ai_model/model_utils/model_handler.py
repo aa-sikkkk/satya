@@ -114,7 +114,8 @@ class ModelHandler:
             # Combine answers
             if phase2_answer:
                 full_answer = f"{phase1_answer}\n\n{phase2_answer}"
-                confidence = (phase1_conf + phase2_conf) / 2
+                # Use max confidence - Phase 2 with RAG is more reliable
+                confidence = max(phase1_conf, phase2_conf)
             else:
                 full_answer = phase1_answer
                 confidence = phase1_conf

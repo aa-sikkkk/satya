@@ -19,6 +19,7 @@ from pathlib import Path
 from system.rag.anti_confusion_engine import AntiConfusionEngine
 from system.rag.ascii_diagram_library import ASCIIDiagramLibrary
 from system.rag.user_edge_case_handler import UserEdgeCaseHandler
+from system.rag.rag_cache import RAGCache
 from scripts.rag_data_preparation.embedding_generator import EmbeddingGenerator
 from ai_model.model_utils.model_handler import ModelHandler
 
@@ -34,7 +35,8 @@ class RAGRetrievalEngine:
     def __init__(
         self,
         chroma_db_path: str = "satya_data/chroma_db",
-        model_path: str = "satya_data/models/phi15" # Point to specific model folder
+        model_path: str = "satya_data/models/phi15",  # Point to specific model folder
+        llm_handler=None  # Optional: pass pre-loaded model to avoid double loading
     ):
         """Initialize the RAG Engine and all sub-components."""
         logger.info("🚀 Initializing Satya RAG Engine...")
@@ -45,6 +47,7 @@ class RAGRetrievalEngine:
         self.edge_case_handler = UserEdgeCaseHandler()
         self.anti_confusion = AntiConfusionEngine()
         self.diagram_library = ASCIIDiagramLibrary()
+        self.cache = RAGCache(max_size=100, ttl_seconds=3600)  # 1 hour TTL
         
         # 2. Initialize Embedding Model (for query encoding)
         # We reuse the utility class but in inference mode
@@ -58,13 +61,17 @@ class RAGRetrievalEngine:
             logger.error(f"❌ ChromaDB connection failed: {e}")
             self.chroma_client = None
 
-        # 4. Initialize LLM
-        try:
-             self.llm = ModelHandler(model_path=model_path) # Changed to ModelHandler
-             logger.info("✅ LLM Model connected")
-        except Exception as e:
-            logger.error(f"❌ LLM connection failed: {e}")
-            self.llm = None
+        # 4. Initialize LLM (reuse if provided, otherwise create new)
+        if llm_handler:
+            self.llm = llm_handler
+            logger.info("✅ LLM Model connected (reused pre-loaded model)")
+        else:
+            try:
+                 self.llm = ModelHandler(model_path=model_path) # Changed to ModelHandler
+                 logger.info("✅ LLM Model connected")
+            except Exception as e:
+                logger.error(f"❌ LLM connection failed: {e}")
+                self.llm = None
         
         logger.info("✅ RAG Engine initialized successfully")
 
@@ -124,7 +131,9 @@ class RAGRetrievalEngine:
         query_text: str,
         subject: str,
         grade: str,
-        n_results: int = 5
+        n_results: int = 5,
+        phase1_callback=None,  # Callback to send Phase 1 answer immediately
+        phase2_callback=None   # Callback for Phase 2 token streaming
     ) -> Dict[str, Any]:
         """
         Main query entry point.
@@ -146,6 +155,14 @@ class RAGRetrievalEngine:
                 "answer": "Error: Database not connected.",
                 "type": "error"
             }
+
+        # --- Cache Check ---
+        cached_result = self.cache.get(query_text, subject, grade)
+        if cached_result:
+            logger.info(f"⚡ Cache HIT for '{query_text[:50]}...'")
+            cached_result["from_cache"] = True
+            cached_result["processing_time"] = time.time() - start_time
+            return cached_result
 
         # --- Retrieval Phase ---
         
@@ -238,12 +255,24 @@ class RAGRetrievalEngine:
         if self.llm:
             try:
                 t_gen = time.time()
-                    
-                answer, confidence = self.llm.get_answer(
-                    question=query_text,
-                    context=full_context_str
+                
+                # PHASE 1: Fast framing (call immediately and send via callback)
+                phase1_answer, phase1_conf = self.llm.phi15_handler.get_answer_phase1(query_text)
+                
+                # Send Phase 1 to GUI immediately via callback
+                if phase1_callback:
+                    phase1_callback(phase1_answer, phase1_conf)
+                
+                # PHASE 2: Structured depth (with RAG context)
+                phase2_answer, phase2_conf = self.llm.phi15_handler.get_answer_phase2(
+                    query_text, full_context_str, phase1_answer, stream_callback=phase2_callback
                 )
-                logger.info(f"⏱️ LLM Gen Time: {time.time() - t_gen:.3f}s")
+                
+                # Combine for final answer
+                answer = f"{phase1_answer}\n\n{phase2_answer}"
+                confidence = max(phase1_conf, phase2_conf)
+                
+                logger.info(f"⏱️ LLM Gen Time (Two-Phase): {time.time() - t_gen:.3f}s")
             except Exception as e:
                 logger.error(f"LLM generation error: {e}")
                 answer = "Error generating answer from AI model."
@@ -253,7 +282,7 @@ class RAGRetrievalEngine:
         # Check for Diagrams
         diagram = self.diagram_library.find_diagram_by_text(query_text)
         
-        return {
+        result = {
             "answer": answer,
             "context_used": context_texts,
             "sources": [c['metadata'] for c in ordered_chunks],
@@ -262,3 +291,8 @@ class RAGRetrievalEngine:
             "processing_time": time.time() - start_time,
             "type": "rag_response"
         }
+        
+        # Cache the result for future queries
+        self.cache.set(query_text, subject, grade, result)
+        
+        return result
