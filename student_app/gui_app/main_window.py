@@ -599,10 +599,10 @@ class NEBeduApp(ctk.CTk):
         
         self._safe_destroy_widgets()
         if correct:
-            msg = "✓ Correct!"
+            msg = "[Correct]"
             color = "#43a047"
         else:
-             msg = "✗ Not quite right."
+             msg = "[Incorrect]"
              color = "#e53935"
         label = ctk.CTkLabel(self.main_frame, text=msg, font=ctk.CTkFont(size=22, weight="bold"), text_color=color)
         label.pack(pady=(40, 10))
@@ -680,7 +680,7 @@ class NEBeduApp(ctk.CTk):
                     # Define callback for Phase 1 (show immediately with typing animation)
                     def on_phase1(phase1_text, phase1_confidence):
                         import logging
-                        logging.info(f"🎯 Phase 1 callback triggered! Text: {phase1_text[:50]}...")
+                        logging.info(f"[Phase 1] Phase 1 callback triggered! Text: {phase1_text[:50]}...")
                         def show_phase1():
                             self.ask_view.set_loading(False)
                             type_text(phase1_text, delay_ms=15)  # Fast typing
@@ -758,5 +758,14 @@ class NEBeduApp(ctk.CTk):
         self._loading = False
 
 if __name__ == "__main__":
+    import sys
+    # Fix for Windows Unicode logging errors (emojis)
+    if sys.platform == "win32":
+        try:
+            sys.stdout.reconfigure(encoding='utf-8')
+            sys.stderr.reconfigure(encoding='utf-8')
+        except Exception:
+            pass
+            
     app = NEBeduApp()
     app.mainloop()

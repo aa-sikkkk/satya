@@ -73,7 +73,7 @@ class EmbeddingGenerator:
         else:
             self.device = device
             
-        logger.info(f"🔄 Initializing Embedding Generator...")
+        logger.info(f"Initializing Embedding Generator...")
         logger.info(f"   Model: {model_name}")
         logger.info(f"   Device: {self.device}")
         
@@ -83,9 +83,9 @@ class EmbeddingGenerator:
                 device=self.device,
                 cache_folder=cache_dir
             )
-            logger.info("✅ Model loaded successfully")
+            logger.info("Model loaded successfully")
         except Exception as e:
-            logger.error(f"❌ Failed to load model: {e}")
+            logger.error(f"Failed to load model: {e}")
             raise
             
         self.embedding_dim = self.model.get_sentence_embedding_dimension()

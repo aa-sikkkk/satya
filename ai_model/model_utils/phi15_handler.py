@@ -56,9 +56,6 @@ class Phi15Handler:
         "\n┌",  
         "\n│",  
         "\n└",  
-        "\n1.",  
-        "\n2.",  
-        "\n3.",  
     ]
     
     # Dynamic token limits based on question complexity
@@ -191,6 +188,343 @@ class Phi15Handler:
             # 80-100 tokens should allow 2-4 sentences without cutting off
             return min(base_tokens, 100)
                 
+    def _classify_intent(self, question: str) -> str:
+        """Heuristic classification of student question intent."""
+        q_lower = question.lower()
+        if any(w in q_lower for w in ["difference", "compare", "contrast", "versus", "vs", "distinguish"]):
+            return "COMPARE"
+        if any(w in q_lower for w in ["why", "reason", "cause", "explain why"]):
+            return "WHY"
+        if any(w in q_lower for w in ["solve", "calculate", "compute", "find the value"]):
+            return "SOLVE"
+        if any(w in q_lower for w in ["list", "enumerate", "types of", "components of", "name the"]):
+            return "LIST"
+        if any(w in q_lower for w in ["example", "instance", "illustrate", "show me"]):
+            return "EXAMPLE"
+        if any(w in q_lower for w in ["pros", "cons", "advantages", "disadvantages", "benefits", "limitations", "evaluate"]):
+            return "EVALUATE"
+        return "DESCRIBE"
+
+    def get_answer_phase1(self, question: str) -> Tuple[str, float]:
+        """
+        Phase 1: Fast Framing.
+        Generates a concise 'Core Idea' or summary (1-2 sentences).
+        """
+        if self.llm is None:
+            self.load_model()
+            
+        # Prompt
+        prompt = (
+            f"Question: {question}\n\n"
+            f"Provide a single, simple sentence explaining the core idea.\n"
+            f"Core Idea:"
+        )
+        
+        # Inference
+        try:
+             # Fast generation with strict stopping
+             response = self.llm(
+                 prompt, 
+                 max_tokens=60, 
+                 temperature=0.3, 
+                 stop=["\n", "."],
+                 echo=False
+             )
+             
+             answer = self._extract_text(response)
+             if answer:
+                 answer = answer.strip()
+             
+             if not answer: 
+                 answer = "I'm thinking about this..."
+                 
+             return answer, 0.8
+        except Exception as e:
+             logger.error(f"Phase 1 error: {e}")
+             return "Processing...", 0.5
+
+    def get_answer_phase2(self, question: str, context: str, phase1_answer: str, stream_callback=None) -> Tuple[str, float]:
+        """
+        Generate answer using RAG context when available, otherwise use Phi's own knowledge.
+        
+        Args:
+            question: Student's question
+            context: RAG context (can be empty/minimal - Phi will use own knowledge)
+            phase1_answer: The initial answer from Phase 1, used as a core idea.
+            stream_callback: Optional callback function for streaming tokens.
+            
+        Returns:
+            Tuple of (answer, confidence)
+        """
+        if self.llm is None:
+            self.load_model()
+            
+        if not question or len(question.strip()) < 3:
+            return "Please provide a question about your Grade 8-12 curriculum.", 0.1
+        
+        if context is None:
+            context = ""
+            
+        normalized_question = question.strip()
+        if normalized_question.isupper():
+            normalized_question = normalized_question.lower().capitalize()
+        elif normalized_question.islower():
+            normalized_question = normalized_question.capitalize()
+        if len(normalized_question) < 3:
+            return "Please provide a more detailed question.", 0.1
+            
+        try:
+            # Dynamic Intent Classification
+            intent = self._classify_intent(question)
+            
+            # Select instructions based on intent
+            if intent == "COMPARE":
+                instructions = (
+                    "Create a comparison table or list highlighting differences.\n"
+                    "Structure:\n"
+                    "- Key Differences\n"
+                    "- Detailed Contrast\n"
+                    "- Summary"
+                )
+                start_phrase = "Here is a comparison of the key differences:"
+            
+            elif intent == "WHY":
+                instructions = (
+                    "Focus on the reasoning, logic, and importance.\n"
+                    "Structure:\n"
+                    "- The Core Reason\n"
+                    "- Step-by-Step Logic\n"
+                    "- Real-world Impact"
+                )
+                start_phrase = "The main reason for this is:"
+            
+            elif intent == "SOLVE":
+                 instructions = (
+                    "Focus on the step-by-step calculation or solution.\n"
+                    "Structure:\n"
+                    "- Given Information\n"
+                    "- Formula/Concept\n"
+                    "- Step-by-Step Solution\n"
+                    "- Final Answer"
+                )
+                 start_phrase = "Here is the step-by-step solution:"
+
+            elif intent == "LIST":
+                instructions = (
+                    "Create a clear, numbered list of the items.\n"
+                    "Structure:\n"
+                    "- Brief Introduction\n"
+                    "- Numbered List (with brief details)\n"
+                    "- Summary/Context"
+                )
+                start_phrase = "Here are the key points:"
+
+            elif intent == "EXAMPLE":
+                instructions = (
+                    "Focus on a concrete, real-world example.\n"
+                    "Structure:\n"
+                    "- Statement of Concept\n"
+                    "- Detailed Real-World Example\n"
+                    "- Why this example applies"
+                )
+                start_phrase = "Here is a practical example:"
+
+            elif intent == "EVALUATE":
+                instructions = (
+                    "Evaluate the pros, cons, or importance.\n"
+                    "Structure:\n"
+                    "- Advantages/Pros\n"
+                    "- Disadvantages/Cons\n"
+                    "- Conclusion/Verdict"
+                )
+                start_phrase = "Here is an evaluation of the concept:"
+
+            else: # DESCRIBE / GENERAL
+                instructions = (
+                    "Focus on the mechanism and physical process.\n"
+                    "Structure:\n"
+                    "- Detailed Mechanism (Step-by-Step)\n"
+                    "- Why it matters\n"
+                    "- A simple example"
+                )
+                start_phrase = "Here is the detailed mechanism of the process:"
+
+            # RAG vs No-RAG selection
+            if context and len(context.strip()) > 50:
+                # RAG Context Available
+                prompt = (
+                    f"Use the following Context to explain the concept in detail.\n\n"
+                    f"Context: {context}\n\n"
+                    f"Question: {question}\n\n"
+                    f"Core Idea: {phase1_answer}\n\n"
+                    f"Instructions:\n{instructions}\n\n"
+                    f"{start_phrase}\n"
+                )
+            else:
+                # No RAG Context - Use internal knowledge + Phase 1
+                prompt = (
+                    f"Explain this concept to a student step by step based on the core idea below.\n\n"
+                    f"Question: {question}\n\n"
+                    f"Core Idea: {phase1_answer}\n\n"
+                    f"Instructions:\n{instructions}\n\n"
+                    f"{start_phrase}\n"
+                )
+            
+            # Calculate max_tokens based on context (shorter for fallback)
+            max_tokens = self._calculate_max_tokens(normalized_question, context)
+            
+            if self.llm is None:
+                logger.error("Model not loaded for non-streaming inference!")
+                return "Error: Model not loaded. Please check model files.", 0.1
+            
+            # Enable streaming if callback is provided
+            is_streaming = stream_callback is not None
+            
+            response_gen = self.llm(
+                prompt,
+                max_tokens=max_tokens,  
+                temperature=0.7, 
+                top_p=0.9,
+                repeat_penalty=1.1, 
+                stop=self.STOP_SEQUENCES, 
+                echo=False,
+                stream=True # Always stream to handle both cases
+            )
+            
+            answer = ""
+            for chunk in response_gen:
+                text = chunk['choices'][0]['text']
+                answer += text
+                if is_streaming:
+                     stream_callback(text)
+            
+            # answer = self._extract_text(response) # Not needed for stream
+            
+            if not answer or len(answer.strip()) < 10:
+                logger.warning(f"Answer too short or empty. Length: {len(answer) if answer else 0}, Content: {answer}")
+                return "I couldn't generate a proper response. Please try rephrasing your question.", 0.1
+            
+            answer = answer.strip()
+            
+            if answer.lower().startswith("answer:"):
+                answer = answer[7:].strip()
+            if answer.lower().startswith("a:"):
+                answer = answer[2:].strip()
+            
+            answer = re.sub(r'^Q:\s*', '', answer, flags=re.IGNORECASE | re.MULTILINE)
+            answer = re.sub(r'^A:\s*', '', answer, flags=re.IGNORECASE | re.MULTILINE)
+            answer = re.sub(r'\nQ:\s*', '\n', answer, flags=re.IGNORECASE)
+            answer = re.sub(r'\nA:\s*', '\n', answer, flags=re.IGNORECASE)
+            
+            off_topic_markers = [
+                "\n\nExercise:", "\nExercise:", "Exercise:",
+                "\n\nPractice:", "\nPractice:", "Practice:",
+                "\n\nTry this:", "\nTry this:", "Try this:",
+                "\n\nNow try", "\nNow try",
+                "\n\nNow, let's", "\nNow, let's", "Now, let's",
+                "\n\nLet's explore", "\nLet's explore", "Let's explore",
+                "\n\nUse Case", "\nUse Case", "Use Case",
+                "\n\nReal-world", "\nReal-world", "Real-world",
+                "\n\nAnother example", "\nAnother example", "Another example",
+                "\n\nAdditionally,", "\nAdditionally,",
+                "\n\nFurthermore,", "\nFurthermore,",
+                "\n\nMoreover,", "\nMoreover,",
+                "\n\nExplanation:", "\nExplanation:", "Explanation:",
+                "\nExplanation", "\n\nExplanation",
+                "\n\nIn summary", "\nIn summary",
+                "\n\nTo summarize", "\nTo summarize",
+                "\n\nIn other words", "\nIn other words",
+                "\n\nSimilarly,", "\nSimilarly,",
+                "\n1.", "\n2.", "\n3.", "\n4.", "\n5.", "\n6.",
+                "\n\n1.", "\n\n2.", "\n\n3.", "\n\n4.",
+                "\n1 ", "\n2 ", "\n3 ", "\n4 ",
+                "\n\nDiagram:", "\nDiagram:", "Diagram:",
+                "\nDiagram", "\n\nDiagram",
+                "\n┌", "\n│", "\n└", "\n├",
+                "\n\n┌", "\n\n│", "\n\n└", "\n\n├",
+            "\n\nReference Context", "\nReference Context",
+            "\n\nReference material", "\nReference material",
+            "\n\nStudy material", "\nStudy material",
+            "\n\nStudent Question", "\nStudent Question",
+            "\n\nQuestion:", "\nQuestion:", "Question:",
+            "\n\nAnswer:", "\nAnswer:", "Answer:",
+            "\n\nAnswer using the study material", "\nAnswer using the study material",
+            "\n\nIMPORTANT:", "\nIMPORTANT:",
+            "IMPORTANT:",
+            "\nQ:", "\n\nQ:", "Q:",
+            "\nA:", "\n\nA:", "A:",
+            ]
+            for marker in off_topic_markers:
+                if marker in answer:
+                    answer = answer.split(marker)[0].strip()
+                    logger.debug(f"Removed off-topic content after {marker}")
+                    break
+            
+            if answer:
+                answer = re.sub(r'^\d+\.\s*', '', answer, flags=re.MULTILINE)
+                answer = re.sub(r'\n\d+\.\s*', '. ', answer)
+                answer = re.sub(r'\n\d+\s+', '. ', answer)
+                answer = re.sub(r'\s+', ' ', answer)
+                answer = answer.strip()
+            
+            if "\nQ:" in answer or "\nA:" in answer or answer.startswith("Q:") or answer.startswith("A:"):
+                parts = re.split(r'\n?[QA]:\s*', answer, flags=re.IGNORECASE)
+                best_part = ""
+                for part in parts:
+                    part = part.strip()
+                    if len(part) > len(best_part) and not part.endswith("?") and len(part) > 10:
+                        best_part = part
+                if best_part:
+                    answer = best_part.strip()
+            
+            if answer:
+                sentences = re.split(r'(?<=[.!?])\s+', answer)
+                sentences = [s.strip() for s in sentences if s.strip() and len(s.strip()) > 5]
+                
+                if len(sentences) > 6:
+                    if sentences[5].endswith(('.', '!', '?')):
+                        keep_count = 6
+                    else:
+                        keep_count = 5
+                    
+                    answer = '. '.join(sentences[:keep_count])
+                    if not answer.endswith(('.', '!', '?')):
+                        answer += '.'
+                    if len(sentences) > keep_count:
+                        logger.debug(f"Trimmed answer from {len(sentences)} to {keep_count} complete sentences")
+                
+                if answer and not answer.rstrip().endswith(('.', '!', '?')):
+                    trimmed = answer.rstrip()
+                    for punct in ['.', '!', '?']:
+                        last_punct = trimmed.rfind(punct)
+                        if last_punct > len(trimmed) * 0.3:
+                            answer = trimmed[:last_punct + 1].strip()
+                            logger.debug(f"Fixed incomplete answer by using last complete sentence ending at {punct}")
+                            break
+                    else:
+                        answer = trimmed + '.'
+                        logger.debug("Added period to ensure answer completeness")
+            
+            if answer and len(answer) > 20:
+                trimmed = answer.rstrip()
+                if not trimmed.endswith(('.', '!', '?')):
+                    for punct in ['.', '!', '?']:
+                        last_punct = trimmed.rfind(punct)
+                        if last_punct > len(trimmed) * 0.3:
+                            answer = trimmed[:last_punct + 1].strip()
+                            logger.debug(f"Final fix: used last complete sentence ending at {punct}")
+                            break
+                    else:
+                        answer = trimmed + '.'
+                        logger.debug("Final fix: added period to complete answer")
+                
+            confidence = self._calculate_confidence(answer, context, question)
+            return answer, confidence
+            
+        except Exception as e:
+            logger.error(f"Inference error: {e}")
+            return "I'm having trouble processing your question. Please try again.", 0.1
+
     def get_answer(self, question: str, context: str, answer_length: str = "medium") -> Tuple[str, float]:
         """
         Generate answer using RAG context when available, otherwise use Phi's own knowledge.
@@ -902,11 +1236,6 @@ class Phi15Handler:
                     trimmed_context = trimmed_context[:last_period + 1]
             
             prompt = (
-                f"You are a helpful tutor. Based on the context, give 3 specific hints to answer this question.\n\n"
-                f"Context: {trimmed_context}\n\n"
-                f"Question: {question}\n\n"
-                f"Hints (be specific and related to the question):\n"
-                f"1."
                 f"You are a helpful tutor. Based on the context, give 3 specific hints to answer this question.\n\n"
                 f"Context: {trimmed_context}\n\n"
                 f"Question: {question}\n\n"

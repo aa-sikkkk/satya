@@ -8,6 +8,7 @@ Uses in-memory LRU cache with TTL support.
 
 import time
 import hashlib
+import numpy as np
 from typing import Dict, Any, Optional, List, Tuple
 from functools import lru_cache
 
@@ -31,7 +32,8 @@ class RAGCache:
         """
         self.max_size = max_size
         self.ttl_seconds = ttl_seconds
-        self.cache: Dict[str, Tuple[Any, float]] = {}  # key -> (value, timestamp)
+        # key -> (value, timestamp, embedding, metadata)
+        self.cache: Dict[str, Tuple[Any, float, Optional[np.ndarray], Dict]] = {}
     
     def _normalize_query(self, query: str, subject: str, grade: str) -> str:
         """Normalize query for cache key."""
@@ -55,7 +57,7 @@ class RAGCache:
         if key not in self.cache:
             return None
         
-        value, timestamp = self.cache[key]
+        value, timestamp, _, _ = self.cache[key]
         
         # Check TTL
         if time.time() - timestamp > self.ttl_seconds:
@@ -63,16 +65,52 @@ class RAGCache:
             return None
         
         return value
-    
-    def set(self, query: str, subject: str, grade: str, results: Dict[str, Any]) -> None:
+
+    def find_similar(self, embedding: np.ndarray, subject: str, grade: str, threshold: float = 0.92) -> Optional[Dict[str, Any]]:
         """
-        Cache RAG results.
+        Find semantically similar cached query.
+        """
+        if embedding is None:
+            return None
+            
+        best_score = -1.0
+        best_result = None
         
-        Args:
-            query: User query
-            subject: Subject filter
-            grade: Grade filter
-            results: RAG retrieval results to cache
+        # Norm of query embedding
+        query_norm = np.linalg.norm(embedding)
+        if query_norm == 0:
+            return None
+            
+        for key, (val, timestamp, cached_emb, meta) in self.cache.items():
+            # Check TTL
+            if time.time() - timestamp > self.ttl_seconds:
+                continue
+                
+            # strict filter on subject/grade
+            if meta.get('subject') != subject or meta.get('grade') != grade:
+                continue
+                
+            if cached_emb is None:
+                continue
+                
+            # Cosine Similarity
+            cached_norm = np.linalg.norm(cached_emb)
+            if cached_norm == 0:
+                continue
+                
+            score = np.dot(embedding, cached_emb) / (query_norm * cached_norm)
+            
+            if score > best_score:
+                best_score = score
+                best_result = val
+                
+        if best_score >= threshold:
+            return best_result
+        return None
+    
+    def set(self, query: str, subject: str, grade: str, results: Dict[str, Any], embedding: Optional[np.ndarray] = None) -> None:
+        """
+        Cache RAG results with optional embedding for semantic search.
         """
         key = self._normalize_query(query, subject, grade)
         
@@ -82,7 +120,8 @@ class RAGCache:
             oldest_key = min(self.cache.keys(), key=lambda k: self.cache[k][1])
             del self.cache[oldest_key]
         
-        self.cache[key] = (results, time.time())
+        metadata = {"subject": subject, "grade": grade, "query": query}
+        self.cache[key] = (results, time.time(), embedding, metadata)
     
     def clear(self) -> None:
         """Clear all cache entries."""
