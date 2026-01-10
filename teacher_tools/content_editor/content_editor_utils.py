@@ -4,11 +4,11 @@ Content Editor Utilities Module
 Provides tools for teachers to load, edit, add, and remove topics, subtopics, concepts, and questions in the content JSON. Includes validation and saving.
 """
 
-import os
 import json
 from typing import Dict, Any, List, Optional
-from system.data_manager.content_manager import ContentManager
 from jsonschema import ValidationError
+from system.data_manager.content_manager import ContentManager
+from system.security.security_utils import validate_content_input
 
 
 def load_content_file(filepath: str) -> Dict[str, Any]:
@@ -57,6 +57,9 @@ def add_topic(content: Dict[str, Any], topic: Dict[str, Any]) -> None:
         content (Dict[str, Any]): Content data
         topic (Dict[str, Any]): Topic to add
     """
+    if not validate_content_input(topic):
+        print("Error: Invalid topic input (too large).")
+        return
     content.setdefault('topics', []).append(topic)
 
 
@@ -82,6 +85,10 @@ def add_concept(content: Dict[str, Any], topic_name: str, subtopic_name: str, co
     Returns:
         bool: True if added, False if not found
     """
+    if not validate_content_input(concept):
+        print("Error: Invalid concept input.")
+        return False
+
     def add_to_subtopic(subtopics):
         for subtopic in subtopics:
             if subtopic.get('name') == subtopic_name:
@@ -147,6 +154,10 @@ def add_question(content: Dict[str, Any], topic_name: str, subtopic_name: str, c
     Returns:
         bool: True if added, False if not found
     """
+    if not validate_content_input(question):
+        print("Error: Invalid question input.")
+        return False
+
     def add_to_concept(subtopics):
         for subtopic in subtopics:
             if subtopic.get('name') == subtopic_name:

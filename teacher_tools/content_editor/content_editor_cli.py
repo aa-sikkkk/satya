@@ -46,17 +46,25 @@ Confirm.ask = staticmethod(patched_confirm_ask)
 class TeacherContentEditorCLI:
     def __init__(self):
         self.content = None
-        self.filepath = None
-        self.content_manager = None
+        self.current_subject = None
+        self.content_manager = ContentManager() # Initialize with default path
         self.session = PromptSession()
 
     def start(self):
         console.print(Panel("[bold cyan]Welcome to the Satya Teacher Content Editor![/bold cyan]", border_style="cyan"))
         while True:
-            choice = self._create_menu(
-                "Teacher Content Editor Menu",
-                [
-                    "Load Content File",
+            # Show current state
+            if self.current_subject:
+                console.print(Panel(f"[bold green]Current Subject: {self.current_subject}[/bold green]", border_style="green"))
+
+            # Dynamic menu based on state
+            load_option = "Switch Subject" if self.content else "Load Subject Content"
+            options = [load_option]
+            
+            default_choice = "1"
+            
+            if self.content:
+                options.extend([
                     "List Topics",
                     "Add Topic",
                     "Add Concept",
@@ -64,12 +72,16 @@ class TeacherContentEditorCLI:
                     "Remove Topic",
                     "Remove Concept",
                     "Remove Question",
-                    "Save Content File",
-                    "Exit"
-                ]
-            )
-            if choice == "Load Content File":
-                self._load_content()
+                    "Save Content"
+                ])
+                default_choice = "2" # Default to "List Topics" if content is loaded
+            
+            options.append("Exit")
+
+            choice = self._create_menu("Teacher Content Editor Menu", options, default_choice)
+            
+            if choice == "Load Subject Content" or choice == "Switch Subject":
+                self._load_subject_content()
             elif choice == "List Topics":
                 self._list_topics()
             elif choice == "Add Topic":
@@ -84,14 +96,14 @@ class TeacherContentEditorCLI:
                 self._remove_concept()
             elif choice == "Remove Question":
                 self._remove_question()
-            elif choice == "Save Content File":
+            elif choice == "Save Content":
                 self._save_content()
             elif choice == "Exit":
                 if Confirm.ask("Are you sure you want to exit?"):
                     console.print("[bold green]Thank you for using the Teacher Content Editor. Goodbye![/bold green]")
                     break
 
-    def _create_menu(self, title: str, options: List[str]) -> str:
+    def _create_menu(self, title: str, options: List[str], default_choice: str = "1") -> str:
         table = Table(title=title, show_header=False, box=None)
         table.add_column("Option", style="cyan")
         table.add_column("Description", style="green")
@@ -104,25 +116,31 @@ class TeacherContentEditorCLI:
             choice = Prompt.ask(
                 "Select an option (number or text)",
                 choices=list(valid_choices.keys()),
-                default="1"
+                default=default_choice
             )
             selected = valid_choices.get(choice.lower())
             if selected:
                 return selected
             console.print("[red]Invalid choice. Please enter a number or option text.[/red]")
 
-    def _load_content(self):
-        filepath = Prompt.ask("Enter path to content JSON file")
-        if not os.path.exists(filepath):
-            console.print(f"[red]File not found: {filepath}[/red]")
+    def _load_subject_content(self):
+        subjects = self.content_manager.get_all_subjects()
+        if not subjects:
+            console.print("[yellow]No subjects found in Content Manager.[/yellow]")
             return
+        
+        console.print("\n[bold]Available Subjects:[/bold]")
+        for i, subj in enumerate(subjects, 1):
+            console.print(f"{i}. {subj}")
+            
+        choice = Prompt.ask("Enter subject name", choices=subjects)
+        
         try:
-            self.content = load_content_file(filepath)
-            self.filepath = filepath
-            self.content_manager = ContentManager(os.path.dirname(filepath))
-            console.print(f"[green]Loaded content from {filepath}[/green]")
+            self.content = self.content_manager.get_subject(choice)
+            self.current_subject = choice
+            console.print(f"[green]Loaded content for subject: {choice}[/green]")
         except Exception as e:
-            console.print(f"[red]Failed to load content: {e}[/red]")
+            console.print(f"[red]Failed to load content for {choice}: {e}[/red]")
 
     def _list_topics(self):
         if not self.content:
@@ -132,15 +150,19 @@ class TeacherContentEditorCLI:
         if not topics:
             console.print("[yellow]No topics found.[/yellow]")
             return
-        table = Table(title="Topics", show_lines=True)
+        table = Table(title=f"Topics in {self.current_subject}", show_lines=True)
         table.add_column("Name", style="cyan")
+        table.add_column("Subtopics", style="magenta")
+        table.add_column("Concepts", style="green")
+        
         for topic in topics:
-            table.add_row(topic.get('name', ''))
+            sub_count = len(topic.get('subtopics', []))
+            conc_count = len(topic.get('concepts', []))
+            table.add_row(topic.get('name', ''), str(sub_count), str(conc_count))
         console.print(table)
 
     def _add_topic(self):
         if not self.content:
-            console.print("[yellow]No content loaded.[/yellow]")
             return
         name = Prompt.ask("Enter topic name")
         topic = {"name": name, "subtopics": [], "concepts": []}
@@ -149,81 +171,95 @@ class TeacherContentEditorCLI:
 
     def _add_concept(self):
         if not self.content:
-            console.print("[yellow]No content loaded.[/yellow]")
             return
         topic_name = Prompt.ask("Enter topic name to add concept to")
-        subtopic_name = Prompt.ask("Enter subtopic name to add concept to")
+        # Optional subtopic
+        subtopic_name = Prompt.ask("Enter subtopic name (optional, press Enter to skip)", default="")
+        if not subtopic_name:
+            subtopic_name = topic_name # Logic in utils uses topic name as fallback if added directly
+
         concept_name = Prompt.ask("Enter concept name")
         summary = Prompt.ask("Enter concept summary", default="")
         concept = {"name": concept_name, "summary": summary, "steps": [], "questions": []}
+        
         if add_concept(self.content, topic_name, subtopic_name, concept):
             console.print(f"[green]Added concept: {concept_name}[/green]")
         else:
-            console.print(f"[red]Failed to add concept. Check topic and subtopic names.[/red]")
+            console.print(f"[red]Failed to add concept. Topic '{topic_name}' or subtopic '{subtopic_name}' not found.[/red]")
 
     def _add_question(self):
         if not self.content:
-            console.print("[yellow]No content loaded.[/yellow]")
             return
-        topic_name = Prompt.ask("Enter topic name for question")
-        subtopic_name = Prompt.ask("Enter subtopic name for question")
-        concept_name = Prompt.ask("Enter concept name for question")
+        topic_name = Prompt.ask("Enter topic name")
+        subtopic_name = Prompt.ask("Enter subtopic name (optional)", default="")
+        if not subtopic_name: subtopic_name = topic_name
+
+        concept_name = Prompt.ask("Enter concept name")
         question_text = Prompt.ask("Enter question text")
-        question = {"question": question_text}
+        question = {"question": question_text} # Minimal question structure
+        
         if add_question(self.content, topic_name, subtopic_name, concept_name, question):
             console.print(f"[green]Added question to concept: {concept_name}[/green]")
         else:
-            console.print(f"[red]Failed to add question. Check topic, subtopic, and concept names.[/red]")
+            console.print(f"[red]Failed to add question. Check path.[/red]")
 
     def _remove_topic(self):
         if not self.content:
-            console.print("[yellow]No content loaded.[/yellow]")
             return
         topic_name = Prompt.ask("Enter topic name to remove")
-        remove_topic(self.content, topic_name)
-        console.print(f"[green]Removed topic: {topic_name}[/green]")
+        if Confirm.ask(f"Are you sure you want to delete topic '{topic_name}'?"):
+            remove_topic(self.content, topic_name)
+            console.print(f"[green]Removed topic: {topic_name}[/green]")
 
     def _remove_concept(self):
         if not self.content:
-            console.print("[yellow]No content loaded.[/yellow]")
             return
-        topic_name = Prompt.ask("Enter topic name for concept")
-        subtopic_name = Prompt.ask("Enter subtopic name for concept")
+        topic_name = Prompt.ask("Enter topic name")
+        subtopic_name = Prompt.ask("Enter subtopic name (optional)", default="")
+        if not subtopic_name: subtopic_name = topic_name
+        
         concept_name = Prompt.ask("Enter concept name to remove")
-        if remove_concept(self.content, topic_name, subtopic_name, concept_name):
-            console.print(f"[green]Removed concept: {concept_name}[/green]")
-        else:
-            console.print(f"[red]Failed to remove concept. Check topic, subtopic, and concept names.[/red]")
+        if Confirm.ask(f"Delete concept '{concept_name}'?"):
+            if remove_concept(self.content, topic_name, subtopic_name, concept_name):
+                console.print(f"[green]Removed concept: {concept_name}[/green]")
+            else:
+                console.print("[red]Concept not found.[/red]")
 
     def _remove_question(self):
         if not self.content:
-            console.print("[yellow]No content loaded.[/yellow]")
             return
-        topic_name = Prompt.ask("Enter topic name for question")
-        subtopic_name = Prompt.ask("Enter subtopic name for question")
-        concept_name = Prompt.ask("Enter concept name for question")
+        topic_name = Prompt.ask("Enter topic name")
+        subtopic_name = Prompt.ask("Enter subtopic name (optional)", default="")
+        if not subtopic_name: subtopic_name = topic_name
+        
+        concept_name = Prompt.ask("Enter concept name")
         question_text = Prompt.ask("Enter question text to remove")
+        
         if remove_question(self.content, topic_name, subtopic_name, concept_name, question_text):
-            console.print(f"[green]Removed question from concept: {concept_name}[/green]")
+            console.print(f"[green]Removed question.[/green]")
         else:
-            console.print(f"[red]Failed to remove question. Check topic, subtopic, concept, and question text.[/red]")
+            console.print("[red]Question not found.[/red]")
 
     def _save_content(self):
-        if not self.content:
+        if not self.content or not self.current_subject:
             console.print("[yellow]No content loaded.[/yellow]")
             return
-        if not self.filepath:
-            self.filepath = Prompt.ask("Enter path to save content JSON file")
-        # Validate before saving
-        if self.content_manager and not validate_content(self.content, self.content_manager):
-            if not Confirm.ask("Content failed validation. Save anyway?"):
-                console.print("[red]Content not saved.[/red]")
-                return
+        
         try:
-            save_content_file(self.content, self.filepath)
-            console.print(f"[green]Content saved to {self.filepath}[/green]")
+            # Use ContentManager to update (handles validation and backup)
+            self.content_manager.update_content(self.current_subject, self.content)
+            console.print(f"[bold green]Successfully saved content for {self.current_subject}![/bold green]")
+            console.print(f"[dim]Backup created in {self.current_subject}/backups[/dim]")
         except Exception as e:
             console.print(f"[red]Failed to save content: {e}[/red]")
+            # Offer to force save to a file just in case
+            if Confirm.ask("Try saving to a local file instead?"):
+                fname = f"{self.current_subject}_emergency_save.json"
+                try:
+                    save_content_file(self.content, fname)
+                    console.print(f"[green]Saved to {fname}[/green]")
+                except Exception as e2:
+                    console.print(f"[red]Emergency save failed: {e2}[/red]")
 
 if __name__ == "__main__":
     cli = TeacherContentEditorCLI()
