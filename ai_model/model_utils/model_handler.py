@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 """
 Model Handler for Satya Learning System
-Simple wrapper around Phi 1.5 handler
+CPU-first with SimpleHandler interface
 """
 
 import os
 import logging
 from typing import Dict, Any, List, Tuple, Iterator, Optional
 
-# Import the FIXED handler
-from .phi15_handler import Phi15Handler
+from .phi15_handler import SimplePhiHandler
 
 logging.basicConfig(
     level=logging.INFO,
@@ -18,25 +17,47 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+class SimpleHandler:
+    """Lightweight single-phase interface for RAG queries."""
+    
+    def __init__(self, phi_handler):
+        self.phi_handler = phi_handler
+    
+    def get_answer(self, query_text: str, context_text: str) -> Tuple[str, float]:
+        """
+        Single-step answer generation.
+        Returns (answer_text, confidence_score)
+        """
+        try:
+            return self.phi_handler.get_answer(query_text, context_text)
+        except Exception as e:
+            logger.error(f"SimpleHandler error: {e}")
+            return "Error generating answer.", 0.0
+
+
 class ModelHandler:
     """
-    Simple model handler using Phi 1.5.
-    No complexity, just works.
+    Model handler with SimpleHandler interface for i3 optimization.
     """
     
     def __init__(self, model_path: Optional[str] = None):
-        """
-        Initialize handler.
-
-        Args:
-            model_path: Path to model directory. Defaults to "satya_data/models/phi15"
-        """
-        # Default path
+        """Initialize handler."""
         if model_path is None:
             model_path = os.path.join("satya_data", "models", "phi15")
-            
+        
+        # Find .gguf file
+        from pathlib import Path
+        model_dir = Path(model_path)
+        gguf_files = list(model_dir.glob("*.gguf"))
+        
+        if not gguf_files:
+            raise FileNotFoundError(f"No .gguf file found in {model_path}")
+        
+        model_file = str(gguf_files[0])
+        logger.info(f"Using model: {model_file}")
+        
         self.model_path = model_path
-        self.handler = Phi15Handler(model_path)
+        self.handler = SimplePhiHandler(model_file)
         
         # Pre-load model
         try:
@@ -47,18 +68,11 @@ class ModelHandler:
             logger.error(f"Failed to load model: {e}")
             raise
         
+        # Add lightweight interface for RAG
+        self.simple_handler = SimpleHandler(self.handler)
+    
     def get_answer(self, question: str, context: str = "", answer_length: str = "medium") -> Tuple[str, float]:
-        """
-        Get answer (answer_length is ignored - handler auto-detects).
-        
-        Args:
-            question: User's question
-            context: RAG context (optional)
-            answer_length: Ignored (kept for compatibility)
-            
-        Returns:
-            (answer, confidence)
-        """
+        """Get answer (non-streaming)."""
         try:
             return self.handler.get_answer(question, context)
         except Exception as e:
@@ -66,44 +80,13 @@ class ModelHandler:
             return "I'm having trouble with your question. Please try again.", 0.1
     
     def get_answer_stream(self, question: str, context: str = "", answer_length: str = "medium") -> Iterator[str]:
-        """
-        Stream answer tokens.
-        
-        Args:
-            question: User's question
-            context: RAG context (optional)
-            answer_length: Ignored
-            
-        Yields:
-            Token chunks
-        """
+        """Stream answer tokens."""
         try:
             yield from self.handler.get_answer_stream(question, context)
         except Exception as e:
             logger.error(f"Stream error: {e}")
             yield "I'm having trouble with your question. Please try again."
     
-    def get_hints(self, question: str, context: str = "") -> List[str]:
-        """
-        Get 3 hints.
-        
-        Args:
-            question: Question to get hints for
-            context: Context (optional)
-            
-        Returns:
-            List of 3 hints
-        """
-        try:
-            return self.handler.get_hints(question, context)
-        except Exception as e:
-            logger.error(f"Hints error: {e}")
-            return [
-                "Think about the key concepts.",
-                "Break the question into parts.",
-                "Connect to what you already know."
-            ]
-            
     def get_model_info(self) -> Dict[str, Any]:
         """Get model info."""
         return {
@@ -111,13 +94,9 @@ class ModelHandler:
             "version": "1.5",
             "format": "GGUF",
             "backend": "llama-cpp-python",
-            "optimized_for": "educational_answers",
-            "adaptive_tokens": True
+            "optimized_for": "i3_cpu",
+            "context_size": "384 tokens"
         }
-            
-    def get_available_models(self) -> List[str]:
-        """Get available models."""
-        return ["phi15"]
     
     def cleanup(self):
         """Clean up resources."""

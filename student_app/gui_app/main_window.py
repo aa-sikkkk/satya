@@ -71,7 +71,7 @@ class NEBeduApp(ctk.CTk):
         self.question_index = 0
         
         # --- NEW STATE VARIABLES ---
-        self.current_grade_filter = "Grade 10" 
+        self.current_grade_filter = "10"  # Store as number only
         self.current_subject_filter = "Science" 
 
         # Create UI structure first (non-blocking)
@@ -143,15 +143,11 @@ class NEBeduApp(ctk.CTk):
         )
         self.title_label.pack(side="left", padx=15)
         
-        # --- NEW: Mandatory Dropdowns in Top Bar ---
-        self.grade_selector = GradeSelector(self.top_bar, command=self.on_grade_change, width=110)
-        self.grade_selector.pack(side="right", padx=10)
-        
+        # --- Subject Selector Only (Grade removed for simplicity) ---
         self.subject_selector = SubjectSelector(self.top_bar, command=self.on_subject_change, width=140)
         self.subject_selector.pack(side="right", padx=10)
         
-        # Store initial values
-        self.current_grade_filter = self.grade_selector.get().replace("Grade ", "")
+        # Store initial value
         self.current_subject_filter = self.subject_selector.get()
 
         self.sidebar_shown = False
@@ -168,10 +164,6 @@ class NEBeduApp(ctk.CTk):
         self.welcome_view = WelcomeView(self.main_frame, self.on_login)
         self.welcome_view.pack(fill='both', expand=True)
 
-    def on_grade_change(self, value):
-        self.current_grade_filter = value.replace("Grade ", "")
-        print(f"Grade changed to: {self.current_grade_filter}")
-        
     def on_subject_change(self, value):
         self.current_subject_filter = value
         self.selected_subject = value # Sync with browse variable
@@ -653,8 +645,7 @@ class NEBeduApp(ctk.CTk):
 
     def on_ask_submit(self, question, answer_length="medium"):
         """
-        Handle RAG question submission.
-        UPDATED: Now includes mandatory Subject/Grade filters and Diagram Viewer Integration.
+        Handle RAG question submission with REAL-TIME streaming.
         """
         if self._loading:
             return
@@ -664,73 +655,82 @@ class NEBeduApp(ctk.CTk):
         
         def worker():
             try:
-                # RAG engine is already initialized during startup (eager loading)
-                normalized_question = question.strip().capitalize()
+                # Normalize question
+                normalized_question = question.strip()
+                if not normalized_question:
+                    def show_error():
+                        mb.showerror("Error", "Please enter a question")
+                        self.ask_view.set_loading(False)
+                        self._loading = False
+                    self.after(0, show_error)
+                    return
                 
-                # Helper function for typing animation
-                def type_text(text, delay_ms=20):
-                    """Type text character-by-character for smooth UX"""
-                    for char in text:
-                        self.ask_view.append_answer_token(char)
-                        self.update()  # Force GUI update
-                        time.sleep(delay_ms / 1000.0)  # Convert ms to seconds
+                # Check if RAG engine is ready
+                if not self.rag_engine:
+                    def show_error():
+                        self.ask_view.set_result(
+                            "RAG Engine not initialized. Please restart the app.",
+                            is_openai=False
+                        )
+                        self._loading = False
+                    self.after(0, show_error)
+                    return
                 
-                # --- USE EXISTING RAG QUERY METHOD WITH STREAMING ---
-                if self.rag_engine:
-                    # Define callback for Phase 1 (show immediately with typing animation)
-                    def on_phase1(phase1_text, phase1_confidence):
-                        import logging
-                        logging.info(f"[Phase 1] Phase 1 callback triggered! Text: {phase1_text[:50]}...")
-                        def show_phase1():
+                # STREAMING callback for real-time feedback
+                first_token = [True]
+                
+                def on_token(token):
+                    """Stream tokens to GUI in real-time"""
+                    def display():
+                        if first_token[0]:
                             self.ask_view.set_loading(False)
-                            type_text(phase1_text, delay_ms=15)  # Fast typing
-                            self.ask_view.append_answer_token("\n\n")  # Separator
-                        self.after(0, show_phase1)
-                    
-                    # Define callback for Phase 2 (True Streaming)
-                    def on_phase2_token(token):
-                        def show_token():
-                            self.ask_view.append_answer_token(token)
-                        # Schedule token display
-                        self.after(0, show_token)
-
-                    # Pass callbacks to RAG engine
+                            first_token[0] = False
+                        self.ask_view.append_answer_token(token)
+                    self.after(0, display)
+                
+                # Call RAG with streaming
+                try:
                     response = self.rag_engine.query(
                         query_text=normalized_question,
                         subject=self.current_subject_filter,
-                        grade="",  # Don't filter by grade
-                        phase1_callback=on_phase1,  # Stream Phase 1
-                        phase2_callback=on_phase2_token # Stream Phase 2 tokens
+                        stream_callback=on_token  # REAL-TIME STREAMING
                     )
                     
-                    # Phase 2 is already displayed via streaming...
-                    # Just finalize the confidence and state
+                    # Get metadata
                     confidence = response.get('confidence', 0.5)
+                    diagram = response.get('diagram')
                     
-                    def finalize_ui():
-                        # We don't need to append text anymore, just finalize
+                    # Finalize UI
+                    def finalize():
                         self.ask_view.finalize_answer(confidence, question=normalized_question)
+                        
+                        if diagram:
+                            try:
+                                self.ask_view.show_diagram(diagram)
+                            except AttributeError:
+                                pass
+                        
                         self._loading = False
                     
-                    self.after(0, finalize_ui)
+                    self.after(0, finalize)
                     
-                else:
-                    final_answer = "RAG Engine not initialized."
-                    
+                except Exception as e:
+                    error_msg = str(e)
                     def show_error():
-                        self.ask_view.set_result(final_answer, is_openai=False)
+                        mb.showerror("RAG Error", f"Failed to get answer: {error_msg}")
+                        self.ask_view.set_loading(False)
                         self._loading = False
-                    
                     self.after(0, show_error)
-                
+                    
             except Exception as ex:
-                error_msg = str(ex)  # Capture error message before nested function
+                error_msg = str(ex)
                 def show_error():
                     mb.showerror("Error", f"An error occurred: {error_msg}")
                     self.ask_view.set_loading(False)
                     self._loading = False
                 self.after(0, show_error)
         
+        # Run in background thread
         threading.Thread(target=worker, daemon=True).start()
 
     def show_progress(self):
