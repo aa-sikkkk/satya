@@ -8,7 +8,7 @@ Satya is an offline AI learning companion for Grade 10 students in Nepal. It hel
 
 ## 2. Installation
 
-Your teacher or system administrator will likely install Satya for you. If you need to install it yourself, please refer to the detailed [Installation Guide](README.md#Installation).
+Your teacher or system administrator will likely install Satya for you. If you need to install it yourself, please refer to the detailed [Installation Guide](https://github.com/aa-sikkkk/satya/blob/master/readme.md#installation).
 
 ## 3. Starting the Application
 

@@ -8,7 +8,7 @@ The Satya system includes tools specifically designed for teachers to manage edu
 
 ## 2. Installation
 
-Refer to the main [Installation Guide](README.md#Installation) for detailed steps on setting up the Satya system. The teacher tools are included in the standard installation.
+Refer to the main [Installation Guide](https://github.com/aa-sikkkk/satya/blob/master/readme.md#installation) for detailed steps on setting up the Satya system. The teacher tools are included in the standard installation.
 
 ## 3. Content Management with the CLI Editor
 
@@ -71,4 +71,4 @@ The Satya content is community-editable. You can contribute to improving the con
 
 ## 7. Troubleshooting
 
-If you encounter issues, refer to the main [Troubleshooting section](README.md#Support) in the README or the [Technical Implementation Guide](docs/TECHNICAL_IMPLEMENTATION.md#Troubleshooting) for common problems and solutions. 
+If you encounter issues, refer to the main [Troubleshooting section](../README.md#Support) in the README or the [Technical Implementation Guide](docs/TECHNICAL_IMPLEMENTATION.md#Troubleshooting) for common problems and solutions. 
