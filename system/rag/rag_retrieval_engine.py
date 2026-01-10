@@ -231,8 +231,8 @@ class RAGRetrievalEngine:
                     
                     print(f"✅ RAG: Streaming complete. Total tokens: {token_count}", flush=True)
                     
-                    # Calculate confidence
-                    confidence = self._calculate_confidence(answer, query_text)
+                    # Calculate confidence with RAG context quality
+                    confidence = self._calculate_confidence(answer, query_text, final_context_chunks)
                 else:
                     # Non-streaming fallback
                     answer, confidence = self.llm.simple_handler.get_answer(query_text, full_context_str)
@@ -259,13 +259,39 @@ class RAGRetrievalEngine:
 
         return result
     
-    def _calculate_confidence(self, answer: str, question: str) -> float:
-        """Calculate confidence based on answer quality."""
+    def _calculate_confidence(self, answer: str, question: str, context_chunks: list = None) -> float:
+        """
+        Calculate confidence based on answer quality and RAG context.
+        
+        Factors:
+        - Answer length and completeness
+        - Relevance to question
+        - Quality of RAG context used
+        """
         if not answer or len(answer.split()) < 5:
             return 0.3
         
+        confidence = 0.5  # Base confidence
+        
+        # Factor 1: Answer length (good educational answers are 50-150 words)
+        word_count = len(answer.split())
+        if 50 <= word_count <= 150:
+            confidence += 0.2  # Ideal length
+        elif 30 <= word_count < 50 or 150 < word_count <= 200:
+            confidence += 0.1  # Acceptable length
+        # else: no bonus for too short or too long
+        
+        # Factor 2: Question-answer relevance
         q_words = set(w.lower() for w in question.split() if len(w) > 3)
         a_words = set(w.lower() for w in answer.split())
-        relevance = len(q_words & a_words) / max(1, len(q_words))
+        if q_words:
+            relevance = len(q_words & a_words) / len(q_words)
+            confidence += relevance * 0.2
         
-        return min(1.0, 0.5 + relevance * 0.5)
+        # Factor 3: RAG context quality (if available)
+        if context_chunks and len(context_chunks) > 0:
+            # If we have good RAG context, boost confidence
+            avg_score = sum(c.get('final_score', 0.5) for c in context_chunks) / len(context_chunks)
+            confidence += avg_score * 0.1
+        
+        return min(1.0, confidence)
