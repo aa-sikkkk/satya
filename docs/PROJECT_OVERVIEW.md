@@ -1,4 +1,4 @@
-# Satya Project Overview: An Offline-First, RAG-Powered AI Learning Companion for Nepali Grade 10 Students
+# Satya Project Overview: An Offline-First, RAG-Powered AI Learning Companion for Nepali students
 
 ## Executive Summary
 
