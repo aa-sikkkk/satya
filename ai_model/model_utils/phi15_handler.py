@@ -118,6 +118,7 @@ class SimplePhiHandler:
                     if len(chunk["choices"]) > 0:
                         text = chunk["choices"][0].get("text", "")
                         if text:
+                            print(f"🔥 TOKEN: '{text}'", flush=True)  # DIAGNOSTIC
                             yield text
         
         except Exception as e:

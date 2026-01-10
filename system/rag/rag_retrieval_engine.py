@@ -218,11 +218,18 @@ class RAGRetrievalEngine:
         if self.llm:
             try:
                 if stream_callback:
-                    # STREAM tokens in real-time
+                    # STREAM tokens in real-time - NO BUFFERING
                     answer = ""
+                    print("🚀 RAG: Starting token streaming...", flush=True)
+                    token_count = 0
+                    
                     for token in self.llm.handler.get_answer_stream(query_text, full_context_str):
                         answer += token
-                        stream_callback(token)
+                        print(f"📤 RAG: Sending token #{token_count}: '{token}'", flush=True)
+                        stream_callback(token)  # Send immediately
+                        token_count += 1
+                    
+                    print(f"✅ RAG: Streaming complete. Total tokens: {token_count}", flush=True)
                     
                     # Calculate confidence
                     confidence = self._calculate_confidence(answer, query_text)

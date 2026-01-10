@@ -681,6 +681,7 @@ class NEBeduApp(ctk.CTk):
                 
                 def on_token(token):
                     """Stream tokens to GUI in real-time"""
+                    print(f"🖥️  GUI: Received token: '{token}'", flush=True)
                     def display():
                         if first_token[0]:
                             self.ask_view.set_loading(False)
