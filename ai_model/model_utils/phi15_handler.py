@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class SimplePhiHandler:
     """Lightweight single-phase handler for i3 processors."""
     
-    STOP_SEQUENCES = ["\n\nQ:", "\n\nQuestion:", "</s>", "\nQuestion:", "\nQ:"]
+    STOP_SEQUENCES = ["</s>", "\n\nQuestion:", "\n\nQ:"]  # Simplified to allow longer answers
     
     def __init__(self, model_path: str):
         self.model_path = model_path
@@ -47,13 +47,26 @@ class SimplePhiHandler:
     def _build_prompt(self, question: str, context: str) -> str:
         """Build educational prompt with optional context."""
         context = (context or "").strip()
+        
+        # Educational prompt - balanced for 3-4 informative sentences
+        base_instruction = (
+            "You are Satya, an educational tutor for high school students.\n"
+            "Provide a clear explanation in exactly 3-4 complete sentences.\n"
+            "Structure your answer:\n"
+            "1. First sentence: Define what it is\n"
+            "2. Second sentence: Explain how it works or its main function\n"
+            "3. Third sentence: Give an example or explain why it's important\n"
+            "4. Optional fourth sentence: Add one more relevant detail\n"
+            "Make each sentence informative and complete.\n"
+        )
+        
         if context:
             # Trim context to 200 chars for i3 performance
             if len(context) > 200:
                 context = context[:200].rsplit('.', 1)[0] + '.'
-            return f"{self.system_prompt}\n\nStudy material:\n{context}\n\nQ: {question}\nA:"
+            return f"{base_instruction}\nReference material:\n{context}\n\nQuestion: {question}\nAnswer:"
         
-        return f"{self.system_prompt}\n\nQ: {question}\nA:"
+        return f"{base_instruction}\nQuestion: {question}\nAnswer:"
     
     def _clean_answer(self, answer: str) -> str:
         """Clean answer output."""
@@ -107,7 +120,7 @@ class SimplePhiHandler:
             # Stream directly from LLM
             for chunk in self.llm(
                 prompt,
-                max_tokens=200,
+                max_tokens=250,  # Balanced for 3-4 good sentences (~150-200 tokens)
                 temperature=0.5,
                 top_p=0.9,
                 repeat_penalty=1.08,
@@ -138,7 +151,7 @@ class SimplePhiHandler:
         try:
             response = self.llm(
                 prompt,
-                max_tokens=200,
+                max_tokens=250,  # Balanced for 3-4 good sentences
                 temperature=0.5,
                 top_p=0.9,
                 repeat_penalty=1.08,
