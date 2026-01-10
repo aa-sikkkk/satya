@@ -143,6 +143,9 @@ class RAGRetrievalEngine:
             stream_callback("🔍 Searching knowledge base...\n\n")
 
         # Embedding generation
+        if stream_callback:
+            stream_callback("📊 Analyzing your question...\n\n")
+        
         query_embedding = self.embedding_gen.generate_embeddings(query_text)
 
         # Cache check (semantic match) - NO GRADE
@@ -159,7 +162,11 @@ class RAGRetrievalEngine:
         # Collections selection - NO GRADE
         target_collections = self._get_relevant_collections(subject, "")
         if not target_collections:
-            logger.warning(f"No collections found for {subject} grade {grade}")
+            logger.warning(f"No collections found for {subject}")
+        
+        # Show progress
+        if stream_callback:
+            stream_callback("🎯 Finding best matches...\n\n")
 
         # Retrieval
         raw_results = []
@@ -210,6 +217,10 @@ class RAGRetrievalEngine:
         ordered_chunks = self.anti_confusion.resolve_conflicts(final_context_chunks)
         context_texts = [c['text'] for c in ordered_chunks]
         full_context_str = "\n\n".join(context_texts)
+        
+        # Show progress before generation
+        if stream_callback:
+            stream_callback("✨ Generating answer...\n\n")
 
         # LLM generation with STREAMING
         answer = "Unable to generate answer."
