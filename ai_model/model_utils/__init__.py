@@ -1,6 +1,6 @@
-"""BitNet Model Utilities for Satya Learning System"""
+"""Model Utilities for Satya Learning System"""
 
 from .model_handler import ModelHandler
-from .bitnet_handler import BitNetHandler
+from .phi15_handler import SimplePhiHandler
 
-__all__ = ['ModelHandler', 'BitNetHandler']
+__all__ = ['ModelHandler', 'SimplePhiHandler']

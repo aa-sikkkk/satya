@@ -95,13 +95,11 @@ class RAGCache:
         best_score = -1.0
         best_result = None
         
-        # Norm of query embedding
         query_norm = np.linalg.norm(embedding)
         if query_norm == 0:
             return None
             
         for key, (val, timestamp, cached_emb, meta) in list(self.cache.items()):
-            # Check TTL
             if time.time() - timestamp > self.ttl_seconds:
                 del self.cache[key]
                 continue
@@ -113,15 +111,12 @@ class RAGCache:
             if cached_emb is None:
                 continue
             
-            # Handle cached embedding shape
             if cached_emb.ndim > 1:
                 cached_emb = cached_emb.flatten()
                 
-            # Check dimension match
             if embedding.shape != cached_emb.shape:
                 continue
                 
-            # Cosine similarity
             cached_norm = np.linalg.norm(cached_emb)
             if cached_norm == 0:
                 continue
@@ -182,7 +177,6 @@ class RAGCache:
     
     def stats(self) -> Dict[str, Any]:
         """Get cache statistics."""
-        # Clean expired entries first
         current_time = time.time()
         expired_keys = [
             k for k, (_, timestamp, _, _) in self.cache.items() 

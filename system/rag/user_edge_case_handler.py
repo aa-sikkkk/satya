@@ -31,16 +31,6 @@ class UserEdgeCaseHandler:
         }
 
     def check_edge_cases(self, query: str) -> Optional[str]:
-        """
-        Check if the query matches a known edge case.
-        Returns a pre-canned response if matched, else None.
-        
-        Args:
-            query: User's raw input string
-            
-        Returns:
-            Response string or None
-        """
         query_lower = query.strip().lower()
         
         # 1. Empty Query
@@ -80,7 +70,6 @@ class UserEdgeCaseHandler:
         return None
         
     def is_math_query(self, query: str) -> bool:
-        """Simple heuristic to detect math queries for specialized prompt injection."""
         math_symbols = ['+', '=', '/', '*', '√', '^', 'solve', 'calculate', 'equation']
         count = sum(1 for s in math_symbols if s in query.lower())
         return count >= 1

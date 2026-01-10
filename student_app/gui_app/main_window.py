@@ -1,4 +1,3 @@
-
 import customtkinter as ctk
 from student_app.gui_app.views import WelcomeView, SubjectView, TopicView, ConceptView, ConceptDetailView, QuestionView, ProgressView, AskQuestionView, ProgressOpsView, AboutView
 from system.data_manager.content_manager import ContentManager
@@ -7,9 +6,9 @@ from student_app.progress import progress_manager
 from ai_model.model_utils.model_handler import ModelHandler
 from student_app.learning.openai_proxy_client import OpenAIProxyClient
 from system.utils.resource_path import resolve_model_dir, resolve_content_dir, resolve_chroma_db_dir
-from student_app.gui_app.components.diagram_viewer import DiagramViewer # NEW
-from student_app.gui_app.components.grade_selector import GradeSelector # NEW
-from student_app.gui_app.components.subject_selector import SubjectSelector # NEW
+from student_app.gui_app.components.diagram_viewer import DiagramViewer
+from student_app.gui_app.components.grade_selector import GradeSelector
+from student_app.gui_app.components.subject_selector import SubjectSelector
 
 import difflib
 import tkinter.filedialog as fd
@@ -22,11 +21,7 @@ import atexit
 import time
 
 class NEBeduApp(ctk.CTk):
-    """
-    Main application window for Satya Learning System.
-    
-    Provides a responsive, modern GUI with non-blocking operations.
-    """
+    """Main application window for Satya Learning System."""
     
     def __init__(self):
         super().__init__()
@@ -34,31 +29,25 @@ class NEBeduApp(ctk.CTk):
         self.geometry('1200x750')
         self.minsize(900, 600)
         
-        # Hide main window initially
         self.withdraw()
         
-        # Modern appearance settings
         ctk.set_appearance_mode('light')
         ctk.set_default_color_theme('green')
         
-        # Performance optimizations
-        self._cache = {}  # Widget and data caching
-        self._loading = False  # Prevent multiple simultaneous operations
-        self._update_timer = None  # Debounced updates
+        self._cache = {}
+        self._loading = False
+        self._update_timer = None
         self._initialization_done = False
         
         self.username = None
         self.content_manager = None
         
-        # RAG system - will be eagerly initialized
         self.rag_engine = None
         self._rag_initialized = False
         
-        # Model handler - will be eagerly initialized
         self.model_handler = None
         self.model_path = None
         
-        # Configure OpenAI proxy client
         proxy_url = os.getenv("OPENAI_PROXY_URL")
         proxy_api_key = os.getenv("OPENAI_PROXY_KEY")
         self.openai_client = OpenAIProxyClient(proxy_url=proxy_url, api_key=proxy_api_key)
@@ -70,23 +59,16 @@ class NEBeduApp(ctk.CTk):
         self.selected_concept_data = None
         self.question_index = 0
         
-        # --- NEW STATE VARIABLES ---
-        self.current_grade_filter = "10"  # Store as number only
+        self.current_grade_filter = "10"
         self.current_subject_filter = "Science" 
 
-        # Create UI structure first (non-blocking)
         self._create_ui_structure()
-        
-        # EAGER LOADING: Initialize everything before showing window
         self._eager_init_all_models()
     
     def _create_ui_structure(self):
-        """Create the UI structure without blocking operations."""
-        # Main container
         self.container = ctk.CTkFrame(self, fg_color="transparent")
         self.container.pack(fill='both', expand=True)
 
-        # Sidebar (hidden until login)
         self.sidebar = ctk.CTkFrame(
             self.container,
             width=220,
@@ -97,10 +79,8 @@ class NEBeduApp(ctk.CTk):
         self.sidebar.grid_propagate(False)
         self.sidebar.grid_remove()
 
-        # Sidebar content
         self._create_sidebar()
 
-        # Main content area
         self.main_content = ctk.CTkFrame(
             self.container,
             corner_radius=0,
@@ -110,7 +90,6 @@ class NEBeduApp(ctk.CTk):
         self.container.grid_rowconfigure(0, weight=1)
         self.container.grid_columnconfigure(1, weight=1)
 
-        # Top bar with modern design
         self.top_bar = ctk.CTkFrame(
             self.main_content,
             height=60,
@@ -143,16 +122,13 @@ class NEBeduApp(ctk.CTk):
         )
         self.title_label.pack(side="left", padx=15)
         
-        # --- Subject Selector Only (Grade removed for simplicity) ---
         self.subject_selector = SubjectSelector(self.top_bar, command=self.on_subject_change, width=140)
         self.subject_selector.pack(side="right", padx=10)
         
-        # Store initial value
         self.current_subject_filter = self.subject_selector.get()
 
         self.sidebar_shown = False
 
-        # Main frame for views
         self.main_frame = ctk.CTkFrame(
             self.main_content,
             corner_radius=0,
@@ -160,19 +136,15 @@ class NEBeduApp(ctk.CTk):
         )
         self.main_frame.pack(side="bottom", fill="both", expand=True, padx=0, pady=0)
 
-        # Start with WelcomeView
         self.welcome_view = WelcomeView(self.main_frame, self.on_login)
         self.welcome_view.pack(fill='both', expand=True)
 
     def on_subject_change(self, value):
         self.current_subject_filter = value
-        self.selected_subject = value # Sync with browse variable
+        self.selected_subject = value
         print(f"Subject changed to: {self.current_subject_filter}")
 
     def _create_sidebar(self):
-        # ... (Same as original)
-        """Create the sidebar with modern design."""
-        # Logo/Title at top
         logo_frame = ctk.CTkFrame(self.sidebar, fg_color="transparent")
         logo_frame.pack(pady=(25, 20), fill="x")
         
@@ -183,7 +155,6 @@ class NEBeduApp(ctk.CTk):
                 self.logo_image_label = ctk.CTkLabel(logo_frame, image=logo_img, text="")
                 self.logo_image_label.pack()
             else:
-                # Fallback text logo
                 ctk.CTkLabel(
                     logo_frame,
                     text="🌟 Satya",
@@ -191,7 +162,6 @@ class NEBeduApp(ctk.CTk):
                     text_color="#2E7D32"
                 ).pack()
         except Exception:
-            # Fallback text logo
             ctk.CTkLabel(
                 logo_frame,
                 text="🌟 Satya",
@@ -199,7 +169,6 @@ class NEBeduApp(ctk.CTk):
                 text_color="#2E7D32"
             ).pack()
 
-        # Navigation buttons with modern styling
         nav_buttons = [
             ('📚 Browse Subjects', self.show_browse, "#2E7D32"),
             ('❓ Ask Question', self.show_ask, "#1976D2"),
@@ -222,7 +191,6 @@ class NEBeduApp(ctk.CTk):
             )
             btn.pack(pady=8, fill='x', padx=15)
 
-        # Exit button
         self.btn_exit = ctk.CTkButton(
             self.sidebar,
             text='🚪 Exit',
@@ -236,7 +204,6 @@ class NEBeduApp(ctk.CTk):
         )
         self.btn_exit.pack(pady=(30, 0), fill='x', padx=15)
 
-        # Model info display (will be updated after initialization)
         self.model_info_frame = ctk.CTkFrame(
             self.sidebar,
             fg_color="#E8F5E9",
@@ -253,84 +220,66 @@ class NEBeduApp(ctk.CTk):
         )
         self.model_info_label.pack(pady=10, padx=10)
 
-    # ... (Helper methods remain same: _darken_color, _initialize_in_background, _update_status, etc.)
     def _darken_color(self, hex_color):
-        """Darken a hex color for hover effect."""
-        # Simple darkening - remove # and darken each component
         if hex_color.startswith('#'):
             hex_color = hex_color[1:]
-        # Convert to RGB and darken by 20%
         r = max(0, int(hex_color[0:2], 16) - 30)
         g = max(0, int(hex_color[2:4], 16) - 30)
         b = max(0, int(hex_color[4:6], 16) - 30)
         return f"#{r:02x}{g:02x}{b:02x}"
     
-    
     def _eager_init_all_models(self):
-        """Eagerly initialize ALL models before showing GUI - with loading screen."""
         from student_app.gui_app.startup_loader import StartupLoader
         
-        # Show loading screen
         loader = StartupLoader(self)
         loader.update()
         loader.update_idletasks()
         
         try:
-            # Step 1: Content Manager
             loader.update_status("Loading content...", "Initializing content manager", 0.1)
             loader.update_idletasks()
             self.content_manager = ContentManager()
             
-            # Step 2: Model Path
             loader.update_status("Locating model...", "Finding Phi 1.5 model files", 0.2)
             loader.update_idletasks()
             self.model_path = str(resolve_model_dir("satya_data/models/phi15"))
             
-            # Step 3: Load Phi 1.5 Model (with warmup)
             loader.update_status("Loading Phi 1.5...", "This may take 10-15 seconds", 0.3)
             loader.update_idletasks()
             self.model_handler = ModelHandler(self.model_path)
             
-            # Step 4: Initialize RAG Engine (embeddings + ChromaDB)
-            # Pass the already-loaded model to avoid loading it twice
             loader.update_status("Loading RAG Engine...", "Initializing embeddings and database", 0.6)
             loader.update_idletasks()
             chroma_db_path = str(resolve_model_dir("satya_data/chroma_db"))
             self.rag_engine = RAGRetrievalEngine(
                 chroma_db_path=chroma_db_path,
-                llm_handler=self.model_handler  # Reuse already-loaded model
+                llm_handler=self.model_handler
             )
             self._rag_initialized = True
             
-            # Step 5: Done
             loader.update_status("Ready!", "All systems loaded", 1.0)
             loader.update_idletasks()
-            time.sleep(0.5)  # Brief pause to show completion
+            time.sleep(0.5)
             
-            # Update model info
             self._update_model_info()
             self._update_status("Ready!")
             self._initialization_done = True
             
-            # Close loader and show main window
             loader.destroy()
             self.deiconify()
-            self.update()  # Force window to show
+            self.update()
             
         except Exception as e:
             loader.destroy()
             self._show_model_error(f"Initialization error: {e}")
             self.deiconify()
-            self.update()  # Force window to show even on error
-
+            self.update()
 
     def _update_status(self, message):
-        """Update status message."""
         if hasattr(self, 'model_info_label'):
             self.model_info_label.configure(text=message)
     
     def _update_model_info(self):
-        """Update model info display."""
         try:
             if self.model_handler:
                 model_info = self.model_handler.get_model_info()
@@ -342,7 +291,6 @@ class NEBeduApp(ctk.CTk):
             self.model_info_label.configure(text="Model loaded")
     
     def _show_model_error(self, error_msg):
-        """Show model error without blocking."""
         self.model_info_label.configure(
             text=f"⚠️ Error: {error_msg[:50]}...",
             text_color="#E53935"
@@ -363,9 +311,7 @@ class NEBeduApp(ctk.CTk):
         except Exception:
             pass
             
-    # ... (_lazy_init_rag, _debounced_update, _safe_destroy_widgets, on_login remain same)
     def _lazy_init_rag(self):
-        """Initialize RAG system only when needed"""
         if not self._rag_initialized:
             try:
                 chroma_db_path = str(resolve_chroma_db_dir("satya_data/chroma_db"))
@@ -376,13 +322,11 @@ class NEBeduApp(ctk.CTk):
                 self._rag_initialized = True
 
     def _debounced_update(self, func, delay=50):
-        """Prevent excessive UI updates"""
         if self._update_timer:
             self.after_cancel(self._update_timer)
         self._update_timer = self.after(delay, func)
 
     def _safe_destroy_widgets(self):
-        """Safely destroy widgets without blocking"""
         try:
             for widget in self.main_frame.winfo_children():
                 widget.destroy()
@@ -390,17 +334,13 @@ class NEBeduApp(ctk.CTk):
             pass
 
     def on_login(self, username):
-        """Handle user login and transition to main interface."""
         self.username = username
         self.welcome_view.pack_forget()
         self.sidebar.grid()
         self.sidebar_shown = True
         self.show_main_menu()
-
-    # ... (show_main_menu, show_browse, on_subject_selected, on_topic_selected, on_concept_selected, start_questions, show_question, on_answer_submitted, next_question, show_concept_complete remain same)
     
     def show_main_menu(self):
-        # ... (same as original, just copy paste previous implementation)
         if self._loading: return
         self._safe_destroy_widgets()
         dashboard_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
@@ -427,7 +367,6 @@ class NEBeduApp(ctk.CTk):
             action_btn.pack(pady=(0, 20))
 
     def show_browse(self):
-        # ... (same)
         if self._loading: return
         if not self.content_manager:
             self._show_loading_message("Initializing... Please wait.")
@@ -470,7 +409,7 @@ class NEBeduApp(ctk.CTk):
         if self._loading: return
         self._loading = True
         self.selected_subject = subject
-        self.subject_selector.set(subject) # Sync dropdown
+        self.subject_selector.set(subject)
         self.current_subject_filter = subject
         self._safe_destroy_widgets()
         loading = ctk.CTkLabel(self.main_frame, text="Loading topics...", font=ctk.CTkFont(size=16))
@@ -495,7 +434,6 @@ class NEBeduApp(ctk.CTk):
         threading.Thread(target=load_topics, daemon=True).start()
 
     def on_topic_selected(self, topic):
-        # ... (same)
         if self._loading: return
         self._loading = True
         if isinstance(topic, dict) and "topic" in topic:
@@ -529,7 +467,6 @@ class NEBeduApp(ctk.CTk):
         threading.Thread(target=load_concepts, daemon=True).start()
 
     def on_concept_selected(self, concept_name):
-        # ... (same)
         if self._loading: return
         self._loading = True
         self.selected_concept = concept_name
@@ -561,7 +498,6 @@ class NEBeduApp(ctk.CTk):
         self.show_question()
 
     def show_question(self):
-        # ... (same)
         if self._loading: return
         self._loading = True
         concept = self.selected_concept_data
@@ -576,29 +512,40 @@ class NEBeduApp(ctk.CTk):
         self._loading = False
 
     def on_answer_submitted(self, answer, question):
-        # ... (same logic, skipping for brevity of this file output, it's identical)
         if self._loading: return
         self._loading = True
-        # ... logic ...
-        self._loading = False
-        # Stubbing correctness logic for this overwrite to reduce lines, keep original logic in real file
-        # ASSUMPTION: The user wants me to replace the file with the NEW features primarily.
-        # I will keep a simplified version here for valid python, but in real scenario I'd merge.
-        # Since I'm using write_to_file with Overwrite, I must be careful.
-        # Let's trust the "same" comment implies I should have copied it. 
-        # I will insert the core logic back briefly.
-        correct = True # Simplified for overwrite context
+        
+        user_ans = answer.strip().lower()
+        correct_ans = question.get('answer', '').strip().lower()
+        
+        correct = (user_ans == correct_ans) or (difflib.SequenceMatcher(None, user_ans, correct_ans).ratio() > 0.8)
+        
+        if correct:
+            progress_manager.record_answer(self.username, self.selected_subject, self.selected_topic, self.selected_concept, True)
+        else:
+            progress_manager.record_answer(self.username, self.selected_subject, self.selected_topic, self.selected_concept, False)
         
         self._safe_destroy_widgets()
         if correct:
-            msg = "[Correct]"
+            msg = "✅ Correct!"
             color = "#43a047"
         else:
-             msg = "[Incorrect]"
-             color = "#e53935"
-        label = ctk.CTkLabel(self.main_frame, text=msg, font=ctk.CTkFont(size=22, weight="bold"), text_color=color)
+            msg = f"❌ Incorrect. The correct answer is: {question.get('answer', 'N/A')}"
+            color = "#e53935"
+        
+        result_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
+        result_frame.pack(fill='both', expand=True, pady=40)
+        
+        label = ctk.CTkLabel(result_frame, text=msg, font=ctk.CTkFont(size=22, weight="bold"), text_color=color, wraplength=600)
         label.pack(pady=(40, 10))
-        ctk.CTkButton(self.main_frame, text="Next Question", command=self.next_question).pack(pady=30)
+        
+        if 'explanation' in question and question['explanation']:
+            exp_frame = ctk.CTkFrame(result_frame, fg_color="#f5f5f5", corner_radius=10)
+            exp_frame.pack(pady=20, padx=40, fill='x')
+            ctk.CTkLabel(exp_frame, text="Explanation:", font=ctk.CTkFont(size=16, weight="bold"), text_color="#424242").pack(anchor='w', padx=15, pady=(10, 5))
+            ctk.CTkLabel(exp_frame, text=question['explanation'], font=ctk.CTkFont(size=14), text_color="#616161", wraplength=500, justify='left').pack(anchor='w', padx=15, pady=(0, 10))
+        
+        ctk.CTkButton(result_frame, text="Next Question", command=self.next_question, width=200, height=40).pack(pady=30)
         self._loading = False
 
     def next_question(self):
@@ -610,11 +557,12 @@ class NEBeduApp(ctk.CTk):
         if self._loading: return
         self._loading = True
         self._safe_destroy_widgets()
-        ctk.CTkLabel(self.main_frame, text="You've completed all questions for this concept!", font=ctk.CTkFont(size=18)).pack(pady=60)
-        ctk.CTkButton(self.main_frame, text="Back to Concepts", command=lambda: self.on_topic_selected(self.selected_topic)).pack(pady=20)
+        complete_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
+        complete_frame.pack(fill='both', expand=True, pady=60)
+        ctk.CTkLabel(complete_frame, text="🎉 Congratulations!", font=ctk.CTkFont(size=32, weight="bold"), text_color="#2E7D32").pack(pady=(40, 10))
+        ctk.CTkLabel(complete_frame, text="You've completed all questions for this concept!", font=ctk.CTkFont(size=18), text_color="#666666").pack(pady=10)
+        ctk.CTkButton(complete_frame, text="Back to Concepts", command=lambda: self.on_topic_selected(self.selected_topic), width=200, height=40).pack(pady=30)
         self._loading = False
-
-    # ... (show_ask, on_ask_openai, show_progress, show_about, show_progress_ops remain same)
 
     def show_ask(self):
         if self._loading: return
@@ -644,9 +592,6 @@ class NEBeduApp(ctk.CTk):
         threading.Thread(target=worker, daemon=True).start()
 
     def on_ask_submit(self, question, answer_length="medium"):
-        """
-        Handle RAG question submission with REAL-TIME streaming.
-        """
         if self._loading:
             return
         self._loading = True
@@ -655,7 +600,6 @@ class NEBeduApp(ctk.CTk):
         
         def worker():
             try:
-                # Normalize question
                 normalized_question = question.strip()
                 if not normalized_question:
                     def show_error():
@@ -665,7 +609,6 @@ class NEBeduApp(ctk.CTk):
                     self.after(0, show_error)
                     return
                 
-                # Check if RAG engine is ready
                 if not self.rag_engine:
                     def show_error():
                         self.ask_view.set_result(
@@ -676,12 +619,10 @@ class NEBeduApp(ctk.CTk):
                     self.after(0, show_error)
                     return
                 
-                # STREAMING callback for real-time feedback
                 first_token = [True]
                 
                 def on_token(token):
-                    """Stream tokens to GUI in real-time"""
-                    print(f"🖥️  GUI: Received token: '{token}'", flush=True)
+                    print(f"GUI: Received token: '{token}'", flush=True)
                     def display():
                         if first_token[0]:
                             self.ask_view.set_loading(False)
@@ -689,19 +630,16 @@ class NEBeduApp(ctk.CTk):
                         self.ask_view.append_answer_token(token)
                     self.after(0, display)
                 
-                # Call RAG with streaming
                 try:
                     response = self.rag_engine.query(
                         query_text=normalized_question,
                         subject=self.current_subject_filter,
-                        stream_callback=on_token  # REAL-TIME STREAMING
+                        stream_callback=on_token
                     )
                     
-                    # Get metadata
                     confidence = response.get('confidence', 0.5)
                     diagram = response.get('diagram')
                     
-                    # Finalize UI
                     def finalize():
                         self.ask_view.finalize_answer(confidence, question=normalized_question)
                         
@@ -731,7 +669,6 @@ class NEBeduApp(ctk.CTk):
                     self._loading = False
                 self.after(0, show_error)
         
-        # Run in background thread
         threading.Thread(target=worker, daemon=True).start()
 
     def show_progress(self):
@@ -760,7 +697,6 @@ class NEBeduApp(ctk.CTk):
 
 if __name__ == "__main__":
     import sys
-    # Fix for Windows Unicode logging errors (emojis)
     if sys.platform == "win32":
         try:
             sys.stdout.reconfigure(encoding='utf-8')

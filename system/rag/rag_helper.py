@@ -1,7 +1,6 @@
 """
 RAG Helper Utilities
-
-Simplified for new RAG engine structure.
+Simplified.
 """
 
 import logging
@@ -36,9 +35,7 @@ def should_use_rag(question: str) -> bool:
     if any(pattern in question_lower for pattern in general_patterns):
         return False
     
-    # Skip for very short questions
     if len(question.split()) < 4:
-        # Unless curriculum-specific
         curriculum_terms = [
             "function", "variable", "class", "method", "algorithm",
             "syntax", "loop", "array", "string", "integer",
@@ -48,7 +45,7 @@ def should_use_rag(question: str) -> bool:
         if not any(term in question_lower for term in curriculum_terms):
             return False
     
-    # Use for curriculum questions
+
     curriculum_indicators = [
         "what is", "how does", "explain", "define", "describe",
         "chapter", "lesson", "topic", "concept", "subject"
@@ -57,7 +54,6 @@ def should_use_rag(question: str) -> bool:
     if any(indicator in question_lower for indicator in curriculum_indicators):
         return True
     
-    # Default: use for questions >10 words
     return len(question.split()) > 10
 
 
@@ -84,18 +80,15 @@ def get_context_with_timeout(
     if not rag_engine:
         return "", "AI Knowledge"
     
-    # Quick check
     if not should_use_rag(question):
         return "", "AI Knowledge"
     
     try:
-        # Use threading to timeout RAG retrieval
         result_container = [None]
         error_container = [None]
         
         def do_query():
             try:
-                # Query without streaming to get context only
                 res = rag_engine.query(
                     query_text=question,
                     subject=subject,
@@ -111,7 +104,7 @@ def get_context_with_timeout(
         thread.start()
         thread.join(timeout=timeout_seconds)
         
-        # Check if completed
+        
         if thread.is_alive():
             logger.debug(f"RAG timeout after {timeout_seconds}s")
             return "", "AI Knowledge (timeout)"
@@ -124,7 +117,7 @@ def get_context_with_timeout(
         if not result:
             return "", "AI Knowledge"
         
-        # Extract context from result
+        
         context_texts = result.get('context_used', [])
         if context_texts:
             context = "\n\n".join(context_texts[:2])  # Max 2 chunks
@@ -154,18 +147,14 @@ def validate_context_relevance(question: str, context: str) -> bool:
     
     question_lower = question.lower()
     context_lower = context.lower()
-    
-    # Get meaningful words
     question_words = set(word for word in question_lower.split() if len(word) > 3)
     
-    # Check overlap
+
     overlap_count = sum(1 for word in question_words if word in context_lower)
-    
-    # Need at least 2 word matches or 1 long word match
     if overlap_count >= 2:
         return True
     
-    # Check for long word matches (>5 chars)
+   
     long_words = [w for w in question_words if len(w) > 5]
     if any(word in context_lower for word in long_words):
         return True

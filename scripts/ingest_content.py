@@ -26,15 +26,13 @@ from sentence_transformers import SentenceTransformer
 from tqdm import tqdm
 import fitz  # PyMuPDF
 
-# Add project root to path
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from scripts.rag_data_preparation.enhanced_chunker import EnhancedChunker
 
-# Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# Optional OCR imports (lazy load)
 TESSERACT_AVAILABLE = False
 EASYOCR_AVAILABLE = False
 
@@ -43,13 +41,13 @@ try:
     from PIL import Image
     TESSERACT_AVAILABLE = True
 except ImportError:
-    logger.warning("⚠️ Tesseract not available. Install: pip install pytesseract pillow")
+    logger.warning("Tesseract not available. Install: pip install pytesseract pillow")
 
 try:
     import easyocr
     EASYOCR_AVAILABLE = True
 except ImportError:
-    logger.warning("⚠️ EasyOCR not available. Install: pip install easyocr")
+    logger.warning("EasyOCR not available. Install: pip install easyocr")
 
 
 class UniversalContentIngester:
@@ -64,10 +62,10 @@ class UniversalContentIngester:
         self.db_path = db_path
         self.ocr_mode = ocr_mode
         
-        logger.info("⚡ Loading Embedding Model...")
+        logger.info("Loading Embedding Model...")
         self.model = SentenceTransformer('all-MiniLM-L6-v2', device='cpu')
         
-        logger.info("📚 Opening ChromaDB...")
+        logger.info("Opening ChromaDB...")
         self.client = chromadb.PersistentClient(path=db_path)
         
         self.chunker = EnhancedChunker(chunk_size=512, overlap_ratio=0.1)
@@ -75,7 +73,7 @@ class UniversalContentIngester:
         # Initialize OCR readers (lazy)
         self.easyocr_reader = None
         if EASYOCR_AVAILABLE and ocr_mode != "never":
-            logger.info("🔤 Loading EasyOCR (for handwritten notes)...")
+            logger.info("Loading EasyOCR (for handwritten notes)...")
             self.easyocr_reader = easyocr.Reader(['en'], gpu=False)
     
     def detect_pdf_type(self, pdf_path: Path) -> str:
@@ -243,10 +241,10 @@ class UniversalContentIngester:
         """Ingest all supported files from a directory."""
         input_path = Path(input_dir)
         if not input_path.exists():
-            logger.warning(f"⚠️ Directory not found: {input_dir}")
+            logger.warning(f"Directory not found: {input_dir}")
             return
         
-        logger.info(f"\n🚀 Ingesting: {input_dir}")
+        logger.info(f"\n Ingesting: {input_dir}")
         
         # Find all supported files
         files = (
@@ -256,7 +254,7 @@ class UniversalContentIngester:
             list(input_path.rglob("*.jsonl"))
         )
         
-        logger.info(f"📂 Found {len(files)} files")
+        logger.info(f"Found {len(files)} files")
         
         for file_path in tqdm(files, desc="Processing files"):
             # Extract content
@@ -301,10 +299,10 @@ class UniversalContentIngester:
                         metadatas=metadatas[i:end]
                     )
                 
-                logger.info(f"   ✅ Ingested {len(chunks)} chunks")
+                logger.info(f"Ingested {len(chunks)} chunks")
                 
             except Exception as e:
-                logger.error(f"   ❌ DB error: {e}")
+                logger.error(f" DB error: {e}")
 
 
 def main():
@@ -344,7 +342,7 @@ def main():
     for dir_path in dirs_to_process:
         ingester.ingest_directory(dir_path)
     
-    logger.info("\n✨ All content ingested successfully!")
+    logger.info("\n All content ingested successfully!")
 
 
 if __name__ == "__main__":

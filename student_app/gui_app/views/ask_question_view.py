@@ -90,7 +90,6 @@ class AskQuestionView(ctk.CTkFrame):
     def append_answer_token(self, token):
         """Append a token to the streaming answer display."""
         if self.answer_box is None:
-            # Initialize answer box for streaming
             self.streaming_answer = ""
             for widget in self.result_frame.winfo_children():
                 widget.destroy()
@@ -99,16 +98,14 @@ class AskQuestionView(ctk.CTkFrame):
             self.answer_frame = ctk.CTkFrame(self.result_frame, fg_color="#e3f2fd", corner_radius=8)
             self.answer_frame.pack(pady=(0, 10), padx=10, fill='x', expand=True)
             
-            # Create answer textbox with dynamic height
             answer_height = self._calculate_answer_height("medium")  # Default to medium
             self.answer_box = ctk.CTkTextbox(self.answer_frame, width=600, height=answer_height, font=ctk.CTkFont(size=16), wrap='word')
             self.answer_box.pack(pady=(10, 10), padx=10, fill='both', expand=True)
         
-        # Append token to answer
         self.streaming_answer += token
         self.answer_box.insert('end', token)
         self.answer_box.see('end')  # Auto-scroll to bottom
-        self.update_idletasks()  # Force UI update
+        self.update_idletasks()  
     
     def finalize_answer(self, confidence, hints=None, related=None, source_info=None, question=None):
         """Finalize the streaming answer display with confidence and metadata."""

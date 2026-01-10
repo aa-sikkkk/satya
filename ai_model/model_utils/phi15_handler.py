@@ -27,7 +27,6 @@ class SimplePhiHandler:
         )
     
     def load_model(self):
-        """Load model with i3-optimized settings."""
         if self.llm is not None:
             return
         
@@ -45,7 +44,6 @@ class SimplePhiHandler:
         logger.info("Model loaded!")
     
     def _build_prompt(self, question: str, context: str) -> str:
-        """Build educational prompt with optional context."""
         context = (context or "").strip()
         
         # Educational prompt - balanced for 3-4 informative sentences
@@ -69,7 +67,6 @@ class SimplePhiHandler:
         return f"{base_instruction}\nQuestion: {question}\nAnswer:"
     
     def _clean_answer(self, answer: str) -> str:
-        """Clean answer output."""
         if not answer:
             return ""
         
@@ -95,7 +92,6 @@ class SimplePhiHandler:
         return answer
     
     def _calculate_confidence(self, answer: str, question: str) -> float:
-        """Calculate confidence based on answer quality."""
         if not answer or len(answer.split()) < 5:
             return 0.3
         
@@ -106,7 +102,6 @@ class SimplePhiHandler:
         return min(1.0, 0.5 + relevance * 0.5)
     
     def get_answer_stream(self, question: str, context: str = "") -> Iterator[str]:
-        """Stream answer tokens in real-time."""
         if not self.llm:
             self.load_model()
         
@@ -131,7 +126,6 @@ class SimplePhiHandler:
                     if len(chunk["choices"]) > 0:
                         text = chunk["choices"][0].get("text", "")
                         if text:
-                            print(f"🔥 TOKEN: '{text}'", flush=True)  # DIAGNOSTIC
                             yield text
         
         except Exception as e:
@@ -139,7 +133,6 @@ class SimplePhiHandler:
             yield "Error generating answer. Please try again."
     
     def get_answer(self, question: str, context: str = "") -> Tuple[str, float]:
-        """Get complete answer (non-streaming)."""
         if not self.llm:
             self.load_model()
         
@@ -170,7 +163,6 @@ class SimplePhiHandler:
             return "Error generating answer.", 0.1
     
     def cleanup(self):
-        """Free memory."""
         if self.llm:
             del self.llm
             self.llm = None

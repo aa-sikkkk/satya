@@ -53,7 +53,7 @@ class EnhancedChunker:
         self.overlap_size = int(chunk_size * overlap_ratio)
         self.min_chunk_size = min_chunk_size
         
-        logger.info(f"✅ Enhanced chunker initialized:")
+        logger.info(f"Enhanced chunker initialized:")
         logger.info(f"   Chunk size: {chunk_size} chars")
         logger.info(f"   Overlap: {overlap_ratio*100:.0f}% ({self.overlap_size} chars)")
     
@@ -221,7 +221,7 @@ class EnhancedChunker:
         while current_pos < len(text):
             # Safety check for infinite loops
             if loop_counter > len(text) + 1000: # Generous buffer
-                logger.error(f"⚠️ Infinite loop detected in chunking! Breaking safely.")
+                logger.error(f"Infinite loop detected in chunking! Breaking safely.")
                 break
             loop_counter += 1
 
@@ -302,7 +302,7 @@ class EnhancedChunker:
 
             current_pos = next_pos
         
-        logger.info(f"📄 Created {len(chunks)} chunks from {len(text)} chars")
+        logger.info(f"Created {len(chunks)} chunks from {len(text)} chars")
         logger.info(f"   Math regions protected: {len(math_regions)}")
         logger.info(f"   Code blocks protected: {len(code_regions)}")
         
@@ -323,7 +323,7 @@ class EnhancedChunker:
         Returns:
             List of chunks
         """
-        logger.info(f"📖 Chunking: {markdown_file}")
+        logger.info(f"Chunking: {markdown_file}")
         
         # Read file
         with open(markdown_file, 'r', encoding='utf-8') as f:
@@ -371,7 +371,7 @@ class EnhancedChunker:
                     f.write("\n")
                     f.write(chunk['text'])
             
-            logger.info(f"💾 Saved {len(chunks)} chunks to {output_dir}")
+            logger.info(f"Saved {len(chunks)} chunks to {output_dir}")
         
         return chunks
     
@@ -395,7 +395,7 @@ class EnhancedChunker:
         input_path = Path(input_dir)
         files = list(input_path.glob(file_pattern))
         
-        logger.info(f"📚 Found {len(files)} files to chunk")
+        logger.info(f"Found {len(files)} files to chunk")
         
         results = {
             'processed': 0,
@@ -413,13 +413,13 @@ class EnhancedChunker:
                 results['total_chunks'] += len(chunks)
                 
             except Exception as e:
-                logger.error(f"❌ Failed to chunk {file.name}: {e}")
+                logger.error(f"Failed to chunk {file.name}: {e}")
                 results['failed'].append({
                     'file': str(file),
                     'error': str(e)
                 })
         
-        logger.info(f"\n✅ Chunking complete!")
+        logger.info(f"\nChunking complete!")
         logger.info(f"   Files processed: {results['processed']}")
         logger.info(f"   Total chunks: {results['total_chunks']}")
         logger.info(f"   Failed: {len(results['failed'])}")

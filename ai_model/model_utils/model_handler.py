@@ -20,14 +20,12 @@ logger = logging.getLogger(__name__)
 class SimpleHandler:
     """Lightweight single-phase interface for RAG queries."""
     
+    
     def __init__(self, phi_handler):
         self.phi_handler = phi_handler
     
     def get_answer(self, query_text: str, context_text: str) -> Tuple[str, float]:
-        """
-        Single-step answer generation.
-        Returns (answer_text, confidence_score)
-        """
+        """Single-step answer generation."""
         try:
             return self.phi_handler.get_answer(query_text, context_text)
         except Exception as e:
@@ -36,16 +34,12 @@ class SimpleHandler:
 
 
 class ModelHandler:
-    """
-    Model handler with Simple Phi Handler interface for i3 optimization.
-    """
+    """Model handler with Simple Phi Handler interface for i3 optimization."""
     
     def __init__(self, model_path: Optional[str] = None):
-        """Initialize handler."""
         if model_path is None:
             model_path = os.path.join("satya_data", "models", "phi15")
         
-        # Find .gguf file
         from pathlib import Path
         model_dir = Path(model_path)
         gguf_files = list(model_dir.glob("*.gguf"))
@@ -59,7 +53,6 @@ class ModelHandler:
         self.model_path = model_path
         self.handler = SimplePhiHandler(model_file)
         
-        # Pre-load model
         try:
             logger.info("Loading Phi 1.5...")
             self.handler.load_model()
@@ -68,11 +61,9 @@ class ModelHandler:
             logger.error(f"Failed to load model: {e}")
             raise
         
-        # Add lightweight interface for RAG
         self.simple_handler = SimpleHandler(self.handler)
     
     def get_answer(self, question: str, context: str = "", answer_length: str = "medium") -> Tuple[str, float]:
-        """Get answer (non-streaming)."""
         try:
             return self.handler.get_answer(question, context)
         except Exception as e:
@@ -80,7 +71,6 @@ class ModelHandler:
             return "I'm having trouble with your question. Please try again.", 0.1
     
     def get_answer_stream(self, question: str, context: str = "", answer_length: str = "medium") -> Iterator[str]:
-        """Stream answer tokens."""
         try:
             yield from self.handler.get_answer_stream(question, context)
         except Exception as e:
@@ -88,7 +78,6 @@ class ModelHandler:
             yield "I'm having trouble with your question. Please try again."
     
     def get_model_info(self) -> Dict[str, Any]:
-        """Get model info."""
         return {
             "name": "Phi 1.5",
             "version": "1.5",
@@ -99,7 +88,6 @@ class ModelHandler:
         }
     
     def cleanup(self):
-        """Clean up resources."""
         try:
             self.handler.cleanup()
             logger.info("Model cleaned up")

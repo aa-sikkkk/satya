@@ -44,7 +44,6 @@ class AntiConfusionEngine:
         self.RELEVANCE_THRESHOLD = 0.6  # Minimum similarity
 
     def calculate_priority_score(self, source_type: str) -> int:
-        """Get priority score for a source type."""
         if not source_type:
             return self.SOURCE_PRIORITY['default']
         
@@ -66,32 +65,19 @@ class AntiConfusionEngine:
         results: List[Dict], 
         query_text: str
     ) -> List[Dict]:
-        """
-        Rank retrieval results using 5-layer strategy.
-        
-        Args:
-            results: Raw results from ChromaDB
-            query_text: Original query
-            
-        Returns:
-            Re-ranked context chunks
-        """
         if not results:
             return []
         
         ranked_chunks = []
         
         for res in results:
-            # Extract metadata
             metadata = res.get('metadata', {})
             source = metadata.get('source', 'unknown')
             
-            # Fallback to seed_data if source unknown
             if (source.lower() == 'unknown' or not source) and 'seed_data' in metadata:
                 source = metadata['seed_data']
                 metadata['source'] = source
             
-            # Type normalization
             current_type = metadata.get('type', 'unknown')
             if current_type == 'unknown':
                 if source in ['openstax', 'khanacademy', 'fineweb_edu', 'finemath', 'scienceqa']:
@@ -102,18 +88,13 @@ class AntiConfusionEngine:
             chunk_text = res.get('text', '')
             base_score = res.get('score', 0.0)  # Cosine similarity
             
-            # Skip empty chunks
             if not chunk_text or len(chunk_text.strip()) < 10:
                 continue
             
-            # Source prioritization
             priority_score = self.calculate_priority_score(source)
             
-            # Weighted score: 70% similarity + 30% priority
-            # Priority normalized: 100 -> 1.0, 50 -> 0.5
             weighted_score = (base_score * 0.7) + ((priority_score / 100.0) * 0.3)
             
-            # Boost if grade matches
             if 'grade' in metadata:
                 grade_str = str(metadata['grade'])
                 if grade_str in query_text or f"grade {grade_str}" in query_text.lower():
@@ -127,7 +108,6 @@ class AntiConfusionEngine:
                 'source_type': 'NEB' if priority_score == 100 else 'External'
             })
             
-        # Sort by final score (highest first)
         ranked_chunks.sort(key=lambda x: x['final_score'], reverse=True)
         
         return ranked_chunks
@@ -155,25 +135,21 @@ class AntiConfusionEngine:
         if len(answer.split()) < 5:
             return True, "Answer too short to validate"
             
-        # Combine context
         full_context = " ".join(context_chunks).lower()
         answer_lower = answer.lower()
         
-        # Extract key terms (words > 4 chars)
         answer_terms = set(re.findall(r'\b\w{5,}\b', answer_lower))
         
         if not answer_terms:
             return True, "No key terms to validate"
             
-        # Count terms found in context
         found_count = sum(1 for term in answer_terms if term in full_context)
         overlap_ratio = found_count / len(answer_terms) if answer_terms else 0
         
         if overlap_ratio < self.MIN_CONTEXT_OVERLAP:
-            logger.warning(f"⚠️ Low grounding: {overlap_ratio:.2%}")
+            logger.warning(f"Low grounding: {overlap_ratio:.2%}")
             return False, f"Low context overlap ({overlap_ratio:.0%})"
             
-        # Check for hallucination indicators
         forbidden_phrases = [
             "i don't have that information",
             "my knowledge cutoff",
@@ -190,35 +166,13 @@ class AntiConfusionEngine:
         return True, "Grounded"
 
     def resolve_conflicts(self, chunks: List[Dict]) -> List[Dict]:
-        """
-        Layer 5: Conflict resolution.
-        NEB sources always appear first.
-        
-        Args:
-            chunks: Ranked chunks
-            
-        Returns:
-            Chunks with NEB first
-        """
         if not chunks:
             return []
         
-        # Separate NEB and others
         neb_chunks = [c for c in chunks if c.get('source_type') == 'NEB']
         other_chunks = [c for c in chunks if c.get('source_type') != 'NEB']
         
-        # NEB first, then others (both already sorted by score)
         return neb_chunks + other_chunks
     
     def filter_low_quality(self, chunks: List[Dict], min_score: float = 0.35) -> List[Dict]:
-        """
-        Remove low-quality chunks that won't help answer.
-        
-        Args:
-            chunks: Ranked chunks
-            min_score: Minimum final_score threshold
-            
-        Returns:
-            Filtered chunks
-        """
         return [c for c in chunks if c.get('final_score', 0) >= min_score]
