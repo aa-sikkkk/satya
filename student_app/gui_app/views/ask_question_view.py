@@ -90,7 +90,6 @@ class AskQuestionView(ctk.CTkFrame):
     def append_answer_token(self, token):
         """Append a token to the streaming answer display."""
         if self.answer_box is None:
-            # Initialize answer box for streaming
             self.streaming_answer = ""
             for widget in self.result_frame.winfo_children():
                 widget.destroy()
@@ -99,16 +98,14 @@ class AskQuestionView(ctk.CTkFrame):
             self.answer_frame = ctk.CTkFrame(self.result_frame, fg_color="#e3f2fd", corner_radius=8)
             self.answer_frame.pack(pady=(0, 10), padx=10, fill='x', expand=True)
             
-            # Create answer textbox with dynamic height
             answer_height = self._calculate_answer_height("medium")  # Default to medium
             self.answer_box = ctk.CTkTextbox(self.answer_frame, width=600, height=answer_height, font=ctk.CTkFont(size=16), wrap='word')
             self.answer_box.pack(pady=(10, 10), padx=10, fill='both', expand=True)
         
-        # Append token to answer
         self.streaming_answer += token
         self.answer_box.insert('end', token)
         self.answer_box.see('end')  # Auto-scroll to bottom
-        self.update_idletasks()  # Force UI update
+        self.update_idletasks()  
     
     def finalize_answer(self, confidence, hints=None, related=None, source_info=None, question=None):
         """Finalize the streaming answer display with confidence and metadata."""
@@ -162,21 +159,27 @@ class AskQuestionView(ctk.CTkFrame):
                 source_label = ctk.CTkLabel(self.answer_frame, text=f"Source: {source_info}", font=ctk.CTkFont(size=12), text_color="#1976d2")
                 source_label.pack(pady=(5, 0), padx=10, anchor='w', before=self.answer_box)
         
-        # Confidence indicator with color coding
-        if confidence > 0.7:
-            conf_color = "#43a047"  # Green
-            conf_text = "High Confidence"
-        elif confidence > 0.4:
-            conf_color = "#fbc02d"  # Yellow
-            conf_text = "Medium Confidence"
-        else:
-            conf_color = "#e53935"  # Red
-            conf_text = "Low Confidence"
-            self.openai_btn.configure(state="normal")
-        
-        conf_frame = ctk.CTkFrame(self.result_frame, fg_color=conf_color, corner_radius=4)
-        conf_frame.pack(pady=(0, 10), padx=10, fill='x')
-        ctk.CTkLabel(conf_frame, text=f"{conf_text}: {confidence*100:.1f}%", font=ctk.CTkFont(size=14, weight="bold"), text_color="white").pack(pady=5, padx=10)
+        # Confidence indicator - ONLY show if confidence < 70% (subtle warning)
+        if confidence < 0.7:
+            if confidence > 0.4:
+                conf_color = "#fff9c4"  # Light yellow background
+                conf_text_color = "#f57c00"  # Orange text
+                conf_text = "⚠️ Moderate confidence"
+            else:
+                conf_color = "#ffebee"  # Light red background
+                conf_text_color = "#c62828"  # Dark red text
+                conf_text = "⚠️ Low confidence - please verify"
+                self.openai_btn.configure(state="normal")
+            
+            # Small, subtle indicator in bottom-right
+            conf_frame = ctk.CTkFrame(self.result_frame, fg_color=conf_color, corner_radius=6)
+            conf_frame.pack(pady=(0, 5), padx=10, anchor='e')  # Right-aligned
+            ctk.CTkLabel(
+                conf_frame, 
+                text=f"{conf_text} ({confidence*100:.0f}%)", 
+                font=ctk.CTkFont(size=11),  # Smaller font
+                text_color=conf_text_color
+            ).pack(pady=3, padx=8)
         
         # Hints section
         if hints:
@@ -235,7 +238,7 @@ class AskQuestionView(ctk.CTkFrame):
             source_frame.pack(pady=(0, 10), padx=10, fill='x')
             ctk.CTkLabel(source_frame, text=f"Source: {source_info}", font=ctk.CTkFont(size=12), text_color="#1976d2").pack(pady=5, padx=10, anchor='w')
         
-        if confidence is None or confidence < 0.1:
+        if confidence is None or confidence < 0.3:  # Raised from 0.1 to avoid false warnings
             # Yellow warning panel for low confidence
             warn_frame = ctk.CTkFrame(self.result_frame, fg_color="#fffde7", corner_radius=8)
             warn_frame.pack(pady=(0, 10), padx=10, fill='x', expand=True)
@@ -269,21 +272,27 @@ class AskQuestionView(ctk.CTkFrame):
             self.answer_box.configure(state="disabled")
             self.answer_box.pack(pady=(0, 10), padx=10, fill='x', expand=True)
             
-            # Confidence indicator with color coding
-            if confidence > 0.7:
-                conf_color = "#43a047"  # Green
-                conf_text = "High Confidence"
-            elif confidence > 0.4:
-                conf_color = "#fbc02d"  # Yellow
-                conf_text = "Medium Confidence"
-            else:
-                conf_color = "#e53935"  # Red
-                conf_text = "Low Confidence"
-                self.openai_btn.configure(state="normal")
-            
-            conf_frame = ctk.CTkFrame(self.result_frame, fg_color=conf_color, corner_radius=4)
-            conf_frame.pack(pady=(0, 10), padx=10, fill='x')
-            ctk.CTkLabel(conf_frame, text=f"{conf_text}: {confidence*100:.1f}%", font=ctk.CTkFont(size=14, weight="bold"), text_color="white").pack(pady=5, padx=10)
+            # Confidence indicator - ONLY show if confidence < 70% (subtle warning)
+            if confidence < 0.7:
+                if confidence > 0.4:
+                    conf_color = "#fff9c4"  # Light yellow background
+                    conf_text_color = "#f57c00"  # Orange text
+                    conf_text = "⚠️ Moderate confidence"
+                else:
+                    conf_color = "#ffebee"  # Light red background
+                    conf_text_color = "#c62828"  # Dark red text
+                    conf_text = "⚠️ Low confidence - please verify"
+                    self.openai_btn.configure(state="normal")
+                
+                # Small, subtle indicator in bottom-right
+                conf_frame = ctk.CTkFrame(self.result_frame, fg_color=conf_color, corner_radius=6)
+                conf_frame.pack(pady=(0, 5), padx=10, anchor='e')  # Right-aligned
+                ctk.CTkLabel(
+                    conf_frame, 
+                    text=f"{conf_text} ({confidence*100:.0f}%)", 
+                    font=ctk.CTkFont(size=11),  # Smaller font
+                    text_color=conf_text_color
+                ).pack(pady=3, padx=8)
         
         # Hints section
         if hints:

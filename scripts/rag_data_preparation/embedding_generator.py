@@ -1,941 +1,202 @@
 #!/usr/bin/env python3
 """
-Embedding Generation Pipeline for Satya RAG System
+Semantic Embedding Generator for Satya Learning System
 
-This script generates embeddings for text chunks and images using:
-- Phi 1.5 for text embeddings
-- CLIP for image embeddings
-- Stores results in Chroma vector database
+Generates high-quality semantic embeddings using Sentence Transformers.
+Optimized for local execution on i3 processors.
+
+Features:
+- Uses `all-MiniLM-L6-v2` (small, fast, high accuracy)
+- Batch processing for efficiency
+- Caching of embeddings
+- GPU support (if available, falls back to CPU)
+- Standardized dimension (384D)
 """
 
 import os
 import json
 import logging
-import time
+import torch
+from typing import List, Dict, Optional, Union, Any
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any, Union
+from tqdm import tqdm
 import numpy as np
-from datetime import datetime
-
-# Import embedding models (all optional; default to lightweight hash embeddings)
-PHI_AVAILABLE = False
-CLIP_AVAILABLE = False
-CHROMA_AVAILABLE = False
-
-try:
-    import chromadb
-    CHROMA_AVAILABLE = True
-except ImportError:
-    print("Warning: Chroma not available. Install chromadb.")
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
+try:
+    from sentence_transformers import SentenceTransformer
+except ImportError:
+    logger.error("Missing dependency: sentence-transformers")
+    logger.error("Install with: pip install sentence-transformers")
+    raise
+
+
 class EmbeddingGenerator:
-    """Generates embeddings for text and images using lightweight defaults."""
+    """
+    Generates semantic embeddings using Sentence BERT.
+    Default model: all-MiniLM-L6-v2 (384 dimensions, ~80MB)
+    """
     
-    def __init__(self, chroma_db_path: str = "satya_data/chroma_db"):
-        """
-        Initialize the embedding generator.
+    def __init__(
+        self,
+        model_name: str = "all-MiniLM-L6-v2",
+        device: str = None,
+        batch_size: int = 16, # Reduced from 32 for i3 stability
+        cache_dir: str = None
+    ):
+        self.model_name = model_name
+        self.batch_size = batch_size
         
-        Args:
-            chroma_db_path: Path to Chroma database
-        """
-        self.chroma_db_path = Path(chroma_db_path)
+        torch.set_num_threads(2)
+        self.model_name = model_name
+        self.batch_size = batch_size
         
-        # Initialize models (kept optional to stay within 4GB CPU-only)
-        self.phi_model = None
-        self.clip_model = None
-        self.clip_preprocess = None
-
-        # Initialize Chroma client
-        if CHROMA_AVAILABLE:
-            self.chroma_client = chromadb.PersistentClient(path=str(self.chroma_db_path))
-            logger.info(f"Chroma client initialized at: {self.chroma_db_path}")
+        if device is None:
+            self.device = "cuda" if torch.cuda.is_available() else "cpu"
         else:
-            self.chroma_client = None
-            logger.error("Chroma not available!")
+            self.device = device
+            
+        logger.info(f"Initializing Embedding Generator...")
+        logger.info(f"   Model: {model_name}")
+        logger.info(f"   Device: {self.device}")
         
-        # Model configuration (keep minimal for offline CPU-only)
-        self.phi_model_path = "satya_data/models/phi_1_5/phi-1_5-Q4_K_M.gguf"
-        self.clip_model_name = "ViT-B/32"
-        self.batch_size = 64  # Increased for faster processing
-        self.max_length = 512
-        
-        # Embedding cache for faster repeated queries
-        self._embedding_cache = {}
-        self._cache_size_limit = 10000  # Limit cache size
+        try:
+            self.model = SentenceTransformer(
+                model_name,
+                device=self.device,
+                cache_folder=cache_dir
+            )
+            logger.info("Model loaded successfully")
+        except Exception as e:
+            logger.error(f"Failed to load model: {e}")
+            raise
+            
+        self.embedding_dim = self.model.get_sentence_embedding_dimension()
+        logger.info(f"   Dimensions: {self.embedding_dim}")
 
-        # Avoid heavy model loads by default; callers can opt-in via env flags
-        if os.getenv("SATYA_LOAD_EMBED_MODELS", "").lower() in {"1", "true", "yes"}:
-            self._load_models()
-    
-    def _load_models(self):
-        """Load Phi 1.5 GGUF and CLIP models."""
-        global PHI_AVAILABLE, CLIP_AVAILABLE
-        
-        # Load Phi 1.5 GGUF for text embeddings
-        if PHI_AVAILABLE:
-            try:
-                logger.info("Loading Phi 1.5 GGUF model...")
-                self.phi_model = Llama(
-                    model_path=self.phi_model_path,
-                    n_ctx=2048,
-                    n_threads=4,
-                    verbose=False
-                )
-                logger.info("✅ Phi 1.5 GGUF model loaded successfully")
-            except Exception as e:
-                logger.error(f"Failed to load Phi 1.5 GGUF: {e}")
-                PHI_AVAILABLE = False
-        
-        # Load CLIP for image embeddings
-        if CLIP_AVAILABLE:
-            try:
-                logger.info("Loading CLIP model...")
-                self.clip_model, self.clip_preprocess = clip.load(self.clip_model_name, device="cpu")
-                logger.info("✅ CLIP model loaded successfully")
-            except Exception as e:
-                logger.error(f"Failed to load CLIP: {e}")
-                CLIP_AVAILABLE = False
-    
-    def generate_text_embedding(self, text: str) -> Optional[np.ndarray]:
-        """
-        Generate embedding for text using optimized hash-based approach.
-        Fast, deterministic, and cacheable.
-        
-        Args:
-            text: Input text to embed
+    def generate_embeddings(
+        self,
+        texts: Union[str, List[str]],
+        show_progress: bool = False
+    ) -> Union[np.ndarray, List[np.ndarray]]:
+        is_single = isinstance(texts, str)
+        if is_single:
+            texts = [texts]
             
-        Returns:
-            Text embedding vector or None if failed
-        """
         try:
-            import hashlib
+            valid_indices = [i for i, t in enumerate(texts) if t and t.strip()]
+            valid_texts = [texts[i] for i in valid_indices]
             
-            # Ensure text is a string
-            if not isinstance(text, str):
-                logger.warning(f"Text input is not a string: {type(text)}, converting...")
-                text = str(text)
+            if not valid_texts:
+                return np.array([]) if not is_single else np.zeros(self.embedding_dim)
+
+            embeddings = self.model.encode(
+                valid_texts,
+                batch_size=self.batch_size,
+                show_progress_bar=show_progress,
+                convert_to_numpy=True,
+                normalize_embeddings=True
+            )
             
-            # Check cache first
-            text_hash_key = hashlib.md5(text.encode('utf-8')).hexdigest()
-            if text_hash_key in self._embedding_cache:
-                return self._embedding_cache[text_hash_key]
-            
-            # Fast vectorized embedding generation
-            # Use multiple hash functions for better distribution
-            text_bytes = text.encode('utf-8')
-            hash1 = hashlib.md5(text_bytes).digest()
-            hash2 = hashlib.sha1(text_bytes).digest()
-            
-            # Combine hashes for 32 dimensions (16 from each)
-            embedding = np.zeros(32, dtype=np.float32)
-            
-            # Use first 16 bytes from MD5
-            for i in range(min(16, len(hash1))):
-                embedding[i] = hash1[i] / 255.0
-            
-            # Use first 16 bytes from SHA1
-            for i in range(min(16, len(hash2))):
-                embedding[16 + i] = hash2[i] / 255.0
-            
-            # Normalize using vectorized operation
-            norm = np.linalg.norm(embedding)
-            if norm > 0:
-                embedding = embedding / norm
-            
-            # Cache the result (with size limit)
-            if len(self._embedding_cache) < self._cache_size_limit:
-                self._embedding_cache[text_hash_key] = embedding
-            elif len(self._embedding_cache) >= self._cache_size_limit:
-                # Clear 20% of cache (FIFO-like, but simple)
-                keys_to_remove = list(self._embedding_cache.keys())[:self._cache_size_limit // 5]
-                for key in keys_to_remove:
-                    del self._embedding_cache[key]
-                self._embedding_cache[text_hash_key] = embedding
-            
-            return embedding
-                
-        except Exception as e:
-            logger.error(f"Text embedding generation failed: {e}")
-            return None
-    
-    def generate_image_embedding(self, image_path: str) -> Optional[np.ndarray]:
-        """
-        Generate embedding for image using CLIP.
-        
-        Args:
-            image_path: Path to image file
-            
-        Returns:
-            Image embedding vector or None if failed
-        """
-        if not CLIP_AVAILABLE or self.clip_model is None:
-            logger.error("CLIP model not available")
-            return None
-        
-        try:
-            from PIL import Image
-            
-            # Load and preprocess image
-            image = Image.open(image_path).convert('RGB')
-            image_input = self.clip_preprocess(image).unsqueeze(0)
-            
-            # Generate embeddings
-            with torch.no_grad():
-                image_features = self.clip_model.encode_image(image_input)
-                return image_features.numpy().flatten()
-                
-        except Exception as e:
-            logger.error(f"Image embedding generation failed: {e}")
-            return None
-    
-    def generate_base64_embedding(self, base64_string: str) -> Optional[np.ndarray]:
-        """
-        Generate embedding for base64 encoded image using CLIP.
-        
-        Args:
-            base64_string: Base64 encoded image string
-            
-        Returns:
-            Image embedding vector or None if failed
-        """
-        if not CLIP_AVAILABLE or self.clip_model is None:
-            logger.error("CLIP model not available")
-            return None
-        
-        try:
-            import base64
-            from PIL import Image
-            import io
-            
-            # Decode base64 to image
-            image_data = base64.b64decode(base64_string)
-            image = Image.open(io.BytesIO(image_data)).convert('RGB')
-            
-            # Preprocess and generate embedding
-            image_input = self.clip_preprocess(image).unsqueeze(0)
-            
-            with torch.no_grad():
-                image_features = self.clip_model.encode_image(image_input)
-                return image_features.numpy().flatten()
-                
-        except Exception as e:
-            logger.error(f"Base64 image embedding generation failed: {e}")
-            return None
-    
-    def generate_clip_text_embedding(self, text: str) -> Optional[np.ndarray]:
-        """
-        Generate text embedding using CLIP for image queries.
-        
-        Args:
-            text: Input text to embed
-            
-        Returns:
-            CLIP text embedding vector (512D) or None if failed
-        """
-        if not CLIP_AVAILABLE or self.clip_model is None:
-            logger.error("CLIP model not available")
-            return None
-        
-        try:
-            # Tokenize text
-            text_tokens = clip.tokenize([text])
-            
-            # Generate embeddings
-            with torch.no_grad():
-                text_features = self.clip_model.encode_text(text_tokens)
-                return text_features.numpy().flatten()
-                
-        except Exception as e:
-            logger.error(f"CLIP text embedding generation failed: {e}")
-            return None
-    
-    def process_text_chunks(self, chunks_file: str, subject: str, content_type: str = "book") -> bool:
-        """
-        Process text chunks and store embeddings in Chroma.
-        
-        Args:
-            chunks_file: Path to JSON file containing text chunks
-            subject: Subject name (computer_science, english, science)
-            content_type: Type of content - "book" (textbook) or "notes" (study notes)
-            
-        Returns:
-            True if successful, False otherwise
-        """
-        if not CHROMA_AVAILABLE:
-            logger.error("Chroma not available for text processing")
-            return False
-        
-        try:
-            # Load chunks
-            logger.info(f"Loading chunks from: {chunks_file}")
-            with open(chunks_file, 'r', encoding='utf-8') as f:
-                chunks_data = json.load(f)
-            
-            # Debug: Check the structure of chunks_data
-            logger.info(f"Chunks data type: {type(chunks_data)}")
-            logger.info(f"Chunks data length: {len(chunks_data) if isinstance(chunks_data, (list, dict)) else 'N/A'}")
-            
-            # Show the keys if it's a dict
-            if isinstance(chunks_data, dict):
-                logger.info(f"Chunks data keys: {list(chunks_data.keys())}")
-                # Show the type and length of first few values
-                for i, (key, value) in enumerate(list(chunks_data.items())[:3]):
-                    logger.info(f"  Key '{key}': type={type(value)}, len={len(value) if hasattr(value, '__len__') else 'N/A'}")
-                    if isinstance(value, list) and value:
-                        logger.info(f"    First item type: {type(value[0])}")
-                        if hasattr(value[0], '__len__'):
-                            logger.info(f"    First item preview: {str(value[0])[:100]}...")
-                        else:
-                            logger.info(f"    First item: {value[0]}")
-                            
-            elif isinstance(chunks_data, list) and chunks_data:
-                logger.info(f"First item type: {type(chunks_data[0])}")
-                logger.info(f"First item preview: {str(chunks_data[0])[:100]}...")
-            
-            # Handle different data structures
-            if isinstance(chunks_data, dict):
-                # If it's a dictionary, convert to list of chunks
-                if 'text_chunks' in chunks_data:
-                    chunks = chunks_data['text_chunks']
-                elif 'chunks' in chunks_data:
-                    chunks = chunks_data['chunks']
-                elif 'content' in chunks_data:
-                    chunks = chunks_data['content']
-                else:
-                    # Flatten dict values if they are lists
-                    chunks = []
-                    for key, value in chunks_data.items():
-                        if isinstance(value, list):
-                            # Flatten the list into individual chunks
-                            chunks.extend(value)
-                        elif isinstance(value, (str, dict)):
-                            # Single chunk
-                            chunks.append(value)
-                        else:
-                            logger.warning(f"Unexpected value type in chunks_data['{key}']: {type(value)}")
-            elif isinstance(chunks_data, list):
-                chunks = chunks_data
+            if len(valid_texts) < len(texts):
+                full_embeddings = np.zeros((len(texts), self.embedding_dim))
+                for i, valid_idx in enumerate(valid_indices):
+                    full_embeddings[valid_idx] = embeddings[i]
+                result = full_embeddings
             else:
-                logger.error(f"Unexpected chunks data structure: {type(chunks_data)}")
-                return False
+                result = embeddings
+                
+            return result[0] if is_single else result
             
-            # Ensure chunks is a list
-            if not isinstance(chunks, list):
-                logger.error(f"Chunks is not a list: {type(chunks)}")
-                return False
+        except Exception as e:
+            logger.error(f"Encoding failed: {e}")
+            raise
+
+    def process_chunk_file(
+        self,
+        input_file: str,
+        output_file: str = None
+    ) -> Dict:
+        if output_file is None:
+            output_file = input_file
             
-            logger.info(f"Processing {len(chunks)} text chunks for {subject}")
-            
-            # Debug: Show first few chunk structures
-            if chunks:
-                logger.info(f"Total chunks after processing: {len(chunks)}")
-                for i, chunk in enumerate(chunks[:3]):
-                    logger.info(f"Chunk {i}: type={type(chunk)}")
-                    if isinstance(chunk, dict):
-                        logger.info(f"  Keys: {list(chunk.keys())}")
-                    elif isinstance(chunk, str):
-                        logger.info(f"  Text preview: {chunk[:100]}...")
-                    elif isinstance(chunk, list):
-                        logger.info(f"  List length: {len(chunk)}")
-                        if chunk:
-                            logger.info(f"  First list item type: {type(chunk[0])}")
-                    else:
-                        logger.info(f"  Content: {str(chunk)[:100]}...")
-            
-            # Get or create collection based on content type
-            if content_type == "notes":
-                collection_name = f"{subject}_notes_grade_10"
+        logger.info(f"Processing chunks from: {input_file}")
+        
+        try:
+            with open(input_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                
+            if isinstance(data, list):
+                chunks = data
+            elif isinstance(data, dict) and 'chunks' in data:
+                chunks = data['chunks']
             else:
-                collection_name = f"{subject}_grade_10"
+                chunks = []
+                for k, v in data.items():
+                    if isinstance(v, list) and len(v) > 0 and 'text' in v[0]:
+                        chunks = v
+                        break
             
-            try:
-                collection = self.chroma_client.get_collection(name=collection_name)
-                logger.info(f"Using existing collection: {collection_name}")
-            except Exception:
-                # Collection doesn't exist, create it
-                collection = self.chroma_client.create_collection(
-                    name=collection_name,
-                    metadata={"content_type": content_type, "subject": subject}
-                )
-                logger.info(f"Created new collection: {collection_name} (type: {content_type})")
-            
-            # Process chunks in batches with optimized batch processing
-            successful_chunks = 0
-            failed_chunks = 0
-            
-            # Pre-process all chunks to extract data efficiently
-            processed_chunks = []
-            for idx, chunk in enumerate(chunks):
-                try:
-                    if isinstance(chunk, dict):
-                        # Prefer raw_text for embedding (faster, no formatting overhead)
-                        # Use formatted text for document storage
-                        text_content = chunk.get('raw_text', chunk.get('text', chunk.get('content', '')))
-                        formatted_text = chunk.get('text', text_content)  # For document storage
-                        chunk_id = chunk.get('chunk_id', chunk.get('id', f"{subject}_chunk_{idx}"))
-                        page_num = chunk.get('page_number', chunk.get('page', 0))
-                        chapter = chunk.get('chapter', chunk.get('section', f'page_{page_num}'))
-                        difficulty = chunk.get('difficulty', 'beginner')
-                    elif isinstance(chunk, str):
-                        text_content = chunk
-                        formatted_text = chunk
-                        chunk_id = f"{subject}_chunk_{idx}"
-                        page_num = 0
-                        chapter = 'unknown'
-                        difficulty = 'beginner'
-                    else:
-                        continue
-                    
-                    if text_content.strip():
-                        processed_chunks.append({
-                            'text': text_content.strip(),  # Raw text for embedding
-                            'formatted_text': formatted_text.strip(),  # Formatted for storage
-                            'id': str(chunk_id),
-                            'page': page_num,
-                            'chapter': str(chapter),
-                            'difficulty': str(difficulty)
-                        })
-                except Exception as e:
-                    logger.warning(f"Error pre-processing chunk {idx}: {e}")
-                    failed_chunks += 1
-            
-            # Generate embeddings in batches (vectorized where possible)
-            total_batches = (len(processed_chunks) + self.batch_size - 1) // self.batch_size
-            
-            for batch_idx in range(0, len(processed_chunks), self.batch_size):
-                batch = processed_chunks[batch_idx:batch_idx + self.batch_size]
+            if not chunks:
+                logger.warning("No chunks found in file")
+                return {'processed': 0, 'error': "No chunks found"}
                 
-                batch_ids = []
-                batch_texts = []
-                batch_embeddings = []
-                batch_metadata = []
-                
-                # Generate embeddings for entire batch (use raw text for faster embedding)
-                for chunk_data in batch:
-                    # Use raw text for embedding generation (faster)
-                    embedding = self.generate_text_embedding(chunk_data['text'])
-                    if embedding is not None:
-                        batch_ids.append(chunk_data['id'])
-                        # Store formatted text in document for better model parsing
-                        batch_texts.append(chunk_data.get('formatted_text', chunk_data['text']))
-                        batch_embeddings.append(embedding.tolist())
-                        batch_metadata.append({
-                            "content_type": "text",
-                            "source_type": content_type,  # "book" or "notes"
-                            "subject": subject,
-                            "grade": "10",
-                            "chapter": chunk_data['chapter'],
-                            "page_number": chunk_data['page'],
-                            "difficulty": chunk_data['difficulty'],
-                            "language": "en",
-                            "file_path": chunks_file,
-                            "created_at": datetime.now().isoformat()
-                        })
-                        successful_chunks += 1
-                    else:
-                        failed_chunks += 1
-                
-                # Add batch to collection
-                if batch_ids:
-                    try:
-                        collection.add(
-                            ids=batch_ids,
-                            documents=batch_texts,
-                            embeddings=batch_embeddings,
-                            metadatas=batch_metadata
-                        )
-                        
-                        if (batch_idx // self.batch_size + 1) % 10 == 0 or (batch_idx // self.batch_size + 1) == total_batches:
-                            logger.info(f"Processed batch {batch_idx // self.batch_size + 1}/{total_batches} - {len(batch_ids)} chunks")
-                    except Exception as e:
-                        logger.error(f"Failed to add batch to collection: {e}")
-                        return False
+            texts = [c.get('text', '') for c in chunks]
             
-            logger.info(f"✅ Text chunks processed successfully for {subject}")
-            logger.info(f"   Successful: {successful_chunks}, Failed: {failed_chunks}")
-            return True
+            logger.info(f"Generating embeddings for {len(texts)} chunks...")
+            embeddings = self.generate_embeddings(texts, show_progress=True)
             
-        except Exception as e:
-            logger.error(f"Text chunk processing failed: {e}")
-            import traceback
-            logger.error(f"Traceback: {traceback.format_exc()}")
-            return False
-    
-    def process_images(self, images_dir: str, subject: str) -> bool:
-        """
-        Process images and store embeddings in Chroma.
-        
-        Args:
-            images_dir: Directory containing image files
-            subject: Subject name (computer_science, english, science)
+            for i, chunk in enumerate(chunks):
+                if i < len(embeddings):
+                    chunk['embedding'] = embeddings[i].tolist()
             
-        Returns:
-            True if successful, False otherwise
-        """
-        if not CHROMA_AVAILABLE:
-            logger.error("Chroma not available for image processing")
-            return False
-        
-        try:
-            # Get or create collection
-            collection_name = f"{subject}_images"
-            try:
-                collection = self.chroma_client.get_collection(name=collection_name)
-                logger.info(f"Using existing collection: {collection_name}")
-            except Exception:
-                # Collection doesn't exist, create it
-                collection = self.chroma_client.create_collection(name=collection_name)
-                logger.info(f"Created new collection: {collection_name}")
+            output_data = {'chunks': chunks} if isinstance(data, list) else data
+
+            with open(output_file, 'w', encoding='utf-8') as f:
+                json.dump(output_data, f, ensure_ascii=False)
             
-            # Find image files
-            image_extensions = {'.jpg', '.jpeg', '.png', '.bmp', '.tiff'}
-            image_files = []
+            logger.info(f"Saved updated chunks to {output_file}")
             
-            images_path = Path(images_dir)
-            if not images_path.exists():
-                logger.warning(f"Images directory does not exist: {images_dir}")
-                return True  # Not an error, just no images to process
-            
-            for ext in image_extensions:
-                image_files.extend(images_path.glob(f"*{ext}"))
-                image_files.extend(images_path.glob(f"*{ext.upper()}"))
-            
-            logger.info(f"Found {len(image_files)} images for {subject}")
-            
-            if not image_files:
-                logger.info(f"No images found in {images_dir}")
-                return True
-            
-            # Process images
-            successful_images = 0
-            failed_images = 0
-            
-            for i, image_path in enumerate(image_files):
-                try:
-                    # Generate embedding
-                    embedding = self.generate_image_embedding(str(image_path))
-                    if embedding is not None:
-                        image_id = f"{subject}_image_{i:04d}_{image_path.stem}"
-                        
-                        # Check embedding dimension
-                        embedding_dim = len(embedding)
-                        logger.debug(f"Image embedding dimension: {embedding_dim}")
-                        
-                        # Add to collection
-                        collection.add(
-                            ids=[image_id],
-                            documents=[f"Image from {image_path.name}"],
-                            embeddings=[embedding.tolist()],
-                            metadatas=[{
-                                "content_type": "image",
-                                "subject": subject,
-                                "grade": "10",
-                                "chapter": "unknown",
-                                "difficulty": "beginner",
-                                "language": "en",
-                                "file_path": str(image_path),
-                                "related_content": "",
-                                "created_at": datetime.now().isoformat(),
-                                "updated_at": datetime.now().isoformat()
-                            }]
-                        )
-                        
-                        successful_images += 1
-                        
-                        if (i + 1) % 10 == 0:
-                            logger.info(f"Processed {i + 1}/{len(image_files)} images")
-                    else:
-                        failed_images += 1
-                
-                except Exception as e:
-                    logger.warning(f"Failed to process image {image_path}: {e}")
-                    failed_images += 1
-                    continue
-            
-            logger.info(f"✅ Images processed successfully for {subject}")
-            logger.info(f"   Successful: {successful_images}, Failed: {failed_images}")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Image processing failed: {e}")
-            import traceback
-            logger.error(f"Traceback: {traceback.format_exc()}")
-            return False
-    
-    def setup_chromadb_collections(self) -> bool:
-        """
-        Setup ChromaDB collections for the RAG system.
-        
-        Returns:
-            True if setup successful, False otherwise
-        """
-        if not CHROMA_AVAILABLE:
-            logger.error("Chroma not available for setup")
-            return False
-        
-        try:
-            logger.info("Setting up ChromaDB collections...")
-            
-            # Define collection structure
-            # Books: comprehensive textbook content
-            # Notes: supplementary notes and study materials
-            collections = {
-                "text": {
-                    # Book collections (from PDFs)
-                    "computer_science_grade_10": "Computer Science textbook chunks",
-                    "english_grade_10": "English textbook chunks", 
-                    "science_grade_10": "Science textbook chunks",
-                    # Notes collections (supplementary materials)
-                    "computer_science_notes_grade_10": "Computer Science notes",
-                    "english_notes_grade_10": "English notes",
-                    "science_notes_grade_10": "Science notes"
-                },
-                "image": {
-                    "computer_science_images": "Computer Science images",
-                    "english_images": "English images",
-                    "science_images": "Science images"
-                },
-                "base64_image": {
-                    "computer_science_base64": "Computer Science base64 images",
-                    "english_base64": "English base64 images", 
-                    "science_base64": "Science base64 images"
-                }
+            return {
+                'processed': len(chunks),
+                'model': self.model_name,
+                'dimension': self.embedding_dim
             }
             
-            # Create collections
-            for collection_type, subjects in collections.items():
-                for collection_name, description in subjects.items():
-                    try:
-                        # Create collection with metadata
-                        collection = self.chroma_client.create_collection(
-                            name=collection_name,
-                            metadata={"description": description, "type": collection_type}
-                        )
-                        logger.info(f"Created collection: {collection_name}")
-                    except Exception as e:
-                        logger.info(f"Collection {collection_name} already exists: {e}")
-            
-            logger.info("✅ ChromaDB collections setup completed")
-            return True
-            
         except Exception as e:
-            logger.error(f"ChromaDB setup failed: {e}")
-            return False
-    
-    def test_collections(self) -> bool:
-        """
-        Test basic operations on all collections.
-        
-        Returns:
-            True if all tests pass, False otherwise
-        """
-        if not CHROMA_AVAILABLE:
-            logger.error("Chroma not available for testing")
-            return False
-        
-        try:
-            logger.info("Testing collections...")
-            collections = self.chroma_client.list_collections()
-            
-            # Only test text collections for now, skip image collections
-            text_collections = [c for c in collections if "grade_10" in c.name]
-            
-            for collection in text_collections:
-                try:
-                    collection_obj = self.chroma_client.get_collection(name=collection.name)
-                    
-                    # Check if collection is empty (no existing embeddings)
-                    if collection_obj.count() == 0:
-                        logger.info(f"⏭️ Skipping {collection.name} - empty collection")
-                        continue
-                    
-                    # Try to get a sample document to check embedding dimensions
-                    try:
-                        sample_results = collection_obj.query(
-                            query_texts=["test"],
-                            n_results=1
-                        )
-                        
-                        if sample_results['embeddings'] and sample_results['embeddings'][0]:
-                            existing_embedding_dim = len(sample_results['embeddings'][0])
-                            logger.info(f"📊 {collection.name} has {existing_embedding_dim}-dimensional embeddings")
-                            
-                            # Skip if dimensions don't match our simple embeddings (32D)
-                            if existing_embedding_dim != 32:
-                                logger.info(f"⏭️ Skipping {collection.name} - dimension mismatch ({existing_embedding_dim}D vs 32D)")
-                                continue
-                        else:
-                            logger.info(f"⏭️ Skipping {collection.name} - no existing embeddings")
-                            continue
-                            
-                    except Exception as e:
-                        logger.info(f"⏭️ Skipping {collection.name} - can't check dimensions: {e}")
-                        continue
-                    
-                    # Test adding a sample document
-                    sample_id = f"test_{collection.name}_001"
-                    sample_text = f"This is a test document for {collection.name}"
-                    
-                    # Use simple embeddings for text collections (32D)
-                    sample_embedding = self.generate_text_embedding(sample_text).tolist()
-                    
-                    sample_metadata = {
-                        "content_type": "text",
-                        "subject": collection.name.split("_")[0],
-                        "grade": "10",
-                        "chapter": "test_chapter",
-                        "difficulty": "beginner",
-                        "language": "en",
-                        "file_path": f"test/{sample_id}.txt",
-                        "related_content": "",
-                        "created_at": "2024-01-01T00:00:00Z",
-                        "updated_at": "2024-01-01T00:00:00Z"
-                    }
-                    
-                    # Add test document
-                    collection_obj.add(
-                        documents=[sample_text],
-                        metadatas=[sample_metadata],
-                        ids=[sample_id],
-                        embeddings=[sample_embedding]
-                    )
-                    
-                    # Test query
-                    results = collection_obj.query(
-                        query_texts=[sample_text],
-                        n_results=1
-                    )
-                    
-                    if results['ids'][0] and results['ids'][0][0] == sample_id:
-                        logger.info(f"✓ {collection.name} test passed")
-                    else:
-                        logger.error(f"✗ {collection.name} test failed")
-                        return False
-                    
-                    # Clean up test document
-                    collection_obj.delete(ids=[sample_id])
-                    
-                except Exception as e:
-                    logger.error(f"✗ {collection.name} test failed: {e}")
-                    return False
-            
-            logger.info("✅ All collection tests passed!")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Collection testing failed: {e}")
-            return False
-    
-    def get_collection_info(self) -> Dict[str, Dict]:
-        """
-        Get information about all collections.
-        
-        Returns:
-            Dictionary with collection information
-        """
-        if not CHROMA_AVAILABLE:
-            return {"error": "Chroma not available"}
-        
-        info = {}
-        try:
-            collections = self.chroma_client.list_collections()
-            
-            for collection in collections:
-                try:
-                    collection_obj = self.chroma_client.get_collection(name=collection.name)
-                    count = collection_obj.count()
-                    info[collection.name] = {
-                        "count": count,
-                        "metadata": collection_obj.metadata
-                    }
-                except Exception as e:
-                    info[collection.name] = {"error": str(e)}
-        except Exception as e:
-            info["error"] = f"Failed to get collections: {e}"
-        
-        return info
-    
-    def setup_database(self) -> bool:
-        """
-        Complete database setup process.
-        
-        Returns:
-            True if setup successful, False otherwise
-        """
-        try:
-            logger.info("Starting Chroma database setup...")
-            
-            # Setup collections
-            if not self.setup_chromadb_collections():
-                logger.error("Collection setup failed!")
-                return False
-            
-            # Test collections
-            if not self.test_collections():
-                logger.error("Collection testing failed!")
-                return False
-            
-            # Display collection info
-            info = self.get_collection_info()
-            logger.info("Database setup complete!")
-            logger.info(f"Collection info: {json.dumps(info, indent=2)}")
-            
-            return True
-            
-        except Exception as e:
-            logger.error(f"Database setup failed: {e}")
-            return False
-
-    def populate_chromadb_with_content(self, include_notes: bool = False) -> bool:
-        """
-        Populate ChromaDB with educational content from processed chunks.
-        
-        Args:
-            include_notes: If True, also process notes files (default: False, only books)
-        
-        Returns:
-            True if successful, False otherwise
-        """
-        if not CHROMA_AVAILABLE:
-            logger.error("Chroma not available for content population")
-            return False
-        
-        try:
-            logger.info("🚀 Populating ChromaDB with Educational Content")
-            
-            # Define the chunks files to process (books)
-            book_chunks_files = {
-                "computer_science": "processed_data_new/chunks/computer_science_grade_10_chunks.json",
-                "english": "processed_data_new/chunks/english_grade_10_chunks.json", 
-                "science": "processed_data_new/chunks/science_grade_10_chunks.json"
-            }
-            
-            # Process each subject (books)
-            for subject, chunks_file in book_chunks_files.items():
-                logger.info(f"\n📚 Processing {subject.upper()} BOOK content...")
-                
-                # Check if file exists
-                if not os.path.exists(chunks_file):
-                    logger.warning(f"Chunks file not found: {chunks_file}")
-                    continue
-                
-                logger.info(f"📁 Found chunks file: {chunks_file}")
-                
-                try:
-                    # Process the chunks and populate ChromaDB (content_type="book")
-                    success = self.process_text_chunks(chunks_file, subject, content_type="book")
-                    
-                    if success:
-                        logger.info(f"✅ {subject.upper()} BOOK content successfully populated in ChromaDB!")
-                    else:
-                        logger.error(f"❌ Failed to populate {subject.upper()} BOOK content")
-                        
-                except Exception as e:
-                    logger.error(f"❌ Error processing {subject} book: {e}")
-                    continue
-            
-            # Process notes if requested
-            if include_notes:
-                notes_chunks_files = {
-                    "computer_science": "processed_data_new/chunks/computer_science_notes_grade_10_chunks.json",
-                    "english": "processed_data_new/chunks/english_notes_grade_10_chunks.json", 
-                    "science": "processed_data_new/chunks/science_notes_grade_10_chunks.json"
-                }
-                
-                for subject, chunks_file in notes_chunks_files.items():
-                    logger.info(f"\n📝 Processing {subject.upper()} NOTES content...")
-                    
-                    if not os.path.exists(chunks_file):
-                        logger.warning(f"Notes file not found: {chunks_file}")
-                        continue
-                    
-                    logger.info(f"📁 Found notes file: {chunks_file}")
-                    
-                    try:
-                        success = self.process_text_chunks(chunks_file, subject, content_type="notes")
-                        
-                        if success:
-                            logger.info(f"✅ {subject.upper()} NOTES successfully populated in ChromaDB!")
-                        else:
-                            logger.error(f"❌ Failed to populate {subject.upper()} NOTES")
-                            
-                    except Exception as e:
-                        logger.error(f"❌ Error processing {subject} notes: {e}")
-                        continue
-            
-            logger.info("\n🎉 ChromaDB population completed!")
-            
-            # Show summary of what was created
-            try:
-                collections = self.chroma_client.list_collections()
-                logger.info(f"\n📊 ChromaDB Collections Created:")
-                for collection in collections:
-                    logger.info(f"   - {collection.name}")
-                    # Get collection info
-                    try:
-                        collection_info = self.chroma_client.get_collection(collection.name)
-                        count = collection_info.count()
-                        logger.info(f"     Records: {count}")
-                    except Exception as e:
-                        logger.error(f"     Error getting count: {e}")
-                        
-            except Exception as e:
-                logger.error(f"❌ Error listing collections: {e}")
-            
-            return True
-            
-        except Exception as e:
-            logger.error(f"Content population failed: {e}")
-            return False
+            logger.error(f"Processing failed: {e}")
+            return {'processed': 0, 'error': str(e)}
 
 def main():
-    """Main function to run the embedding generation pipeline."""
-    logger.info("=== Satya RAG System - Embedding Generation Pipeline ===")
+    import argparse
+    parser = argparse.ArgumentParser(description="Generate semantic embeddings for text chunks")
+    parser.add_argument("input", help="Input JSON file or directory containing chunks")
+    parser.add_argument("--output", help="Output path (optional)")
+    parser.add_argument("--batch-size", type=int, default=16, help="Batch size")
+    parser.add_argument("--model", default="all-MiniLM-L6-v2", help="SentenceTransformer model name")
     
-    # Initialize generator
-    generator = EmbeddingGenerator()
+    args = parser.parse_args()
     
-    # Check model availability
-    if not PHI_AVAILABLE:
-        logger.error("❌ Phi 1.5 GGUF model not available!")
-        return 1
+    generator = EmbeddingGenerator(
+        model_name=args.model,
+        batch_size=args.batch_size
+    )
     
-    if not CLIP_AVAILABLE:
-        logger.error("❌ CLIP model not available!")
-        return 1
-    
-    if not CHROMA_AVAILABLE:
-        logger.error("❌ Chroma not available!")
-        return 1
-    
-    logger.info("✅ All models loaded successfully!")
-    logger.info("📦 Using lightweight GGUF models for offline use!")
-    
-    # Setup ChromaDB collections
-    logger.info("Setting up ChromaDB collections...")
-    if generator.setup_database():
-        logger.info("✅ ChromaDB setup completed successfully!")
-    else:
-        logger.error("❌ ChromaDB setup failed!")
-        return 1
-    
-    # Show current stats
-    stats = generator.get_collection_info() # Changed to get_collection_info as get_processing_stats is removed
-    logger.info(f"Current database stats: {json.dumps(stats, indent=2)}")
-    
-    # Example usage for populating content
-    logger.info("\n🚀 Ready to process content!")
-    logger.info("Use the following methods:")
-    logger.info("  - setup_database(): Setup ChromaDB collections")
-    logger.info("  - process_text_chunks(): Process text chunks")
-    logger.info("  - process_images(): Process images")
-    logger.info("  - get_collection_info(): Get database statistics") # Changed to get_collection_info
-    
-    return 0
+    if os.path.isfile(args.input):
+        generator.process_chunk_file(args.input, args.output)
+    elif os.path.isdir(args.input):
+        input_path = Path(args.input)
+        files = list(input_path.glob("*chunks*.json"))
+        logger.info(f"📚 Found {len(files)} chunk files to process")
+        
+        for f in files:
+            generator.process_chunk_file(str(f))
 
 if __name__ == "__main__":
-    exit(main())
+    main()

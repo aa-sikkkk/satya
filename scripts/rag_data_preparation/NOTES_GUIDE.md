@@ -1,154 +1,302 @@
-# Notes vs Books: RAG Content Strategy
+# Notes vs Textbooks: Content Strategy
 
-## Recommendation: **Keep Both!** ✅
+## Overview
 
-### Why Keep Book Chunks?
+The Satya RAG system supports two types of educational content:
+1. **Textbooks** - Comprehensive curriculum materials
+2. **Notes** - Teacher-created summaries and supplementary materials
 
-1. **Comprehensive Coverage**: Textbooks contain complete, structured curriculum content
-2. **Already Processed**: Your book chunks are already in ChromaDB and optimized
-3. **Authoritative Source**: Books are the primary reference material
-4. **No Duplication**: Notes complement books, they don't replace them
+Both are processed separately and stored in dedicated ChromaDB collections for flexible retrieval.
 
-### Why Add Notes Separately?
+---
 
-1. **Supplementary Material**: Notes often contain summaries, mnemonics, and quick references
-2. **Different Perspective**: Notes may explain concepts differently or highlight key points
-3. **Flexible Search**: You can search books, notes, or both together
-4. **Clear Separation**: Separate collections make it easy to filter by content type
+## Content Comparison
+
+| Aspect | Textbooks | Notes |
+|--------|-----------|-------|
+| **Source** | Official curriculum PDFs | Teacher-created materials |
+| **Location** | `textbooks/grade_10/` | `notes/grade_10/` |
+| **Collection** | `neb_{subject}_grade_10` | `neb_{subject}_notes_grade_10` |
+| **Content Type** | Comprehensive, structured | Summaries, quick references |
+| **Processing** | Standard extraction | Same as textbooks |
+| **Metadata** | `type: "neb_curriculum"` | `type: "neb_curriculum"` |
+| **Search** | Always included | Always included |
+
+---
+
+## Why Keep Both
+
+### Textbooks Provide
+
+1. **Comprehensive coverage** - Complete curriculum content
+2. **Structured learning** - Organized by topics and chapters
+3. **Authoritative source** - Official reference material
+4. **Detailed explanations** - In-depth concept coverage
+
+### Notes Provide
+
+1. **Concise summaries** - Quick concept reviews
+2. **Key highlights** - Important points emphasized
+3. **Alternative explanations** - Different teaching perspectives
+4. **Mnemonics and tips** - Memory aids and shortcuts
+
+### Combined Benefits
+
+- **Comprehensive answers** from textbooks
+- **Quick references** from notes
+- **Multiple perspectives** on same concepts
+- **Flexible search** across both sources
+
+---
 
 ## Collection Structure
 
-### Current Setup (Books)
-```
-computer_science_grade_10  → Textbook chunks
-english_grade_10            → Textbook chunks  
-science_grade_10            → Textbook chunks
-```
+### Current Setup
 
-### With Notes Added
+**Textbooks only:**
 ```
-computer_science_grade_10        → Textbook chunks (KEEP)
-computer_science_notes_grade_10   → Notes chunks (NEW)
-english_grade_10                  → Textbook chunks (KEEP)
-english_notes_grade_10            → Notes chunks (NEW)
-science_grade_10                  → Textbook chunks (KEEP)
-science_notes_grade_10            → Notes chunks (NEW)
+neb_computer_science_grade_10
+neb_english_grade_10
+neb_science_grade_10
 ```
 
-## How to Add Notes
+**With notes added:**
+```
+neb_computer_science_grade_10        (textbooks)
+neb_computer_science_notes_grade_10  (notes)
+neb_english_grade_10                 (textbooks)
+neb_english_notes_grade_10           (notes)
+neb_science_grade_10                 (textbooks)
+neb_science_notes_grade_10           (notes)
+```
 
-### Option 1: Using the Unified Process Script (Recommended)
+---
 
+## Processing Strategy
+
+### Recommended Approach
+
+**Keep both textbooks and notes** for maximum educational value.
+
+**Process together:**
 ```bash
-# Process all notes (and optionally textbooks)
-python scripts/rag_data_preparation/process_all.py --notes-only
-
-# Or process everything (textbooks + notes)
-python scripts/rag_data_preparation/process_all.py
+python scripts/ingest_content.py
 ```
 
-### Option 2: Using Python API
-
-```python
-from scripts.rag_data_preparation.pdf_processor import PDFProcessor
-from scripts.rag_data_preparation.embedding_generator import EmbeddingGenerator
-
-# Process notes PDF
-processor = PDFProcessor(output_dir="processed_data_new")
-result = processor.process_pdf_to_chunks(
-    pdf_path="my_notes.pdf",
-    subject="computer_science",
-    grade="10"
-)
-
-# Add to ChromaDB as notes
-generator = EmbeddingGenerator()
-generator.process_text_chunks(
-    chunks_file=result['chunks_file'],
-    subject="computer_science",
-    content_type="notes"  # Important: marks as notes, not book
-)
-```
-
-## Searching Both Books and Notes
-
-The RAG system will automatically search both collections:
-
-```python
-# Search all content (books + notes)
-results = rag_engine.search_content(
-    query="What is a variable?",
-    subject="computer_science",
-    n_results=5
-)
-
-# Results will include both:
-# - From computer_science_grade_10 (books)
-# - From computer_science_notes_grade_10 (notes)
-```
-
-## Filtering by Content Type
-
-You can filter results by source type using metadata:
-
-```python
-# Filter to only books
-book_results = [r for r in results if r['metadata'].get('source_type') == 'book']
-
-# Filter to only notes
-notes_results = [r for r in results if r['metadata'].get('source_type') == 'notes']
-```
-
-## When to Delete and Rebuild
-
-### ❌ Don't Delete If:
-- You want to keep comprehensive textbook content
-- You want both books and notes available
-- You've already processed and optimized the books
-
-### ✅ Consider Deleting If:
-- Books are outdated or incorrect
-- You want to start fresh with a new curriculum
-- You're switching to a completely different content source
-
-## Best Practice: Keep Both
-
-**Recommended Approach:**
-1. ✅ **Keep existing book collections** (they're valuable)
-2. ✅ **Add notes as separate collections** (complementary content)
-3. ✅ **Search both together** (comprehensive answers)
-4. ✅ **Use metadata to filter** (when needed)
-
-This gives you:
-- **Comprehensive answers** from books
-- **Quick references** from notes
-- **Flexibility** to search either or both
-- **No data loss** from existing work
-
-## Quick Start: Adding Your First Notes
-
+**Process separately:**
 ```bash
-# 1. Process your notes PDF
-python scripts/rag_data_preparation/process_all.py --notes-only
+# Textbooks only
+python scripts/ingest_content.py --input textbooks
 
-# 2. Verify it was added
-python -c "
-from scripts.rag_data_preparation.embedding_generator import EmbeddingGenerator
-gen = EmbeddingGenerator()
-info = gen.get_collection_info()
-print(info)
-"
+# Notes only
+python scripts/ingest_content.py --input notes
+```
 
-# 3. Test search (should find both books and notes)
-python -c "
+---
+
+## Search Behavior
+
+### Automatic Inclusion
+
+The RAG system automatically searches both textbooks and notes:
+
+```python
 from system.rag.rag_retrieval_engine import RAGRetrievalEngine
+
 rag = RAGRetrievalEngine()
-results = rag.search_content('What is programming?', subject='computer_science')
-print(f'Found {len(results)} results from books and notes')
+result = rag.query(
+    query_text="What is a variable?",
+    subject="computer_science"
+)
+
+# Results include chunks from:
+# - neb_computer_science_grade_10 (textbooks)
+# - neb_computer_science_notes_grade_10 (notes)
+```
+
+### Filtering by Source
+
+While not typically needed, you can filter by source type:
+
+```python
+# Get all results
+results = rag.query(query_text="...", subject="...")
+
+# Filter to textbooks only
+textbook_sources = [
+    s for s in results['sources']
+    if 'notes' not in s['metadata'].get('collection', '')
+]
+
+# Filter to notes only
+notes_sources = [
+    s for s in results['sources']
+    if 'notes' in s['metadata'].get('collection', '')
+]
+```
+
+---
+
+## When to Rebuild
+
+### Keep Existing Collections If
+
+- Content is current and accurate
+- Collections are functioning properly
+- You want to add supplementary notes
+- No major curriculum changes
+
+### Rebuild Collections If
+
+- Curriculum has been updated
+- Existing content contains errors
+- Switching to different textbooks
+- Major structural changes needed
+
+### Rebuild Process
+
+```python
+import chromadb
+
+client = chromadb.PersistentClient(path='satya_data/chroma_db')
+
+# Delete old collections
+client.delete_collection('neb_computer_science_grade_10')
+client.delete_collection('neb_computer_science_notes_grade_10')
+
+# Re-run ingestion
+# python scripts/ingest_content.py
+```
+
+---
+
+## Best Practices
+
+### Content Organization
+
+1. **Separate directories** - Keep textbooks and notes in respective folders
+2. **Clear naming** - Use descriptive filenames
+3. **Grade structure** - Maintain grade-specific organization
+4. **Consistent format** - Prefer PDF for compatibility
+
+### Processing Workflow
+
+1. **Process textbooks first** - Establish baseline content
+2. **Add notes incrementally** - Supplement with teacher materials
+3. **Verify collections** - Check counts and sample content
+4. **Test retrieval** - Ensure both sources are searchable
+
+### Maintenance
+
+1. **Regular updates** - Re-ingest when content changes
+2. **Version control** - Track content versions
+3. **Backup database** - Periodically backup ChromaDB
+4. **Monitor quality** - Review retrieval results
+
+---
+
+## Example Workflow
+
+### Initial Setup
+
+```bash
+# 1. Add textbooks
+# Place PDFs in textbooks/grade_10/
+
+# 2. Process textbooks
+python scripts/ingest_content.py --input textbooks
+
+# 3. Verify
+python -c "
+import chromadb
+client = chromadb.PersistentClient(path='satya_data/chroma_db')
+print([c.name for c in client.list_collections()])
 "
 ```
+
+### Adding Notes
+
+```bash
+# 1. Add notes
+# Place PDFs in notes/grade_10/
+
+# 2. Process notes
+python scripts/ingest_content.py --input notes
+
+# 3. Verify both exist
+python -c "
+import chromadb
+client = chromadb.PersistentClient(path='satya_data/chroma_db')
+for c in client.list_collections():
+    print(f'{c.name}: {c.count()} chunks')
+"
+```
+
+### Testing Combined Search
+
+```python
+from system.rag.rag_retrieval_engine import RAGRetrievalEngine
+
+rag = RAGRetrievalEngine()
+result = rag.query(
+    query_text="Explain variables in programming",
+    subject="computer_science"
+)
+
+print(f"Answer: {result['answer']}")
+print(f"\nSources ({len(result['sources'])}):")
+for source in result['sources']:
+    collection = source['metadata'].get('collection', 'unknown')
+    print(f"  - {collection}")
+```
+
+---
+
+## Metadata Schema
+
+### Textbook Chunks
+
+```python
+{
+    "source": "computer_science.pdf",
+    "type": "neb_curriculum",
+    "grade": "10",
+    "subject": "computer_science",
+    "collection": "neb_computer_science_grade_10"
+}
+```
+
+### Notes Chunks
+
+```python
+{
+    "source": "cs_notes.pdf",
+    "type": "neb_curriculum",
+    "grade": "10",
+    "subject": "computer_science",
+    "collection": "neb_computer_science_notes_grade_10"
+}
+```
+
+---
 
 ## Summary
 
-**Keep your book chunks!** They're valuable comprehensive content. Add notes as separate collections to complement them. This gives you the best of both worlds without losing your existing work.
+**Recommendation:** Keep both textbooks and notes for comprehensive educational coverage.
 
+**Benefits:**
+- Authoritative textbook content
+- Supplementary teacher notes
+- Multiple explanation styles
+- Flexible search capabilities
+
+**Implementation:** Use `scripts/ingest_content.py` to process both content types into separate collections.
+
+---
+
+## Additional Resources
+
+- **Quick start:** `QUICK_START.md`
+- **Detailed guide:** `README.md`
+- **Textbooks README:** `../../textbooks/README.md`
+- **Notes README:** `../../notes/README.md`

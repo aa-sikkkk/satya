@@ -1,3 +1,6 @@
-"""
-Model utilities for the Nepali Grade 10 AI Learning Companion.
-""" 
+"""Model Utilities for Satya Learning System"""
+
+from .model_handler import ModelHandler
+from .phi15_handler import SimplePhiHandler
+
+__all__ = ['ModelHandler', 'SimplePhiHandler']

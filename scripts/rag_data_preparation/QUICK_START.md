@@ -1,144 +1,263 @@
-# 🚀 Quick Start: Process Textbooks & Notes
+# Quick Start Guide
 
-## One Command to Process Everything
+## Single Command Processing
+
+Process all educational content with one command:
 
 ```bash
-python scripts/rag_data_preparation/process_all.py
+python scripts/ingest_content.py
 ```
 
-This single command will:
-1. ✅ Process all textbooks from `textbooks/grade_10/`
-2. ✅ Process all notes from `notes/grade_10/`
-3. ✅ Generate embeddings for both
-4. ✅ Add everything to ChromaDB
+This processes textbooks and notes from both `textbooks/` and `notes/` directories.
 
-## 📋 Step-by-Step Guide
+---
 
-### 1. Prepare Your Files
+## Prerequisites
+
+### Required Dependencies
+
+```bash
+pip install pymupdf sentence-transformers chromadb
+```
+
+### Optional OCR Dependencies
+
+**For scanned PDFs:**
+```bash
+pip install pytesseract pillow
+```
+
+**For handwritten notes:**
+```bash
+pip install easyocr
+```
+
+---
+
+## Step-by-Step Workflow
+
+### Step 1: Organize Content
 
 **Textbooks:**
 ```
 textbooks/grade_10/
-├── computer_science_grade_10.pdf
-├── english_grade_10.pdf
-└── science_grade_10.pdf
+├── computer_science.pdf
+├── english.pdf
+└── science.pdf
 ```
 
 **Notes:**
 ```
 notes/grade_10/
-├── computer_science_notes.pdf  (optional)
-├── english_notes.pdf          (optional)
-└── science_notes.pdf          (optional)
+├── cs_notes.pdf
+├── english_summary.md
+└── science_revision.txt
 ```
 
-### 2. Run Processing
+### Step 2: Run Ingestion
+
+**Process everything:**
+```bash
+python scripts/ingest_content.py
+```
+
+**Process only textbooks:**
+```bash
+python scripts/ingest_content.py --input textbooks
+```
+
+**Process only notes:**
+```bash
+python scripts/ingest_content.py --input notes
+```
+
+### Step 3: Verify Results
+
+```python
+import chromadb
+
+client = chromadb.PersistentClient(path='satya_data/chroma_db')
+collections = client.list_collections()
+
+for c in collections:
+    print(f"{c.name}: {c.count()} chunks")
+```
+
+---
+
+## Processing Options
+
+### OCR Modes
+
+**Auto-detect (recommended):**
+```bash
+python scripts/ingest_content.py --ocr-mode auto
+```
+
+**Force OCR on all PDFs:**
+```bash
+python scripts/ingest_content.py --ocr-mode force
+```
+
+**Never use OCR:**
+```bash
+python scripts/ingest_content.py --ocr-mode never
+```
+
+### Custom Database Path
 
 ```bash
-# Process everything
-python scripts/rag_data_preparation/process_all.py
+python scripts/ingest_content.py --db /custom/path/chroma_db
 ```
 
-### 3. Verify Results
+---
 
-```bash
-python -c "
-from scripts.rag_data_preparation.embedding_generator import EmbeddingGenerator
-gen = EmbeddingGenerator()
-info = gen.get_collection_info()
-for name, data in info.items():
-    print(f'{name}: {data.get(\"count\", 0)} chunks')
-"
-```
-
-## 🎯 Processing Options
-
-### Process Only Textbooks
-```bash
-python scripts/rag_data_preparation/process_all.py --textbooks-only
-```
-
-### Process Only Notes
-```bash
-python scripts/rag_data_preparation/process_all.py --notes-only
-```
-
-### Process Without Embeddings (Testing)
-```bash
-python scripts/rag_data_preparation/process_all.py --skip-embeddings
-```
-
-## 📊 What Gets Created
-
-### Processed Chunks
-```
-processed_data_new/
-├── chunks/              # JSON files with chunks
-│   ├── computer_science_grade_10_chunks.json
-│   ├── computer_science_notes_grade_10_chunks.json
-│   └── ...
-├── images/             # Extracted images
-└── reports/            # Processing reports
-```
+## Output Structure
 
 ### ChromaDB Collections
+
+**Textbooks:**
+- `neb_computer_science_grade_10`
+- `neb_english_grade_10`
+- `neb_science_grade_10`
+
+**Notes:**
+- `neb_computer_science_notes_grade_10`
+- `neb_english_notes_grade_10`
+- `neb_science_notes_grade_10`
+
+### Database Location
+
 ```
-Books:
-├── computer_science_grade_10
-├── english_grade_10
-└── science_grade_10
-
-Notes:
-├── computer_science_notes_grade_10
-├── english_notes_grade_10
-└── science_notes_grade_10
+satya_data/
+└── chroma_db/
+    ├── neb_computer_science_grade_10/
+    ├── neb_english_grade_10/
+    └── [other collections]
 ```
 
-## ⚡ Alternative: Process Separately
+---
 
-If you prefer to process books and notes separately:
+## Common Use Cases
 
-### Textbooks Only
+### Adding New Content
+
+1. **Add files** to `textbooks/grade_10/` or `notes/grade_10/`
+2. **Run ingestion:**
+   ```bash
+   python scripts/ingest_content.py
+   ```
+3. **Verify:** Check collection counts
+
+### Updating Existing Content
+
+1. **Replace files** in respective directories
+2. **Re-run ingestion** (collections are additive)
+3. **Optional:** Delete old collection first for clean rebuild
+
+### Processing Multiple Grades
+
 ```bash
-# Process PDFs to chunks
-python -c "
-from scripts.rag_data_preparation.pdf_processor import PDFProcessor
-from scripts.rag_data_preparation.embedding_generator import EmbeddingGenerator
+# Create grade_11 folders
+mkdir -p textbooks/grade_11 notes/grade_11
 
-processor = PDFProcessor('processed_data_new')
-processor.run_pipeline()
+# Add content
+# ...
 
-generator = EmbeddingGenerator()
-generator.populate_chromadb_with_content(include_notes=False)
-"
+# Process
+python scripts/ingest_content.py
 ```
 
-### Notes Only
-```bash
-python scripts/rag_data_preparation/process_all.py --notes-only
+---
+
+## Troubleshooting
+
+### Issue: "No files found"
+
+**Check:**
+- Files are in correct directories
+- File extensions are supported (.pdf, .txt, .md)
+- Files have read permissions
+
+### Issue: "OCR failed"
+
+**Solutions:**
+- Install OCR dependencies
+- Verify image quality (300 DPI recommended)
+- Try `--ocr-mode force`
+
+### Issue: "Slow processing"
+
+**Optimization:**
+- Use text PDFs instead of scanned
+- Process in smaller batches
+- Check CPU usage
+
+### Issue: "Collection already exists"
+
+**Note:** This is normal behavior. Collections are additive.
+
+**To rebuild:**
+```python
+import chromadb
+
+client = chromadb.PersistentClient(path='satya_data/chroma_db')
+client.delete_collection('neb_computer_science_grade_10')
+
+# Then re-run ingestion
 ```
 
-## 🔍 Troubleshooting
+---
 
-### "No PDF files found"
-- Check files are in `textbooks/grade_10/` or `notes/grade_10/`
-- Verify file extensions are `.pdf`
-- Check file permissions
+## Testing the RAG System
 
-### "Collection already exists"
-- This is normal if re-processing
-- Old chunks will be updated/added to
-- Use `get_collection_info()` to check counts
+### Query Test
 
-### "Failed to process"
-- Check PDF has extractable text
-- Try OCR for scanned PDFs (automatic)
-- Check processing logs in `processed_data_new/logs/`
+```python
+from system.rag.rag_retrieval_engine import RAGRetrievalEngine
 
-## 📚 More Information
+rag = RAGRetrievalEngine()
+result = rag.query(
+    query_text="What is a variable?",
+    subject="computer_science"
+)
 
-- **Full Guide**: See `INPUT_FOLDERS_GUIDE.md` in project root
-- **Textbooks Guide**: See `textbooks/README.md`
-- **Notes Guide**: See `notes/README.md`
-- **Notes vs Books**: See `NOTES_GUIDE.md`
+print(f"Answer: {result['answer']}")
+print(f"Confidence: {result['confidence']}")
+print(f"Sources: {len(result['sources'])}")
+```
 
+### Collection Inspection
+
+```python
+import chromadb
+
+client = chromadb.PersistentClient(path='satya_data/chroma_db')
+collection = client.get_collection('neb_computer_science_grade_10')
+
+# Get sample chunks
+sample = collection.peek(limit=3)
+print(f"Sample chunks: {sample}")
+
+# Get statistics
+print(f"Total chunks: {collection.count()}")
+```
+
+---
+
+## Next Steps
+
+1. **Process your content** using the commands above
+2. **Verify collections** are created successfully
+3. **Test RAG queries** to ensure retrieval works
+4. **Integrate with GUI** for student use
+
+---
+
+## Additional Resources
+
+- **Detailed guide:** `README.md`
+- **Notes strategy:** `NOTES_GUIDE.md`
+- **Textbooks README:** `../../textbooks/README.md`
+- **Notes README:** `../../notes/README.md`
+- **Ingestion script:** `../ingest_content.py`

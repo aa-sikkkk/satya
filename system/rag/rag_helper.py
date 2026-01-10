@@ -1,14 +1,11 @@
 """
 RAG Helper Utilities
-
-Non-blocking RAG retrieval with timeout and smart skipping.
-Optimized for fast answer generation while still benefiting from RAG when available.
+Simplified.
 """
 
 import logging
-import threading
 import time
-from typing import Optional, Dict, Tuple, Callable
+from typing import Optional, Dict, Tuple
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 
 logger = logging.getLogger(__name__)
@@ -16,21 +13,21 @@ logger = logging.getLogger(__name__)
 
 def should_use_rag(question: str) -> bool:
     """
-    Quick check if question is likely to benefit from RAG.
-    Skips RAG for general/conversational questions that Phi can handle well.
+    Quick check if question benefits from RAG.
+    Skips RAG for general questions Phi can handle.
     
     Args:
         question: Student's question
         
     Returns:
-        True if RAG might help, False to skip RAG and use Phi's knowledge
+        True if RAG might help, False to skip
     """
     if not question or len(question.strip()) < 5:
         return False
     
     question_lower = question.lower().strip()
     
-    # Skip RAG for very general questions
+    # Skip for greetings/general
     general_patterns = [
         "hello", "hi", "hey", "thanks", "thank you", "what can you",
         "who are you", "what is your name", "help me", "can you help"
@@ -38,9 +35,7 @@ def should_use_rag(question: str) -> bool:
     if any(pattern in question_lower for pattern in general_patterns):
         return False
     
-    # Skip RAG for very short questions (likely general knowledge)
     if len(question.split()) < 4:
-        # Unless it contains curriculum-specific terms
         curriculum_terms = [
             "function", "variable", "class", "method", "algorithm",
             "syntax", "loop", "array", "string", "integer",
@@ -50,168 +45,122 @@ def should_use_rag(question: str) -> bool:
         if not any(term in question_lower for term in curriculum_terms):
             return False
     
-    # Use RAG for curriculum-specific questions
+
     curriculum_indicators = [
         "what is", "how does", "explain", "define", "describe",
         "chapter", "lesson", "topic", "concept", "subject"
     ]
     
-    # If question has curriculum indicators, likely needs RAG
     if any(indicator in question_lower for indicator in curriculum_indicators):
         return True
     
-    # Default: use RAG for questions longer than 10 words (likely specific)
     return len(question.split()) > 10
 
 
-def retrieve_rag_with_timeout(
+def get_context_with_timeout(
     rag_engine,
     question: str,
-    timeout_seconds: float = 2.0,
-    max_results: int = 2
-) -> Optional[Dict]:
+    subject: str,
+    grade: str,
+    timeout_seconds: float = 2.0
+) -> Tuple[str, str]:
     """
-    Retrieve RAG content with timeout to prevent blocking.
+    Get RAG context with timeout.
     
     Args:
         rag_engine: RAGRetrievalEngine instance
-        question: Search query
-        timeout_seconds: Maximum time to wait (default 2 seconds)
-        max_results: Maximum results to return
+        question: Question text
+        subject: Subject filter
+        grade: Grade filter
+        timeout_seconds: Max wait time
         
     Returns:
-        RAG results dict or None if timeout/error
+        (context_string, source_info)
     """
     if not rag_engine:
-        return None
+        return "", "AI Knowledge"
+    
+    if not should_use_rag(question):
+        return "", "AI Knowledge"
     
     try:
-        with ThreadPoolExecutor(max_workers=1) as executor:
-            future = executor.submit(
-                rag_engine.retrieve_relevant_content,
-                question,
-                max_results
-            )
-            return future.result(timeout=timeout_seconds)
-    except FuturesTimeoutError:
-        logger.debug(f"RAG retrieval timed out after {timeout_seconds}s for: {question[:50]}")
-        return None
+        result_container = [None]
+        error_container = [None]
+        
+        def do_query():
+            try:
+                res = rag_engine.query(
+                    query_text=question,
+                    subject=subject,
+                    grade=grade,
+                    n_results=3
+                )
+                result_container[0] = res
+            except Exception as e:
+                error_container[0] = e
+        
+        thread = threading.Thread(target=do_query)
+        thread.daemon = True
+        thread.start()
+        thread.join(timeout=timeout_seconds)
+        
+        
+        if thread.is_alive():
+            logger.debug(f"RAG timeout after {timeout_seconds}s")
+            return "", "AI Knowledge (timeout)"
+        
+        if error_container[0]:
+            logger.debug(f"RAG error: {error_container[0]}")
+            return "", "AI Knowledge (error)"
+        
+        result = result_container[0]
+        if not result:
+            return "", "AI Knowledge"
+        
+        
+        context_texts = result.get('context_used', [])
+        if context_texts:
+            context = "\n\n".join(context_texts[:2])  # Max 2 chunks
+            context = context[:600]  # Limit size
+            return context, "RAG Context"
+        
+        return "", "AI Knowledge"
+        
     except Exception as e:
-        logger.debug(f"RAG retrieval error: {e}")
-        return None
+        logger.debug(f"RAG retrieval failed: {e}")
+        return "", "AI Knowledge"
 
 
-def validate_rag_relevance(question: str, rag_results: Dict) -> Tuple[bool, Optional[str]]:
+def validate_context_relevance(question: str, context: str) -> bool:
     """
-    Validate if RAG results are actually relevant to the question.
+    Check if context is relevant to question.
     
     Args:
         question: Original question
-        rag_results: RAG retrieval results
+        context: RAG context
         
     Returns:
-        (is_relevant, context_string) - context_string is None if not relevant
+        True if relevant
     """
-    if not rag_results or not rag_results.get('chunks'):
-        return False, None
+    if not context or len(context.strip()) < 20:
+        return False
     
     question_lower = question.lower()
+    context_lower = context.lower()
     question_words = set(word for word in question_lower.split() if len(word) > 3)
     
-    chunks = rag_results['chunks'][:2]
-    relevant_chunks = []
+
+    overlap_count = sum(1 for word in question_words if word in context_lower)
+    if overlap_count >= 2:
+        return True
     
-    for chunk in chunks:
-        chunk_content = chunk.get('content', '').lower()
-        chunk_words = set(word for word in chunk_content.split() if len(word) > 3)
-        
-        # Check word overlap
-        overlap = len(question_words.intersection(chunk_words))
-        
-        # Require at least 2 meaningful word overlaps OR one long word match
-        if overlap >= 2 or any(word in chunk_content for word in question_words if len(word) > 5):
-            relevant_chunks.append(chunk)
+   
+    long_words = [w for w in question_words if len(w) > 5]
+    if any(word in context_lower for word in long_words):
+        return True
     
-    if not relevant_chunks:
-        return False, None
-    
-    # Combine relevant chunks
-    context = "\n\n".join([ch['content'] for ch in relevant_chunks])
-    context = context[:600]  # Limit context size
-    
-    return True, context
+    return False
 
 
-def get_context_non_blocking(
-    rag_engine,
-    question: str,
-    content_manager=None,
-    timeout_seconds: float = 2.0
-) -> Tuple[Optional[str], str]:
-    """
-    Get context for answer generation using non-blocking RAG.
-    Always returns quickly - either with RAG context, structured content, or general knowledge.
-    
-    Strategy:
-    1. Quick check if RAG is worth trying
-    2. Start RAG in parallel (with timeout)
-    3. Return RAG context if available
-    4. Fallback to structured content (fast, concise - helps generation speed)
-    5. Final fallback to general knowledge
-    
-    Args:
-        rag_engine: RAGRetrievalEngine instance (can be None)
-        question: Student's question
-        content_manager: ContentManager for structured content fallback
-        timeout_seconds: RAG timeout (default 2 seconds)
-        
-    Returns:
-        (context, source_info) - context is None if using general knowledge
-    """
-    # Quick check: should we even try RAG?
-    if not should_use_rag(question):
-        return "", "AI General Knowledge"
-    
-    # Try RAG with SHORT timeout (1 second max - don't wait long)
-    # If RAG takes >1s, skip it and use structured content instead
-    rag_results = None
-    if rag_engine:
-        try:
-            rag_results = retrieve_rag_with_timeout(
-                rag_engine,
-                question,
-                timeout_seconds=1.0,  # Reduced from 2.0 - faster fallback
-                max_results=2
-            )
-        except Exception as e:
-            logger.debug(f"RAG retrieval exception: {e}")
-            rag_results = None
-    
-    # Validate and use RAG if relevant (only if it returned quickly)
-    if rag_results and rag_results.get('chunks'):
-        is_relevant, rag_context = validate_rag_relevance(question, rag_results)
-        if is_relevant and rag_context:
-            # RAG succeeded quickly - use RAG context
-            logger.debug(f"RAG found relevant content for: {question[:50]}")
-            return rag_context, "RAG-enhanced content"
-        else:
-            logger.debug(f"RAG results not relevant for: {question[:50]}")
-    elif rag_results and rag_results.get('error'):
-        logger.debug(f"RAG error: {rag_results.get('error')}")
-    
-    # Fallback 1: Try structured content (fast, concise context helps generation speed)
-    # This is faster than waiting for slow RAG
-    if content_manager:
-        try:
-            # Quick search with limited results for fast generation
-            relevant = content_manager.search_content(question, max_results=1)
-            if relevant and relevant[0].get('summary'):
-                # Limit to 250 chars to keep prompt short and fast
-                return relevant[0]['summary'][:250], "Structured content"
-        except Exception as e:
-            logger.debug(f"Structured content search failed: {e}")
-    
-    # Fallback 2: General knowledge
-    # Return empty context - Phi model will use its own knowledge based on system prompt
-    return "", "AI General Knowledge"
-
+# Import threading for timeout
+import threading
