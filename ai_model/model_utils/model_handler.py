@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Model Handler for Satya Learning System
-CPU-first with SimpleHandler interface
+CPU-first with Simple Handler interface
 """
 
 import os
@@ -37,7 +37,7 @@ class SimpleHandler:
 
 class ModelHandler:
     """
-    Model handler with SimpleHandler interface for i3 optimization.
+    Model handler with Simple Phi Handler interface for i3 optimization.
     """
     
     def __init__(self, model_path: Optional[str] = None):

@@ -1,193 +1,385 @@
 # RAG Data Preparation Pipeline
 
-This pipeline prepares educational content for the Satya RAG (Retrieval-Augmented Generation) system. It processes Grade 10 textbooks, extracts text and images, creates overlapping chunks, and prepares data for Chroma database integration.
+## Overview
 
-## 🎯 Overview
+The Satya RAG data preparation pipeline processes educational content (textbooks, notes, handwritten materials) into a vector database for retrieval-augmented generation. The system supports multiple content types with automatic detection and appropriate processing.
 
-The pipeline handles:
-- **PDF Processing**: Text extraction with OCR fallback
-- **Content Chunking**: Overlapping chunks optimized for Phi 1.5
-- **Image Processing**: Extraction and preparation for embedding
-- **Metadata Generation**: Rich metadata for RAG retrieval
-- **ChromaDB Integration**: Complete database setup and population
-- **Quality Validation**: Ensures content quality and consistency
+---
 
-## 📁 Directory Structure
+## Quick Start
 
-```
-scripts/rag_data_preparation/
-├── __init__.py                 # Package initialization
-├── pdf_processor.py           # PDF processing + pipeline orchestration
-├── embedding_generator.py     # AI models + ChromaDB integration
-├── process_all.py             # Unified script to process textbooks + notes
-├── QUICK_START.md             # Quick start guide
-├── NOTES_GUIDE.md             # Notes vs Books strategy guide
-└── README.md                  # This file
-```
+### Single Command Processing
 
-## 🚀 Quick Start
-
-### 1. Install Dependencies
+Process all content (textbooks and notes):
 
 ```bash
-# Install Python dependencies
-pip install -r requirements.txt
-
-# Install system dependencies (Ubuntu/Debian)
-sudo apt-get update
-sudo apt-get install tesseract-ocr tesseract-ocr-eng tesseract-ocr-nep tesseract-ocr-hin
-
-# For Windows: Download Tesseract from https://github.com/UB-Mannheim/tesseract/wiki
-# For macOS: brew install tesseract tesseract-lang
+python scripts/ingest_content.py
 ```
 
-### 2. Prepare Your PDFs
+This command will:
+1. Scan `textbooks/` and `notes/` directories
+2. Auto-detect content type for each file
+3. Apply appropriate extraction method
+4. Generate embeddings
+5. Store in ChromaDB
 
-Place your Grade 10 textbooks in a directory with the following naming convention:
+---
+
+## System Architecture
+
+### Components
+
+| Component | Purpose | Location |
+|-----------|---------|----------|
+| **ingest_content.py** | Universal ingestion script | `scripts/` |
+| **enhanced_chunker.py** | Smart text chunking | `scripts/rag_data_preparation/` |
+| **embedding_generator.py** | Embedding generation | `scripts/rag_data_preparation/` |
+
+### Content Processing Flow
 
 ```
-textbooks/
-├── computer_science_grade_10.pdf
-├── english_grade_10.pdf
-└── science_grade_10.pdf
+Input Files (PDF/TXT/MD)
+    ↓
+Content Type Detection
+    ↓
+Extraction (PyMuPDF/Tesseract/EasyOCR)
+    ↓
+Smart Chunking (512 tokens, 10% overlap)
+    ↓
+Embedding Generation (all-MiniLM-L6-v2)
+    ↓
+ChromaDB Storage
 ```
 
-### 3. Run the Pipeline
+---
 
-#### ⚡ Recommended: Use process_all.py (One Command)
+## Supported Content Types
+
+### Text-Based PDFs
+
+**Detection:** Automatic text extraction succeeds  
+**Processing:** PyMuPDF direct extraction  
+**Use case:** Digital textbooks, typed notes
+
+### Scanned PDFs
+
+**Detection:** Minimal text extraction  
+**Processing:** Tesseract OCR  
+**Use case:** Scanned textbooks, photocopied materials
+
+### Handwritten Notes
+
+**Detection:** Manual flag or poor OCR quality  
+**Processing:** EasyOCR (better handwriting recognition)  
+**Use case:** Teacher handwritten notes, student annotations
+
+### Text Files
+
+**Formats:** .txt, .md, .jsonl  
+**Processing:** Direct reading  
+**Use case:** Markdown notes, structured data
+
+---
+
+## Installation
+
+### Required Dependencies
+
 ```bash
-# Process everything (textbooks + notes)
-python scripts/rag_data_preparation/process_all.py
-
-# Only textbooks
-python scripts/rag_data_preparation/process_all.py --textbooks-only
-
-# Only notes
-python scripts/rag_data_preparation/process_all.py --notes-only
+pip install pymupdf sentence-transformers chromadb
 ```
 
-This single command will:
-- ✅ Process all PDFs from `textbooks/grade_10/` and `notes/grade_10/`
-- ✅ Create optimized chunks (400 words each)
-- ✅ Extract images
-- ✅ Generate embeddings
-- ✅ Add everything to ChromaDB
+### Optional OCR Dependencies
 
-#### 🔧 Advanced: Using Python API Directly
+**For scanned PDFs:**
+```bash
+pip install pytesseract pillow
 
-> **Note**: Use `process_all.py` for most cases. The Python API is for custom processing needs.
+# System dependency (Windows)
+# Download from: https://github.com/UB-Mannheim/tesseract/wiki
+
+# System dependency (Ubuntu/Debian)
+sudo apt-get install tesseract-ocr tesseract-ocr-eng
+```
+
+**For handwritten notes:**
+```bash
+pip install easyocr
+```
+
+---
+
+## Usage
+
+### Basic Usage
+
+**Process everything:**
+```bash
+python scripts/ingest_content.py
+```
+
+**Process specific folders:**
+```bash
+python scripts/ingest_content.py --input textbooks notes
+```
+
+### OCR Modes
+
+**Auto-detect (default):**
+```bash
+python scripts/ingest_content.py --ocr-mode auto
+```
+
+**Force OCR on all PDFs:**
+```bash
+python scripts/ingest_content.py --ocr-mode force
+```
+
+**Never use OCR (text-only):**
+```bash
+python scripts/ingest_content.py --ocr-mode never
+```
+
+### Custom Database Path
 
 ```bash
-# Process PDFs to chunks
-python -c "
-from scripts.rag_data_preparation.pdf_processor import PDFProcessor
-processor = PDFProcessor('processed_data_new')
-results = processor.run_pipeline()
-print('Pipeline completed!')
-"
-
-# Setup ChromaDB and populate
-python -c "
-from scripts.rag_data_preparation.embedding_generator import EmbeddingGenerator
-generator = EmbeddingGenerator()
-generator.setup_database()
-generator.populate_chromadb_with_content()
-print('ChromaDB populated!')
-"
+python scripts/ingest_content.py --db /path/to/chroma_db
 ```
 
-## 🔧 Core Components
+---
 
-### PDFProcessor Class
-- **`run_pipeline()`**: Complete pipeline orchestration
-- **`process_pdf_to_chunks()`**: PDF to chunks conversion
-- **`_extract_page_text()`**: Text extraction with OCR fallback
-- **`_extract_page_images()`**: Image extraction and processing
+## Directory Structure
 
-### EmbeddingGenerator Class
-- **`setup_database()`**: ChromaDB collection setup
-- **`populate_chromadb_with_content()`**: Content population
-- **`process_text_chunks()`**: Text chunk processing
-- **`process_images()`**: Image processing
-- **`generate_clip_text_embedding()`**: CLIP text embeddings
-
-## 📊 Output Structure
-
-After processing, you'll have:
+### Input Structure
 
 ```
-processed_data_new/
-├── chunks/                     # Processed text chunks
-│   ├── computer_science_grade_10_chunks.json
-│   ├── english_grade_10_chunks.json
-│   └── science_grade_10_chunks.json
-├── images/                     # Extracted images
-│   ├── computer_science/
-│   ├── english/
-│   └── science/
-├── reports/                    # Processing reports
-│   └── pipeline_report.json
-└── logs/                       # Processing logs
+Satya/
+├── textbooks/
+│   └── grade_10/
+│       ├── computer_science.pdf
+│       ├── english.pdf
+│       └── science.pdf
+├── notes/
+│   └── grade_10/
+│       ├── cs_notes.pdf
+│       ├── english_summary.md
+│       └── science_revision.txt
+└── scripts/
+    └── ingest_content.py
+```
 
+### Output Structure
+
+```
 satya_data/
-└── chroma_db/                 # Chroma vector database
-    ├── computer_science_grade_10/
-    ├── english_grade_10/
-    ├── science_grade_10/
-    └── config.json
+└── chroma_db/
+    ├── neb_computer_science_grade_10/
+    ├── neb_english_grade_10/
+    ├── neb_science_grade_10/
+    ├── neb_computer_science_notes_grade_10/
+    ├── neb_english_notes_grade_10/
+    └── neb_science_notes_grade_10/
 ```
 
-## ⚡ Performance Features
+---
 
-- **Direct Processing**: No intermediate files, PDF to chunks in one pass
-- **Batch Processing**: Efficient 8-chunk batches for ChromaDB
-- **OCR Fallback**: Automatic OCR when text extraction fails
-- **Image Optimization**: Base64 encoding for ChromaDB storage
-- **Offline Models**: Lightweight GGUF models for local processing
+## Chunking Strategy
 
-## 🔍 Usage Examples
+### Parameters
 
-### Process New PDFs
+- **Chunk size:** 512 tokens
+- **Overlap:** 10% (51 tokens)
+- **Strategy:** Sentence-boundary aware
+
+### Rationale
+
+**512 tokens:**
+- Optimal for Phi 1.5 context window
+- Balances detail vs. retrieval precision
+- Fits within embedding model limits
+
+**10% overlap:**
+- Prevents context loss at boundaries
+- Improves retrieval recall
+- Minimal storage overhead
+
+---
+
+## Metadata Schema
+
+Each chunk includes:
+
 ```python
-from scripts.rag_data_preparation.pdf_processor import PDFProcessor
-
-# Initialize processor
-processor = PDFProcessor('processed_data_new', language='en')
-
-# Run complete pipeline
-results = processor.run_pipeline(['computer_science', 'english'])
-print(f"Created {results['total_chunks']} chunks")
+{
+    "source": "filename.pdf",
+    "type": "neb_curriculum",
+    "grade": "10",
+    "subject": "computer_science"
+}
 ```
 
-### Setup and Populate ChromaDB
+### Metadata Extraction
+
+**Grade detection:**
+- From folder name: `grade_10/` → `"10"`
+- From filename: `science_grade_10.pdf` → `"10"`
+- Fallback: `"unknown"`
+
+**Subject detection:**
+- From filename: `computer_science_notes.pdf` → `"computer_science"`
+- Cleaned and normalized automatically
+
+---
+
+## ChromaDB Collections
+
+### Naming Convention
+
+**Textbooks:**
+```
+neb_{subject}_grade_{grade}
+```
+
+**Notes:**
+```
+neb_{subject}_notes_grade_{grade}
+```
+
+### Collection Management
+
+**List all collections:**
 ```python
-from scripts.rag_data_preparation.embedding_generator import EmbeddingGenerator
+import chromadb
 
-# Initialize generator
-generator = EmbeddingGenerator()
+client = chromadb.PersistentClient(path='satya_data/chroma_db')
+collections = client.list_collections()
 
-# Setup database
-generator.setup_database()
-
-# Populate with content
-generator.populate_chromadb_with_content()
-
-# Get statistics
-stats = generator.get_collection_info()
-print(f"Collections: {stats}")
+for c in collections:
+    print(f"{c.name}: {c.count()} chunks")
 ```
 
-## 🎓 Supported Subjects
+**Query a collection:**
+```python
+collection = client.get_collection('neb_computer_science_grade_10')
+results = collection.query(
+    query_texts=["What is a variable?"],
+    n_results=5
+)
+```
 
-- **Computer Science**: Programming concepts, algorithms, databases
-- **English**: Literature, grammar, writing skills
-- **Science**: Biology, physics, chemistry, environmental science
+---
 
-## 🌟 Key Benefits
+## Performance Considerations
 
-- **Consolidated Codebase**: Single file per major functionality
-- **No Redundancy**: Eliminated duplicate code and overlapping features
-- **Easy Maintenance**: Clear separation of concerns
-- **Production Ready**: Robust error handling and logging
-- **Offline First**: Works completely without internet
-- **Scalable**: Easy to add new subjects or content types 
+### Processing Speed
+
+**Text PDFs:** ~1-2 pages/second  
+**Scanned PDFs (Tesseract):** ~2-5 seconds/page  
+**Handwritten (EasyOCR):** ~5-10 seconds/page
+
+### Optimization Tips
+
+1. **Use text PDFs when possible** - Significantly faster
+2. **Batch processing** - Process multiple files in one run
+3. **CPU threads** - Adjust based on available cores
+4. **Skip re-processing** - Collections are additive
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+**Issue:** "No files found"
+
+**Solution:**
+- Verify files are in correct directories
+- Check file extensions (.pdf, .txt, .md)
+- Ensure read permissions
+
+---
+
+**Issue:** "OCR failed"
+
+**Solution:**
+- Install OCR dependencies
+- Check image quality (300 DPI recommended)
+- Try different OCR mode
+
+---
+
+**Issue:** "Embedding generation slow"
+
+**Solution:**
+- Use CPU-optimized sentence-transformers
+- Process in smaller batches
+- Consider GPU if available
+
+---
+
+**Issue:** "Collection already exists"
+
+**Solution:**
+- This is normal - collections are additive
+- Use `collection.count()` to verify chunks added
+- Delete collection if full rebuild needed
+
+---
+
+## Advanced Usage
+
+### Python API
+
+```python
+from scripts.ingest_content import UniversalContentIngester
+
+# Initialize
+ingester = UniversalContentIngester(
+    db_path='satya_data/chroma_db',
+    ocr_mode='auto'
+)
+
+# Process directory
+ingester.ingest_directory('notes/grade_10')
+
+# Verify
+import chromadb
+client = chromadb.PersistentClient(path='satya_data/chroma_db')
+print(client.list_collections())
+```
+
+### Custom Chunking
+
+```python
+from scripts.rag_data_preparation.enhanced_chunker import EnhancedChunker
+
+chunker = EnhancedChunker(
+    chunk_size=512,
+    overlap_ratio=0.1
+)
+
+chunks = chunker.smart_chunk_with_overlap(
+    text="Your content here",
+    metadata={"subject": "science", "grade": "10"}
+)
+```
+
+---
+
+## Best Practices
+
+1. **Organize by grade** - Maintain grade-specific folders
+2. **Consistent naming** - Use clear, descriptive filenames
+3. **Quality PDFs** - Prefer text PDFs over scanned
+4. **Regular updates** - Re-ingest when content changes
+5. **Verify ingestion** - Check collections after processing
+6. **Backup database** - Periodically backup `chroma_db/`
+
+---
+
+## Additional Resources
+
+- **Quick start:** `QUICK_START.md`
+- **Notes guide:** `NOTES_GUIDE.md`
+- **Textbooks README:** `../../textbooks/README.md`
+- **Notes README:** `../../notes/README.md`
