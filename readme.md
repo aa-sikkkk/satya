@@ -129,29 +129,6 @@ Satya proves that **intelligent, personalized education doesn't require expensiv
 
 **This isn't just about technology. It's about educational justice.**
 
----
-
-## The Problem
-
-While AI is transforming education globally, millions of students still face significant barriers. Unreliable internet, outdated hardware, and weak infrastructure leave them excluded from the AI revolution. Most ed-tech solutions assume high-speed connections and modern devices, widening the gap in educational opportunities.
-
-## The Solution
-
-Satya closes the accessibility gap by delivering intelligent learning that works in any environment. Designed for students across Nepal and offering a framework for the world, Satya provides AI-powered tutoring through RAG-enhanced content discovery and Microsoft's efficient Phi 1.5 model.
-
-> [!IMPORTANT]
-> Satya is designed to run on **4GB RAM systems with CPU-only** processing. No GPU required.
-
-### Core Principles
-
-- **Offline-First Architecture** - Full functionality without persistent internet connection
-- **Low-Resource Optimization** - Runs smoothly on older hardware in rural classrooms
-- **RAG-Enhanced Intelligence** - ChromaDB vector database for intelligent content discovery
-- **Single Model Efficiency** - Phi 1.5 handles all AI tasks seamlessly
-- **Community-Driven Content** - Transparent, collaborative content contribution workflow
-
----
-
 ## Key Features
 
 ### Student-Facing Features
