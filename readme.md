@@ -32,7 +32,7 @@ Smart enough to handle complex questions. Efficient enough to work anywhere. Sim
 
 ---
 
-[![Satya Demo Video](https://img.youtube.com/vi/CIUmyQ4sMOo/maxresdefault.jpg)](https://www.youtube.com/watch?v=CIUmyQ4sMOo)
+[![Satya Demo Video](https://img.youtube.com/vi/CIUmyQ4sMOo/maxresdefault.jpg)](https://www.youtube.com/watch?v=QSHH5KpM2A8)
 
 ## Overview
 
@@ -162,8 +162,9 @@ Satya proves that **intelligent, personalized education doesn't require expensiv
 - **Graphical User Interface (GUI)** - Modern CustomTkinter interface with responsive design
 - **Progress Tracking** - Detailed analytics and visualizations
 - **Export/Import** - Save and restore learning progress
+- 
+[![Satya GUI Demo Video](https://img.youtube.com/vi/QSHH5KpM2A8/maxresdefault.jpg)](https://www.youtube.com/watch?v=QSHH5KpM2A8)
 
-<img width="1358" height="715" alt="Screenshot 2025-12-30 191502" src="https://github.com/user-attachments/assets/d552dc22-f26c-4574-b656-3df7b7c1540d" />
 
 ### Teacher-Facing Features
 
