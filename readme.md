@@ -129,6 +129,10 @@ Satya proves that **intelligent, personalized education doesn't require expensiv
 
 **This isn't just about technology. It's about educational justice.**
 
+
+
+---
+
 ## Key Features
 
 ### Student-Facing Features
