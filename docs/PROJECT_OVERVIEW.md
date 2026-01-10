@@ -2,13 +2,13 @@
 
 ## Executive Summary
 
-Satya is a pioneering educational technology initiative aimed at bridging educational disparities for Grade 10 students in Nepal, particularly in areas with limited or no internet connectivity. This project delivers an **offline-first, RAG-powered learning companion** designed to cover the Computer Science, Science, and English curricula. By leveraging a **single lightweight Phi 1.5 AI model** and **intelligent content discovery through RAG (Retrieval-Augmented Generation)**, Satya provides interactive learning experiences, adaptive support, and valuable tools for both students and teachers, all operating efficiently on **low-resource hardware**.
+Satya is a pioneering educational technology initiative aimed at bridging educational disparities for students in Nepal, particularly in areas with limited or no internet connectivity. This project delivers an **offline-first, RAG-powered learning companion** designed to cover the Computer Science, Science, and English curricula. By leveraging a **single lightweight Phi 1.5 AI model** and **intelligent content discovery through RAG (Retrieval-Augmented Generation)**, Satya provides interactive learning experiences, and valuable tools for both students and teachers, all operating efficiently on **low-end hardware**.
 
-## 🌐 Project Vision
+## Project Vision
 
-Our vision is to empower the next generation of Nepali students by providing accessible, high-quality educational resources regardless of their geographical location or access to online infrastructure. We aim to democratize learning through **intelligent, RAG-enhanced technology** and foster a collaborative environment for content development and continuous improvement, ultimately contributing to enhanced educational outcomes across the nation.
+Our vision is to empower the next generation of Nepali students by providing accessible, high-quality educational resources regardless of their geographical location or access to online infrastructure. We aim to democratize learning through **intelligent, RAG-enhanced technology** and foster a collaborative environment for content development and continuous improvement, ultimately contributing to enhanced educational outcomes across Nepal.
 
-## 🎯 Key Objectives
+## Key Objectives
 
 The Satya project is guided by the following core objectives:
 
@@ -17,10 +17,10 @@ The Satya project is guided by the following core objectives:
 3.  **Empower Teachers:** Provide intuitive and efficient tools for teachers to manage educational content, monitor student progress at both individual and class levels, and gain actionable insights through analytics, thereby enhancing their capacity to deliver effective instruction and targeted support.
 4.  **Foster Community Collaboration:** Establish a transparent and streamlined platform and workflow for community members, particularly subject matter experts and educators, to contribute to, rigorously validate, and continuously update the educational content, ensuring its accuracy, relevance, and pedagogical soundness.
 
-## 👥 Target Users
+## Target Users
 
 ### Primary Users
--   **Grade 10 Students in Nepal:** The core beneficiaries, utilizing the **CLI and GUI applications** for self-paced, interactive learning, **RAG-enhanced Q&A**, and practice exercises in an entirely offline setting.
+-   **Grade 9-12 Students in Nepal:** The core beneficiaries, utilizing the **CLI and GUI applications** for self-paced, interactive learning, **RAG-enhanced Q&A**, and practice exercises in an entirely offline setting.
 -   **Subject Teachers:** Employing the teacher tools for efficient content management (editing, validation, organization) and leveraging student progress analytics to inform their teaching strategies.
 -   **School Administrators:** Potentially utilizing aggregated student performance data and system usage metrics for educational planning, resource allocation, and assessing the impact of the learning companion within their institutions.
 
@@ -29,7 +29,7 @@ The Satya project is guided by the following core objectives:
 -   **Educational Content Creators/Experts:** Contributing their expertise to expand and refine the educational content database through the Community Editor.
 -   **System Administrators:** Responsible for the technical deployment, maintenance, updates, and troubleshooting of the Satya system on local school or community center infrastructure.
 
-## ✨ Core Features
+## Core Features
 
 The Satya system is architected around several key features designed to provide a comprehensive and effective learning ecosystem:
 
@@ -53,7 +53,7 @@ The Satya system is architected around several key features designed to provide 
 *   **Automated Content Validation:** Integrates automated checks (including JSON schema validation) to ensure the technical correctness and structural integrity of the educational content contributed or modified.
 *   **Support for Collaborative Content Development:** The workflow and tools are designed to facilitate contributions and review processes within the community, ensuring the content remains up-to-date and high-quality.
 
-## 🏗️ Technical Architecture
+## Technical Architecture
 
 The technical architecture of Satya is fundamentally designed for **offline operation, efficiency on low-resource hardware, and intelligent content discovery**. Key architectural components include:
 
@@ -76,7 +76,7 @@ The technical architecture of Satya is fundamentally designed for **offline oper
 
 (For an in-depth examination of the system architecture, including the interconnections between components and data flow, please refer to `docs/TECHNICAL_IMPLEMENTATION.md`, which includes the updated RAG + Phi 1.5 architecture diagram.)
 
-## 🛣️ Implementation Strategy
+## Implementation Strategy
 
 The development and implementation of Satya adhere to a structured, phased approach to ensure all critical components are developed and integrated effectively. The strategy involves:
 
@@ -87,7 +87,7 @@ The development and implementation of Satya adhere to a structured, phased appro
 5. **Testing & Optimization**: Performance validation for low-end hardware
 6. **Community Framework**: Teacher tools and content management system
 
-## ✅ Quality Assurance
+## Quality Assurance
 
 A stringent quality assurance process is integrated throughout the development lifecycle. This includes:
 
@@ -97,19 +97,21 @@ A stringent quality assurance process is integrated throughout the development l
 - **RAG System Testing**: Vector search accuracy and fallback mechanism validation
 - **Expert Review**: Educational content accuracy and pedagogical effectiveness
 
-## 🚀 Deployment and Maintenance
+## Deployment and Maintenance
 
 Satya is architected for straightforward local deployment on target machines without requiring complex server setups. The installation procedure involves:
 
 1. **Obtaining Project Files**: Clone the repository or download the student package
 2. **Installing Dependencies**: Python dependencies managed via `requirements.txt`
 3. **Downloading Phi 1.5 Model**: Lightweight GGUF model (~1GB) for AI capabilities
-4. **Running Applications**: Simple commands for CLI or GUI versions (`scripts/release/run_cli.*` / `run_gui.*`)
+4. **Running Applications**:
+    - **Option A (Recommended)**: Use the pre-built `SatyaGUI.exe` for immediate graphical access.
+    - **Option B (Dev Mode)**: Use `scripts/release/run_cli.*` or `run_gui.*` for source execution.
 5. **Offline Bundle**: Build-and-ship archive via `python scripts/release/build_offline_bundle.py`
 
 Maintenance activities include applying updates to the application and content, potential model optimizations, and addressing any reported issues, facilitated by the version-controlled content repository and comprehensive documentation.
 
-## 🌱 Future Roadmap
+## Future Roadmap
 
 Potential future developments for Satya include:
 
@@ -120,15 +122,15 @@ Potential future developments for Satya include:
 - **Community Features**: Student collaboration and peer learning tools
 - **Content Expansion**: Additional subjects and grade levels
 
-## 🤝 Support and Resources
+## Support and Resources
 
 Comprehensive documentation, encompassing user guides, detailed technical specifications (`docs/TECHNICAL_IMPLEMENTATION.md`), content structure and management guidelines (`docs/content-explanation.md`), and project standards (`docs/PROJECT_STANDARDS.md`), is available within the `docs/` directory. Support channels will be established to assist users with installation, usage, and troubleshooting, and to facilitate the reporting of bugs and submission of feature requests.
 
-## 📄 License
+## License
 
 This project is released under the MIT License, encouraging open access, modification, and distribution.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 We gratefully acknowledge the foundational contributions of **Microsoft** for their **Phi 1.5 model** that powers our AI capabilities, **ChromaDB** for enabling intelligent content discovery, and the **llama-cpp-python** community for efficient model inference. Special thanks to [readersnepal](https://readersnepal.com/) and [CDC](http://lib.moecdc.gov.np/) for the notes and resources necessary for the Dataset gathering.
 

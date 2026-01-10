@@ -2,40 +2,62 @@
 
 ## System Architecture Overview
 
-This document provides a detailed technical overview of the **Satya Learning System**'s architecture, elucidating the structure, function, and interaction of its core components. The architecture is designed to support an **offline-first, RAG-powered learning experience** with a lightweight Phi 1.5 AI model, optimized for **low-end hardware** (2GB RAM minimum).
+This document provides a detailed technical overview of the **Satya Learning System**'s architecture, elucidating the structure, function, and interaction of its core components. The architecture is designed to support an **offline-first, RAG-powered learning experience** with a lightweight Phi 1.5 AI model, optimized for **low-end hardware** (4GB RAM minimum).
 
-![architecture](https://github.com/user-attachments/assets/04136c9d-0f04-467f-80f8-760688a2860d)
+```mermaid
+graph TB
+    subgraph "Student Interface Layer"
+        CLI[CLI Interface]
+        GUI[GUI Interface]
+    end
+    
+    subgraph "Application Layer"
+        RAG[RAG Retrieval Engine]
+        PM[Progress Manager]
+    end
+    
+    subgraph "AI Layer"
+        MH[Model Handler]
+        PH[Phi 1.5 Handler]
+    end
+    
+    subgraph "Data Layer"
+        CDB[(ChromaDB)]
+        PROG[Progress Data]
+    end
+    
+    CLI --> RAG
+    CLI --> MH
+    GUI --> RAG
+    GUI --> MH
+    
+    PM --> PROG
+    RAG --> CDB
+    MH --> PH
+    PH --> CDB
+```
 
-*Figure 1: Satya System Architecture Diagram (Updated for RAG + Phi 1.5)*
+*Figure 1: High-Level Architecture (Updated for Version 2.0)*
 
-### 1. RAG (Retrieval-Augmented Generation) Content Pipeline
+### 1. Universal Content Ingestion
 
-This pipeline represents the modern approach to content processing, replacing the traditional web crawler with intelligent PDF processing and vector-based content discovery.
+This unified pipeline replaces the previous separated processing scripts, handling textbooks, notes, and handwritten materials in a single pass.
 
-#### 1.1 PDF Content Processor
+#### 1.1 Ingestion Pipeline (`scripts/ingest_content.py`)
 
-*   **Purpose:** To extract, chunk, and process educational content from PDF documents into structured, searchable text chunks and images. This replaces the web crawler approach for more reliable, offline-first content acquisition.
-*   **Inputs:** PDF files containing educational content (textbooks, notes, study materials).
-*   **Outputs:** Structured text chunks and extracted images with metadata.
+*   **Purpose:** To ingest, process, and index all types of educational content (textbooks, scanned PDFs, handwritten notes) into the RAG system.
+*   **Inputs:** PDF, TXT, MD, JSONL files (text or image-based).
+*   **Outputs:** Vector embeddings stored in ChromaDB and structured metadata.
 *   **Key Processes:**
-    *   PDF text extraction and OCR for scanned documents.
-    *   Intelligent content chunking with overlap for context preservation.
-    *   Image extraction and processing for visual content.
-    *   Metadata generation (subject, chapter, page numbers).
-    *   Storage in structured format for embedding generation.
-*   **Technology/Implementation Notes:** Implemented using `PyPDF2`, `Pillow`, and custom chunking logic in `scripts/rag_data_preparation/pdf_processor.py`.
+    *   **Auto-Detection:** Automatically identifies content type (digital text, scanned, or handwritten).
+    *   **Extraction:** Uses `PyMuPDF` for clean text; `Tesseract` for scanned docs; `EasyOCR` for handwritten notes.
+    *   **Smart Chunking:** Fixed-size chunking (e.g., 512 tokens) with 10% overlap to preserve context.
+    *   **Embedding Generation:** Uses `sentence-transformers` (e.g., `all-MiniLM-L6-v2`) to create vector embeddings.
+    *   **Storage:** Persists vectors to ChromaDB, organized by subject/collection.
+*   **Technology/Implementation Notes:** Key logic resides in `scripts/ingest_content.py`.
 
-#### 1.2 Embedding Generation Engine
-
-*   **Purpose:** To convert text chunks and images into high-dimensional vector representations that enable semantic search and content discovery.
-*   **Inputs:** Processed text chunks and images from the PDF processor.
-*   **Outputs:** Vector embeddings stored in ChromaDB for intelligent retrieval.
-*   **Key Processes:**
-    *   Text embedding generation using optimized algorithms.
-    *   Image embedding generation using CLIP model.
-    *   Vector storage in ChromaDB with metadata indexing.
-    *   Collection management for different subjects and content types.
-*   **Technology/Implementation Notes:** Located in `scripts/rag_data_preparation/embedding_generator.py`, uses ChromaDB for vector storage and optimized embedding algorithms.
+#### 1.2 [Merged into Universal Ingestion]
+*(Embedding generation is now an integral step of the ingestion pipeline described above.)*
 
 #### 1.3 ChromaDB Vector Database
 
@@ -152,28 +174,27 @@ This section covers the teacher tools and content management capabilities, enhan
     *   Content quality control.
 *   **Technology/Implementation Notes:** Located in `teacher_tools/` directory, provides comprehensive teacher capabilities.
 
-## 📦 Dependencies
+##  Dependencies
 
 ### Core Dependencies
 ```python
-llama-cpp-python>=0.2.0  # Phi 1.5 model support
-chromadb>=0.4.0          # Vector database for RAG
-numpy>=1.24.3            # Numerical operations
-rich>=13.3.5             # CLI interface enhancement
+llama-cpp-python==0.3.16 # Phi 1.5 model inference
+chromadb>=0.4.0          # Vector database
+sentence-transformers    # Embedding generation
+customtkinter>=5.2.0     # Modern GUI framework
+pymupdf>=1.23.0          # PDF processing
 ```
 
-### RAG System Dependencies
+### Optional OCR Dependencies
 ```python
-chromadb>=0.4.0          # Vector database
-sentence-transformers>=2.2.0  # Text embeddings (optional)
+pytesseract              # Scanned PDF OCR
+easyocr                  # Handwritten notes OCR
 Pillow>=9.0.0            # Image processing
-PyPDF2>=3.0.0            # PDF processing
 ```
 
 ### CLI/UI Dependencies
 ```python
 rich>=13.3.5             # Enhanced CLI display
-customtkinter>=5.2.0     # Modern GUI framework
 prompt_toolkit>=3.0.38   # Advanced CLI input
 ```
 
@@ -183,39 +204,57 @@ pytest>=7.3.1            # Testing framework
 pytest-cov>=4.1.0        # Coverage reporting
 ```
 
-## 📁 Directory Structure
+## Directory Structure
 ```
 Satya/
-├── satya_data/                 # Data and models directory
+├── satya_data/
 │   ├── models/
-│   │   └── phi_1_5/           # Phi 1.5 GGUF model
-│   ├── chroma_db/              # RAG vector database
-│   └── content/                # Educational content
+│   │   └── phi_1_5/
+│   │       └── phi-1_5.Q4_K_M.gguf
+│   ├── chroma_db/                    # ChromaDB collections
+│   │   ├── neb_computer_science_grade_10/
+│   │   ├── neb_english_grade_10/
+│   │   └── neb_science_grade_10/
+│   └── content/                      # Educational content
 │
 ├── scripts/
-│   ├── rag_data_preparation/   # RAG content processing
-│   │   ├── embedding_generator.py  # Generate embeddings for RAG
-│   │   └── pdf_processor.py    # Process PDFs to chunks
-│   └── data_collection/        # Content collection tools
+│   ├── ingest_content.py             # Universal ingestion script
+│   ├── rag_data_preparation/
+│   │   ├── enhanced_chunker.py       # Smart chunking
+│   │   ├── embedding_generator.py    # Embedding generationHelpers
+│   │   ├── README.md                 # Pipeline documentation
+│   │   ├── QUICK_START.md            # Quick start guide
+│   │   └── NOTES_GUIDE.md            # Notes vs textbooks guide
+│   └── release/
+│       ├── run_cli.bat               # Windows CLI launcher
+│       ├── run_cli.sh                # Linux/Mac CLI launcher
+│       ├── run_gui.bat               # Windows GUI launcher
+│       └── run_gui.sh                # Linux/Mac GUI launcher
 │
 ├── system/
-│   ├── rag/                    # RAG system components
-│   │   └── rag_retrieval_engine.py  # Intelligent content retrieval
-│   ├── data_manager/           # Data handling
-│   ├── performance/            # Performance monitoring
-│   └── security/               # Security features
+│   └── rag/
+│       ├── rag_retrieval_engine.py   # RAG engine
+│       ├── anti_confusion_engine.py  # Context ranking
+│       └── rag_cache.py              # Query caching
 │
 ├── ai_model/
-│   ├── model_utils/            # Model helper functions
-│   │   ├── phi15_handler.py    # Phi 1.5 model handler
-│   │   └── model_handler.py    # Main model manager
-│   └── training/               # Training scripts (if needed)
+│   └── model_utils/
+│       ├── phi15_handler.py          # Phi 1.5 handler
+│       └── model_handler.py          # Model manager
 │
 ├── student_app/
-│   ├── gui_app/                # Modern GUI (customtkinter)
-│   ├── interface/              # CLI interface components
-│   ├── learning/               # Learning features
-│   └── progress/               # Progress tracking
+│   ├── gui_app/
+│   │   ├── main_window.py            # Main GUI
+│   │   └── views/
+│   │       └── ask_question_view.py  # Question interface
+│   └── progress/
+│       └── progress_manager.py       # Progress tracking
+│
+├── textbooks/                        # Textbook PDFs
+│   └── grade_10/
+│
+├── notes/                            # Teacher notes
+│   └── grade_10/
 │
 ├── teacher_tools/               # Teacher utilities
 ├── tests/                      # Test suite
@@ -309,7 +348,7 @@ def _get_length_config(self, answer_length: str) -> dict:
     return length_configs.get(answer_length, length_configs["medium"])
 ```
 
-## 🔍 Critical Implementation Notes
+## Critical Implementation Notes
 
 ### 1. Model Optimization
 - Use GGUF format for Phi 1.5 (lightweight, efficient)
@@ -335,7 +374,7 @@ def _get_length_config(self, answer_length: str) -> dict:
 - Content validation
 - Comprehensive error logging
 
-## 🧪 Testing Strategy
+## Testing Strategy
 
 ### 1. Unit Tests
 ```python
@@ -365,7 +404,7 @@ def test_rag_engine():
 - Vector search performance
 - Model loading time
 
-## 🔒 Security Measures
+## Security Measures
 
 ### 1. Content Security
 - Input validation and sanitization
@@ -379,7 +418,7 @@ def test_rag_engine():
 - Content encryption for sensitive data
 - Backup and recovery systems
 
-## 📈 Future Enhancements
+## Future Enhancements
 
 ### 1. Short-term
 - Enhanced RAG capabilities
@@ -393,7 +432,7 @@ def test_rag_engine():
 - Multi-modal content support
 - Advanced analytics
 
-## 🚀 Deployment Guide
+## Deployment Guide
 
 ### 1. Prerequisites
 - Python 3.8+
@@ -456,7 +495,7 @@ python scripts/release/build_offline_bundle.py
 - ChromaDB backups
 - Configuration backups
 
-## 📚 Additional Resources
+## Additional Resources
 
 ### 1. Documentation
 - Phi 1.5 model documentation
@@ -470,7 +509,7 @@ python scripts/release/build_offline_bundle.py
 - llama-cpp-python guides
 - RAG system research papers
 
-## ⚠️ Known Limitations
+## Known Limitations
 
 ### 1. Technical
 - Memory usage with large content collections
@@ -484,7 +523,7 @@ python scripts/release/build_offline_bundle.py
 - Language support limitations
 - Content update frequency
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### 1. Common Issues
 - Model loading failures
@@ -498,15 +537,15 @@ python scripts/release/build_offline_bundle.py
 - Memory optimization
 - Performance tuning
 
-## 🆕 What's New in This Architecture
+## What's New in This Architecture
 
-### 🚀 **Major Changes from Previous Version**
+### **Major Changes from Previous Version**
 - **Single AI Model**: Replaced multiple models (DistilBERT, T5-small, Phi 2) with one efficient Phi 1.5
 - **RAG System**: Added intelligent content discovery and retrieval using ChromaDB
 - **Lightweight Design**: Optimized for low-end hardware (2GB RAM minimum)
 - **PDF-First Content**: Replaced web crawler with PDF processing pipeline
 
-### 🎯 **New Technical Features**
+### **New Technical Features**
 - **Vector Database**: ChromaDB for semantic content search
 - **Answer Length Control**: 5 different detail levels for varied learning needs
 - **Smart Text Normalization**: Handles uppercase, lowercase, and mixed case input

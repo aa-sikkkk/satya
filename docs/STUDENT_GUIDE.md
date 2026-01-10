@@ -12,8 +12,24 @@ Your teacher or system administrator will likely install Satya for you. If you n
 
 ## 3. Starting the Application
 
-To start the Satya learning application, open your terminal or command prompt and run:
+You can start Satya using the provided application file (recommended) or via command line.
 
+### Method 1: Using the Application (Recommended)
+
+1. Locate the **`SatyaGUI.exe`** file (usually provided by your teacher or in the `dist` folder).
+2. Double-click the file to launch the application.
+3. The graphical interface will open, ready for use.
+
+### Method 2: Running from Source (Advanced)
+
+If you are using the source code directly, open your terminal or command prompt in the `Satya` directory and run:
+
+**For Graphical Interface (GUI):**
+```bash
+python -m student_app.gui_app.main_window
+```
+
+**For Command Line Interface (CLI):**
 ```bash
 python -m student_app.interface.cli_interface
 ```
