@@ -27,14 +27,14 @@ if ($Clean) {
     Write-Host ""
 }
 
-# Verify bootstrap exists
+
 $BootstrapPath = Join-Path $ScriptDir "bootstrap.py"
 if (-not (Test-Path $BootstrapPath)) {
     Write-Host "ERROR: bootstrap.py not found at $BootstrapPath" -ForegroundColor Red
     exit 1
 }
 
-# Verify required directories exist
+
 $RequiredDirs = @(
     "satya_data",
     "scripts\data_collection\data\content",
@@ -53,7 +53,7 @@ foreach ($Dir in $RequiredDirs) {
 }
 Write-Host ""
 
-# Check if Nuitka is installed
+# NUITKA INSTALLATION CHECK
 Write-Host "Checking Nuitka installation..." -ForegroundColor Yellow
 try {
     $NuitkaVersion = python -m nuitka --version 2>&1
@@ -69,7 +69,7 @@ catch {
 }
 Write-Host ""
 
-# Build the executable
+
 Write-Host "Building executable with Nuitka..." -ForegroundColor Cyan
 Write-Host "This may take several minutes..." -ForegroundColor Yellow
 Write-Host ""
@@ -93,18 +93,34 @@ try {
         "--include-data-dir=$ProjectRoot\satya_data=satya_data",
         "--include-data-dir=$ProjectRoot\scripts\data_collection\data\content=scripts\data_collection\data\content",
         "--include-data-dir=$ProjectRoot\student_app\gui_app\images=student_app\gui_app\images",
-        "--nofollow-import-to=torch",  
+        "--module-parameter=torch-disable-jit=yes",
+        "--nofollow-import-to=sympy", 
+        "--nofollow-import-to=torch._inductor",
+        "--nofollow-import-to=torch._dynamo",
+        "--nofollow-import-to=torch.fx",
+        "--nofollow-import-to=torch.compiler",
+        "--nofollow-import-to=torch.distributed",
+        "--nofollow-import-to=torch.testing",
+        "--nofollow-import-to=torch.utils.tensorboard",
+        "--nofollow-import-to=torch.utils.cpp_extension",
+        "--nofollow-import-to=torch.onnx",
         "--nofollow-import-to=torchvision",  
         "--nofollow-import-to=torchaudio",  
         "--nofollow-import-to=transformers",  
         "--nofollow-import-to=clip",  
-        "--nofollow-import-to=matplotlib", 
+        "--nofollow-import-to=matplotlib",
+        "--nofollow-import-to=sklearn",
+        "--nofollow-import-to=pytest",
+        "--nofollow-import-to=nibabel",
+        "--nofollow-import-to=unittest",
+        "--nofollow-import-to=IPython",
+        "--nofollow-import-to=notebook", 
         "--output-filename=$OutputName",
         "--output-dir=dist",
         "--main=$BootstrapPath"  # Use bootstrap as entry point
     )
 
-    # Remove empty icon parameter if no icon specified
+ 
     $BuildCommand = $BuildCommand | Where-Object { $_ -ne "--windows-icon-from-ico=" }
 
     Write-Host "Executing build command..." -ForegroundColor Cyan
