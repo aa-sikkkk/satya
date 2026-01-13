@@ -35,7 +35,7 @@ class SimplePhiHandler:
             model_path=self.model_path,
             n_ctx=2048,       # Full context window support
             n_batch=96,
-            n_threads=4,      # i3 cores
+            n_threads=4,      
             use_mmap=True,
             use_mlock=False,
             f16_kv=False,
@@ -46,7 +46,7 @@ class SimplePhiHandler:
     def _build_prompt(self, question: str, context: str) -> str:
         context = (context or "").strip()
         
-        # Educational prompt - strongly enforces RAG context usage
+        # Prompt for RAG Use
         base_instruction = (
             "Instruct: You are Satya, an expert tutor. Use the Reference Material to write a specific, technical answer. "
             "Use scientific terms and details from the text. Explain functions and processes clearly. "
@@ -55,7 +55,7 @@ class SimplePhiHandler:
         )
         
         if context:
-            # Trim context to 300 chars for i3 performance
+            # I have trimmed the context to 300.
             if len(context) > 300:
                 context = context[:300].rsplit('.', 1)[0] + '.'
             return f"{base_instruction}\nReference material:\n{context}\n\nQuestion: {question}\nAnswer:"
@@ -68,20 +68,20 @@ class SimplePhiHandler:
         
         answer = answer.strip()
         
-        # Remove Q/A echoes
+  
         answer = re.sub(r'^(Q:|A:)\s*', '', answer, flags=re.I)
         answer = re.sub(r'\n(Q:|A:)\s*', '\n', answer, flags=re.I)
         
-        # Remove off-topic markers
+
         off_markers = ["Exercise:", "Practice:", "Try this:", "Use Case:", "Real-world"]
         for marker in off_markers:
             if marker in answer:
                 answer = answer.split(marker)[0].strip()
         
-        # Collapse multiple spaces
+
         answer = re.sub(r'\s+', ' ', answer)
         
-        # Ensure ends with proper punctuation
+
         if answer and not answer[-1] in ".!?":
             answer += '.'
         
@@ -108,7 +108,7 @@ class SimplePhiHandler:
         prompt = self._build_prompt(question, context)
         
         try:
-            # Stream directly from LLM
+
             for chunk in self.llm(
                 prompt,
                 max_tokens=512,  # Increased to 512 to allow for detailed, complete answers
@@ -140,7 +140,7 @@ class SimplePhiHandler:
         try:
             response = self.llm(
                 prompt,
-                max_tokens=512,  # Balanced for 3-4 good sentences
+                max_tokens=512,  
                 temperature=0.6,
                 top_p=0.9,
                 repeat_penalty=1.08,

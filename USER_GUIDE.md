@@ -23,11 +23,11 @@ The system searches for exact keyword matches. Use the specific scientific or hi
 *   **Effective**: "Explain the Treaty of Sugauli."
 *   **Ineffective**: "How do plants make food?" (Unless your book specifically uses the phrase "make food", "photosynthesis" is a safer search term.)
 
-### 2. Focus on "What" and "How"
-Satya excels at defining concepts and explaining processes.
-*   **Definitions**: "What is an isotope?"
-*   **Processes**: "How does the digestive system work?"
-*   **Key Figures**: "Who was Isaac Newton?"
+### 2. Use "Describe" and "Explain" for Detail
+Satya gives richer, more detailed answers when asked to describe a concept rather than just asking "What is it?".
+*   **Better Detail**: "Describe a positive catalyst." (This often yields a better answer than "What is a positive catalyst?")
+*   **Processes**: "Explain how the digestive system works."
+*   **Key Figures**: "Describe the contributions of Isaac Newton."
 
 ### 3. Ask Specific Questions
 Broad questions can overwhelm the system because it can only read a limited amount of text at once. Break complex topics into smaller questions.
