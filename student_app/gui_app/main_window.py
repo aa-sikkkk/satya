@@ -522,9 +522,9 @@ class NEBeduApp(ctk.CTk):
         correct = (user_ans == correct_ans) or (difflib.SequenceMatcher(None, user_ans, correct_ans).ratio() > 0.8)
         
         if correct:
-            progress_manager.record_answer(self.username, self.selected_subject, self.selected_topic, self.selected_concept, True)
+            progress_manager.update_progress(self.username, self.selected_subject, self.selected_topic, self.selected_concept, question['question'], True)
         else:
-            progress_manager.record_answer(self.username, self.selected_subject, self.selected_topic, self.selected_concept, False)
+            progress_manager.update_progress(self.username, self.selected_subject, self.selected_topic, self.selected_concept, question['question'], False)
         
         self._safe_destroy_widgets()
         if correct:
