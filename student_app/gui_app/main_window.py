@@ -14,6 +14,7 @@ import difflib
 import tkinter.filedialog as fd
 import tkinter.messagebox as mb
 import os
+import ctypes
 import json
 from PIL import Image
 import threading
@@ -25,6 +26,14 @@ class NEBeduApp(ctk.CTk):
     
     def __init__(self):
         super().__init__()
+        
+        # Windows Taskbar Icon Fix
+        try:
+            myappid = 'satya.learning.companion.1.0' 
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+        except Exception:
+            pass
+            
         self.title('Satya: Learning Companion')
         self.geometry('1200x750')
         self.minsize(900, 600)
@@ -62,8 +71,35 @@ class NEBeduApp(ctk.CTk):
         self.current_grade_filter = "10"
         self.current_subject_filter = "Science" 
 
+        self._set_window_icon()
         self._create_ui_structure()
         self._eager_init_all_models()
+
+    def _set_window_icon(self):
+        def _apply_icon():
+            try:
+                logo_path = os.path.join(os.path.dirname(__file__), "images", "logo.png")
+                
+                if not os.path.exists(logo_path):
+                    logo_path = os.path.join(os.path.dirname(__file__), "..", "..", "assets", "logo.png")
+                
+                if os.path.exists(logo_path):
+                    try:
+                        ico_path = os.path.splitext(logo_path)[0] + ".ico"
+                        
+                        if not os.path.exists(ico_path):
+                            img = Image.open(logo_path)
+                            img.save(ico_path, format='ICO', sizes=[(32, 32), (64, 64), (128, 128)])
+                        
+                        self.iconbitmap(ico_path)
+                    except Exception:
+                        icon_image = Image.open(logo_path)
+                        self.app_icon = ImageTk.PhotoImage(icon_image)
+                        self.wm_iconphoto(True, self.app_icon)
+            except Exception as e:
+                print(f"Could not set window icon: {e}")
+        
+        self.after(200, _apply_icon)
     
     def _create_ui_structure(self):
         self.container = ctk.CTkFrame(self, fg_color="transparent")
@@ -635,7 +671,6 @@ class NEBeduApp(ctk.CTk):
         try:
 
             response = self.model_handler.generate_response(prompt, max_tokens=100)
-            print(f"DEBUG: AI Raw Response: '{response}'") # Debug print
             
             response_upper = response.upper()
             is_correct = "[CORRECT]" in response_upper
@@ -652,9 +687,6 @@ class NEBeduApp(ctk.CTk):
                 explanation = explanation[9:].strip()
             
             explanation = explanation.strip()
-
-            print(f"DEBUG: Parsed is_correct: {is_correct}")
-            print(f"DEBUG: Parsed Explanation: '{explanation}'")
             
             if not is_correct and "[INCORRECT]" not in response_upper:
                  
@@ -664,7 +696,6 @@ class NEBeduApp(ctk.CTk):
             
         except Exception as e:
             print(f"AI Grading Error: {e}")
-            # Fallback
             is_correct = (user_answer.lower() == correct_answer.lower()) or (difflib.SequenceMatcher(None, user_answer.lower(), correct_answer.lower()).ratio() > 0.8)
             return is_correct, f"The correct answer is: {correct_answer}"
 
