@@ -9,7 +9,26 @@ class AskQuestionView(ctk.CTkFrame):
         self.spinner_animation_running = False
 
         self.label = ctk.CTkLabel(self, text="Ask a Question", font=ctk.CTkFont(size=22, weight="bold"))
-        self.label.pack(pady=(30, 10))
+        self.label.pack(pady=(30, 5))
+
+        # Disclaimer / Guide - Aesthetics Update (Friendlier Blue/Indigo)
+        self.guide_frame = ctk.CTkFrame(self, fg_color="#E8EAF6", corner_radius=12) # Soft Indigo-50
+        self.guide_frame.pack(pady=(0, 25), padx=40, fill='x')
+        
+        ctk.CTkLabel(
+            self.guide_frame, 
+            text="Tips for best results", 
+            font=ctk.CTkFont(size=15, weight="bold"), 
+            text_color="#3949AB" # Indigo-600
+        ).pack(pady=(12, 5))
+        
+        ctk.CTkLabel(
+            self.guide_frame, 
+            text="• Ask 'What' or 'How' questions\n• Be specific and use textbook terms\n• Powered by your offline notes", 
+            font=ctk.CTkFont(size=13), 
+            text_color="#5C6BC0", # Indigo-400
+            justify="center"
+        ).pack(pady=(0, 12))
 
         # Question input
         self.entry = ctk.CTkEntry(self, placeholder_text="Type your question here...", width=400, font=ctk.CTkFont(size=16))
@@ -75,17 +94,27 @@ class AskQuestionView(ctk.CTkFrame):
             next_index = (index + 1) % len(chars)
             self.after(100, self._animate_spinner, next_index)
 
-    def _calculate_answer_height(self, answer_length):
-        """Calculate appropriate height for answer textbox based on answer length."""
-        # Base heights for different answer lengths
-        height_map = {
-            "very_short": 60,
-            "short": 100,
-            "medium": 150,
-            "long": 250,
-            "very_long": 350
-        }
-        return height_map.get(answer_length, 150)
+    def _calculate_fluid_height(self, text):
+        """Calculate exact height needed for text content."""
+        if not text:
+            return 80
+            
+        # Estimate lines based on width 600 and font size 16 (Segoe UI)
+        # Avg char width approx 9px -> 600/9 = ~66 chars per line
+        chars_per_line = 65 
+        
+        lines = 0
+        for paragraph in text.split('\n'):
+            # Each paragraph takes at least 1 line, plus wrapped lines
+            lines += 1 + (len(paragraph) // chars_per_line)
+            
+        line_height = 28  # Comfortable reading height
+        padding = 40      # Top+Bottom padding
+        
+        needed_height = (lines * line_height) + padding
+        
+        # Flexible range: Min 100px, Max 500px (then scroll)
+        return max(100, min(needed_height, 500))
     
     def append_answer_token(self, token):
         """Append a token to the streaming answer display."""
@@ -98,13 +127,21 @@ class AskQuestionView(ctk.CTkFrame):
             self.answer_frame = ctk.CTkFrame(self.result_frame, fg_color="#e3f2fd", corner_radius=8)
             self.answer_frame.pack(pady=(0, 10), padx=10, fill='x', expand=True)
             
-            answer_height = self._calculate_answer_height("medium")  # Default to medium
-            self.answer_box = ctk.CTkTextbox(self.answer_frame, width=600, height=answer_height, font=ctk.CTkFont(size=16), wrap='word')
+            # Start with a reasonable minimum height
+            starting_height = 120
+            self.answer_box = ctk.CTkTextbox(self.answer_frame, width=600, height=starting_height, font=ctk.CTkFont(size=16), wrap='word')
             self.answer_box.pack(pady=(10, 10), padx=10, fill='both', expand=True)
         
         self.streaming_answer += token
         self.answer_box.insert('end', token)
         self.answer_box.see('end')  # Auto-scroll to bottom
+        
+        # Dynamic expansion during streaming (every ~100 chars)
+        if len(self.streaming_answer) % 100 == 0:
+            new_height = self._calculate_fluid_height(self.streaming_answer)
+            if new_height > self.answer_box.cget("height"):
+                self.answer_box.configure(height=new_height)
+                
         self.update_idletasks()  
     
     def finalize_answer(self, confidence, hints=None, related=None, source_info=None, question=None):
@@ -130,21 +167,9 @@ class AskQuestionView(ctk.CTkFrame):
             self.set_result(self.streaming_answer, confidence, hints, related, source_info)
             return
         
-        # Adjust height based on actual answer length
-        answer_length = len(self.streaming_answer)
-        if answer_length < 100:
-            height = 80
-        elif answer_length < 300:
-            height = 120
-        elif answer_length < 600:
-            height = 180
-        elif answer_length < 1000:
-            height = 250
-        else:
-            height = 350
-        
-        # Update answer box height
-        self.answer_box.configure(height=height, state="disabled")
+        # Adapt height to final content
+        final_height = self._calculate_fluid_height(self.streaming_answer)
+        self.answer_box.configure(height=final_height, state="disabled")
         
         # Add source info if available
         if source_info and self.answer_frame:
@@ -212,19 +237,8 @@ class AskQuestionView(ctk.CTkFrame):
             source_frame.pack(pady=(10, 10), padx=10, fill='x')
             ctk.CTkLabel(source_frame, text=f"Source: {source_info}", font=ctk.CTkFont(size=12), text_color="#512da8").pack(pady=5, padx=10, anchor='w')
             
-            # Adjust height based on answer length
-            answer_length = len(answer)
-            height = self._calculate_answer_height("medium")
-            if answer_length < 100:
-                height = 60
-            elif answer_length < 300:
-                height = 100
-            elif answer_length < 600:
-                height = 150
-            elif answer_length < 1000:
-                height = 250
-            else:
-                height = 350
+            # Fluid Height
+            height = self._calculate_fluid_height(answer)
             
             answer_box = ctk.CTkTextbox(source_frame, width=600, height=height, font=ctk.CTkFont(size=15), wrap='word')
             answer_box.insert('1.0', answer)
@@ -244,9 +258,8 @@ class AskQuestionView(ctk.CTkFrame):
             warn_frame.pack(pady=(0, 10), padx=10, fill='x', expand=True)
             ctk.CTkLabel(warn_frame, text="I'm not sure about that. Let me help you find the right information:", font=ctk.CTkFont(size=15, weight="bold"), text_color="#fbc02d").pack(pady=(10, 0), padx=10, anchor='w')
             
-            # Adjust height based on answer length
-            answer_length = len(answer)
-            height = 80 if answer_length < 200 else (150 if answer_length < 500 else 250)
+            # Fluid Height
+            height = self._calculate_fluid_height(answer)
             
             answer_box = ctk.CTkTextbox(warn_frame, width=600, height=height, font=ctk.CTkFont(size=15), wrap='word')
             answer_box.insert('1.0', answer)
@@ -254,18 +267,8 @@ class AskQuestionView(ctk.CTkFrame):
             answer_box.pack(pady=(5, 10), padx=10, fill='x', expand=True)
             self.openai_btn.configure(state="normal")
         else:
-            # Normal answer panel with dynamic height
-            answer_length = len(answer)
-            if answer_length < 100:
-                height = 80
-            elif answer_length < 300:
-                height = 120
-            elif answer_length < 600:
-                height = 180
-            elif answer_length < 1000:
-                height = 250
-            else:
-                height = 350
+            # Normal answer panel with fluid height
+            height = self._calculate_fluid_height(answer)
             
             self.answer_box = ctk.CTkTextbox(self.result_frame, width=600, height=height, font=ctk.CTkFont(size=16), wrap='word')
             self.answer_box.insert('1.0', answer)

@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class SimplePhiHandler:
     """Lightweight single-phase handler for i3 processors."""
     
-    STOP_SEQUENCES = ["</s>", "\n\nQuestion:", "\n\nQ:"]  # Simplified to allow longer answers
+    STOP_SEQUENCES = ["</s>", "\n\nQuestion:", "\n\nQ:", "Exercise", "Instructions:", "Reference material:"]  # Added to prevent hallucinations
     
     def __init__(self, model_path: str):
         self.model_path = model_path
@@ -33,7 +33,7 @@ class SimplePhiHandler:
         logger.info("Loading Phi 1.5 (CPU-optimized)...")
         self.llm = Llama(
             model_path=self.model_path,
-            n_ctx=384,
+            n_ctx=2048,       # Full context window support
             n_batch=96,
             n_threads=4,      # i3 cores
             use_mmap=True,
@@ -46,22 +46,18 @@ class SimplePhiHandler:
     def _build_prompt(self, question: str, context: str) -> str:
         context = (context or "").strip()
         
-        # Educational prompt - balanced for 3-4 informative sentences
+        # Educational prompt - strongly enforces RAG context usage
         base_instruction = (
-            "You are Satya, an educational tutor for high school students.\n"
-            "Provide a clear explanation in exactly 3-4 complete sentences.\n"
-            "Structure your answer:\n"
-            "1. First sentence: Define what it is\n"
-            "2. Second sentence: Explain how it works or its main function\n"
-            "3. Third sentence: Give an example or explain why it's important\n"
-            "4. Optional fourth sentence: Add one more relevant detail\n"
-            "Make each sentence informative and complete.\n"
+            "Instruct: You are Satya, an expert tutor. Use the Reference Material to write a specific, technical answer. "
+            "Use scientific terms and details from the text. Explain functions and processes clearly. "
+            "Avoid generic definitions.\n"
+            "Output:"
         )
         
         if context:
-            # Trim context to 200 chars for i3 performance
-            if len(context) > 200:
-                context = context[:200].rsplit('.', 1)[0] + '.'
+            # Trim context to 300 chars for i3 performance
+            if len(context) > 300:
+                context = context[:300].rsplit('.', 1)[0] + '.'
             return f"{base_instruction}\nReference material:\n{context}\n\nQuestion: {question}\nAnswer:"
         
         return f"{base_instruction}\nQuestion: {question}\nAnswer:"
@@ -115,8 +111,8 @@ class SimplePhiHandler:
             # Stream directly from LLM
             for chunk in self.llm(
                 prompt,
-                max_tokens=250,  # Balanced for 3-4 good sentences (~150-200 tokens)
-                temperature=0.5,
+                max_tokens=512,  # Increased to 512 to allow for detailed, complete answers
+                temperature=0.6,
                 top_p=0.9,
                 repeat_penalty=1.08,
                 stop=self.STOP_SEQUENCES,
@@ -144,8 +140,8 @@ class SimplePhiHandler:
         try:
             response = self.llm(
                 prompt,
-                max_tokens=250,  # Balanced for 3-4 good sentences
-                temperature=0.5,
+                max_tokens=512,  # Balanced for 3-4 good sentences
+                temperature=0.6,
                 top_p=0.9,
                 repeat_penalty=1.08,
                 stop=self.STOP_SEQUENCES,

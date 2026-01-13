@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from student_app.gui_app.views import WelcomeView, SubjectView, TopicView, ConceptView, ConceptDetailView, QuestionView, ProgressView, AskQuestionView, ProgressOpsView, AboutView
+from student_app.gui_app.views import WelcomeView, SubjectView, TopicView, ConceptView, ConceptDetailView, QuestionView, ProgressView, AskQuestionView, ProgressOpsView, AboutView, UserGuideView
 from system.data_manager.content_manager import ContentManager
 from system.rag.rag_retrieval_engine import RAGRetrievalEngine
 from student_app.progress import progress_manager
@@ -175,6 +175,7 @@ class NEBeduApp(ctk.CTk):
             ('📊 Progress', self.show_progress, "#7B1FA2"),
             ('⚙️ Progress Ops', self.show_progress_ops, "#F57C00"),
             ('ℹ️ About', self.show_about, "#616161"),
+            ('📘 User Guide', self.show_user_guide, "#00796B"),
         ]
         
         for text, command, color in nav_buttons:
@@ -684,6 +685,14 @@ class NEBeduApp(ctk.CTk):
         self._loading = True
         self._safe_destroy_widgets()
         view = ProgressOpsView(self.main_frame, self.username, self.show_main_menu)
+        view.pack(fill='both', expand=True)
+        self._loading = False
+
+    def show_user_guide(self):
+        if self._loading: return
+        self._loading = True
+        self._safe_destroy_widgets()
+        view = UserGuideView(self.main_frame, self.show_main_menu)
         view.pack(fill='both', expand=True)
         self._loading = False
 
