@@ -114,7 +114,7 @@ class SimplePhiHandler:
                 max_tokens=512,  # Increased to 512 to allow for detailed, complete answers
                 temperature=0.6,
                 top_p=0.9,
-                repeat_penalty=1.08,
+                repeat_penalty=1.12, 
                 stop=self.STOP_SEQUENCES,
                 stream=True
             ):
@@ -143,7 +143,7 @@ class SimplePhiHandler:
                 max_tokens=512,  
                 temperature=0.6,
                 top_p=0.9,
-                repeat_penalty=1.08,
+                repeat_penalty=1.12,
                 stop=self.STOP_SEQUENCES,
                 stream=False
             )
@@ -158,6 +158,27 @@ class SimplePhiHandler:
             logger.error(f"Answer generation error: {e}")
             return "Error generating answer.", 0.1
     
+    def generate_response(self, prompt: str, max_tokens: int = 512) -> str:
+        """Generating a raw response from a custom prompt."""
+        if not self.llm:
+            self.load_model()
+            
+        try:
+            response = self.llm(
+                prompt,
+                max_tokens=max_tokens,
+                temperature=0.3, # Lower temperature for grading/logic
+                top_p=0.9,
+                repeat_penalty=1.1,
+                stop=self.STOP_SEQUENCES + ["Student Answer:", "Question:"], # Extra stops for grading
+                stream=False
+            )
+            return response["choices"][0]["text"].strip()
+            
+        except Exception as e:
+            logger.error(f"Generation error: {e}")
+            return ""
+
     def cleanup(self):
         if self.llm:
             del self.llm

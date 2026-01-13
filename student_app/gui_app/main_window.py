@@ -516,38 +516,50 @@ class NEBeduApp(ctk.CTk):
         if self._loading: return
         self._loading = True
         
-        user_ans = answer.strip().lower()
-        correct_ans = question.get('answer', '').strip().lower()
-        
-        correct = (user_ans == correct_ans) or (difflib.SequenceMatcher(None, user_ans, correct_ans).ratio() > 0.8)
-        
-        if correct:
-            progress_manager.update_progress(self.username, self.selected_subject, self.selected_topic, self.selected_concept, question['question'], True)
-        else:
-            progress_manager.update_progress(self.username, self.selected_subject, self.selected_topic, self.selected_concept, question['question'], False)
-        
+        # Show loading state
         self._safe_destroy_widgets()
-        if correct:
-            msg = "✅ Correct!"
-            color = "#43a047"
-        else:
-            msg = f"❌ Incorrect. The correct answer is: {question.get('answer', 'N/A')}"
-            color = "#e53935"
+        loading = ctk.CTkLabel(self.main_frame, text="🤖 AI is grading your answer...", font=ctk.CTkFont(size=18))
+        loading.pack(pady=40)
         
-        result_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
-        result_frame.pack(fill='both', expand=True, pady=40)
-        
-        label = ctk.CTkLabel(result_frame, text=msg, font=ctk.CTkFont(size=22, weight="bold"), text_color=color, wraplength=600)
-        label.pack(pady=(40, 10))
-        
-        if 'explanation' in question and question['explanation']:
-            exp_frame = ctk.CTkFrame(result_frame, fg_color="#f5f5f5", corner_radius=10)
-            exp_frame.pack(pady=20, padx=40, fill='x')
-            ctk.CTkLabel(exp_frame, text="Explanation:", font=ctk.CTkFont(size=16, weight="bold"), text_color="#424242").pack(anchor='w', padx=15, pady=(10, 5))
-            ctk.CTkLabel(exp_frame, text=question['explanation'], font=ctk.CTkFont(size=14), text_color="#616161", wraplength=500, justify='left').pack(anchor='w', padx=15, pady=(0, 10))
-        
-        ctk.CTkButton(result_frame, text="Next Question", command=self.next_question, width=200, height=40).pack(pady=30)
-        self._loading = False
+        def worker():
+            user_ans = answer.strip()
+            correct_ans = question.get('answer', '').strip()
+            
+            # AI Grading
+            is_correct, explanation = self._grade_answer_with_ai(question['question'], user_ans, correct_ans)
+            
+            def show_result():
+                # Save Progress
+                progress_manager.update_progress(self.username, self.selected_subject, self.selected_topic, self.selected_concept, question['question'], is_correct)
+                
+                self._safe_destroy_widgets()
+                if is_correct:
+                    msg = "✅ Correct!"
+                    color = "#43a047"
+                else:
+                    msg = "❌ Incorrect"
+                    color = "#e53935"
+                
+                result_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
+                result_frame.pack(fill='both', expand=True, pady=40)
+                
+                label = ctk.CTkLabel(result_frame, text=msg, font=ctk.CTkFont(size=22, weight="bold"), text_color=color, wraplength=600)
+                label.pack(pady=(40, 10))
+                
+                # Show Explanation (AI provided or static fallback)
+                exp_text = explanation if explanation else question.get('explanation', f"The correct answer is: {correct_ans}")
+                
+                exp_frame = ctk.CTkFrame(result_frame, fg_color="#f5f5f5", corner_radius=10)
+                exp_frame.pack(pady=20, padx=40, fill='x')
+                ctk.CTkLabel(exp_frame, text="Feedback:", font=ctk.CTkFont(size=16, weight="bold"), text_color="#424242").pack(anchor='w', padx=15, pady=(10, 5))
+                ctk.CTkLabel(exp_frame, text=exp_text, font=ctk.CTkFont(size=14), text_color="#616161", wraplength=500, justify='left').pack(anchor='w', padx=15, pady=(0, 10))
+                
+                ctk.CTkButton(result_frame, text="Next Question", command=self.next_question, width=200, height=40).pack(pady=30)
+                self._loading = False
+                
+            self.after(0, show_result)
+            
+        threading.Thread(target=worker, daemon=True).start()
 
     def next_question(self):
         if self._loading: return
@@ -591,6 +603,70 @@ class NEBeduApp(ctk.CTk):
                     self._loading = False
                 self.after(0, show_error)
         threading.Thread(target=worker, daemon=True).start()
+
+    
+    def _grade_answer_with_ai(self, question_text, user_answer, correct_answer):
+        """Using the model to grade the answer relative to the correct answer."""
+        if not self.model_handler:
+            is_correct = (user_answer.lower() == correct_answer.lower()) or (difflib.SequenceMatcher(None, user_answer.lower(), correct_answer.lower()).ratio() > 0.8)
+            return is_correct, f"The correct answer is: {correct_answer}"
+
+        prompt = (
+            f"Task: Grade the student's answer based on the Correct Answer. Provide helpful, specific feedback.\n\n"
+            f"Example 1:\n"
+            f"Question: What is the function of mitochondria?\n"
+            f"Correct Answer: It generates energy for the cell through respiration.\n"
+            f"Student Answer: It protects the nucleus.\n"
+            f"Verdict: [INCORRECT]\n"
+            f"Feedback: That is incorrect. The nucleus is protected by the nuclear membrane. Mitochondria are the 'powerhouse' of the cell responsible for generating energy (ATP).\n\n"
+            f"Example 2:\n"
+            f"Question: What is 2 + 2?\n"
+            f"Correct Answer: 4\n"
+            f"Student Answer: It is four.\n"
+            f"Verdict: [CORRECT]\n"
+            f"Feedback: Correct! You identified the right number.\n\n"
+            f"Current Task:\n"
+            f"Question: {question_text}\n"
+            f"Correct Answer: {correct_answer}\n"
+            f"Student Answer: {user_answer}\n"
+            f"Verdict:"
+        )
+        
+        try:
+
+            response = self.model_handler.generate_response(prompt, max_tokens=100)
+            print(f"DEBUG: AI Raw Response: '{response}'") # Debug print
+            
+            response_upper = response.upper()
+            is_correct = "[CORRECT]" in response_upper
+            explanation = response
+            
+            import re
+            explanation = re.sub(r'^\[.*?\]', '', explanation).strip()
+            
+            if explanation.upper().startswith("VERDICT:"):
+                explanation = explanation[8:].strip()
+                explanation = re.sub(r'^\[.*?\]', '', explanation).strip()
+                
+            if explanation.upper().startswith("FEEDBACK:"):
+                explanation = explanation[9:].strip()
+            
+            explanation = explanation.strip()
+
+            print(f"DEBUG: Parsed is_correct: {is_correct}")
+            print(f"DEBUG: Parsed Explanation: '{explanation}'")
+            
+            if not is_correct and "[INCORRECT]" not in response_upper:
+                 
+                 is_correct = (user_answer.lower() == correct_answer.lower())
+            
+            return is_correct, explanation
+            
+        except Exception as e:
+            print(f"AI Grading Error: {e}")
+            # Fallback
+            is_correct = (user_answer.lower() == correct_answer.lower()) or (difflib.SequenceMatcher(None, user_answer.lower(), correct_answer.lower()).ratio() > 0.8)
+            return is_correct, f"The correct answer is: {correct_answer}"
 
     def on_ask_submit(self, question, answer_length="medium"):
         if self._loading:

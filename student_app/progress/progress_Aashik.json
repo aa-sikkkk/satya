@@ -5,12 +5,12 @@
         "questions": [
           {
             "question": "What is a computer network? Explain its importance. [5 marks]",
-            "attempts": 12,
-            "correct": 5
+            "attempts": 20,
+            "correct": 6
           },
           {
             "question": "Differentiate between LAN and WAN. [4 marks]",
-            "attempts": 4,
+            "attempts": 5,
             "correct": 4
           },
           {

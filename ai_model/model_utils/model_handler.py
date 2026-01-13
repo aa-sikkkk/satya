@@ -76,6 +76,14 @@ class ModelHandler:
         except Exception as e:
             logger.error(f"Stream error: {e}")
             yield "I'm having trouble with your question. Please try again."
+            
+    def generate_response(self, prompt: str, max_tokens: int = 512) -> str:
+        """Video passthrough for raw prompt generation."""
+        try:
+             return self.handler.generate_response(prompt, max_tokens)
+        except Exception as e:
+             logger.error(f"Gen Error: {e}")
+             return ""
     
     def get_model_info(self) -> Dict[str, Any]:
         return {
