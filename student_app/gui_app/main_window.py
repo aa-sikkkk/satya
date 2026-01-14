@@ -779,11 +779,127 @@ class NEBeduApp(ctk.CTk):
         
         threading.Thread(target=worker, daemon=True).start()
 
+    def _calculate_progress_stats(self):
+        progress_data = progress_manager.load_progress(self.username)
+        
+        total_q = 0
+        total_correct = 0
+        mastered = []
+        weak = []
+        subject_stats = {}
+        
+        for subject, topics in progress_data.items():
+            subj_total = 0
+            subj_correct = 0
+            
+            for topic, concepts in topics.items():
+                for concept, data in concepts.items():
+                    questions = data.get('questions', [])
+                    c_total = sum(q['attempts'] for q in questions)
+                    c_correct = sum(q['correct'] for q in questions)
+                    
+                    if c_total >= 5:
+                        score = (c_correct / c_total) * 100
+                        if score >= 80:
+                            mastered.append(f"{concept} ({topic})")
+                        elif score < 50:
+                            weak.append(f"{concept} ({topic})")
+                    
+                    subj_total += c_total
+                    subj_correct += c_correct
+            
+            # Subject stats
+            if subj_total > 0:
+                pct = (subj_correct / subj_total) * 100
+                subject_stats[subject] = {
+                    'pct': pct,
+                    'correct': subj_correct,
+                    'total': subj_total
+                }
+            
+            total_q += subj_total
+            total_correct += subj_correct
+            
+        overall_score = (total_correct / total_q * 100) if total_q > 0 else 0
+        
+        stats = {
+            'total': total_q,
+            'correct': total_correct,
+            'score': overall_score
+        }
+        
+        next_concept = None
+        if weak:
+            next_concept = f"Try reviewing: {weak[0]}"
+        elif mastered:
+             next_concept = "Great work! Try exploring a new subject."
+        else:
+             next_concept = "Start by browsing subjects to begin your journey!"
+
+        return stats, mastered, weak, subject_stats, next_concept
+
+    def _export_progress(self):
+        src = progress_manager.get_progress_path(self.username)
+        if not os.path.exists(src):
+            mb.showinfo("Info", "No progress data to export.")
+            return
+            
+        dest = fd.asksaveasfilename(
+            defaultextension=".json",
+            filetypes=[("JSON files", "*.json")],
+            initialfile=f"satya_progress_{self.username}.json",
+            title="Export Progress"
+        )
+        if dest:
+            import shutil
+            try:
+                shutil.copy2(src, dest)
+                mb.showinfo("Success", "Progress exported successfully!")
+            except Exception as e:
+                mb.showerror("Error", f"Failed to export: {e}")
+
+    def _import_progress(self):
+        src = fd.askopenfilename(
+            filetypes=[("JSON files", "*.json")],
+            title="Import Progress"
+        )
+        if src:
+            dest = progress_manager.get_progress_path(self.username)
+            import shutil
+            try:
+                shutil.copy2(src, dest)
+                mb.showinfo("Success", "Progress imported successfully! Please restart to see changes.")
+                self.show_progress_ops() # Refresh
+            except Exception as e:
+                mb.showerror("Error", f"Failed to import: {e}")
+
+    def _reset_progress(self):
+        if mb.askyesno("Confirm Reset", "Are you sure you want to delete all progress? This cannot be undone."):
+            try:
+                path = progress_manager.get_progress_path(self.username)
+                if os.path.exists(path):
+                    os.remove(path)
+                mb.showinfo("Success", "Progress has been reset.")
+                self.show_progress_ops() # Refresh
+            except Exception as e:
+                mb.showerror("Error", f"Failed to reset: {e}")
+
     def show_progress(self):
         if self._loading: return
         self._loading = True
         self._safe_destroy_widgets()
-        view = ProgressView(self.main_frame, self.username, self.content_manager, self.show_main_menu)
+        
+        stats, mastered, weak, subject_stats, next_concept = self._calculate_progress_stats()
+        
+        view = ProgressView(
+            self.main_frame, 
+            stats=stats,
+            mastered=mastered,
+            weak=weak,
+            subject_stats=subject_stats,
+            next_concept=next_concept, 
+            on_back=self.show_main_menu
+        )
         view.pack(fill='both', expand=True)
         self._loading = False
 
@@ -791,7 +907,14 @@ class NEBeduApp(ctk.CTk):
         if self._loading: return
         self._loading = True
         self._safe_destroy_widgets()
-        view = ProgressOpsView(self.main_frame, self.username, self.show_main_menu)
+        
+        view = ProgressOpsView(
+            self.main_frame, 
+            on_export=self._export_progress,
+            on_import=self._import_progress,
+            on_reset=self._reset_progress,
+            on_back=self.show_main_menu
+        )
         view.pack(fill='both', expand=True)
         self._loading = False
 

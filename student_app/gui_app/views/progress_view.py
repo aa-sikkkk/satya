@@ -5,73 +5,224 @@ class ProgressView(ctk.CTkFrame):
         super().__init__(master, *args, **kwargs)
         self.on_back = on_back
         
-        # Main title
-        self.label = ctk.CTkLabel(self, text="Your Progress", font=ctk.CTkFont(size=22, weight="bold"))
-        self.label.pack(pady=(30, 20))
-
-        # Create scrollable frame for all content
-        self.scrollable_frame = ctk.CTkScrollableFrame(self, width=700, height=500)
-        self.scrollable_frame.pack(pady=(0, 20), padx=20, fill='both', expand=True)
-
-        # Overall stats section
-        stats_frame = ctk.CTkFrame(self.scrollable_frame, fg_color="#e8f5e8", corner_radius=8)
-        stats_frame.pack(pady=(0, 15), padx=10, fill='x')
+        self.COLOR_PRIMARY = "#1A237E"    # Deep Indigo
+        self.COLOR_ACCENT = "#283593"     # Lighter Indigo
+        self.COLOR_SUCCESS = "#2E7D32"    # Emerald Green
+        self.COLOR_WARNING = "#C62828"    # Deep Red
+        self.COLOR_NEUTRAL = "#424242"    # Dark Grey
+        self.COLOR_BG_CARD = "#FFFFFF"    # White
+        self.COLOR_TEXT_LIGHT = "#757575" # Light Grey Text
         
-        ctk.CTkLabel(stats_frame, text="📊 Overall Performance", font=ctk.CTkFont(size=16, weight="bold"), text_color="#388e3c").pack(pady=(10, 5), padx=10, anchor='w')
-        self.stats_label = ctk.CTkLabel(stats_frame, text=f"Questions Answered: {stats['total']}\nCorrect Answers: {stats['correct']}\nScore: {stats['score']:.1f}%", font=ctk.CTkFont(size=16))
-        self.stats_label.pack(pady=(0, 10), padx=10, anchor='w')
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(1, weight=1) 
 
-        # Mastered concepts section
-        mastered_frame = ctk.CTkFrame(self.scrollable_frame, fg_color="#fff3e0", corner_radius=8)
-        mastered_frame.pack(pady=(0, 15), padx=10, fill='x')
+        header_frame = ctk.CTkFrame(self, fg_color="transparent")
+        header_frame.grid(row=0, column=0, sticky="ew", padx=40, pady=(30, 20))
         
-        ctk.CTkLabel(mastered_frame, text="🏆 Mastered Concepts", font=ctk.CTkFont(size=16, weight="bold"), text_color="#f57c00").pack(pady=(10, 5), padx=10, anchor='w')
+        ctk.CTkLabel(
+            header_frame, 
+            text="Your Learning Journey 🚀", 
+            font=ctk.CTkFont(family="Segoe UI", size=28, weight="bold"),
+            text_color=self.COLOR_PRIMARY
+        ).pack(anchor='w')
+        
+        ctk.CTkLabel(
+            header_frame, 
+            text="Track your mastery, identify weak spots, and keep growing.", 
+            font=ctk.CTkFont(family="Segoe UI", size=14),
+            text_color=self.COLOR_TEXT_LIGHT
+        ).pack(anchor='w', pady=(2, 0))
+
+        self.scrollable_frame = ctk.CTkScrollableFrame(self, fg_color="transparent")
+        self.scrollable_frame.grid(row=1, column=0, sticky="nsew", padx=20, pady=(0, 20))
+
+        stats_grid = ctk.CTkFrame(self.scrollable_frame, fg_color="transparent")
+        stats_grid.pack(fill='x', padx=10, pady=(10, 20))
+        
+        def create_stat_card(parent, icon, title, value, color):
+            card = ctk.CTkFrame(parent, fg_color=self.COLOR_BG_CARD, corner_radius=15, border_width=1, border_color="#E0E0E0")
+            card.pack(side='left', fill='both', expand=True, padx=10)
+            
+            content = ctk.CTkFrame(card, fg_color="transparent")
+            content.pack(expand=True, pady=20)
+            
+            ctk.CTkLabel(content, text=icon, font=ctk.CTkFont(size=32)).pack(pady=(0, 5))
+            ctk.CTkLabel(content, text=value, font=ctk.CTkFont(family="Segoe UI", size=24, weight="bold"), text_color=color).pack()
+            ctk.CTkLabel(content, text=title, font=ctk.CTkFont(family="Segoe UI", size=13), text_color=self.COLOR_TEXT_LIGHT).pack()
+
+        create_stat_card(stats_grid, "📝", "Questions Answered", str(stats['total']), self.COLOR_PRIMARY)
+        create_stat_card(stats_grid, "✅", "Correct Answers", str(stats['correct']), self.COLOR_SUCCESS)
+        create_stat_card(stats_grid, "🎯", "Overall Accuracy", f"{stats['score']:.1f}%", self.COLOR_ACCENT)
+
+        concepts_frame = ctk.CTkFrame(self.scrollable_frame, fg_color="transparent")
+        concepts_frame.pack(fill='x', padx=10, pady=10)
+        
+        mastered_col = ctk.CTkFrame(concepts_frame, fg_color="transparent")
+        mastered_col.pack(side='left', fill='both', expand=True, padx=(10, 10))
+        self._create_section_header(mastered_col, "🏆 Mastered Concepts", self.COLOR_SUCCESS)
+        
+        m_content = ctk.CTkFrame(mastered_col, fg_color=self.COLOR_BG_CARD, corner_radius=15, border_width=1, border_color="#E0E0E0")
+        m_content.pack(fill='both', expand=True, pady=10)
+        
         if mastered:
-            for m in mastered:
-                ctk.CTkLabel(mastered_frame, text=f"• {m}", font=ctk.CTkFont(size=14), wraplength=600, justify='left').pack(anchor='w', padx=20, pady=2)
+            self._create_chip_grid(m_content, mastered, "#E8F5E9", "#2E7D32") # Light Green BG, Dark Green Text
         else:
-            ctk.CTkLabel(mastered_frame, text="None yet. Keep studying!", font=ctk.CTkFont(size=14), text_color="#757575").pack(anchor='w', padx=20, pady=5)
+            self._create_empty_state(m_content, "Keep practicing to master concepts!")
 
-        # Weak areas section
-        weak_frame = ctk.CTkFrame(self.scrollable_frame, fg_color="#ffebee", corner_radius=8)
-        weak_frame.pack(pady=(0, 15), padx=10, fill='x')
+        weak_col = ctk.CTkFrame(concepts_frame, fg_color="transparent")
+        weak_col.pack(side='left', fill='both', expand=True, padx=(10, 10))
+        self._create_section_header(weak_col, "🧠 Focus Areas", self.COLOR_WARNING)
         
-        ctk.CTkLabel(weak_frame, text="📚 Topics to Review", font=ctk.CTkFont(size=16, weight="bold"), text_color="#d32f2f").pack(pady=(10, 5), padx=10, anchor='w')
+        w_content = ctk.CTkFrame(weak_col, fg_color=self.COLOR_BG_CARD, corner_radius=15, border_width=1, border_color="#E0E0E0")
+        w_content.pack(fill='both', expand=True, pady=10)
+        
         if weak:
-            for w in weak:
-                ctk.CTkLabel(weak_frame, text=f"• {w}", font=ctk.CTkFont(size=14), wraplength=600, justify='left').pack(anchor='w', padx=20, pady=2)
+            self._create_chip_grid(w_content, weak, "#FFEBEE", "#C62828") # Light Red BG, Dark Red Text
         else:
-            ctk.CTkLabel(weak_frame, text="Great job! No weak areas found.", font=ctk.CTkFont(size=14), text_color="#388e3c").pack(anchor='w', padx=20, pady=5)
+             self._create_empty_state(w_content, "Great job! No weak areas detected.", "🎉")
 
-        # Subject-wise progress section
-        subject_frame = ctk.CTkFrame(self.scrollable_frame, fg_color="#f3e5f5", corner_radius=8)
-        subject_frame.pack(pady=(0, 15), padx=10, fill='x')
+        subj_frame = ctk.CTkFrame(self.scrollable_frame, fg_color="transparent")
+        subj_frame.pack(fill='x', padx=20, pady=(20, 10))
+        self._create_section_header(subj_frame, "📊 Subject Performance", self.COLOR_ACCENT)
         
-        ctk.CTkLabel(subject_frame, text="📈 Subject-wise Progress", font=ctk.CTkFont(size=16, weight="bold"), text_color="#7b1fa2").pack(pady=(10, 5), padx=10, anchor='w')
+        subj_card = ctk.CTkFrame(subj_frame, fg_color=self.COLOR_BG_CARD, corner_radius=15, border_width=1, border_color="#E0E0E0")
+        subj_card.pack(fill='x', pady=10)
         
-        for subject, stats in subject_stats.items():
-            subject_item_frame = ctk.CTkFrame(subject_frame, fg_color="transparent")
-            subject_item_frame.pack(pady=5, padx=10, fill='x')
-            
-            # Subject name and percentage
-            ctk.CTkLabel(subject_item_frame, text=f"{subject}: {stats['pct']:.1f}%", font=ctk.CTkFont(size=14, weight="bold")).pack(anchor='w', pady=(0, 2))
-            
-            # Progress bar
-            bar = ctk.CTkProgressBar(subject_item_frame, width=400, height=8)
-            bar.set(stats['pct'] / 100)
-            bar.pack(anchor='w', pady=(0, 5))
-            
-            # Progress details
-            ctk.CTkLabel(subject_item_frame, text=f"  {stats['correct']}/{stats['total']} questions correct", font=ctk.CTkFont(size=12), text_color="#757575").pack(anchor='w')
+        if subject_stats:
+            for i, (subject, s_data) in enumerate(subject_stats.items()):
+                self._create_subject_row(subj_card, subject, s_data, i == len(subject_stats)-1)
+        else:
+            self._create_empty_state(subj_card, "No data yet. Start a quiz!")
 
-        # Next concept suggestion
         if next_concept:
-            next_frame = ctk.CTkFrame(self.scrollable_frame, fg_color="#e8f5e8", corner_radius=8)
-            next_frame.pack(pady=(0, 15), padx=10, fill='x')
+            rec_frame = ctk.CTkFrame(self.scrollable_frame, fg_color="#E3F2FD", corner_radius=15, border_width=1, border_color="#BBDEFB")
+            rec_frame.pack(fill='x', padx=20, pady=20)
             
-            ctk.CTkLabel(next_frame, text="🚀 Ready for your next challenge?", font=ctk.CTkFont(size=16, weight="bold"), text_color="#388e3c").pack(pady=(10, 5), padx=10, anchor='w')
-            ctk.CTkLabel(next_frame, text=next_concept, font=ctk.CTkFont(size=15), text_color="#388e3c", wraplength=600, justify='left').pack(pady=(0, 10), padx=10, anchor='w')
+            ctk.CTkLabel(rec_frame, text="💡 Recommendation", font=ctk.CTkFont(weight="bold"), text_color="#1565C0").pack(pady=(15, 5))
+            ctk.CTkLabel(rec_frame, text=next_concept, font=ctk.CTkFont(size=14), text_color="#0D47A1").pack(pady=(0, 15))
+        
+        footer_frame = ctk.CTkFrame(self, fg_color="transparent")
+        footer_frame.grid(row=2, column=0, sticky="ew", padx=40, pady=20)
+        
+        self.back_btn = ctk.CTkButton(
+            footer_frame, 
+            text="← Back to Menu", 
+            command=self.on_back,
+            font=ctk.CTkFont(family="Segoe UI", size=14),
+            height=45,
+            fg_color="transparent",
+            border_width=1,
+            border_color="#BDBDBD",
+            text_color="#616161",
+            hover_color="#F5F5F5"
+        )
+        self.back_btn.pack(side='left')
+        
+        self._bind_mouse_wheel(self.scrollable_frame)
 
-        # Back button
-        self.back_btn = ctk.CTkButton(self, text="Back to Main Menu", command=self.on_back, fg_color="#bdbdbd", hover_color="#757575")
-        self.back_btn.pack(pady=(20, 30)) 
+    def _bind_mouse_wheel(self, widget):
+        widget.bind("<MouseWheel>", self._on_mouse_wheel)
+        widget.bind("<Button-4>", self._on_mouse_wheel)
+        widget.bind("<Button-5>", self._on_mouse_wheel)
+        
+        for child in widget.winfo_children():
+            self._bind_mouse_wheel(child)
+
+    def _on_mouse_wheel(self, event):
+        try:
+            scroll_amount = 0
+            if event.delta:
+                if event.delta > 0:
+                    scroll_amount = -1
+                else:
+                    scroll_amount = 1
+            elif event.num == 4:
+                scroll_amount = -1
+            elif event.num == 5:
+                scroll_amount = 1
+                
+            if scroll_amount != 0:
+                self.scrollable_frame._parent_canvas.yview_scroll(scroll_amount, "units")
+        except Exception:
+            pass
+
+    def _create_section_header(self, parent, text, color):
+        label = ctk.CTkLabel(
+            parent, 
+            text=text, 
+            font=ctk.CTkFont(family="Segoe UI", size=16, weight="bold"), 
+            text_color=color
+        )
+        label.pack(anchor='w', padx=5)
+        self._bind_mouse_wheel(label)
+
+    def _create_empty_state(self, parent, text, icon="ℹ️"):
+        frame = ctk.CTkFrame(parent, fg_color="transparent")
+        frame.pack(expand=True, pady=30)
+        
+        l1 = ctk.CTkLabel(frame, text=icon, font=ctk.CTkFont(size=24))
+        l1.pack(pady=(0,5))
+        
+        l2 = ctk.CTkLabel(frame, text=text, text_color=self.COLOR_TEXT_LIGHT)
+        l2.pack()
+        
+        self._bind_mouse_wheel(frame)
+        self._bind_mouse_wheel(l1)
+        self._bind_mouse_wheel(l2)
+
+    def _create_chip_grid(self, parent, items, bg_color, text_color):
+        grid = ctk.CTkFrame(parent, fg_color="transparent")
+        grid.pack(fill='both', expand=True, padx=15, pady=15)
+        self._bind_mouse_wheel(grid)
+        
+        for item in items:
+            chip = ctk.CTkFrame(grid, fg_color=bg_color, corner_radius=20)
+            chip.pack(anchor='w', pady=4)
+            
+            label = ctk.CTkLabel(
+                chip, 
+                text=f"  {item}  ", 
+                font=ctk.CTkFont(size=13, weight="bold"),
+                text_color=text_color
+            )
+            label.pack(pady=4, padx=8)
+            
+            self._bind_mouse_wheel(chip)
+            self._bind_mouse_wheel(label)
+
+    def _create_subject_row(self, parent, subject, data, is_last):
+        row = ctk.CTkFrame(parent, fg_color="transparent")
+        row.pack(fill='x', padx=20, pady=12)
+        
+        header = ctk.CTkFrame(row, fg_color="transparent")
+        header.pack(fill='x', pady=(0, 5))
+        
+        l1 = ctk.CTkLabel(header, text=subject, font=ctk.CTkFont(weight="bold", size=14))
+        l1.pack(side='left')
+        
+        l2 = ctk.CTkLabel(header, text=f"{data['pct']:.1f}%", font=ctk.CTkFont(weight="bold", size=14), text_color=self.COLOR_ACCENT)
+        l2.pack(side='right')
+        
+        bar = ctk.CTkProgressBar(row, height=10, corner_radius=5)
+        bar.set(data['pct'] / 100)
+        bar.pack(fill='x')
+        
+        l3 = ctk.CTkLabel(
+            row, 
+            text=f"{data['correct']} / {data['total']} correct", 
+            font=ctk.CTkFont(size=12), 
+            text_color=self.COLOR_TEXT_LIGHT
+        )
+        l3.pack(anchor='w', pady=(4, 0))
+        
+        self._bind_mouse_wheel(row)
+        self._bind_mouse_wheel(header)
+        self._bind_mouse_wheel(l1)
+        self._bind_mouse_wheel(l2)
+        self._bind_mouse_wheel(bar)
+        self._bind_mouse_wheel(l3)
+        
+        if not is_last:
+            sep = ctk.CTkFrame(parent, height=1, fg_color="#EEEEEE")
+            sep.pack(fill='x', padx=20)
+            self._bind_mouse_wheel(sep)

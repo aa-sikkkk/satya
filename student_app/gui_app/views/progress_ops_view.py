@@ -8,15 +8,115 @@ class ProgressOpsView(ctk.CTkFrame):
         self.on_reset = on_reset
         self.on_back = on_back
 
-        self.label = ctk.CTkLabel(self, text="Progress Operations", font=ctk.CTkFont(size=22, weight="bold"))
-        self.label.pack(pady=(30, 20))
+        self.COLOR_PRIMARY = "#1A237E"    # Deep Indigo
+        self.COLOR_ACCENT = "#283593"     # Lighter Indigo
+        self.COLOR_SUCCESS = "#2E7D32"    # Emerald Green
+        self.COLOR_WARNING = "#C62828"    # Deep Red
+        self.COLOR_NEUTRAL = "#424242"    # Dark Grey
+        self.COLOR_BG_CARD = "#FFFFFF"    # White
+        self.COLOR_TEXT_LIGHT = "#757575" # Light Grey Text
 
-        self.export_btn = ctk.CTkButton(self, text="Export Progress", command=self.on_export)
-        self.export_btn.pack(pady=10, fill='x', padx=40)
-        self.import_btn = ctk.CTkButton(self, text="Import Progress", command=self.on_import)
-        self.import_btn.pack(pady=10, fill='x', padx=40)
-        self.reset_btn = ctk.CTkButton(self, text="Reset Progress", fg_color="#e57373", hover_color="#ef5350", command=self.on_reset)
-        self.reset_btn.pack(pady=20, fill='x', padx=40)
+        header_frame = ctk.CTkFrame(self, fg_color="transparent")
+        header_frame.pack(fill='x', padx=40, pady=(30, 20))
+        
+        ctk.CTkLabel(
+            header_frame, 
+            text="Data Management 💾", 
+            font=ctk.CTkFont(family="Segoe UI", size=28, weight="bold"),
+            text_color=self.COLOR_PRIMARY
+        ).pack(anchor='w')
+        
+        ctk.CTkLabel(
+            header_frame, 
+            text="Backup your learning journey or start fresh.", 
+            font=ctk.CTkFont(family="Segoe UI", size=14),
+            text_color=self.COLOR_TEXT_LIGHT
+        ).pack(anchor='w', pady=(2, 0))
 
-        self.back_btn = ctk.CTkButton(self, text="Back", command=self.on_back, fg_color="#bdbdbd", hover_color="#757575")
-        self.back_btn.pack(pady=(30, 0)) 
+        self.content_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.content_frame.pack(fill='both', expand=True, padx=40, pady=20)
+
+        self._create_action_card(
+            self.content_frame,
+            icon="📤",
+            title="Backup Progress",
+            desc="Save your stats and mastery to a JSON file.",
+            btn_text="Export Data",
+            btn_color=self.COLOR_PRIMARY,
+            command=self.on_export
+        )
+
+        self._create_action_card(
+            self.content_frame,
+            icon="📥",
+            title="Restore Progress",
+            desc="Load your stats from a previous backup.",
+            btn_text="Import Data",
+            btn_color=self.COLOR_ACCENT,
+            command=self.on_import
+        )
+
+        self._create_action_card(
+            self.content_frame,
+            icon="🗑️",
+            title="Clear All Data",
+            desc="Permanently delete all progress and start over.",
+            btn_text="Reset Progress",
+            btn_color=self.COLOR_WARNING,
+            command=self.on_reset,
+            hover_color="#B71C1C"
+        )
+
+        footer_frame = ctk.CTkFrame(self, fg_color="transparent")
+        footer_frame.pack(fill='x', padx=40, pady=30, side='bottom')
+        
+        self.back_btn = ctk.CTkButton(
+            footer_frame, 
+            text="← Back to Menu", 
+            command=self.on_back,
+            font=ctk.CTkFont(family="Segoe UI", size=14),
+            height=45,
+            fg_color="transparent",
+            border_width=1,
+            border_color="#BDBDBD",
+            text_color="#616161",
+            hover_color="#F5F5F5"
+        )
+        self.back_btn.pack(side='left')
+
+    def _create_action_card(self, parent, icon, title, desc, btn_text, btn_color, command, hover_color=None):
+        card = ctk.CTkFrame(parent, fg_color=self.COLOR_BG_CARD, corner_radius=15, border_width=1, border_color="#E0E0E0")
+        card.pack(fill='x', pady=10)
+        
+        inner = ctk.CTkFrame(card, fg_color="transparent")
+        inner.pack(fill='both', expand=True, padx=20, pady=20)
+        
+        ctk.CTkLabel(inner, text=icon, font=ctk.CTkFont(size=32)).pack(side='left', padx=(0, 20))
+        
+        text_frame = ctk.CTkFrame(inner, fg_color="transparent")
+        text_frame.pack(side='left', fill='both', expand=True)
+        
+        ctk.CTkLabel(
+            text_frame, 
+            text=title, 
+            font=ctk.CTkFont(family="Segoe UI", size=18, weight="bold"),
+            text_color="#212121"
+        ).pack(anchor='w')
+        
+        ctk.CTkLabel(
+            text_frame, 
+            text=desc, 
+            font=ctk.CTkFont(family="Segoe UI", size=13),
+            text_color=self.COLOR_TEXT_LIGHT
+        ).pack(anchor='w')
+        
+        ctk.CTkButton(
+            inner,
+            text=btn_text,
+            command=command,
+            fg_color=btn_color,
+            hover_color=hover_color if hover_color else btn_color,
+            font=ctk.CTkFont(family="Segoe UI", size=14, weight="bold"),
+            height=40,
+            width=150
+        ).pack(side='right') 
