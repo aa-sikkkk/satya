@@ -14,6 +14,7 @@ from system.rag.anti_confusion_engine import AntiConfusionEngine
 from system.rag.ascii_diagram_library import ASCIIDiagramLibrary
 from system.rag.user_edge_case_handler import UserEdgeCaseHandler
 from system.rag.rag_cache import RAGCache
+from system.input_processing.adaptive_normalizer import AdaptiveNormalizer
 from scripts.rag_data_preparation.embedding_generator import EmbeddingGenerator
 from ai_model.model_utils.model_handler import ModelHandler
 
@@ -36,6 +37,7 @@ class RAGRetrievalEngine:
         self.anti_confusion = AntiConfusionEngine()
         self.diagram_library = ASCIIDiagramLibrary()
         self.cache = RAGCache(max_size=100, ttl_seconds=3600)
+        self.input_normalizer = AdaptiveNormalizer(enable_spell_check=True)
         self.embedding_gen = EmbeddingGenerator(device='cpu')
 
         # ChromaDB init
@@ -61,42 +63,72 @@ class RAGRetrievalEngine:
         logger.info("RAG Engine initialized")
 
     def _get_relevant_collections(self, subject: str, grade: str) -> List[str]:
-        """Select top collections (max 2) based on subject/grade priority."""
+        """
+        Select relevant collections based on subject and grade.
+        
+        Strategy:
+        1. NEB collections: Filter by BOTH subject AND grade
+        2. HuggingFace collections: Filter by SUBJECT ONLY (ignore grade)
+        
+        Returns max 3 collections for performance.
+        """
         if not self.chroma_client:
             return []
 
         all_colls = [c.name for c in self.chroma_client.list_collections()]
         collections = []
-
-        neb_key = f"neb_{subject}_grade_{grade}"
+        
+        # 1. NEB Collections (grade-specific)
+        # Format: neb_{subject}_grade_{grade}
+        neb_key = f"neb_{subject.lower()}_grade_{grade}"
         for name in all_colls:
-            if neb_key in name:
+            if neb_key in name.lower():
                 collections.append(name)
-
-        # Subject mapping
+                logger.info(f"Selected NEB collection (grade {grade}): {name}")
+        
+        # 2. HuggingFace Collections (subject-based, all grades)
+        # Map subjects to appropriate general knowledge collections
         subject_map = {
+            "biology": ["openstax_science", "scienceqa"],
+            "physics": ["openstax_science", "scienceqa"],
+            "chemistry": ["openstax_science", "scienceqa"],
             "science": ["openstax_science", "scienceqa"],
+            
+            "mathematics": ["finemath", "gsm8k"],
             "math": ["finemath", "gsm8k"],
+            
             "computer": ["cs_stanford"],
-            "english": ["fineweb_edu"]
+            "computer science": ["cs_stanford"],
+            "cs": ["cs_stanford"],
+            
+            "english": ["fineweb_edu", "khanacademy_pedagogy"],
+            "grammar": ["fineweb_edu"],
+            "writing": ["fineweb_edu"],
         }
-
-        if subject in subject_map:
-            for target in subject_map[subject]:
+        
+        # Add HuggingFace collections for this subject (ignore grade)
+        subject_lower = subject.lower()
+        if subject_lower in subject_map:
+            for target in subject_map[subject_lower]:
                 if target in all_colls and target not in collections:
                     collections.append(target)
-                    if len(collections) >= 2:
+                    logger.info(f"Selected HuggingFace collection (all grades): {target}")
+                    if len(collections) >= 3:  # Max 3 collections for performance
                         break
-
-        # Fallback
+        
+        # 3. Fallback: General education collections
         if not collections:
-            for fb in ["fineweb_edu", "khanacademy_pedagogy"]:
+            fallback = ["khanacademy_pedagogy", "fineweb_edu"]
+            for fb in fallback:
                 if fb in all_colls:
                     collections.append(fb)
+                    logger.info(f"Selected fallback collection: {fb}")
                     if len(collections) >= 2:
                         break
-
-        return collections[:2]  # Cap for i3 performance
+        
+        logger.info(f"Total collections selected: {len(collections)}")
+        return collections[:3]  # Limit to 3 for performance
+  # Cap for i3 performance
 
     def query(
         self,
@@ -125,8 +157,22 @@ class RAGRetrievalEngine:
             if stream_callback:
                 stream_callback(error_msg)
             return {"answer": error_msg, "type": "error"}
+        
+        # ============ INPUT NORMALIZATION (NEW) ============
+        # Clean the question BEFORE retrieval
+        normalization_result = self.input_normalizer.normalize(query_text)
+        clean_question = normalization_result["clean_question"]
+        
+        # Log normalization for debugging
+        if normalization_result["notes"]:
+            logger.info(f"Normalization applied: {normalization_result['notes']}")
+            logger.info(f"Intent: {normalization_result['intent']}, Confidence: {normalization_result['confidence']:.2f}")
+        
+        # Use clean question for the rest of the pipeline
+        effective_query = clean_question if clean_question else query_text
 
         # Cache check (exact match) - NO GRADE
+        # Use ORIGINAL query for cache key (user may ask same messy question)
         cached_result = self.cache.get(query_text, subject, "")
         if cached_result:
             logger.info(f"Cache HIT (exact)")
@@ -142,11 +188,11 @@ class RAGRetrievalEngine:
         if stream_callback:
             stream_callback("🔍 Searching knowledge base...\n\n")
 
-        # Embedding generation
+        # Embedding generation - USE CLEAN QUESTION
         if stream_callback:
             stream_callback("📊 Analyzing your question...\n\n")
         
-        query_embedding = self.embedding_gen.generate_embeddings(query_text)
+        query_embedding = self.embedding_gen.generate_embeddings(effective_query)
 
         # Cache check (semantic match) - NO GRADE
         semantic_hit = self.cache.find_similar(query_embedding, subject, "", threshold=0.88)
@@ -234,7 +280,8 @@ class RAGRetrievalEngine:
                     print("🚀 RAG: Starting token streaming...", flush=True)
                     token_count = 0
                     
-                    for token in self.llm.handler.get_answer_stream(query_text, full_context_str):
+                    # Use clean question for better Phi inference
+                    for token in self.llm.handler.get_answer_stream(effective_query, full_context_str):
                         answer += token
                         print(f"📤 RAG: Sending token #{token_count}: '{token}'", flush=True)
                         stream_callback(token)  # Send immediately
@@ -243,10 +290,10 @@ class RAGRetrievalEngine:
                     print(f"✅ RAG: Streaming complete. Total tokens: {token_count}", flush=True)
                     
                     # Calculate confidence with RAG context quality
-                    confidence = self._calculate_confidence(answer, query_text, final_context_chunks)
+                    confidence = self._calculate_confidence(answer, effective_query, final_context_chunks)
                 else:
                     # Non-streaming fallback
-                    answer, confidence = self.llm.simple_handler.get_answer(query_text, full_context_str)
+                    answer, confidence = self.llm.simple_handler.get_answer(effective_query, full_context_str)
             except Exception as e:
                 logger.error(f"LLM generation error: {e}")
                 if stream_callback:

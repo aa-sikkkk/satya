@@ -722,30 +722,123 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ### Core Technologies
 
-- **Microsoft Phi 1.5** - Lightweight language model
-- **ChromaDB** - Vector database for RAG
-- **llama-cpp-python** - Efficient GGUF inference
-- **CustomTkinter** - Modern GUI framework
-- **sentence-transformers** - Embedding generation
+- **Microsoft Phi 1.5** - Lightweight language model ([MIT License](https://huggingface.co/microsoft/phi-1_5))
+- **ChromaDB** - Vector database for RAG ([Apache 2.0](https://github.com/chroma-core/chroma))
+- **llama-cpp-python** - Efficient GGUF inference ([MIT License](https://github.com/abetlen/llama-cpp-python))
+- **CustomTkinter** - Modern GUI framework ([MIT License](https://github.com/TomSchimansky/CustomTkinter))
+- **sentence-transformers** - Embedding generation ([Apache 2.0](https://github.com/UKPLab/sentence-transformers))
+
+### Knowledge Base Datasets
+
+Satya's knowledge base is built using the following open-source educational datasets:
+
+#### Science & Mathematics
+
+- **[OpenStax Science](https://openstax.org/)** 
+  - Open-source college textbooks (Biology, Physics, Chemistry)
+  - License: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
+  - Used for: General science concepts across all grades
+
+- **[ScienceQA](https://scienceqa.github.io/)** 
+  - Multi-modal science question answering dataset
+  - License: [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+  - Used for: Science problem-solving and explanations
+
+- **[FineMath](https://huggingface.co/datasets/HuggingFaceTB/finemath)** 
+  - High-quality mathematical reasoning dataset
+  - License: [ODC-By](https://opendatacommons.org/licenses/by/1-0/)
+  - Used for: Mathematical concepts and problem-solving
+
+- **[GSM8K](https://github.com/openai/grade-school-math)** 
+  - Grade school math word problems
+  - License: [MIT License](https://opensource.org/licenses/MIT)
+  - Used for: Step-by-step math problem solving
+
+#### Computer Science
+
+- **CS Stanford** (`cs_stanford` collection)
+  - Source: [HuggingFaceTB/cosmopedia](https://huggingface.co/datasets/HuggingFaceTB/cosmopedia) (Stanford seed data)
+  - Synthetic textbook content for computer science and STEM
+  - License: [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0)
+  - Used for: Programming concepts and CS fundamentals
+
+#### Language & General Education
+
+- **FineWeb-Edu** (`fineweb_edu` collection)
+  - Source: [HuggingFaceFW/fineweb-edu](https://huggingface.co/datasets/HuggingFaceFW/fineweb-edu)
+  - High-quality educational web content
+  - License: [ODC-By](https://opendatacommons.org/licenses/by/1-0/)
+  - Used for: English language and general knowledge
+
+- **Khan Academy Pedagogy** (`khanacademy_pedagogy` collection)
+  - Source: [HuggingFaceTB/cosmopedia](https://huggingface.co/datasets/HuggingFaceTB/cosmopedia) (Khan Academy seed data)
+  - Synthetic educational content with narrative teaching style
+  - License: [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0)
+  - Used for: Conceptual explanations across subjects
+
+
+> [!NOTE]
+> All datasets are used in accordance with their respective licenses. We acknowledge and thank the creators and maintainers of these invaluable educational resources.
+
+### NEB Curriculum Content
+
+In addition to the above datasets, Satya supports **Nepal Education Board (NEB) curriculum-specific content** through teacher-contributed materials:
+
+- Grade-specific textbooks (Grades 8-12)
+- Teacher notes and study materials
+- Local curriculum alignment
+
+These materials are ingested separately and stored in grade-specific collections (e.g., `neb_biology_grade_10`).
 
 ### Community
 
-Special thanks to all contributors, educators, and students who have helped shape Satya.
+Special thanks to:
+- **Educators** who contribute curriculum materials
+- **Students** who provide feedback and testing
+- **Open-source contributors** who improve the codebase
+- **Dataset creators** who make educational AI possible
 
 ---
 
 ## Version History
 
-### Current Version: 2.0
+### Current Version: 2.1 (January 2026)
 
-**Major Changes:**
-- Single Phi 1.5 model architecture
-- Universal content ingestion script
-- Real-time token streaming
-- Progressive UX with status updates
-- Improved confidence calculation
-- Optimized for i3 CPU (4GB RAM)
+**Major Features:**
+- **Input Normalization System** - Production-ready adaptive learning layer
+  - Rule-based core with 4-layer noise removal
+  - LanguageTool integration (offline grammar/spell correction)
+  - Automated pattern mining from production logs
+  - Human-in-the-loop learning workflow
+- **Enhanced RAG Architecture**
+  - 7 HuggingFace datasets (OpenStax, ScienceQA, FineMath, GSM8K, etc.)
+  - Subject-based collection selection (NEB: grade+subject, HuggingFace: subject only)
+  - Semantic caching for faster responses
+- **Single Phi 1.5 Model** - Optimized for i3 CPU (4GB RAM)
+  - Real-time token streaming
+  - Context window: 384 tokens
+  - Q4_K_M quantization (~800MB)
+- **Universal Content Ingestion** - Single script for all content types
+  - OCR support (Tesseract + EasyOCR)
+  - Smart chunking (512 tokens, 10% overlap)
+  - Auto-detection of PDFs, text, markdown
+- **Progressive UX** - Real-time status updates during retrieval
+- **Comprehensive Testing** - 15/15 end-to-end tests passing
+
+**Performance:**
+- RAG retrieval: 10-12 seconds (i3 CPU)
+- Token streaming: Immediate after retrieval
+- Memory usage: <2GB peak
+- Code reduction: 43% fewer lines (cleaner, modular)
+
+### Version 1.0 (2024)
+
+- Initial release with multi-model architecture
+- Basic RAG implementation
+- CLI and GUI interfaces
+- Local ChromaDB integration
 
 ---
 
 *Pioneering accessible, intelligent AI education in Nepal with community power and RAG technology.*
+
