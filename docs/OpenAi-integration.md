@@ -1,12 +1,11 @@
 # Satyá: Learning Companion 
 <div align="center">
-   <img height="180" width="180" src="https://github.com/user-attachments/assets/4faf37b4-bb01-47c7-b443-d58b6c3eff62">
+    <img height="180" width="180" src="https://github.com/user-attachments/assets/23fb9ea4-2fc5-4214-b4d9-05ad82a711d1">
    
    [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
    [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
    [![Offline First](https://img.shields.io/badge/Offline-First-green)](https://github.com/aa-sikkkk/Satya)
    [![RAG Powered](https://img.shields.io/badge/RAG-Powered-purple)](https://github.com/aa-sikkkk/Satya)
-
 </div>
 
 An offline-first, community-editable AI learning companion students in Nepal. Built with lightweight AI models and structured educational content, designed to work in low-resource environments.
