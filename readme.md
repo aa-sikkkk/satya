@@ -734,46 +734,48 @@ Satya's knowledge base is built using the following open-source educational data
 
 #### Science & Mathematics
 
-- **[OpenStax Science](https://openstax.org/)** (115K documents)
+- **[OpenStax Science](https://openstax.org/)** 
   - Open-source college textbooks (Biology, Physics, Chemistry)
   - License: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
   - Used for: General science concepts across all grades
 
-- **[ScienceQA](https://scienceqa.github.io/)** (10K documents)
+- **[ScienceQA](https://scienceqa.github.io/)** 
   - Multi-modal science question answering dataset
   - License: [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)
   - Used for: Science problem-solving and explanations
 
-- **[FineMath](https://huggingface.co/datasets/HuggingFaceTB/finemath)** (133K documents)
+- **[FineMath](https://huggingface.co/datasets/HuggingFaceTB/finemath)** 
   - High-quality mathematical reasoning dataset
   - License: [ODC-By](https://opendatacommons.org/licenses/by/1-0/)
   - Used for: Mathematical concepts and problem-solving
 
-- **[GSM8K](https://github.com/openai/grade-school-math)** (7.5K documents)
+- **[GSM8K](https://github.com/openai/grade-school-math)** 
   - Grade school math word problems
   - License: [MIT License](https://opensource.org/licenses/MIT)
   - Used for: Step-by-step math problem solving
 
 #### Computer Science
 
-- **[CS Stanford](https://huggingface.co/datasets/stanford-cs)** (147K documents)
-  - Computer science curriculum and textbooks
+- **CS Stanford** (`cs_stanford` collection)
+  - Source: [HuggingFaceTB/cosmopedia](https://huggingface.co/datasets/HuggingFaceTB/cosmopedia) (Stanford seed data)
+  - Synthetic textbook content for computer science and STEM
   - License: [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0)
   - Used for: Programming concepts and CS fundamentals
 
 #### Language & General Education
 
-- **[FineWeb-Edu](https://huggingface.co/datasets/HuggingFaceFW/fineweb-edu)** (144K documents)
+- **FineWeb-Edu** (`fineweb_edu` collection)
+  - Source: [HuggingFaceFW/fineweb-edu](https://huggingface.co/datasets/HuggingFaceFW/fineweb-edu)
   - High-quality educational web content
   - License: [ODC-By](https://opendatacommons.org/licenses/by/1-0/)
   - Used for: English language and general knowledge
 
-- **[Khan Academy Pedagogy](https://huggingface.co/datasets/khanacademy)** (99K documents)
-  - Educational content with narrative teaching style
-  - License: [CC BY-NC-SA 3.0](https://creativecommons.org/licenses/by-nc-sa/3.0/)
+- **Khan Academy Pedagogy** (`khanacademy_pedagogy` collection)
+  - Source: [HuggingFaceTB/cosmopedia](https://huggingface.co/datasets/HuggingFaceTB/cosmopedia) (Khan Academy seed data)
+  - Synthetic educational content with narrative teaching style
+  - License: [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0)
   - Used for: Conceptual explanations across subjects
 
-**Total Knowledge Base:** 658,802 documents across 7 collections
 
 > [!NOTE]
 > All datasets are used in accordance with their respective licenses. We acknowledge and thank the creators and maintainers of these invaluable educational resources.
