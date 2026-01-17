@@ -1,0 +1,81 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+
+# Environment and IDE
+.env/
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# Model files and data
+*.pt
+*.pth
+*.bin
+*.onnx
+*.h5
+*.hdf5
+*.ckpt
+*.safetensors
+*.model
+*.pkl
+*.joblib
+satya_data/models/
+
+# Logs and databases
+*.log
+*.sqlite
+*.db
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Input Normalization System - Runtime Data
+satya_data/input_normalizer_phrases.json
+satya_data/normalization_logs/
+satya_data/feedback_db.jsonl
+
+# ChromaDB - Too large for Git (658K+ documents)
+satya_data/chroma_db/
+satya_data/satya_chroma_db/
+
+# Textbooks and notes
+notes/
+textbooks/grade_10/*.pdf
+
+# Test artifacts
+tests/
