@@ -714,7 +714,7 @@ See documentation:
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
-**Copyright (c) 2024 Satya Project Contributors**
+**Copyright (c) 2026 Satya Project Contributors**
 
 ---
 
