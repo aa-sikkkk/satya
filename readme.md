@@ -722,15 +722,79 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ### Core Technologies
 
-- **Microsoft Phi 1.5** - Lightweight language model
-- **ChromaDB** - Vector database for RAG
-- **llama-cpp-python** - Efficient GGUF inference
-- **CustomTkinter** - Modern GUI framework
-- **sentence-transformers** - Embedding generation
+- **Microsoft Phi 1.5** - Lightweight language model ([MIT License](https://huggingface.co/microsoft/phi-1_5))
+- **ChromaDB** - Vector database for RAG ([Apache 2.0](https://github.com/chroma-core/chroma))
+- **llama-cpp-python** - Efficient GGUF inference ([MIT License](https://github.com/abetlen/llama-cpp-python))
+- **CustomTkinter** - Modern GUI framework ([MIT License](https://github.com/TomSchimansky/CustomTkinter))
+- **sentence-transformers** - Embedding generation ([Apache 2.0](https://github.com/UKPLab/sentence-transformers))
+
+### Knowledge Base Datasets
+
+Satya's knowledge base is built using the following open-source educational datasets:
+
+#### Science & Mathematics
+
+- **[OpenStax Science](https://openstax.org/)** (115K documents)
+  - Open-source college textbooks (Biology, Physics, Chemistry)
+  - License: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
+  - Used for: General science concepts across all grades
+
+- **[ScienceQA](https://scienceqa.github.io/)** (10K documents)
+  - Multi-modal science question answering dataset
+  - License: [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+  - Used for: Science problem-solving and explanations
+
+- **[FineMath](https://huggingface.co/datasets/HuggingFaceTB/finemath)** (133K documents)
+  - High-quality mathematical reasoning dataset
+  - License: [ODC-By](https://opendatacommons.org/licenses/by/1-0/)
+  - Used for: Mathematical concepts and problem-solving
+
+- **[GSM8K](https://github.com/openai/grade-school-math)** (7.5K documents)
+  - Grade school math word problems
+  - License: [MIT License](https://opensource.org/licenses/MIT)
+  - Used for: Step-by-step math problem solving
+
+#### Computer Science
+
+- **[CS Stanford](https://huggingface.co/datasets/stanford-cs)** (147K documents)
+  - Computer science curriculum and textbooks
+  - License: [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0)
+  - Used for: Programming concepts and CS fundamentals
+
+#### Language & General Education
+
+- **[FineWeb-Edu](https://huggingface.co/datasets/HuggingFaceFW/fineweb-edu)** (144K documents)
+  - High-quality educational web content
+  - License: [ODC-By](https://opendatacommons.org/licenses/by/1-0/)
+  - Used for: English language and general knowledge
+
+- **[Khan Academy Pedagogy](https://huggingface.co/datasets/khanacademy)** (99K documents)
+  - Educational content with narrative teaching style
+  - License: [CC BY-NC-SA 3.0](https://creativecommons.org/licenses/by-nc-sa/3.0/)
+  - Used for: Conceptual explanations across subjects
+
+**Total Knowledge Base:** 658,802 documents across 7 collections
+
+> [!NOTE]
+> All datasets are used in accordance with their respective licenses. We acknowledge and thank the creators and maintainers of these invaluable educational resources.
+
+### NEB Curriculum Content
+
+In addition to the above datasets, Satya supports **Nepal Education Board (NEB) curriculum-specific content** through teacher-contributed materials:
+
+- Grade-specific textbooks (Grades 8-12)
+- Teacher notes and study materials
+- Local curriculum alignment
+
+These materials are ingested separately and stored in grade-specific collections (e.g., `neb_biology_grade_10`).
 
 ### Community
 
-Special thanks to all contributors, educators, and students who have helped shape Satya.
+Special thanks to:
+- **Educators** who contribute curriculum materials
+- **Students** who provide feedback and testing
+- **Open-source contributors** who improve the codebase
+- **Dataset creators** who make educational AI possible
 
 ---
 
@@ -745,7 +809,15 @@ Special thanks to all contributors, educators, and students who have helped shap
 - Progressive UX with status updates
 - Improved confidence calculation
 - Optimized for i3 CPU (4GB RAM)
+- **Knowledge base:** 658K documents from 7 educational datasets
+
+### Version 1.0
+
+- Initial release with multi-model architecture
+- Basic RAG implementation
+- CLI and GUI interfaces
 
 ---
 
 *Pioneering accessible, intelligent AI education in Nepal with community power and RAG technology.*
+

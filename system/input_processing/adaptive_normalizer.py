@@ -1,0 +1,163 @@
+"""
+Adaptive Normalizer - Production Wrapper
+Adds spell correction, logging, and learning capabilities.
+"""
+
+import logging
+import json
+import os
+from typing import Dict, List, Optional
+from datetime import datetime
+from pathlib import Path
+
+from system.input_processing.input_normalizer import InputNormalizer
+
+logger = logging.getLogger(__name__)
+
+
+class AdaptiveNormalizer:
+    """Production wrapper with learning and spell correction."""
+    
+    def __init__(
+        self,
+        normalizer: Optional[InputNormalizer] = None,
+        log_dir: str = "satya_data/normalization_logs",
+        enable_spell_check: bool = True
+    ):
+        self.normalizer = normalizer or InputNormalizer()
+        self.log_dir = Path(log_dir)
+        self.log_dir.mkdir(parents=True, exist_ok=True)
+        
+        self.feedback_db: List[Dict] = []
+        self.feedback_file = self.log_dir / "feedback_db.jsonl"
+        
+        # Grammar + spell checker (offline)
+        self.spell_checker = None
+        if enable_spell_check:
+            self.spell_checker = self._load_language_tool()
+        
+        logger.info("AdaptiveNormalizer initialized")
+    
+    def normalize(
+        self,
+        raw_question: str,
+        user_id: Optional[str] = None,
+        add_scaffolding: bool = False,
+        enable_spell_check: bool = True
+    ) -> Dict[str, any]:
+        """Normalize with spell correction and logging."""
+        original = raw_question
+        
+        if enable_spell_check and self.spell_checker:
+            raw_question = self._correct_text(raw_question)
+        
+        result = self.normalizer.normalize(raw_question, add_scaffolding=add_scaffolding)
+        
+        self._log_normalization(
+            original=original,
+            corrected=raw_question,
+            result=result,
+            user_id=user_id
+        )
+        
+        return result
+    
+    def get_low_confidence_cases(self, limit: int = 100) -> List[Dict]:
+        """Get recent low-confidence cases for review."""
+        review_file = self.log_dir / "low_confidence_cases.jsonl"
+        if not review_file.exists():
+            return []
+        
+        try:
+            cases = []
+            with open(review_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    if line.strip():
+                        cases.append(json.loads(line))
+            return cases[-limit:]
+        except Exception as e:
+            logger.error(f"Could not load low-confidence cases: {e}")
+            return []
+    
+    # === Private Methods ===
+    
+    def _load_language_tool(self):
+        """Load LanguageTool for offline correction."""
+        try:
+            import language_tool_python
+            tool = language_tool_python.LanguageTool('en-US')
+            logger.info("LanguageTool loaded (offline mode)")
+            return tool
+        except ImportError:
+            logger.warning("LanguageTool not installed. Run: pip install language-tool-python")
+            return None
+        except Exception as e:
+            logger.warning(f"Could not load LanguageTool: {e}")
+            return None
+    
+    def _correct_text(self, text: str) -> str:
+        """Apply grammar and spell correction."""
+        if not self.spell_checker:
+            return text
+        
+        try:
+            import language_tool_python
+            matches = self.spell_checker.check(text)
+            if not matches:
+                return text
+            
+            corrected = language_tool_python.utils.correct(text, matches)
+            if corrected != text:
+                logger.debug(f"Corrected: '{text}' -> '{corrected}'")
+            return corrected
+        except Exception as e:
+            logger.debug(f"Correction error: {e}")
+            return text
+    
+    def _log_normalization(
+        self,
+        original: str,
+        corrected: str,
+        result: Dict,
+        user_id: Optional[str]
+    ):
+        """Log for learning."""
+        log_entry = {
+            "timestamp": datetime.now().isoformat(),
+            "user_id": user_id,
+            "original": original,
+            "corrected": corrected,
+            "clean": result["clean_question"],
+            "confidence": result["confidence"],
+            "notes": result["notes"],
+        }
+        
+        self.feedback_db.append(log_entry)
+        
+        if result["confidence"] < 0.7:
+            self._flag_for_review(log_entry)
+        
+        if len(self.feedback_db) % 100 == 0:
+            self._persist_feedback()
+    
+    def _flag_for_review(self, log_entry: Dict):
+        """Flag low-confidence case."""
+        review_file = self.log_dir / "low_confidence_cases.jsonl"
+        try:
+            with open(review_file, 'a', encoding='utf-8') as f:
+                json.dump(log_entry, f)
+                f.write('\n')
+        except Exception as e:
+            logger.warning(f"Could not flag for review: {e}")
+    
+    def _persist_feedback(self):
+        """Persist feedback database."""
+        try:
+            with open(self.feedback_file, 'a', encoding='utf-8') as f:
+                for entry in self.feedback_db:
+                    json.dump(entry, f)
+                    f.write('\n')
+            self.feedback_db = []
+            logger.debug("Persisted feedback")
+        except Exception as e:
+            logger.warning(f"Could not persist feedback: {e}")
