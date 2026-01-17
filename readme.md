@@ -802,22 +802,41 @@ Special thanks to:
 
 ## Version History
 
-### Current Version: 2.0
+### Current Version: 2.1 (January 2026)
 
-**Major Changes:**
-- Single Phi 1.5 model architecture
-- Universal content ingestion script
-- Real-time token streaming
-- Progressive UX with status updates
-- Improved confidence calculation
-- Optimized for i3 CPU (4GB RAM)
-- **Knowledge base:** 658K documents from 7 educational datasets
+**Major Features:**
+- **Input Normalization System** - Production-ready adaptive learning layer
+  - Rule-based core with 4-layer noise removal
+  - LanguageTool integration (offline grammar/spell correction)
+  - Automated pattern mining from production logs
+  - Human-in-the-loop learning workflow
+- **Enhanced RAG Architecture**
+  - 7 HuggingFace datasets (OpenStax, ScienceQA, FineMath, GSM8K, etc.)
+  - Subject-based collection selection (NEB: grade+subject, HuggingFace: subject only)
+  - Semantic caching for faster responses
+- **Single Phi 1.5 Model** - Optimized for i3 CPU (4GB RAM)
+  - Real-time token streaming
+  - Context window: 384 tokens
+  - Q4_K_M quantization (~800MB)
+- **Universal Content Ingestion** - Single script for all content types
+  - OCR support (Tesseract + EasyOCR)
+  - Smart chunking (512 tokens, 10% overlap)
+  - Auto-detection of PDFs, text, markdown
+- **Progressive UX** - Real-time status updates during retrieval
+- **Comprehensive Testing** - 15/15 end-to-end tests passing
 
-### Version 1.0
+**Performance:**
+- RAG retrieval: 10-12 seconds (i3 CPU)
+- Token streaming: Immediate after retrieval
+- Memory usage: <2GB peak
+- Code reduction: 43% fewer lines (cleaner, modular)
+
+### Version 1.0 (2024)
 
 - Initial release with multi-model architecture
 - Basic RAG implementation
 - CLI and GUI interfaces
+- Local ChromaDB integration
 
 ---
 
