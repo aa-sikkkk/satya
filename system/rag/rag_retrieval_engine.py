@@ -61,6 +61,33 @@ class RAGRetrievalEngine:
                 self.llm = None
         
         logger.info("RAG Engine initialized")
+    
+    def warm_up(self):
+        """
+        Warm up RAG engine by pre-loading embedding generator and ChromaDB.
+        This reduces first query latency.
+        """
+        logger.info("Warming up RAG engine...")
+        try:
+            # Warm up embedding generator with dummy query
+            dummy_query = "test query"
+            self.embedding_gen.generate_embedding(dummy_query)
+            
+            # Warm up ChromaDB by accessing a collection
+            if self.chroma_client:
+                collections = self.chroma_client.list_collections()
+                if collections:
+                    # Query first collection with dummy to load indexes
+                    test_coll = self.chroma_client.get_collection(collections[0].name)
+                    test_embedding = self.embedding_gen.generate_embedding(dummy_query)
+                    test_coll.query(
+                        query_embeddings=[test_embedding],
+                        n_results=1
+                    )
+            
+            logger.info("RAG engine warmed up!")
+        except Exception as e:
+            logger.warning(f"RAG warm-up failed (non-critical): {e}")
 
     def _get_relevant_collections(self, subject: str, grade: str) -> List[str]:
         """

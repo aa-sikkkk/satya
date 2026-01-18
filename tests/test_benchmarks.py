@@ -104,7 +104,7 @@ def cold_start_rag(model_path, chroma_path):
 
 
 def test_cold_start_initialization(model_path, chroma_path):
-    """Benchmark cold start initialization time."""
+    """Benchmark cold start initialization time including model and RAG warm-up."""
     gc.collect()
     initial_memory = get_memory_usage()
     
@@ -115,15 +115,20 @@ def test_cold_start_initialization(model_path, chroma_path):
     model_start = time.time()
     model_handler = ModelHandler(model_path)
     model_time = time.time() - model_start
-    print(f"Model Handler: {model_time:.2f}s")
+    print(f"Model Handler (with warm-up): {model_time:.2f}s")
     
     rag_start = time.time()
     rag_engine = RAGRetrievalEngine(
         chroma_db_path=chroma_path,
         llm_handler=model_handler
     )
-    rag_time = time.time() - rag_start
-    print(f"RAG Engine: {rag_time:.2f}s")
+    rag_init_time = time.time() - rag_start
+    print(f"RAG Engine (init): {rag_init_time:.2f}s")
+    
+    warmup_start = time.time()
+    rag_engine.warm_up()
+    warmup_time = time.time() - warmup_start
+    print(f"RAG Engine (warm-up): {warmup_time:.2f}s")
     
     total_time = time.time() - start_time
     final_memory = get_memory_usage()
@@ -133,7 +138,8 @@ def test_cold_start_initialization(model_path, chroma_path):
     
     model_handler.cleanup()
     
-    assert total_time < 35.0, f"Init took {total_time:.2f}s (should be < 35s)"
+    # Updated expectations with both warm-ups
+    assert total_time < 45.0, f"Init took {total_time:.2f}s (should be < 45s with warm-ups)"
     assert final_memory - initial_memory < 2000, "Memory usage too high"
 
 

@@ -56,6 +56,7 @@ class ModelHandler:
         try:
             logger.info("Loading Phi 1.5...")
             self.handler.load_model()
+            self.handler.warm_up()
             logger.info("Model ready!")
         except Exception as e:
             logger.error(f"Failed to load model: {e}")

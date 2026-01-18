@@ -3,30 +3,31 @@ Startup loader for Satya GUI - Preloads all models before showing main window
 """
 
 import customtkinter as ctk
+import tkinter as tk
 import threading
 import time
 from pathlib import Path
 
-class StartupLoader(ctk.CTkToplevel):
+class StartupLoader(tk.Tk):
     """Loading screen shown during model initialization."""
     
-    def __init__(self, parent):
-        super().__init__(parent)
+    def __init__(self):
+        super().__init__()
         
         self.title("Loading Satya...")
         self.geometry("400x250")
         self.resizable(False, False)
         
-        # Center the window
         self.update_idletasks()
         x = (self.winfo_screenwidth() // 2) - (400 // 2)
         y = (self.winfo_screenheight() // 2) - (250 // 2)
         self.geometry(f"+{x}+{y}")
         
-        # Remove window decorations for cleaner look
         self.overrideredirect(True)
         
-        # Create UI
+        ctk.set_appearance_mode('light')
+        ctk.set_default_color_theme('green')
+        
         self.frame = ctk.CTkFrame(self, corner_radius=15)
         self.frame.pack(fill="both", expand=True, padx=20, pady=20)
         
@@ -67,3 +68,4 @@ class StartupLoader(ctk.CTkToplevel):
         if progress is not None:
             self.progress.set(progress)
         self.update()
+        self.update_idletasks()

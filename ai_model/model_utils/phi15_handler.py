@@ -43,6 +43,27 @@ class SimplePhiHandler:
         )
         logger.info("Model loaded!")
     
+    def warm_up(self):
+        """
+        Warming up the model with a dummy inference.
+        """
+        if not self.llm:
+            self.load_model()
+        
+        logger.info("Warming up model...")
+        try:
+            # Quick dummy inference to initialize the engine
+            dummy_prompt = "Instruct: What is 2+2?\nOutput: Answer:"
+            self.llm(
+                dummy_prompt,
+                max_tokens=10,
+                temperature=0.1,
+                stream=False
+            )
+            logger.info("Model warmed up!")
+        except Exception as e:
+            logger.warning(f"Warm-up failed (non-critical): {e}")
+    
     def _build_prompt(self, question: str, context: str) -> str:
         context = (context or "").strip()
         

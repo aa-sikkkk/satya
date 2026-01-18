@@ -268,7 +268,7 @@ class NEBeduApp(ctk.CTk):
     def _eager_init_all_models(self):
         from student_app.gui_app.startup_loader import StartupLoader
         
-        loader = StartupLoader(self)
+        loader = StartupLoader() 
         loader.update()
         loader.update_idletasks()
         
@@ -281,7 +281,7 @@ class NEBeduApp(ctk.CTk):
             loader.update_idletasks()
             self.model_path = str(resolve_model_dir("satya_data/models/phi15"))
             
-            loader.update_status("Loading Phi 1.5...", "This may take 10-15 seconds", 0.3)
+            loader.update_status("Loading Phi 1.5...", "Loading and warming up model", 0.3)
             loader.update_idletasks()
             self.model_handler = ModelHandler(self.model_path)
             
@@ -292,9 +292,13 @@ class NEBeduApp(ctk.CTk):
                 chroma_db_path=chroma_db_path,
                 llm_handler=self.model_handler
             )
+            
+            loader.update_status("Warming up RAG...", "Pre-loading embeddings and database", 0.8)
+            loader.update_idletasks()
+            self.rag_engine.warm_up()  
             self._rag_initialized = True
             
-            loader.update_status("Ready!", "All systems loaded", 1.0)
+            loader.update_status("Ready!", "All systems loaded and ready", 1.0)
             loader.update_idletasks()
             time.sleep(0.5)
             
