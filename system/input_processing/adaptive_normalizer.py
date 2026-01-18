@@ -6,6 +6,8 @@ Adds spell correction, logging, and learning capabilities.
 import logging
 import json
 import os
+import re
+import hashlib
 from typing import Dict, List, Optional
 from datetime import datetime
 from pathlib import Path
@@ -31,6 +33,12 @@ class AdaptiveNormalizer:
         self.feedback_db: List[Dict] = []
         self.feedback_file = self.log_dir / "feedback_db.jsonl"
         
+        # Spell correction cache
+        self.spell_cache_file = self.log_dir / "spell_cache.json"
+        self.spell_cache = self._load_spell_cache()
+        self.cache_hits = 0
+        self.cache_misses = 0
+        
         # Grammar + spell checker (offline)
         self.spell_checker = None
         if enable_spell_check:
@@ -48,8 +56,29 @@ class AdaptiveNormalizer:
         """Normalize with spell correction and logging."""
         original = raw_question
         
+        # Conditional spell-checking with caching
         if enable_spell_check and self.spell_checker:
-            raw_question = self._correct_text(raw_question)
+            # Check cache first
+            cache_key = self._get_cache_key(raw_question)
+            if cache_key in self.spell_cache:
+                raw_question = self.spell_cache[cache_key]["corrected"]
+                self.cache_hits += 1
+                logger.debug(f"Cache HIT: {cache_key[:8]}...")
+            elif self._should_spell_check(raw_question):
+                # Run LanguageTool only if needed
+                corrected = self._correct_text(raw_question)
+                if corrected != raw_question:
+                    # Cache the correction
+                    self.spell_cache[cache_key] = {
+                        "corrected": corrected,
+                        "timestamp": datetime.now().isoformat(),
+                        "hit_count": 1
+                    }
+                    self._save_spell_cache()
+                raw_question = corrected
+                self.cache_misses += 1
+            else:
+                logger.debug(f"Spell-check SKIPPED (heuristic)")
         
         result = self.normalizer.normalize(raw_question, add_scaffolding=add_scaffolding)
         
@@ -80,6 +109,75 @@ class AdaptiveNormalizer:
             return []
     
     # === Private Methods ===
+    
+    def _get_cache_key(self, text: str) -> str:
+        """Generate cache key from text."""
+        normalized = text.lower().strip()
+        return hashlib.md5(normalized.encode()).hexdigest()
+    
+    def _load_spell_cache(self) -> Dict:
+        """Load spell correction cache from disk."""
+        if not self.spell_cache_file.exists():
+            return {}
+        
+        try:
+            with open(self.spell_cache_file, 'r', encoding='utf-8') as f:
+                cache = json.load(f)
+            logger.info(f"Loaded spell cache: {len(cache)} entries")
+            return cache
+        except Exception as e:
+            logger.warning(f"Could not load spell cache: {e}")
+            return {}
+    
+    def _save_spell_cache(self):
+        """Save spell correction cache to disk."""
+        try:
+            # LRU eviction: keep only 10,000 most recent entries
+            if len(self.spell_cache) > 10000:
+                sorted_cache = sorted(
+                    self.spell_cache.items(),
+                    key=lambda x: x[1].get("timestamp", ""),
+                    reverse=True
+                )
+                self.spell_cache = dict(sorted_cache[:10000])
+            
+            with open(self.spell_cache_file, 'w', encoding='utf-8') as f:
+                json.dump(self.spell_cache, f, indent=2)
+        except Exception as e:
+            logger.warning(f"Could not save spell cache: {e}")
+    
+    def _should_spell_check(self, text: str) -> bool:
+        """Determine if spell-checking is needed using heuristics."""
+        words = text.split()
+        
+        # Skip very short queries (likely well-formed)
+        if len(words) < 5:
+            return False
+        
+        # Skip MCQ-style questions
+        if re.match(r'^[A-D]\)', text) or re.match(r'^\d+\.', text):
+            return False
+        
+        # Skip if all caps (likely exam question - will be fixed by normalizer)
+        if text.isupper():
+            return False
+        
+        # Check for potential typos (fast regex patterns)
+        potential_typos = [
+            r'\b\w*[0-9]+\w*\b',  # Words with numbers
+            r'\b\w{15,}\b',        # Very long words (likely typos)
+            r'(.)\1{3,}',          # Repeated characters (e.g., "hellooo")
+        ]
+        
+        for pattern in potential_typos:
+            if re.search(pattern, text):
+                return True
+        
+        # For longer questions, run spell-check
+        if len(words) > 10:
+            return True
+        
+        return False
     
     def _load_language_tool(self):
         """Load LanguageTool for offline correction."""
