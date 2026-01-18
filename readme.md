@@ -813,7 +813,7 @@ Special thanks to:
 - **Enhanced RAG Architecture**
   - 7 HuggingFace datasets (OpenStax, ScienceQA, FineMath, GSM8K, etc.)
   - Subject-based collection selection (NEB: grade+subject, HuggingFace: subject only)
-  - Semantic caching for faster responses
+  - Semantic caching for instant repeated queries
 - **Single Phi 1.5 Model** - Optimized for i3 CPU (4GB RAM)
   - Real-time token streaming
   - Context window: 384 tokens
@@ -823,15 +823,21 @@ Special thanks to:
   - Smart chunking (512 tokens, 10% overlap)
   - Auto-detection of PDFs, text, markdown
 - **Progressive UX** - Real-time status updates during retrieval
-- **Comprehensive Testing** - 15/15 end-to-end tests passing
+- **Comprehensive Testing** - 101/101 tests passing (unit + integration + benchmarks)
 
-**Performance:**
-- RAG retrieval: 10-12 seconds (i3 CPU)
-- Token streaming: Immediate after retrieval
-- Memory usage: <2GB peak
-- Code reduction: 43% fewer lines (cleaner, modular)
+**Performance**
 
-### Version 1.0 (2024)
+> [!NOTE]
+> **Test Hardware:** Intel Core i3-3220 @ 3.30GHz | 64-bit Windows | 4GB RAM
+
+- Cold start: ~14s (Model: 0.6s, RAG: 13.6s)
+- TTFT (Time To First Token): 7-31s (includes normalization + RAG + inference)
+- Total pipeline: 9-52s (varies by answer length)
+- Cached queries: <0.1s (instant)
+- Token streaming: Real-time after TTFT
+
+
+### Version 1.0 (2025)
 
 - Initial release with multi-model architecture
 - Basic RAG implementation
