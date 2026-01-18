@@ -24,8 +24,7 @@ def content_dir():
                             "name": "Basic Concepts",
                             "concepts": [
                                 {
-                                    "id": "comp_01",
-                                    "title": "What is a Computer?",
+                                    "name": "What is a Computer?",
                                     "summary": "A computer is an electronic device that processes data.",
                                     "questions": [
                                         {
@@ -95,12 +94,12 @@ def test_get_concept(content_manager):
     concept = content_manager.get_concept(
         "computer_science",
         "Introduction to Computers",
-        "comp_01"
+        "What is a Computer?"
     )
     assert concept is not None
-    assert concept["id"] == "comp_01"
-    assert concept["title"] == "What is a Computer?"
+    assert concept["name"] == "What is a Computer?"
     
+    # Test non-existent concept
     # Test non-existent concept
     assert content_manager.get_concept(
         "computer_science",
@@ -113,7 +112,7 @@ def test_get_question(content_manager):
     question = content_manager.get_question(
         "computer_science",
         "Introduction to Computers",
-        "comp_01",
+        "What is a Computer?",
         0
     )
     assert question is not None
@@ -121,10 +120,11 @@ def test_get_question(content_manager):
     assert question["question"] == "What is a computer?"
     
     # Test invalid question index
+    # Test invalid question index
     assert content_manager.get_question(
         "computer_science",
         "Introduction to Computers",
-        "comp_01",
+        "What is a Computer?",
         999
     ) is None
 
@@ -142,8 +142,7 @@ def test_update_content(content_manager, content_dir):
                         "name": "New Subtopic",
                         "concepts": [
                             {
-                                "id": "comp_02",
-                                "title": "New Concept",
+                                "name": "New Concept",
                                 "summary": "A new concept",
                                 "questions": [
                                     {
@@ -207,7 +206,7 @@ def test_get_all_concepts(content_manager):
         "Introduction to Computers"
     )
     assert len(concepts) == 1
-    assert concepts[0]["id"] == "comp_01"
+    assert concepts[0]["name"] == "What is a Computer?"
     
     # Test non-existent topic
     assert content_manager.get_all_concepts(
