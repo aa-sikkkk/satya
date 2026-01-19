@@ -1,10 +1,3 @@
-"""
-Diagram Templates
-
-Pre-defined diagram templates for common patterns.
-Used as fallback if custom generator doesn't support a specific type.
-"""
-
 DIAGRAM_TEMPLATES = {
     "for_loop": """
 ┌─────────┐
