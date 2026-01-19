@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import Optional, List
 
 from .diagram_detector import should_generate_diagram, extract_context_for_diagram
 from .custom_generator import generate_diagram
@@ -9,7 +9,7 @@ from .diagram_validator import validate_diagram
 logger = logging.getLogger(__name__)
 
 
-def generate_and_append_diagram(question: str, answer: str) -> str:
+def generate_and_append_diagram(question: str, answer: str, rag_chunks: Optional[List[str]] = None, llm_handler=None) -> str:
     original_answer = answer
     
     try:
@@ -25,6 +25,12 @@ def generate_and_append_diagram(question: str, answer: str) -> str:
             return original_answer
         
         context = extract_context_for_diagram(question, answer, diagram_type)
+        
+        if rag_chunks:
+            context['rag_chunks'] = rag_chunks
+        
+        if llm_handler:
+            context['llm_handler'] = llm_handler
         
         diagram = generate_diagram(diagram_type, context)
         

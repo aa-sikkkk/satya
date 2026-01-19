@@ -751,9 +751,16 @@ class NEBeduApp(ctk.CTk):
                     
                     confidence = response.get('confidence', 0.5)
                     diagram = response.get('diagram')
+                    rag_chunks = response.get('context_used', [])
+                    llm_handler = self.rag_engine.llm.handler if self.rag_engine and hasattr(self.rag_engine, 'llm') else None
                     
                     def finalize():
-                        self.ask_view.finalize_answer(confidence, question=normalized_question)
+                        self.ask_view.finalize_answer(
+                            confidence, 
+                            question=normalized_question,
+                            rag_chunks=rag_chunks,
+                            llm_handler=llm_handler
+                        )
                         
                         if diagram:
                             try:

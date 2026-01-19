@@ -4,8 +4,37 @@ from typing import Dict, Optional, List, Tuple
 STOPWORDS = {
     "the", "is", "are", "a", "an", "to", "of", "and", "or", "for", "in", "on", "at", "by", "that",
     "this", "it", "as", "be", "with", "from", "into", "their", "its", "they", "them", "can", "will",
-    "about", "how", "what", "why", "which", "who", "whose", "when", "where", "than", "then", "also"
+    "about", "how", "what", "why", "which", "who", "whose", "when", "where", "than", "then", "also",
+    "been", "has", "have", "had", "does", "did", "do", "would", "could", "should"
 }
+
+SENTENCE_INDICATORS = {
+    "occurs", "happens", "takes", "place", "when", "where", "which", "that", "been", "warmed",
+    "system", "process", "stage", "phase", "step"
+}
+
+
+def is_valid_process_name(text: str) -> bool:
+    if not text or len(text) < 3:
+        return False
+    
+    words = text.lower().split()
+    
+    if len(words) > 3:
+        return False
+    
+    stopword_count = sum(1 for w in words if w in STOPWORDS)
+    if stopword_count > 1:
+        return False
+    
+    sentence_indicator_count = sum(1 for w in words if w in SENTENCE_INDICATORS)
+    if sentence_indicator_count > 0:
+        return False
+    
+    if any(char in text for char in [',', '.', '!', '?', ';', ':']):
+        return False
+    
+    return True
 
 
 def generate_diagram(diagram_type: str, context: Dict[str, any]) -> Optional[str]:
@@ -22,8 +51,10 @@ def generate_diagram(diagram_type: str, context: Dict[str, any]) -> Optional[str
 def generate_flowchart(context: Dict[str, any]) -> Optional[str]:
     question = context.get("question", "")
     answer = context.get("answer", "")
+    rag_chunks = context.get("rag_chunks")
+    llm_handler = context.get("llm_handler")
     
-    steps = extract_steps_from_answer(answer)
+    steps = extract_steps_from_answer(answer, rag_chunks, llm_handler)
     
     if steps and len(steps) > 0:
         return generate_step_based_flowchart(steps)
@@ -139,8 +170,119 @@ def _calculate_adaptive_limits(content_length: int, num_items: int) -> Tuple[int
     return max_items, max_item_length
 
 
-def extract_steps_from_answer(answer: str) -> List[str]:
+def extract_steps_from_rag(rag_chunks: List[str]) -> List[str]:
+    if not rag_chunks:
+        return []
+    
+    steps = []
+    combined_text = ' '.join(rag_chunks)
+    
+    numbered_list_patterns = [
+        r'(\d+)\.\s+([A-Z][a-zA-Z\s]+?)(?:\s*[-–—:]\s*|\s*\n)',
+        r'(?:Step|Stage|Phase)\s+(\d+)[:\.]?\s*([A-Z][a-zA-Z\s]+?)(?:\s*[-–—:]\s*|\s*\n)',
+    ]
+    
+    for pattern in numbered_list_patterns:
+        matches = re.findall(pattern, combined_text, re.MULTILINE)
+        if matches:
+            for match in matches:
+                text = match[1] if len(match) > 1 else match[0]
+                text = text.strip()
+                
+                words = text.split()
+                if len(words) <= 4:
+                    clean_text = ' '.join(words)
+                else:
+                    clean_text = ' '.join(words[:3])
+                
+                clean_text = re.sub(r'[.,;:]+$', '', clean_text)
+                
+                if len(clean_text) >= 3 and clean_text not in steps:
+                    steps.append(clean_text)
+            
+            if len(steps) >= 2:
+                return steps[:8]
+    
+    process_list_patterns = [
+        r'(?:consists of|includes|involves|comprises)[:\s]+([^\.]+)',
+        r'(?:stages?|steps?|phases?|processes?)[:\s]+([^\.]+)',
+    ]
+    
+    for pattern in process_list_patterns:
+        matches = re.findall(pattern, combined_text, re.IGNORECASE)
+        if matches:
+            for match in matches:
+                items = re.split(r',\s*(?:and\s+)?|;\s*|\s+and\s+', match)
+                
+                for item in items:
+                    item = item.strip()
+                    item = re.sub(r'^(?:the|a|an)\s+', '', item, flags=re.IGNORECASE)
+                    
+                    words = item.split()
+                    if len(words) <= 3:
+                        clean_item = ' '.join(words)
+                    else:
+                        clean_item = ' '.join(words[:2])
+                    
+                    clean_item = re.sub(r'[.,;:]+$', '', clean_item)
+                    clean_item = clean_item.capitalize()
+                    
+                    if len(clean_item) >= 3 and clean_item not in steps:
+                        steps.append(clean_item)
+            
+            if len(steps) >= 2:
+                return steps[:8]
+    
+    capitalized_terms = re.findall(r'\b([A-Z][a-z]+(?:ation|tion|sion|ment)?)\b', combined_text)
+    
+    if capitalized_terms and len(capitalized_terms) >= 3:
+        term_counts = {}
+        for term in capitalized_terms:
+            if len(term) >= 4 and term.lower() not in STOPWORDS:
+                term_counts[term] = term_counts.get(term, 0) + 1
+        
+        frequent_terms = [term for term, count in term_counts.items() if count >= 2]
+        
+        if len(frequent_terms) >= 3:
+            return frequent_terms[:8]
+    
+    return steps[:8] if len(steps) >= 2 else []
+
+
+def extract_steps_with_llm(answer: str, llm_handler) -> List[str]:
+    if not answer or not llm_handler or len(answer.strip()) < 10:
+        return []
+    
+    try:
+        extraction_prompt = f"""Extract the main process names from this explanation. List only 1-3 word process names, comma-separated.
+
+Explanation: {answer}
+
+Process names:"""
+        
+        extracted = llm_handler.generate_response(extraction_prompt, max_tokens=50)
+        
+        steps = [s.strip() for s in extracted.split(',') if s.strip()]
+        steps = [s for s in steps if len(s.split()) <= 3][:8]
+        
+        return steps if len(steps) >= 2 else []
+    except Exception:
+        return []
+
+
+def extract_steps_from_answer(answer: str, rag_chunks: Optional[List[str]] = None, llm_handler=None) -> List[str]:
+    if llm_handler:
+        llm_steps = extract_steps_with_llm(answer, llm_handler)
+        if len(llm_steps) >= 2:
+            return llm_steps
+    
+    if rag_chunks:
+        rag_steps = extract_steps_from_rag(rag_chunks)
+        if len(rag_steps) >= 2:
+            return rag_steps
+    
     if not answer or len(answer.strip()) < 10:
+
         return []
     
     steps = []
@@ -196,7 +338,7 @@ def extract_steps_from_answer(answer: str) -> List[str]:
                         
                         item = re.sub(r'^(?:the|a|an)\s+', '', item, flags=re.IGNORECASE)
                         words = item.split()
-                        meaningful = [w for w in words[:3] if len(w) > 1]
+                        meaningful = [w for w in words[:2] if len(w) > 1]
                         
                         if meaningful:
                             step = ' '.join(meaningful).capitalize()
@@ -209,18 +351,40 @@ def extract_steps_from_answer(answer: str) -> List[str]:
                     break
     
     if not steps:
+        process_name_patterns = [
+            r'([A-Z][a-z]+(?:ation|tion|sion)?)\s+(?:occurs|happens|takes place|then occurs)',
+            r'([A-Z][a-z]+(?:ation|tion|sion)?)\s+is\s+(?:the|a)\s+(?:process|stage|phase)',
+        ]
+        
+        for pattern in process_name_patterns:
+            matches = re.findall(pattern, answer)
+            if matches:
+                for match in matches:
+                    text = match if isinstance(match, str) else match[0] if isinstance(match, tuple) else str(match)
+                    text = text.strip()
+                    
+                    if len(text) >= 4 and text not in steps:
+                        steps.append(text)
+                
+                if len(steps) >= 2:
+                    break
+        
+        if len(steps) < 2:
+            steps = []
+    
+    if not steps:
         sequential_markers = [
-            r'(?:first|second|third|fourth|fifth|sixth)[,:\s]+([^\n\.]+?)(?=\n|\.|\,|$)',
-            r'(?:then|next|after|finally)[,:\s]+([^\n\.]+?)(?=\n|\.|\,|$)',
+            r'(?:first|second|third|fourth|fifth|sixth)[,:\s]+([^\.]+?)(?:occurs|happens|is|involves)',
+            r'(?:then|next|after|finally)[,:\s]+(?:the\s+)?([A-Z][a-z]+)',
         ]
         
         for pattern in sequential_markers:
             matches = re.findall(pattern, answer, re.IGNORECASE)
             if matches:
                 for match in matches[:6]:
-                    text = match.strip() if isinstance(match, str) else match[0].strip()
+                    text = match.strip() if isinstance(match, str) else match[0].strip() if isinstance(match, tuple) else str(match)
                     words = text.split()
-                    meaningful = [w for w in words[:4] if len(w) > 1]
+                    meaningful = [w for w in words[:2] if len(w) > 2]
                     
                     if meaningful:
                         step = ' '.join(meaningful).capitalize()
@@ -758,8 +922,10 @@ def generate_cycle_diagram(steps: List[str]) -> str:
 def generate_process_diagram(context: Dict[str, any]) -> Optional[str]:
     answer = context.get("answer", "")
     question = context.get("question", "")
+    rag_chunks = context.get("rag_chunks")
+    llm_handler = context.get("llm_handler")
     is_cycle = _is_cyclic_process(question, answer)
-    steps = extract_steps_from_answer(answer)
+    steps = extract_steps_from_answer(answer, rag_chunks, llm_handler)
     
     if steps and len(steps) > 0:
         if is_cycle and len(steps) >= 2:
@@ -768,7 +934,7 @@ def generate_process_diagram(context: Dict[str, any]) -> Optional[str]:
             return generate_step_based_flowchart(steps)
     
     if not steps and question:
-        question_steps = extract_steps_from_answer(question)
+        question_steps = extract_steps_from_answer(question, rag_chunks, llm_handler)
         if question_steps:
             return generate_step_based_flowchart(question_steps)
     

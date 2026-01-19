@@ -1,65 +1,383 @@
-# Contributing to Satya
+# Contributing to Satya: Join the Movement
 
-Thank you for your interest in contributing to the Nepali Grade 10 AI Learning Companion (Satya)! Your contributions help us empower students in Nepal with accessible, offline AI-powered learning resources. This document outlines how you can get involved.
+> [!IMPORTANT]
+> **This isn't just about technology. It's about educational justice.**
 
-## Project Vision and Goals
+Thank you for your interest in contributing to **Satya** — an intelligent learning companion built to democratize AI-powered education. By contributing to this project, you're joining a movement to ensure that **every student**, regardless of their location, internet connectivity, or hardware resources, has access to intelligent, personalized learning assistance.
 
-Satya aims to provide an offline-first, AI-powered learning companion for Grade 10 students in Nepal, focusing on Computer Science, Science, and English. Our goals include maximizing accessibility on low-resource hardware, delivering high-quality educational content, empowering teachers, and fostering community collaboration. (See [PROJECT_OVERVIEW.md](docs/PROJECT_OVERVIEW.md) for more details).
+---
+
+## Our Mission: Educational Justice Through Technology
+
+### The Problem We're Solving
+
+**2.9 billion people** worldwide lack reliable internet access. In Nepal alone, **60% of students** study in rural areas with limited connectivity and outdated hardware. While AI transforms learning in well-connected urban centers, millions of students remain excluded from this revolution.
+
+**We believe education is a fundamental right, not a privilege.**
+
+### Our Solution: Radical Accessibility
+
+Satya breaks down barriers through:
+
+- **Offline-First Architecture** - Complete functionality without internet
+- **Low-Resource Optimization** - Runs on 4GB RAM with decade-old hardware
+- **Intelligent RAG System** - Local AI tutoring without cloud dependencies
+- **Community-Driven Content** - Teachers and educators control the curriculum
+- **Zero Cost** - No subscriptions, no hidden fees, no barriers
+
+**Your contribution helps bridge the digital divide in education.**
+
+---
+
+## Who Can Contribute?
+
+**Everyone!** This project needs diverse skills and perspectives:
+
+### Educators & Teachers
+- Contribute curriculum materials and study notes
+- Improve educational content quality
+- Provide pedagogical feedback
+- Test the system with real students
+
+### Developers & Engineers
+- Optimize performance for low-resource hardware
+- Improve RAG retrieval accuracy
+- Enhance user interfaces
+- Fix bugs and add features
+
+### Content Creators & Writers
+- Create educational materials
+- Write documentation and guides
+- Translate content to local languages
+- Improve explanations and examples
+
+### Designers & UX Specialists
+- Improve user interface design
+- Enhance user experience
+- Create visual assets
+- Design intuitive workflows
+
+### Testers & Students
+- Test features and report bugs
+- Provide feedback on usability
+- Suggest improvements
+- Share your learning experience
+
+### Community Builders
+- Spread awareness about the project
+- Help onboard new contributors
+- Build local communities
+- Advocate for educational equity
+
+> [!NOTE]
+> **No contribution is too small.** Whether you fix a typo, report a bug, or contribute a major feature, you're making a difference.
+
+---
 
 ## Code of Conduct
 
-Please note that this project is released with a Contributor Code of Conduct. By participating in this project, you agree to abide by its terms. We strive to create a welcoming and inclusive environment for all contributors.
+We are committed to creating a **welcoming, inclusive, and respectful environment** for all contributors. By participating in this project, you agree to:
+
+- Be respectful and considerate in all interactions
+- Welcome diverse perspectives and experiences
+- Accept constructive feedback gracefully
+- Focus on what's best for the community and students
+- Show empathy towards other community members
+
+**Zero tolerance for harassment, discrimination, or exclusionary behavior.**
+
+---
 
 ## How to Contribute
 
-There are many ways to contribute, from reporting bugs and suggesting features to writing documentation and contributing code or educational content.
+### Quick Start Workflow
 
-1.  **Fork the repository.**
-2.  **Clone your forked repository** to your local machine.
-3.  **Create a new branch** for your contribution (`git checkout -b feature/your-feature-name` or `fix/your-bug-fix`).
-4.  **Make your changes.**
-5.  **Commit your changes** with clear and meaningful commit messages.
-6.  **Push your changes** to your fork (`git push origin your-branch-name`).
-7.  **Open a Pull Request** against the main repository's `main` branch.
+1. **Fork the repository** on GitHub
+2. **Clone your fork** to your local machine
+3. **Create a feature branch**: `git checkout -b feature/your-feature-name`
+4. **Make your changes** following our guidelines
+5. **Commit with clear messages**: `git commit -m "Add feature: description"`
+6. **Push to your fork**: `git push origin your-feature-name`
+7. **Open a Pull Request** against the `main` branch
 
-### Reporting Bugs
+---
 
-If you find a bug, please report it by opening a new issue on the project's issue tracker. Provide a clear description of the bug, steps to reproduce it, expected behavior, and your environment (OS, Python version, etc.).
+## Contribution Areas
 
-### Suggesting Features
+### 1. Reporting Bugs
 
-Have an idea for a new feature? Open an issue on the issue tracker to suggest it. Describe the feature, its purpose, and how it would benefit the project and users.
+Found a bug? Help us fix it!
 
-### Contributing Code
+**What to include:**
+- Clear description of the bug
+- Steps to reproduce the issue
+- Expected vs. actual behavior
+- Your environment (OS, Python version, hardware specs)
+- Screenshots or error messages if applicable
 
-We welcome code contributions! Before submitting code, please ensure it adheres to the project's standards.
+**Where to report:** Open an issue on our [issue tracker](https://github.com/aa-sikkkk/satya/issues)
 
-*   **Setup**: Follow the installation steps outlined in the README or [TECHNICAL_IMPLEMENTATION.md](docs/TECHNICAL_IMPLEMENTATION.md) to set up your development environment and install dependencies (`pip install -r requirements.txt`).
-*   **Code Style**: Adhere strictly to [PEP 8 standards](docs/PROJECT_STANDARDS.md#11-python-code-style). Use Black for formatting, type hints, and Google-style docstrings. We recommend using linters like Flake8 and Isort (included in `requirements.txt`). You can automate checks using `validate_standards.py`.
-*   **Testing**: Write unit and integration tests for your code following the guidelines in [PROJECT_STANDARDS.md](docs/PROJECT_STANDARDS.md#6-testing-standards) and [TECHNICAL_IMPLEMENTATION.md](docs/TECHNICAL_IMPLEMENTATION.md#7-testing-strategy). Aim for high test coverage. Run tests using `pytest`.
-*   **Directory Structure**: Place your code in the appropriate directories as described in [TECHNICAL_IMPLEMENTATION.md](docs/TECHNICAL_IMPLEMENTATION.md#f-directory-structure).
-*   **Commit Messages**: Write clear, concise commit messages that explain the purpose of the change.
-*   **Pull Requests**: Ensure your pull request has a descriptive title and explains the changes made.
+### 2. Suggesting Features
 
-### Contributing Content
+Have an idea to improve Satya?
 
-The educational content is community-editable and a core part of Satya. We encourage subject matter experts and educators to contribute and improve the content.
+**What to include:**
+- Clear description of the feature
+- Problem it solves or benefit it provides
+- How it aligns with our mission of accessibility
+- Potential implementation approach (optional)
 
-*   **Content Structure**: All content must follow the JSON schema defined in [PROJECT_STANDARDS.md](docs/PROJECT_STANDARDS.md#41-json-schema-standards) and detailed in [content-explanation.md](docs/content-explanation.md#2-field-descriptions).
-*   **Content Quality**: Adhere to the [Content Quality Standards](docs/content-explanation.md#2-content-quality-standards) regarding language, accuracy, cultural sensitivity, and progression.
-*   **Using the Content Editor**: We highly recommend using the CLI Content Editor (`teacher_tools/content_editor/main.py`) to make content changes. It assists with navigation, editing, and automatically validates against the schema before saving. (See [TEACHER_GUIDE.md](docs/TEACHER_GUIDE.md#3-content-management-with-the-cli-editor)).
-*   **Validation**: After editing, validate your content using the `validate_standards.py` script (`python scripts/validation/validate_standards.py`). Only validated content should be committed.
-*   **Workflow**: Make changes to the JSON files located in `data/content/`. Use the Content Editor for a guided experience. Commit your changes and submit a pull request.
+**Remember:** We prioritize features that enhance accessibility and work on low-resource hardware.
 
-### Contributing Documentation
+### 3. Contributing Code
 
-Clear and comprehensive documentation is vital for the project's success.
+#### Development Setup
 
-*   **Types of Documentation**: Contribute to docstrings, inline comments, README files, and the various guides in the `docs/` directory (e.g., [STUDENT_GUIDE.md](docs/STUDENT_GUIDE.md), [TEACHER_GUIDE.md](docs/TEACHER_GUIDE.md), [TECHNICAL_IMPLEMENTATION.md](docs/TECHNICAL_IMPLEMENTATION.md)). Refer to [PROJECT_STANDARDS.md](docs/PROJECT_STANDARDS.md#7-documentation-standards) for guidelines.
-*   **How to Contribute**: Edit the relevant Markdown or code files, commit your changes, and open a pull request.
+**Prerequisites:**
+- Python 3.8 or higher
+- 4GB RAM minimum (8GB recommended)
+- 5GB free disk space
+
+**Setup Steps:**
+
+```bash
+# Clone your fork
+git clone https://github.com/YOUR_USERNAME/satya.git
+cd Satya
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install --upgrade pip
+pip install -r requirements.txt
+
+# Download Phi 1.5 model (see README.md)
+```
+
+#### Code Standards
+
+> [!IMPORTANT]
+> All code must adhere to our quality standards to ensure maintainability and accessibility.
+
+**Python Code Style:**
+- Follow [PEP 8 standards](docs/PROJECT_STANDARDS.md#11-python-code-style) strictly
+- Use **Black** for code formatting
+- Include **type hints** for all functions
+- Write **Google-style docstrings**
+- Use linters: Flake8, Isort (included in `requirements.txt`)
+
+**Testing Requirements:**
+- Write unit tests for all new features
+- Follow guidelines in [PROJECT_STANDARDS.md](docs/PROJECT_STANDARDS.md#6-testing-standards)
+- Aim for high test coverage
+- Run tests with `pytest` before submitting
+
+**Directory Structure:**
+- Place code in appropriate directories (see [TECHNICAL_IMPLEMENTATION.md](docs/TECHNICAL_IMPLEMENTATION.md#f-directory-structure))
+- Keep related functionality together
+- Follow existing patterns
+
+**Commit Messages:**
+- Use clear, descriptive commit messages
+- Format: `<type>: <description>` (e.g., `feat: Add offline mode`, `fix: Resolve memory leak`)
+- Reference issues when applicable
+
+**Pull Requests:**
+- Provide descriptive title and detailed description
+- Explain what changed and why
+- Link related issues
+- Ensure all tests pass
+- Request review from maintainers
+
+### 4. Contributing Educational Content
+
+**Content is the heart of Satya.** We need educators and subject matter experts to contribute high-quality educational materials.
+
+#### Why Content Matters
+
+Your content contributions directly impact students' learning experience. Quality educational materials make the difference between a tool and a true learning companion.
+
+#### Content Guidelines
+
+**Content Structure:**
+- Follow the JSON schema in [PROJECT_STANDARDS.md](docs/PROJECT_STANDARDS.md#41-json-schema-standards)
+- See detailed field descriptions in [content-explanation.md](docs/content-explanation.md#2-field-descriptions)
+
+**Content Quality Standards:**
+- **Language**: Clear, age-appropriate, culturally sensitive
+- **Accuracy**: Factually correct and up-to-date
+- **Progression**: Appropriate difficulty for grade level
+- **Inclusivity**: Accessible to diverse learners
+
+**Using the Content Editor:**
+
+We **highly recommend** using the CLI Content Editor for content changes:
+
+```bash
+python teacher_tools/content_editor/main.py
+```
+
+The editor provides:
+- Guided navigation through content
+- Schema validation before saving
+- Helpful prompts and suggestions
+- Error prevention
+
+See [TEACHER_GUIDE.md](docs/TEACHER_GUIDE.md#3-content-management-with-the-cli-editor) for detailed instructions.
+
+#### Content Workflow
+
+1. **Locate content files** in `data/content/`
+2. **Edit using Content Editor** (recommended) or manually
+3. **Validate your changes**: `python scripts/validation/validate_standards.py`
+4. **Commit validated content** only
+5. **Submit pull request** with description of changes
+
+#### Adding New Materials
+
+**Textbooks and Notes:**
+
+Satya supports universal content ingestion for PDFs, scanned documents, and handwritten notes.
+
+**Organization:**
+
+```
+textbooks/grade_10/
+├── computer_science.pdf
+├── english.pdf
+└── science.pdf
+
+notes/grade_10/
+├── cs_notes.pdf
+├── english_summary.md
+└── science_revision.txt
+```
+
+**Ingestion:**
+
+```bash
+# Process all content
+python scripts/ingest_content.py
+
+# Process only textbooks
+python scripts/ingest_content.py --input textbooks
+
+# Process only notes
+python scripts/ingest_content.py --input notes
+```
+
+See detailed guides:
+- [RAG Data Preparation README](../scripts/rag_data_preparation/README.md)
+- [Quick Start Guide](../scripts/rag_data_preparation/QUICK_START.md)
+- [Notes Strategy Guide](../scripts/rag_data_preparation/NOTES_GUIDE.md)
+
+### 5. Contributing Documentation
+
+**Clear documentation is essential** for making Satya accessible to all users.
+
+#### Documentation Types
+
+- **Code Documentation**: Docstrings, inline comments
+- **User Guides**: Student and teacher guides
+- **Technical Documentation**: Implementation details, API references
+- **README Files**: Project overview, setup instructions
+
+#### Documentation Standards
+
+Follow guidelines in [PROJECT_STANDARDS.md](docs/PROJECT_STANDARDS.md#7-documentation-standards):
+
+- Use clear, simple language
+- Include examples and use cases
+- Keep formatting consistent
+- Update documentation with code changes
+
+#### How to Contribute Documentation
+
+1. Identify documentation gaps or errors
+2. Edit relevant Markdown or code files
+3. Ensure clarity and accuracy
+4. Commit changes with descriptive messages
+5. Submit pull request
+
+---
+
+## Recognition & Community
+
+### Contributors Are Valued
+
+Every contributor is recognized in our project:
+- Listed in project acknowledgments
+- Credited in release notes
+- Invited to community discussions
+- Part of a global movement for educational equity
+
+### Join Our Community
+
+- **GitHub Discussions**: Share ideas and ask questions
+- **Issue Tracker**: Report bugs and suggest features
+- **Pull Requests**: Contribute code and content
+- **Social Media**: Spread the word about Satya
+
+---
 
 ## Getting Help
 
-If you have questions or need help contributing, feel free to open an issue on the issue tracker or reach out to the project maintainers.
+**Need assistance?** We're here to help!
 
-We look forward to your contributions! 
+- **Questions about contributing**: Open a discussion on GitHub
+- **Technical issues**: Open an issue with details
+- **General inquiries**: Reach out to project maintainers
+- **Documentation**: Check our comprehensive guides in `docs/`
+
+**Don't hesitate to ask!** We welcome questions from contributors at all experience levels.
+
+---
+
+## Impact of Your Contribution
+
+### Every Contribution Matters
+
+When you contribute to Satya, you're:
+
+✅ **Empowering students** in rural areas with AI-powered learning  
+✅ **Bridging the digital divide** in education  
+✅ **Democratizing access** to intelligent tutoring  
+✅ **Supporting teachers** with better tools  
+✅ **Building sustainable** open-source education technology  
+✅ **Creating educational equity** for underserved communities  
+
+### Real-World Impact
+
+- **500,000+ Grade 10 students** in Nepal can benefit
+- **Rural schools** across South Asia gain access to AI tutoring
+- **Teachers** can provide personalized learning at scale
+- **Communities** build sustainable educational infrastructure
+
+---
+
+## Join the Movement
+
+> [!TIP]
+> **Ready to make a difference?** Start small, learn as you go, and grow with the community.
+
+**Your first contribution could be:**
+- Fixing a typo in documentation
+- Reporting a bug you encountered
+- Suggesting a feature improvement
+- Adding a study note for students
+- Translating content to your language
+- Sharing Satya with educators you know
+
+**Together, we can ensure that AI-powered education reaches every student, everywhere.**
+
+---
+
+## Thank You
+
+Thank you for considering contributing to Satya. Your time, skills, and passion help us build a more equitable educational future.
+
+**Let's make AI-powered learning accessible to all students, not just the privileged few.**
+
+**Welcome to the movement. Welcome to Satya.** 
