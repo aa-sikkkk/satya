@@ -1,7 +1,6 @@
 # Satyá: Learning Companion 
-
 <div align="center">
-   <img height="180" width="180" src="https://github.com/user-attachments/assets/23fb9ea4-2fc5-4214-b4d9-05ad82a711d1">
+   <img height="250" width="190" src="https://github.com/user-attachments/assets/1230c5ef-bf67-46e3-a66a-9bc950cbb4e6">
 
    [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
    [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
