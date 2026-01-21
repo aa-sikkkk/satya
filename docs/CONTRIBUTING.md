@@ -1,65 +1,141 @@
 # Contributing to Satya
 
-Thank you for your interest in contributing to the Nepali Grade 10 AI Learning Companion (Satya)! Your contributions help us empower students in Nepal with accessible, offline AI-powered learning resources. This document outlines how you can get involved.
+## Purpose of Contributions
 
-## Project Vision and Goals
+Thank you for considering contributing to **Satya**, an intelligent learning companion designed to democratize AI-powered education. Your involvement is critical to ensuring this project serves its mission effectively and efficiently.
 
-Satya aims to provide an offline-first, AI-powered learning companion for Grade 10 students in Nepal, focusing on Computer Science, Science, and English. Our goals include maximizing accessibility on low-resource hardware, delivering high-quality educational content, empowering teachers, and fostering community collaboration. (See [PROJECT_OVERVIEW.md](docs/PROJECT_OVERVIEW.md) for more details).
+---
+
+## Mission Statement: Promoting Education Accessibility
+
+The lack of internet access affects 2.9 billion people globally. In Nepal alone, 60% of students face challenges due to limited connectivity and outdated hardware. Satya aims to break down these barriers.
+
+Satya focuses on:
+
+- **Offline-First Functionality:** Ensuring usability without the need for internet
+- **Low-Resource Optimization:** Operating on minimal hardware requirements
+- **Intelligent RAG System:** Delivering AI tutoring without relying on cloud infrastructure
+- **Community-Driven Content:** Allowing educators to define the curriculum
+- **Cost-Free Accessibility:** Removing financial hurdles
+
+---
+
+## Contributor Categories and Areas of Focus
+
+### Educators and Teachers
+- Provide curriculum materials
+- Improve educational content quality
+- Offer pedagogical insights and test the system
+
+### Developers
+- Enhance performance for low-resource environments
+- Optimize RAG retrieval accuracy
+- Improve UI/UX
+- Fix bugs and introduce features
+
+### Content Creators and Writers
+- Develop comprehensive educational materials
+- Contribute to documentation
+- Translate content for diverse audiences
+
+### Designers
+- Elevate interface and aesthetic design
+- Simplify workflows
+
+### Testers and Students
+- Test software features
+- Offer feedback to improve usability
+- Suggest innovative ideas
+
+### Community Advocates 
+- Increase awareness of the project
+- Facilitate onboarding for new contributors
+- Advocate for equitable education solutions
+
+---
 
 ## Code of Conduct
 
-Please note that this project is released with a Contributor Code of Conduct. By participating in this project, you agree to abide by its terms. We strive to create a welcoming and inclusive environment for all contributors.
+Participation in Satya requires:
+- Respectful and constructive communication
+- Acceptance of diverse ideas and feedback
+- Empathy and community-focused practices
 
-## How to Contribute
+We maintain zero tolerance for any form of harassment or discrimination.
 
-There are many ways to contribute, from reporting bugs and suggesting features to writing documentation and contributing code or educational content.
+---
 
-1.  **Fork the repository.**
-2.  **Clone your forked repository** to your local machine.
-3.  **Create a new branch** for your contribution (`git checkout -b feature/your-feature-name` or `fix/your-bug-fix`).
-4.  **Make your changes.**
-5.  **Commit your changes** with clear and meaningful commit messages.
-6.  **Push your changes** to your fork (`git push origin your-branch-name`).
-7.  **Open a Pull Request** against the main repository's `main` branch.
+## Contribution Guide
 
-### Reporting Bugs
+### Key Steps:
+1. **Fork the Repository**
+2. **Clone Locally**
+3. **Create a Feature Branch**: `git checkout -b feature/<branch-name>`
+4. **Develop Based on Requirements**
+5. **Write Clear Commit Messages**
+6. **Push Changes**
+7. **Open a Pull Request**
 
-If you find a bug, please report it by opening a new issue on the project's issue tracker. Provide a clear description of the bug, steps to reproduce it, expected behavior, and your environment (OS, Python version, etc.).
+### Reporting Issues:
+For issues, include:
+- A clear problem description
+- Reproduction steps
+- Expected versus observed behavior
+- Technical environment details
 
-### Suggesting Features
+### Feature Proposals:
+For feature proposals, outline:
+- The problem the feature resolves
+- The feature’s alignment with accessibility and low-resourced environments
+- Potential implementation details (optional)
 
-Have an idea for a new feature? Open an issue on the issue tracker to suggest it. Describe the feature, its purpose, and how it would benefit the project and users.
+---
 
-### Contributing Code
+## Development Standards
 
-We welcome code contributions! Before submitting code, please ensure it adheres to the project's standards.
+### Coding Principles:
+- Adhere to [PEP 8](docs/PROJECT_STANDARDS.md#11-python-code-style)
+- Format code with Black
+- Integrate type hints and write Google-style docstrings
+- Use linters such as Flake8 and Isort
 
-*   **Setup**: Follow the installation steps outlined in the README or [TECHNICAL_IMPLEMENTATION.md](docs/TECHNICAL_IMPLEMENTATION.md) to set up your development environment and install dependencies (`pip install -r requirements.txt`).
-*   **Code Style**: Adhere strictly to [PEP 8 standards](docs/PROJECT_STANDARDS.md#11-python-code-style). Use Black for formatting, type hints, and Google-style docstrings. We recommend using linters like Flake8 and Isort (included in `requirements.txt`). You can automate checks using `validate_standards.py`.
-*   **Testing**: Write unit and integration tests for your code following the guidelines in [PROJECT_STANDARDS.md](docs/PROJECT_STANDARDS.md#6-testing-standards) and [TECHNICAL_IMPLEMENTATION.md](docs/TECHNICAL_IMPLEMENTATION.md#7-testing-strategy). Aim for high test coverage. Run tests using `pytest`.
-*   **Directory Structure**: Place your code in the appropriate directories as described in [TECHNICAL_IMPLEMENTATION.md](docs/TECHNICAL_IMPLEMENTATION.md#f-directory-structure).
-*   **Commit Messages**: Write clear, concise commit messages that explain the purpose of the change.
-*   **Pull Requests**: Ensure your pull request has a descriptive title and explains the changes made.
+### Testing Standards:
+- Implement unit tests for new code contributions
+- Maintain coverage recommendations
 
-### Contributing Content
+---
 
-The educational content is community-editable and a core part of Satya. We encourage subject matter experts and educators to contribute and improve the content.
+## Content Contributions
 
-*   **Content Structure**: All content must follow the JSON schema defined in [PROJECT_STANDARDS.md](docs/PROJECT_STANDARDS.md#41-json-schema-standards) and detailed in [content-explanation.md](docs/content-explanation.md#2-field-descriptions).
-*   **Content Quality**: Adhere to the [Content Quality Standards](docs/content-explanation.md#2-content-quality-standards) regarding language, accuracy, cultural sensitivity, and progression.
-*   **Using the Content Editor**: We highly recommend using the CLI Content Editor (`teacher_tools/content_editor/main.py`) to make content changes. It assists with navigation, editing, and automatically validates against the schema before saving. (See [TEACHER_GUIDE.md](docs/TEACHER_GUIDE.md#3-content-management-with-the-cli-editor)).
-*   **Validation**: After editing, validate your content using the `validate_standards.py` script (`python scripts/validation/validate_standards.py`). Only validated content should be committed.
-*   **Workflow**: Make changes to the JSON files located in `data/content/`. Use the Content Editor for a guided experience. Commit your changes and submit a pull request.
+### Quality Standards
+Material submissions should prioritize:
+- Clear language and cultural sensitivity
+- Appropriate complexity and inclusivity
+- Fact-checked accuracy
 
-### Contributing Documentation
+Use automated validation scripts to ensure schema adherence (`python scripts/validation/validate_standards.py`).
 
-Clear and comprehensive documentation is vital for the project's success.
+---
 
-*   **Types of Documentation**: Contribute to docstrings, inline comments, README files, and the various guides in the `docs/` directory (e.g., [STUDENT_GUIDE.md](docs/STUDENT_GUIDE.md), [TEACHER_GUIDE.md](docs/TEACHER_GUIDE.md), [TECHNICAL_IMPLEMENTATION.md](docs/TECHNICAL_IMPLEMENTATION.md)). Refer to [PROJECT_STANDARDS.md](docs/PROJECT_STANDARDS.md#7-documentation-standards) for guidelines.
-*   **How to Contribute**: Edit the relevant Markdown or code files, commit your changes, and open a pull request.
+## How to Offer Documentation
+All documentation should:
+- Follow standards as specified in `PROJECT_STANDARDS.md`
+- Use simple and explanatory language
+- Include examples
 
-## Getting Help
+---
 
-If you have questions or need help contributing, feel free to open an issue on the issue tracker or reach out to the project maintainers.
+## Benefits of Contributing
 
-We look forward to your contributions! 
+### Contributor Recognition:
+- Acknowledged within project documentation
+- Invited to community forums
+- Highlighted in release notes
+
+### Real-World Impact
+Contributors shape educational opportunities for underserved communities while bridging technological gaps.
+
+---
+
+## Get Started
+Start small and build momentum. Contribute by fixing write comments, codes, and reporting in a designated issue tracker or posting constructive inputs to relevant GitHub channels.

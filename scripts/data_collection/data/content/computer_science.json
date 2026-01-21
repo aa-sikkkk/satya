@@ -1,4 +1,3 @@
-
 {
     "subject": "Computer Science",
     "grade": 10,
@@ -548,69 +547,64 @@
                             ]
                         },
                         {
-                            "name": "Network Implementation",
-                            "concepts": [
+                            "name": "Network Setup and Management",
+                            "summary": "Network implementation in Nepal's context involves setting up and managing computer networks in schools, colleges, and businesses. This includes understanding local infrastructure, internet service providers (ISPs) like Nepal Telecom, WorldLink, and Vianet, and implementing appropriate network solutions. Key aspects include network design, hardware selection, configuration, and maintenance. Understanding Nepal's network infrastructure is crucial for effective implementation. The country's network setup often involves dealing with challenges like power outages, limited bandwidth, and geographical constraints. Network implementation must consider local requirements, budget constraints, and future scalability.",
+                            "steps": [
+                                "Understand Nepal's network infrastructure",
+                                "Learn about local ISPs and their services",
+                                "Study network hardware and components",
+                                "Practice network configuration",
+                                "Implement security measures",
+                                "Monitor and maintain networks",
+                                "Troubleshoot common issues"
+                            ],
+                            "questions": [
                                 {
-                                    "name": "Network Setup and Management",
-                                    "summary": "Network implementation in Nepal's context involves setting up and managing computer networks in schools, colleges, and businesses. This includes understanding local infrastructure, internet service providers (ISPs) like Nepal Telecom, WorldLink, and Vianet, and implementing appropriate network solutions. Key aspects include network design, hardware selection, configuration, and maintenance. Understanding Nepal's network infrastructure is crucial for effective implementation. The country's network setup often involves dealing with challenges like power outages, limited bandwidth, and geographical constraints. Network implementation must consider local requirements, budget constraints, and future scalability.",
-                                    "steps": [
-                                        "Understand Nepal's network infrastructure",
-                                        "Learn about local ISPs and their services",
-                                        "Study network hardware and components",
-                                        "Practice network configuration",
-                                        "Implement security measures",
-                                        "Monitor and maintain networks",
-                                        "Troubleshoot common issues"
+                                    "question": "Design a network setup for a school in Kathmandu with 50 computers, considering local infrastructure and challenges. [5 marks]",
+                                    "acceptable_answers": [
+                                        "School Network Design:\n\n1) Internet Connection:\n   - Primary: Fiber connection from WorldLink/Nepal Telecom\n   - Backup: 4G/LTE connection for power outages\n   - Bandwidth: 50 Mbps shared\n\n2) Network Hardware:\n   - 2-3 24-port switches for computer labs\n   - Router with load balancing\n   - UPS for network equipment\n   - Wireless access points for staff rooms\n\n3) Network Structure:\n   - Star topology for reliability\n   - VLANs for different departments\n   - Bandwidth management for fair usage\n\n4) Security Measures:\n   - Firewall configuration\n   - Content filtering for students\n   - User authentication system\n   - Regular security updates\n\n5) Power Management:\n   - UPS for network equipment\n   - Backup power for servers\n   - Power monitoring system\n\n6) Maintenance Plan:\n   - Regular backup system\n   - Network monitoring tools\n   - Power backup solutions\n   - Emergency response plan"
                                     ],
-                                    "questions": [
-                                        {
-                                            "question": "Design a network setup for a school in Kathmandu with 50 computers, considering local infrastructure and challenges. [5 marks]",
-                                            "acceptable_answers": [
-                                                "School Network Design:\n\n1) Internet Connection:\n   - Primary: Fiber connection from WorldLink/Nepal Telecom\n   - Backup: 4G/LTE connection for power outages\n   - Bandwidth: 50 Mbps shared\n\n2) Network Hardware:\n   - 2-3 24-port switches for computer labs\n   - Router with load balancing\n   - UPS for network equipment\n   - Wireless access points for staff rooms\n\n3) Network Structure:\n   - Star topology for reliability\n   - VLANs for different departments\n   - Bandwidth management for fair usage\n\n4) Security Measures:\n   - Firewall configuration\n   - Content filtering for students\n   - User authentication system\n   - Regular security updates\n\n5) Power Management:\n   - UPS for network equipment\n   - Backup power for servers\n   - Power monitoring system\n\n6) Maintenance Plan:\n   - Regular backup system\n   - Network monitoring tools\n   - Power backup solutions\n   - Emergency response plan"
-                                            ],
-                                            "hints": [
-                                                "Consider power backup requirements",
-                                                "Plan for bandwidth management",
-                                                "Include security measures",
-                                                "Think about scalability"
-                                            ]
-                                        },
-                                        {
-                                            "question": "Explain the steps to set up a small office network in Nepal, including internet connection and security measures. [5 marks]",
-                                            "acceptable_answers": [
-                                                "Office Network Setup Steps:\n\n1) Internet Connection:\n   - Choose reliable ISP (WorldLink/Vianet)\n   - Select appropriate bandwidth package\n   - Set up backup connection\n   - Configure load balancing\n\n2) Network Hardware:\n   - Router with firewall capabilities\n   - Switch for wired connections\n   - Wireless access points\n   - UPS for power backup\n\n3) Network Configuration:\n   - IP address planning\n   - DHCP setup\n   - DNS configuration\n   - Bandwidth management\n\n4) Security Implementation:\n   - Firewall rules\n   - User authentication\n   - Access control lists\n   - Regular security updates\n\n5) Maintenance:\n   - Network monitoring\n   - Regular backups\n   - Performance optimization\n   - Troubleshooting procedures"
-                                            ],
-                                            "hints": [
-                                                "Consider local ISP options",
-                                                "Include power backup solutions",
-                                                "Plan for security measures",
-                                                "Think about maintenance"
-                                            ]
-                                        },
-                                        {
-                                            "question": "Describe the process of implementing a wireless network in a college campus in Nepal, including challenges and solutions. [5 marks]",
-                                            "acceptable_answers": [
-                                                "Wireless Network Implementation:\n\n1) Site Survey:\n   - Building layout analysis\n   - Signal coverage planning\n   - Interference assessment\n   - Access point placement\n\n2) Hardware Selection:\n   - Enterprise-grade access points\n   - PoE switches\n   - Controller for management\n   - Power backup systems\n\n3) Network Design:\n   - SSID planning for different user groups\n   - Channel planning to avoid interference\n   - Bandwidth allocation\n   - Coverage optimization\n\n4) Security Measures:\n   - WPA2-Enterprise authentication\n   - User access control\n   - Traffic monitoring\n   - Regular security audits\n\n5) Challenges and Solutions:\n   - Power issues: UPS and backup systems\n   - Bandwidth limitations: Traffic shaping\n   - Security concerns: Strong authentication\n   - Maintenance: Regular monitoring"
-                                            ],
-                                            "hints": [
-                                                "Consider power backup needs",
-                                                "Plan for user authentication",
-                                                "Include security measures",
-                                                "Think about maintenance"
-                                            ]
-                                        },
-                                        {
-                                            "question": "Explain the implementation of a network security system for a bank in Nepal, considering local regulations and requirements. [5 marks]",
-                                            "acceptable_answers": [
-                                                "Bank Network Security Implementation:\n\n1) Network Architecture:\n   - Segmented network design\n   - DMZ for public services\n   - Internal network isolation\n   - Backup systems\n\n2) Security Measures:\n   - Firewall configuration\n   - Intrusion Detection System\n   - VPN for remote access\n   - Access control lists\n\n3) Authentication System:\n   - Multi-factor authentication\n   - Role-based access control\n   - Password policies\n   - Session management\n\n4) Monitoring and Logging:\n   - Security event monitoring\n   - Traffic analysis\n   - User activity logging\n   - Regular security audits\n\n5) Compliance and Regulations:\n   - NRB guidelines compliance\n   - Data protection measures\n   - Regular security assessments\n   - Incident response plan"
-                                            ],
-                                            "hints": [
-                                                "Consider NRB regulations",
-                                                "Include multi-layer security",
-                                                "Plan for incident response",
-                                                "Think about compliance"
-                                            ]
-                                        }
+                                    "hints": [
+                                        "Consider power backup requirements",
+                                        "Plan for bandwidth management",
+                                        "Include security measures",
+                                        "Think about scalability"
+                                    ]
+                                },
+                                {
+                                    "question": "Explain the steps to set up a small office network in Nepal, including internet connection and security measures. [5 marks]",
+                                    "acceptable_answers": [
+                                        "Office Network Setup Steps:\n\n1) Internet Connection:\n   - Choose reliable ISP (WorldLink/Vianet)\n   - Select appropriate bandwidth package\n   - Set up backup connection\n   - Configure load balancing\n\n2) Network Hardware:\n   - Router with firewall capabilities\n   - Switch for wired connections\n   - Wireless access points\n   - UPS for power backup\n\n3) Network Configuration:\n   - IP address planning\n   - DHCP setup\n   - DNS configuration\n   - Bandwidth management\n\n4) Security Implementation:\n   - Firewall rules\n   - User authentication\n   - Access control lists\n   - Regular security updates\n\n5) Maintenance:\n   - Network monitoring\n   - Regular backups\n   - Performance optimization\n   - Troubleshooting procedures"
+                                    ],
+                                    "hints": [
+                                        "Consider local ISP options",
+                                        "Include power backup solutions",
+                                        "Plan for security measures",
+                                        "Think about maintenance"
+                                    ]
+                                },
+                                {
+                                    "question": "Describe the process of implementing a wireless network in a college campus in Nepal, including challenges and solutions. [5 marks]",
+                                    "acceptable_answers": [
+                                        "Wireless Network Implementation:\n\n1) Site Survey:\n   - Building layout analysis\n   - Signal coverage planning\n   - Interference assessment\n   - Access point placement\n\n2) Hardware Selection:\n   - Enterprise-grade access points\n   - PoE switches\n   - Controller for management\n   - Power backup systems\n\n3) Network Design:\n   - SSID planning for different user groups\n   - Channel planning to avoid interference\n   - Bandwidth allocation\n   - Coverage optimization\n\n4) Security Measures:\n   - WPA2-Enterprise authentication\n   - User access control\n   - Traffic monitoring\n   - Regular security audits\n\n5) Challenges and Solutions:\n   - Power issues: UPS and backup systems\n   - Bandwidth limitations: Traffic shaping\n   - Security concerns: Strong authentication\n   - Maintenance: Regular monitoring"
+                                    ],
+                                    "hints": [
+                                        "Consider power backup needs",
+                                        "Plan for user authentication",
+                                        "Include security measures",
+                                        "Think about maintenance"
+                                    ]
+                                },
+                                {
+                                    "question": "Explain the implementation of a network security system for a bank in Nepal, considering local regulations and requirements. [5 marks]",
+                                    "acceptable_answers": [
+                                        "Bank Network Security Implementation:\n\n1) Network Architecture:\n   - Segmented network design\n   - DMZ for public services\n   - Internal network isolation\n   - Backup systems\n\n2) Security Measures:\n   - Firewall configuration\n   - Intrusion Detection System\n   - VPN for remote access\n   - Access control lists\n\n3) Authentication System:\n   - Multi-factor authentication\n   - Role-based access control\n   - Password policies\n   - Session management\n\n4) Monitoring and Logging:\n   - Security event monitoring\n   - Traffic analysis\n   - User activity logging\n   - Regular security audits\n\n5) Compliance and Regulations:\n   - NRB guidelines compliance\n   - Data protection measures\n   - Regular security assessments\n   - Incident response plan"
+                                    ],
+                                    "hints": [
+                                        "Consider NRB regulations",
+                                        "Include multi-layer security",
+                                        "Plan for incident response",
+                                        "Think about compliance"
                                     ]
                                 }
                             ]

@@ -131,15 +131,19 @@ class AskQuestionView(ctk.CTkFrame):
                 
         self.update_idletasks()
     
-    def finalize_answer(self, confidence, hints=None, related=None, source_info=None, question=None):
-        """Finalize the streaming answer display with confidence and metadata."""
+    def finalize_answer(self, confidence, hints=None, related=None, source_info=None, question=None, rag_chunks=None, llm_handler=None):
         self.set_loading(False)
         
         # Generate diagram if applicable
         if question and self.streaming_answer:
             try:
                 from system.diagrams import generate_and_append_diagram
-                self.streaming_answer = generate_and_append_diagram(question, self.streaming_answer)
+                self.streaming_answer = generate_and_append_diagram(
+                    question, 
+                    self.streaming_answer,
+                    rag_chunks=rag_chunks,
+                    llm_handler=llm_handler
+                )
                 if self.answer_box:
                     self.answer_box.delete("1.0", "end")
                     self.answer_box.insert("1.0", self.streaming_answer)

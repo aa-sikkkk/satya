@@ -25,34 +25,53 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Maximally flexible concept schema: only 'name' is required, all else is optional, and 'questions' can be any array of objects or strings
+# Strict Question Schema
+QUESTION_SCHEMA = {
+    "type": "object",
+    "required": ["question", "acceptable_answers", "hints"],
+    "properties": {
+        "question": {"type": "string", "minLength": 1},
+        "acceptable_answers": {
+            "type": "array",
+            "items": {"type": "string", "minLength": 1},
+            "minItems": 1
+        },
+        "hints": {
+            "type": "array",
+            "items": {"type": "string", "minLength": 1},
+            "minItems": 1
+        }
+    },
+    "additionalProperties": False
+}
+
+# Strict Concept Schema
 CONCEPT_SCHEMA = {
     "type": "object",
-    "required": ["name"],
+    "required": ["name", "summary", "steps", "questions"],
     "properties": {
-        "name": {"type": "string"},
-        "summary": {"type": "string"},
+        "name": {"type": "string", "minLength": 1},
+        "summary": {"type": "string", "minLength": 1},
         "steps": {
             "type": "array",
-            "items": {"type": "string"}
+            "items": {"type": "string", "minLength": 1},
+            "minItems": 1
         },
         "questions": {
             "type": "array",
-            "items": {}
+            "items": QUESTION_SCHEMA
         }
     },
-    "additionalProperties": True
+    "additionalProperties": False
 }
 
-# Maximally flexible recursive subtopic schema: only 'name' is required, all else is optional
-# Subtopics and concepts can coexist or be absent, and any additional properties are allowed
-
+# Recursive Subtopic Schema
 def create_subtopic_schema(max_depth=3, current_depth=0):
     schema = {
         "type": "object",
         "required": ["name"],
         "properties": {
-            "name": {"type": "string"},
+            "name": {"type": "string", "minLength": 1},
             "concepts": {
                 "type": "array",
                 "items": CONCEPT_SCHEMA
@@ -62,7 +81,13 @@ def create_subtopic_schema(max_depth=3, current_depth=0):
                 "items": create_subtopic_schema(max_depth, current_depth + 1) if current_depth < max_depth else {"type": "object"}
             }
         },
-        "additionalProperties": True
+        "additionalProperties": False,
+        # Ensure at least one of concepts or subtopics is present (custom validation logic handles this better, 
+        # but schema can enforcing structure)
+        "anyOf": [
+            {"required": ["concepts"]},
+            {"required": ["subtopics"]}
+        ]
     }
     return schema
 
@@ -72,29 +97,33 @@ CONTENT_SCHEMA = {
     "type": "object",
     "required": ["subject", "grade", "topics"],
     "properties": {
-        "subject": {"type": "string"},
-        "grade": {"anyOf": [{"type": "string"}, {"type": "number"}]},
+        "subject": {
+            "type": "string",
+            "enum": ["Computer Science", "Science", "English"]
+        },
+        "grade": {
+            "anyOf": [
+                {"type": "integer", "minimum": 1, "maximum": 12},
+                {"type": "string", "pattern": "^(1[0-2]|[1-9])$"}
+            ]
+        },
         "topics": {
             "type": "array",
             "items": {
                 "type": "object",
-                "required": ["name"],
+                "required": ["name", "subtopics"],
                 "properties": {
-                    "name": {"type": "string"},
+                    "name": {"type": "string", "minLength": 1},
                     "subtopics": {
                         "type": "array",
                         "items": SUBTOPIC_SCHEMA
-                    },
-                    "concepts": {
-                        "type": "array",
-                        "items": CONCEPT_SCHEMA
                     }
                 },
-                "additionalProperties": True
+                "additionalProperties": False
             }
         }
     },
-    "additionalProperties": True
+    "additionalProperties": False
 }
 
 class ContentManager:
@@ -113,8 +142,6 @@ class ContentManager:
         Args:
             content_dir (str): Path to content directory
         """
-        # [DEBUG] Uncomment for developer debugging
-        # print("[DEBUG] Loading content from directory:", content_dir)
         # Resolve content directory robustly: prefer provided path if valid; otherwise compute relative to project root
         provided_path = content_dir
         if not os.path.isabs(provided_path):
@@ -132,31 +159,21 @@ class ContentManager:
         self.content_dir = resolved_dir
         self.subjects = {}
         self._load_content()
-        # [DEBUG] Uncomment for developer debugging
-        # print("[DEBUG] Subjects loaded:", list(self.subjects.keys()))
         
     def _load_content(self) -> None:
         """Load all subject content from JSON files (flat or subdirectory structure)."""
         try:
-            # [DEBUG] Uncomment for developer debugging
-            # print("[DEBUG] Files in content_dir:", os.listdir(self.content_dir))
             # Load flat .json files in content_dir
             for fname in os.listdir(self.content_dir):
                 fpath = os.path.join(self.content_dir, fname)
                 if os.path.isfile(fpath) and fname.endswith('.json'):
-                    # [DEBUG] Uncomment for developer debugging
-                    # print(f"[DEBUG] Attempting to load file: {fname}")
                     try:
                         with open(fpath, 'r', encoding='utf-8') as f:
                             content = json.load(f)
                             self._validate_content(content)
                             subject_name = content.get('subject') or os.path.splitext(fname)[0]
                             self.subjects[subject_name] = content
-                            # [DEBUG] Uncomment for developer debugging
-                            # print(f"[DEBUG] Loaded content for {subject_name} (flat file)")
                     except Exception as e:
-                        # [DEBUG] Uncomment for developer debugging
-                        # print(f"[DEBUG] Error loading file {fname}: {str(e)}")
                         logger.error(f"Error loading file {fname}: {str(e)}")
                         continue
                         
@@ -166,24 +183,16 @@ class ContentManager:
                 if os.path.isdir(subject_path):
                     content_file = os.path.join(subject_path, "content.json")
                     if os.path.exists(content_file):
-                        # [DEBUG] Uncomment for developer debugging
-                        # print(f"[DEBUG] Attempting to load subdir content: {content_file}")
                         try:
                             with open(content_file, 'r', encoding='utf-8') as f:
                                 content = json.load(f)
                                 self._validate_content(content)
                                 self.subjects[subject] = content
-                                # [DEBUG] Uncomment for developer debugging
-                                # print(f"[DEBUG] Loaded content for {subject} (subdir)")
                         except Exception as e:
-                            # [DEBUG] Uncomment for developer debugging
-                            # print(f"[DEBUG] Error loading content for {subject}: {str(e)}")
                             logger.error(f"Error loading content for {subject}: {str(e)}")
                             continue
                             
         except Exception as e:
-            # [DEBUG] Uncomment for developer debugging
-            # print(f"[DEBUG] Error loading content: {str(e)}")
             logger.error(f"Error loading content: {str(e)}")
             # Don't raise here, allow partial loading
             
@@ -200,9 +209,6 @@ class ContentManager:
         try:
             validate(instance=content, schema=CONTENT_SCHEMA)
         except ValidationError as e:
-            # [DEBUG] Uncomment for developer debugging
-            # print(f"[DEBUG] Content validation error: {str(e)}")
-            # print(f"[DEBUG] Failed content structure: {json.dumps(content, indent=2)[:500]}...")
             logger.error(f"Content validation error: {str(e)}")
             logger.error(f"Failed content structure: {json.dumps(content, indent=2)[:500]}...")
             raise
