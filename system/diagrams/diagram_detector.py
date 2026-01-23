@@ -66,11 +66,21 @@ def should_generate_diagram(question: str, answer: str) -> Tuple[bool, Optional[
     if not visualizable:
         return False, None
     
-    answer_complexity = len(answer_lower) / 100
-    base_threshold = 3
-    adaptive_threshold = max(base_threshold, int(base_threshold * (1 + answer_complexity / 10)))
+    if len(answer_lower) > 500:
+        adaptive_threshold = 2 
+    else:
+        adaptive_threshold = 3
     
     max_score = max(scores.values())
+    
+    if len(answer_lower) > 800 and max_score >= 1:
+        if scores["process"] >= 1:
+            return True, "process"
+        elif scores["structure"] >= 1:
+            return True, "structure"
+        elif scores["flowchart"] >= 1:
+            return True, "flowchart"
+            
     if max_score < adaptive_threshold:
         return False, None
     

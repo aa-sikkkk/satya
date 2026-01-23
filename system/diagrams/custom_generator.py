@@ -254,19 +254,41 @@ def extract_steps_with_llm(answer: str, llm_handler) -> List[str]:
         return []
     
     try:
-        extraction_prompt = f"""Extract the main process names from this explanation. List only 1-3 word process names, comma-separated.
+        extraction_prompt = f"""Identify the sequential steps or stages in this text. 
+Return ONLY a comma-separated list of short names (1-3 words) for each step.
+Do not include numbers or descriptions.
 
-Explanation: {answer}
+Text: {answer}
 
-Process names:"""
+Steps:"""
         
-        extracted = llm_handler.generate_response(extraction_prompt, max_tokens=50)
+        extracted = llm_handler.generate_response(extraction_prompt, max_tokens=100)
         
-        steps = [s.strip() for s in extracted.split(',') if s.strip()]
-        steps = [s for s in steps if len(s.split()) <= 3][:8]
+        if ":" in extracted:
+            extracted = extracted.split(":")[-1]
+            
+        if "," in extracted:
+            raw_steps = extracted.split(',')
+        else:
+            raw_steps = extracted.split('\n')
+            
+        steps = []
+        for s in raw_steps:
+            clean = s.strip()
+            clean = re.sub(r'^[\d\-\.\)\*]+\s*', '', clean)
+            
+            if clean and len(clean.split()) <= 4:  
+                words = clean.split()
+                if len(words) > 3:
+                    clean = ' '.join(words[:3])
+                
+                clean = clean.strip().capitalize()
+                if len(clean) >= 3 and clean not in steps:
+                    steps.append(clean)
         
         return steps if len(steps) >= 2 else []
-    except Exception:
+    except Exception as e:
+        logger.debug(f"LLM extraction failed: {e}")
         return []
 
 
