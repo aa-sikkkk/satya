@@ -8,9 +8,7 @@
    [![RAG Powered](https://img.shields.io/badge/RAG-Powered-purple)](https://github.com/aa-sikkkk/Satya)
 </div>
 
-An intelligent **learning companion** built with RAG-powered content discovery and Microsoft's efficient Phi 1.5 model. Delivers education that scales from offline rural classrooms to connected urban schools, all while running smoothly on the hardware you already have.
-
-Smart enough to handle complex questions. Efficient enough to work anywhere. Simple enough for anyone to deploy.
+An offline-first educational platform integrating Retrieval-Augmented Generation (RAG) with the Phi 1.5 language model. Designed to run locally on standard hardware (4GB RAM) without internet dependency.
 
 ---
 
@@ -35,7 +33,7 @@ Smart enough to handle complex questions. Efficient enough to work anywhere. Sim
 
 ## Overview
 
-Satya reimagines AI-powered education for the real world. This comprehensive learning platform is designed for students in Nepal, bringing intelligent tutoring to any environment. Whether in a connected classroom, a rural school, or a home with unreliable internet, Satya supports every learner with RAG-enhanced content discovery and the efficient Phi 1.5 model.
+Satya is a local-first learning platform optimized for the Nepali educational context. It provides content indexing and query capabilities using RAG and the Phi 1.5 model, functioning identically in both offline and online environments. The system is engineered to run on hardware with limited resources, ensuring access regardless of infrastructure.
 
 ---
 
@@ -45,22 +43,22 @@ Satya reimagines AI-powered education for the real world. This comprehensive lea
 
 **To democratize AI-powered education by making intelligent tutoring accessible to every student, regardless of their location, internet connectivity, or hardware resources.**
 
-Satya exists to bridge the digital divide in education. While AI transforms learning in well-connected urban centers, millions of students in rural areas remain excluded. We believe every student deserves access to intelligent, personalized learning assistance—not just those with high-speed internet and modern devices.
+Satya addresses the infrastructure limitations in rural education by offering a self-contained AI tutoring system. It eliminates the need for high-speed internet or modern devices, ensuring students in remote areas have access to the same learning resources as those in connected environments.
 
-### The Educational Crisis
+### The Educational Divide
 
 > [!IMPORTANT]
-> **2.9 billion people** worldwide lack reliable internet access. In Nepal alone, **60% of students** study in rural areas with limited connectivity and outdated hardware.
+> **1.39 million** secondary students in Nepal lack reliable internet access. While **79.3%** of urban households have internet, only **17.4%** of rural households do.
 
-**Current barriers to AI education:**
+**The Reality for Rural Students:**
 
-- **Infrastructure Gap** - Rural schools lack reliable electricity and internet
-- **Hardware Limitations** - Most schools have 4-8GB RAM computers from 2010-2015
-- **Cost Barriers** - Cloud-based AI solutions require expensive subscriptions
-- **Connectivity Dependence** - Existing ed-tech assumes constant internet access
-- **Resource Inequality** - Urban students get AI tutors; rural students get textbooks
+- **Connectivity Gap** - **79.3% urban** households connected vs only **17.4% rural** households
+- **Device Access** - Only **3% of rural children** have access to both a computer and internet
+- **Hardware Limitations** - Schools rely on computers with 4GB+ RAM from 2015
+- **School Infrastructure** - Only **12% of public schools** have functioning IT connectivity
+- **Cost Barriers** - $0 budget for software subscriptions vs $20/month cloud tools
 
-**The result:** Educational inequality widens as AI advances accelerate in privileged areas while underserved communities fall further behind.
+**The Result:** A systematic exclusion from the AI revolution. Existing ed-tech solutions assume infrastructure that simply doesn't exist in rural classrooms.
 
 ### Our Solution: Offline-First AI Education
 
@@ -95,9 +93,9 @@ Satya breaks down these barriers through **radical accessibility**:
 
 **Target Beneficiaries:**
 
-- **Primary:** 500,000+ Grade 10 students in Nepal
-- **Secondary:** Rural schools across South Asia
-- **Tertiary:** Any educational institution with limited resources
+- **Primary:** 1.39 million+ secondary students (Grades 8-12)
+- **Secondary:** Public Schools in rural districts
+- **Tertiary:** Remote learning centers with limited infrastructure
 
 **Measurable Outcomes:**
 
@@ -136,24 +134,29 @@ Satya proves that **intelligent, personalized education doesn't require expensiv
 
 ### Student-Facing Features
 
-#### RAG-Enhanced Content Discovery
+#### Content Retrieval (RAG)
 
-- **Intelligent Semantic Search** - ChromaDB vector database retrieves relevant content
-- **Context-Aware Answers** - References appropriate study materials before generating responses
-- **Multi-Source Retrieval** - Searches both textbooks and teacher notes
-- **Subject-Aware Filtering** - Ensures related concepts from same subject
-- **Progressive Status Updates** - Real-time feedback during retrieval
+- **Semantic Search** - ChromaDB vector database retrieves relevant content
+- **Context Handling** - References appropriate study materials before generation
+- **Multi-Source** - Searches both textbooks and teacher notes
+- **Filtering** - Applies subject-aware constraints
+- **Status Feedback** - Real-time progress updates
 
 > [!TIP]
-> The RAG system searches both textbooks and notes collections automatically, providing comprehensive answers from multiple sources.
+> The RAG system automatically queries both textbooks and notes collections for comprehensive answers.
 
-#### AI-Powered Learning Assistance
+#### Learning Assistance
 
-- **Detailed Answers** - Generates 3-4 informative sentences (100-150 tokens)
-- **Real-Time Streaming** - Token-by-token display for immediate feedback
-- **Confidence Scoring** - Shows warning only when confidence < 70%
-- **Text Normalization** - Processes input regardless of letter case
-- **Hint Generation** - Context-specific hints to guide learning
+- **Response Generation** - Produces concise 3-4 sentence explanations (100-150 tokens)
+- **Token Streaming** - Low-latency character display
+- **Confidence Metrics** - Displays warnings for low-confidence generations (< 70%)
+- **Input Normalization** - Auto-corrects case and formatting
+
+#### Visual Explanations
+
+- **ASCII Diagrams** - Generates structural, process, and flowchart diagrams from text
+- **Pattern Recognition** - Identifies cycles, hierarchies, and sequential steps
+- **Zero-Dependency** - Pure text rendering requiring no external libraries
 
 #### User Interfaces
 
@@ -196,6 +199,7 @@ graph TB
     
     subgraph "Application Layer"
         RAG[RAG Retrieval Engine]
+        DG[Diagram Generator]
         PM[Progress Manager]
     end
     
@@ -211,13 +215,16 @@ graph TB
     
     CLI --> RAG
     CLI --> MH
+    CLI --> DG
     GUI --> RAG
     GUI --> MH
+    GUI --> DG
     
     PM --> PROG
     RAG --> CDB
     MH --> PH
     PH --> CDB
+    DG -.-> MH
 ```
 
 ### Component Architecture
@@ -275,22 +282,45 @@ ChromaDB Storage
 **Single Phi 1.5 Model Handler** (`ai_model/model_utils/phi15_handler.py`)
 
 - **Model Format** - GGUF (Q4_K_M quantization)
-- **Context Window** - 384 tokens (optimized for i3 CPU)
-- **Thread Management** - Auto-detected based on CPU cores
+- **Context Window** - 2048 tokens (Full context support)
+- **Thread Management** - Fixed at 4 threads (Optimized for quad-core/hyperthreaded i3)
 - **Streaming** - Real-time token-by-token generation
 
 **Model Configuration:**
 
 ```python
 {
-    "n_ctx": 384,              # Context window
-    "n_threads": auto,         # CPU cores / 2
+    "n_ctx": 2048,             # Full context window
+    "n_threads": 4,            # Optimized for 4 cores
     "n_gpu_layers": 0,         # CPU-only
-    "max_tokens": 250,         # Balanced for 3-4 sentences
-    "temperature": 0.5,        # Focused generation
+    "max_tokens": 512,         # 512 tokens for detailed answers
+    "temperature": 0.6,        # Balanced creativity
     "top_p": 0.9,             # Nucleus sampling
-    "repeat_penalty": 1.08    # Repetition control
+    "repeat_penalty": 1.12    # Repetition control
 }
+```
+
+#### 4. Diagram Generation Engine
+
+**Implementation** (`system/diagrams/custom_generator.py`)
+
+- **Pattern Mining** - Regex-based extraction of processes, cycles, and hierarchies from text
+- **Template System** - Pre-defined ASCII art templates for common structures
+- **Zero-Dependency** - Generates standard text output compatible with any terminal/UI
+- **Context-Integrated** - Uses RAG context to enrich diagram labels
+
+**Generation Flow:**
+
+```
+Answer Text
+    ↓
+Pattern Recognition (Cycle/Process/Structure)
+    ↓
+Entity Extraction (LLM/Regex)
+    ↓
+Template Selection
+    ↓
+ASCII Rendering
 ```
 
 ---
@@ -336,53 +366,34 @@ ChromaDB Storage
 Satya/
 ├── satya_data/
 │   ├── models/
-│   │   └── phi_1_5/
-│   │       └── phi-1_5.Q4_K_M.gguf
-│   ├── chroma_db/                    # ChromaDB collections
-│   │   ├── neb_computer_science_grade_10/
-│   │   ├── neb_english_grade_10/
-│   │   └── neb_science_grade_10/
-│   └── content/                      # Educational content
+│   │   ├── phi15/                    # Language Model
+│   │   ├── embedding/                # Sentence Transformers
+│   ├── chroma_db/                    # Vector Database
+│   └── content/                      # Raw Educational Content
 │
 ├── scripts/
 │   ├── ingest_content.py             # Universal ingestion script
-│   ├── rag_data_preparation/
-│   │   ├── enhanced_chunker.py       # Smart chunking
-│   │   ├── embedding_generator.py    # Embedding generation
-│   │   ├── README.md                 # Pipeline documentation
-│   │   ├── QUICK_START.md            # Quick start guide
-│   │   └── NOTES_GUIDE.md            # Notes vs textbooks guide
-│   └── release/
-│       ├── run_cli.bat               # Windows CLI launcher
-│       ├── run_cli.sh                # Linux/Mac CLI launcher
-│       ├── run_gui.bat               # Windows GUI launcher
-│       └── run_gui.sh                # Linux/Mac GUI launcher
+│   ├── run_pattern_mining.py         # Pattern mining tool
+│   └── rag_data_preparation/         # Data pipeline utilities
 │
 ├── system/
-│   └── rag/
-│       ├── rag_retrieval_engine.py   # RAG engine
-│       ├── anti_confusion_engine.py  # Context ranking
-│       └── rag_cache.py              # Query caching
+│   ├── diagrams/                     # Diagram generation engine
+│   ├── input_processing/             # Text normalization & cleaning
+│   ├── rag/                          # RAG retrieval engine
+│   └── utils/                        # Shared utilities
 │
 ├── ai_model/
-│   └── model_utils/
-│       ├── phi15_handler.py          # Phi 1.5 handler
-│       └── model_handler.py          # Model manager
+│   └── model_utils/                  # Model inference handlers
 │
 ├── student_app/
-│   ├── gui_app/
-│   │   ├── main_window.py            # Main GUI
-│   │   └── views/
-│   │       └── ask_question_view.py  # Question interface
-│   └── progress/
-│       └── progress_manager.py       # Progress tracking
+│   ├── gui_app/                      # CustomTkinter GUI
+│   ├── interface/                    # CLI implementation
+│   └── progress/                     # Progress tracking logic
 │
-├── textbooks/                        # Textbook PDFs
-│   └── grade_10/
-│
-├── notes/                            # Teacher notes
-│   └── grade_10/
-│
+├── teacher_tools/                    # Content creation tools
+├── docs/                             # Documentation & Guides
+├── textbooks/                        # Input source: Textbooks
+├── notes/                            # Input source: Teacher Notes
 ├── requirements.txt
 ├── README.md
 └── LICENSE
@@ -390,14 +401,14 @@ Satya/
 
 ---
 
-## Installation
+## Development Setup
 
 ### Prerequisites
 
 - **Python** - 3.8 or higher
-- **Operating System** - Windows 10+, Linux (Ubuntu 18.04+), or macOS 10.14+
-- **RAM** - 4GB minimum (8GB recommended)
-- **Storage** - 5GB free space minimum
+- **Git** - Version control system
+- **C++ Compiler** - Optional (for optimized build of llama.cpp)
+- **Hardware** - 4GB RAM minimum (8GB recommended for development)
 
 ### Step-by-Step Installation
 
@@ -443,16 +454,16 @@ Download the Phi 1.5 GGUF model:
 # Create model directory
 mkdir -p satya_data/models/phi_1_5
 
-# Download model (Q4_K_M quantization recommended)
+# Download model (Q4_K_M quantization)
 # File size: ~800MB
 ```
 
 **Model Sources:**
 - Hugging Face: [microsoft/phi-1_5](https://huggingface.co/microsoft/phi-1_5)
-- Use GGUF quantized versions (Q4_K_M or Q5_K_S)
+- Use GGUF quantized versions (Q4_K_M)
 
 > [!IMPORTANT]
-> Place the model file in `satya_data/models/phi_1_5/` and ensure it has a `.gguf` extension.
+> Place the model file in `satya_data/models/phi15/` and ensure it has a `.gguf` extension.
 
 #### 5. Verify Installation
 
@@ -468,31 +479,17 @@ python -m py_compile system/rag/rag_retrieval_engine.py
 ### CLI Mode
 
 ```bash
-# Using Python module
 python -m student_app.interface.cli_interface
-
-# Using launcher script (Windows)
-scripts\release\run_cli.bat
-
-# Using launcher script (Linux/Mac)
-./scripts/release/run_cli.sh
 ```
 
 ### GUI Mode
 
 ```bash
-# Using Python module
 python -m student_app.gui_app.main_window
-
-# Using launcher script (Windows)
-scripts\release\run_gui.bat
-
-# Using launcher script (Linux/Mac)
-./scripts/release/run_gui.sh
 ```
 
 > [!NOTE]
-> First run will take 5-10 seconds to load the model. Subsequent runs are faster.
+> First run will take 15-30 seconds to load the model. Subsequent runs are faster.
 
 ---
 
@@ -505,19 +502,14 @@ scripts\release\run_gui.bat
 
 #### Quick Start
 
-**Process all content (textbooks + notes):**
+**Process all content (Default):**
 ```bash
 python scripts/ingest_content.py
 ```
 
-**Process only textbooks:**
+**Process specific folders:**
 ```bash
-python scripts/ingest_content.py --input textbooks
-```
-
-**Process only notes:**
-```bash
-python scripts/ingest_content.py --input notes
+python scripts/ingest_content.py --input textbooks notes
 ```
 
 #### OCR Modes
@@ -660,7 +652,7 @@ print(f"Confidence: {result['confidence']}")
 #### Model Loading Fails
 
 > [!WARNING]
-> Ensure model file exists in `satya_data/models/phi_1_5/` with `.gguf` extension.
+> Ensure model file exists in `satya_data/models/phi15/` with `.gguf` extension.
 
 **Solutions:**
 1. Verify model file exists
@@ -674,7 +666,7 @@ print(f"Confidence: {result['confidence']}")
 
 **Optimization:**
 1. Close other applications
-2. Verify model quantization (Q4_K_M recommended)
+2. Verify model quantization (Q4_K_M)
 3. Check system RAM usage
 
 #### RAG Retrieval Returns No Results
@@ -846,4 +838,3 @@ Special thanks to:
 ---
 
 *Pioneering accessible, intelligent AI education in Nepal with community power and RAG technology.*
-

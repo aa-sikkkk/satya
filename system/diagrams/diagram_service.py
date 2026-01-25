@@ -77,6 +77,7 @@ def should_attempt_diagram(question: str) -> bool:
         r'\b(how|what|explain|describe)\s+(do|does|is|are)\s+.*\s+(work|happen|flow|process)',
         r'\b(step|stage|phase|procedure|method|way)',
         r'\b(sequence|order|series|chain|cycle)',
+        r'^(explain|describe|how)\s+',  # Allow broad explain/describe questions to pass to deep analysis
     ]
     
     structure_patterns = [
