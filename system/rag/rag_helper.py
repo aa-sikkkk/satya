@@ -1,6 +1,20 @@
+# Copyright (C) 2026 Aashik
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 """
 RAG Helper Utilities
-Simplified.
 """
 
 import logging
@@ -27,7 +41,7 @@ def should_use_rag(question: str) -> bool:
     
     question_lower = question.lower().strip()
     
-    # Skip for greetings/general
+    # Skips for greetings/general
     general_patterns = [
         "hello", "hi", "hey", "thanks", "thank you", "what can you",
         "who are you", "what is your name", "help me", "can you help"
@@ -65,7 +79,7 @@ def get_context_with_timeout(
     timeout_seconds: float = 2.0
 ) -> Tuple[str, str]:
     """
-    Get RAG context with timeout.
+    Gets RAG context with timeout.
     
     Args:
         rag_engine: RAGRetrievalEngine instance
@@ -133,7 +147,7 @@ def get_context_with_timeout(
 
 def validate_context_relevance(question: str, context: str) -> bool:
     """
-    Check if context is relevant to question.
+    Validates if context is relevant to question.
     
     Args:
         question: Original question
@@ -160,7 +174,4 @@ def validate_context_relevance(question: str, context: str) -> bool:
         return True
     
     return False
-
-
-# Import threading for timeout
 import threading

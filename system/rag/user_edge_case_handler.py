@@ -1,3 +1,18 @@
+# Copyright (C) 2026 Aashik
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 """
 User Edge Case Handler for Satya Learning System
 
@@ -42,16 +57,12 @@ class UserEdgeCaseHandler:
             return "Could you please elaborate? Your question is a bit too short for me to understand."
             
         # 3. Greetings
-        # Check exact match or start
         if query_lower in self.greetings:
             return "Namaste! I am Satya, your learning companion. How can I help you with your studies today?"
             
         for g in self.greetings:
             if query_lower.startswith(g + " "):
-                 # Let it pass to LLM if it's "Hello, what is an atom?"
-                 # But if it's just a greeting, we might want to be nicer?
-                 # ideally, let LLM handle mixed queries.
-                 pass
+                pass
 
         # 4. Gratitude
         if query_lower in self.gratitude:
@@ -63,8 +74,6 @@ class UserEdgeCaseHandler:
             
         # 6. "I don't understand"
         if "don't understand" in query_lower or "confused" in query_lower:
-            # We can prompt them to be specific, or this might be handled better by keeping context
-            # For now, return None to let LLM handle it with context
             return None
 
         return None

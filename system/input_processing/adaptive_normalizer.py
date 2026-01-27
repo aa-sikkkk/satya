@@ -1,3 +1,18 @@
+# Copyright (C) 2026 Aashik
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 """
 Adaptive Normalizer - Production Wrapper
 Adds spell correction, logging, and learning capabilities.
@@ -39,7 +54,7 @@ class AdaptiveNormalizer:
         self.cache_hits = 0
         self.cache_misses = 0
         
-        # Grammar + spell checker (offline)
+        # Grammar + spell checker 
         self.spell_checker = None
         if enable_spell_check:
             self.spell_checker = self._load_language_tool()
@@ -53,12 +68,10 @@ class AdaptiveNormalizer:
         add_scaffolding: bool = False,
         enable_spell_check: bool = True
     ) -> Dict[str, any]:
-        """Normalize with spell correction and logging."""
         original = raw_question
         
         # Conditional spell-checking with caching
         if enable_spell_check and self.spell_checker:
-            # Check cache first
             cache_key = self._get_cache_key(raw_question)
             if cache_key in self.spell_cache:
                 raw_question = self.spell_cache[cache_key]["corrected"]
@@ -92,7 +105,7 @@ class AdaptiveNormalizer:
         return result
     
     def get_low_confidence_cases(self, limit: int = 100) -> List[Dict]:
-        """Get recent low-confidence cases for review."""
+        """Gets recent low-confidence cases for review."""
         review_file = self.log_dir / "low_confidence_cases.jsonl"
         if not review_file.exists():
             return []
@@ -108,7 +121,7 @@ class AdaptiveNormalizer:
             logger.error(f"Could not load low-confidence cases: {e}")
             return []
     
-    # === Private Methods ===
+    # Private Methods
     
     def _get_cache_key(self, text: str) -> str:
         """Generate cache key from text."""
@@ -147,33 +160,28 @@ class AdaptiveNormalizer:
             logger.warning(f"Could not save spell cache: {e}")
     
     def _should_spell_check(self, text: str) -> bool:
-        """Determine if spell-checking is needed using heuristics."""
         words = text.split()
-        
-        # Skip very short queries (likely well-formed)
+
         if len(words) < 5:
             return False
         
-        # Skip MCQ-style questions
         if re.match(r'^[A-D]\)', text) or re.match(r'^\d+\.', text):
             return False
         
-        # Skip if all caps (likely exam question - will be fixed by normalizer)
         if text.isupper():
             return False
         
-        # Check for potential typos (fast regex patterns)
         potential_typos = [
-            r'\b\w*[0-9]+\w*\b',  # Words with numbers
-            r'\b\w{15,}\b',        # Very long words (likely typos)
-            r'(.)\1{3,}',          # Repeated characters (e.g., "hellooo")
+            r'\b\w*[0-9]+\w*\b',  
+            r'\b\w{15,}\b',       
+            r'(.)\1{3,}',     
         ]
         
         for pattern in potential_typos:
             if re.search(pattern, text):
                 return True
         
-        # For longer questions, run spell-check
+        # For longer questions, we'll run spell-check
         if len(words) > 10:
             return True
         
@@ -194,7 +202,6 @@ class AdaptiveNormalizer:
             return None
     
     def _correct_text(self, text: str) -> str:
-        """Apply grammar and spell correction."""
         if not self.spell_checker:
             return text
         
@@ -239,7 +246,6 @@ class AdaptiveNormalizer:
             self._persist_feedback()
     
     def _flag_for_review(self, log_entry: Dict):
-        """Flag low-confidence case."""
         review_file = self.log_dir / "low_confidence_cases.jsonl"
         try:
             with open(review_file, 'a', encoding='utf-8') as f:
@@ -249,7 +255,6 @@ class AdaptiveNormalizer:
             logger.warning(f"Could not flag for review: {e}")
     
     def _persist_feedback(self):
-        """Persist feedback database."""
         try:
             with open(self.feedback_file, 'a', encoding='utf-8') as f:
                 for entry in self.feedback_db:

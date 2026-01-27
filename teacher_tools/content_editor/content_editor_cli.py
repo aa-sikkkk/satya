@@ -1,3 +1,18 @@
+# Copyright (C) 2026 Aashik
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 """
 Teacher Content Editor CLI
 
@@ -27,7 +42,6 @@ style = Style.from_dict({
     'input': 'ansigreen',
 })
 
-# Patch Confirm.ask for y/n
 from rich.prompt import Prompt as _Prompt
 
 def patched_confirm_ask(prompt, default=False):
@@ -47,17 +61,15 @@ class TeacherContentEditorCLI:
     def __init__(self):
         self.content = None
         self.current_subject = None
-        self.content_manager = ContentManager() # Initialize with default path
+        self.content_manager = ContentManager()
         self.session = PromptSession()
 
     def start(self):
         console.print(Panel("[bold cyan]Welcome to the Satya Teacher Content Editor![/bold cyan]", border_style="cyan"))
         while True:
-            # Show current state
             if self.current_subject:
                 console.print(Panel(f"[bold green]Current Subject: {self.current_subject}[/bold green]", border_style="green"))
 
-            # Dynamic menu based on state
             load_option = "Switch Subject" if self.content else "Load Subject Content"
             options = [load_option]
             
@@ -74,7 +86,7 @@ class TeacherContentEditorCLI:
                     "Remove Question",
                     "Save Content"
                 ])
-                default_choice = "2" # Default to "List Topics" if content is loaded
+                default_choice = "2"
             
             options.append("Exit")
 
@@ -173,10 +185,9 @@ class TeacherContentEditorCLI:
         if not self.content:
             return
         topic_name = Prompt.ask("Enter topic name to add concept to")
-        # Optional subtopic
         subtopic_name = Prompt.ask("Enter subtopic name (optional, press Enter to skip)", default="")
         if not subtopic_name:
-            subtopic_name = topic_name # Logic in utils uses topic name as fallback if added directly
+            subtopic_name = topic_name
 
         concept_name = Prompt.ask("Enter concept name")
         summary = Prompt.ask("Enter concept summary", default="")
@@ -196,7 +207,7 @@ class TeacherContentEditorCLI:
 
         concept_name = Prompt.ask("Enter concept name")
         question_text = Prompt.ask("Enter question text")
-        question = {"question": question_text} # Minimal question structure
+        question = {"question": question_text}
         
         if add_question(self.content, topic_name, subtopic_name, concept_name, question):
             console.print(f"[green]Added question to concept: {concept_name}[/green]")
@@ -246,13 +257,11 @@ class TeacherContentEditorCLI:
             return
         
         try:
-            # Use ContentManager to update (handles validation and backup)
             self.content_manager.update_content(self.current_subject, self.content)
             console.print(f"[bold green]Successfully saved content for {self.current_subject}![/bold green]")
             console.print(f"[dim]Backup created in {self.current_subject}/backups[/dim]")
         except Exception as e:
             console.print(f"[red]Failed to save content: {e}[/red]")
-            # Offer to force save to a file just in case
             if Confirm.ask("Try saving to a local file instead?"):
                 fname = f"{self.current_subject}_emergency_save.json"
                 try:

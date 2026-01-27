@@ -1,4 +1,19 @@
 #!/usr/bin/env python3
+# Copyright (C) 2026 Aashik
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 """
 Simple RAG Cache Implementation
 
@@ -74,7 +89,7 @@ class RAGCache:
         threshold: float = 0.92
     ) -> Optional[Dict[str, Any]]:
         """
-        Find semantically similar cached query using cosine similarity.
+        Finds semantically similar cached query using cosine similarity.
         
         Args:
             embedding: Query embedding vector
@@ -88,7 +103,7 @@ class RAGCache:
         if embedding is None:
             return None
         
-        # Handle embedding shape
+        # Handles embedding shape
         if embedding.ndim > 1:
             embedding = embedding.flatten()
             
@@ -104,7 +119,7 @@ class RAGCache:
                 del self.cache[key]
                 continue
                 
-            # Filter by subject/grade
+            # Filters by subject/grade
             if meta.get('subject') != subject or meta.get('grade') != grade:
                 continue
                 
@@ -141,7 +156,7 @@ class RAGCache:
         embedding: Optional[np.ndarray] = None
     ) -> None:
         """
-        Cache RAG results with optional embedding for semantic search.
+        Caches RAG results with optional embedding for semantic search.
         
         Args:
             query: User query
@@ -154,29 +169,29 @@ class RAGCache:
         
         # LRU eviction if cache is full
         if len(self.cache) >= self.max_size and key not in self.cache:
-            # Remove oldest entry
+            # Removes oldest entry
             oldest_key = min(self.cache.keys(), key=lambda k: self.cache[k][1])
             del self.cache[oldest_key]
         
-        # Store metadata for filtering
+        # Stores metadata for filtering
         metadata = {
             "subject": subject, 
             "grade": grade, 
             "query": query
         }
         
-        # Flatten embedding if needed
+        # Flattens embedding if needed
         if embedding is not None and embedding.ndim > 1:
             embedding = embedding.flatten()
         
         self.cache[key] = (results, time.time(), embedding, metadata)
     
     def clear(self) -> None:
-        """Clear all cache entries."""
+        """Clears all cache entries."""
         self.cache.clear()
     
     def stats(self) -> Dict[str, Any]:
-        """Get cache statistics."""
+        """Gets cache statistics."""
         current_time = time.time()
         expired_keys = [
             k for k, (_, timestamp, _, _) in self.cache.items() 
