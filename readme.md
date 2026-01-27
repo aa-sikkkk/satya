@@ -703,7 +703,19 @@ See documentation:
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+### PolyForm Noncommercial License 1.0.0
+
+Satya is a nonprofit educational initiative. To ensure this software remains free and accessible to students and educators without commercial exploitation, it is licensed under the **PolyForm Noncommercial License 1.0.0**.
+
+**You are free to:**
+- Use this software for personal, educational, or charitable purposes.
+- Modify and distribute it for non-commercial use.
+
+**You may NOT:**
+- Sell this software or any derivative works.
+- Use it for any commercial purpose or advantage.
+
+See [LICENSE](LICENSE) file for full details.
 
 **Copyright (c) 2026 Satya Project Contributors**
 
