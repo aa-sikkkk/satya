@@ -1,6 +1,20 @@
+# Copyright (C) 2026 Aashik
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 """
 Lightweight RAG Retrieval Engine for Satya Learning System
-Optimized for i3 processors
 """
 
 import logging
@@ -9,7 +23,6 @@ from typing import Dict, List, Any
 import chromadb
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-# Import sub-components
 from system.rag.anti_confusion_engine import AntiConfusionEngine
 from system.rag.ascii_diagram_library import ASCIIDiagramLibrary
 from system.rag.user_edge_case_handler import UserEdgeCaseHandler
@@ -22,7 +35,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class RAGRetrievalEngine:
-    """i3-friendly RAG orchestrator for Satya."""
+    """RAG orchestrator for Satya."""
 
     def __init__(
         self,
@@ -30,7 +43,7 @@ class RAGRetrievalEngine:
         model_path: str = "satya_data/models/phi15",
         llm_handler=None
     ):
-        logger.info("Initializing Satya RAG Engine (i3-optimized)...")
+        logger.info("Initializing Satya RAG Engine...")
 
         self.chroma_db_path = chroma_db_path
         self.edge_case_handler = UserEdgeCaseHandler()
@@ -64,20 +77,20 @@ class RAGRetrievalEngine:
     
     def warm_up(self):
         """
-        Warm up RAG engine by pre-loading embedding generator and ChromaDB.
+        Warms up RAG engine by pre-loading embedding generator and ChromaDB.
         This reduces first query latency.
         """
         logger.info("Warming up RAG engine...")
         try:
-            # Warm up embedding generator with dummy query
+            # Warms up embedding generator with dummy query
             dummy_query = "test query"
             self.embedding_gen.generate_embedding(dummy_query)
             
-            # Warm up ChromaDB by accessing a collection
+            # Warms up ChromaDB by accessing a collection
             if self.chroma_client:
                 collections = self.chroma_client.list_collections()
                 if collections:
-                    # Query first collection with dummy to load indexes
+                    # Queries first collection with dummy to load indexes
                     test_coll = self.chroma_client.get_collection(collections[0].name)
                     test_embedding = self.embedding_gen.generate_embedding(dummy_query)
                     test_coll.query(
@@ -91,7 +104,7 @@ class RAGRetrievalEngine:
 
     def _get_relevant_collections(self, subject: str, grade: str) -> List[str]:
         """
-        Select relevant collections based on subject and grade.
+        Selects relevant collections based on subject and grade.
         
         Strategy:
         1. NEB collections: Filter by BOTH subject AND grade
@@ -114,7 +127,7 @@ class RAGRetrievalEngine:
                 logger.info(f"Selected NEB collection (grade {grade}): {name}")
         
         # 2. HuggingFace Collections (subject-based, all grades)
-        # Map subjects to appropriate general knowledge collections
+        # Maps subjects to appropriate general knowledge collections
         subject_map = {
             "biology": ["openstax_science", "scienceqa"],
             "physics": ["openstax_science", "scienceqa"],
@@ -133,7 +146,7 @@ class RAGRetrievalEngine:
             "writing": ["fineweb_edu"],
         }
         
-        # Add HuggingFace collections for this subject (ignore grade)
+        # Adds HuggingFace collections for this subject (ignore grade)
         subject_lower = subject.lower()
         if subject_lower in subject_map:
             for target in subject_map[subject_lower]:
@@ -154,17 +167,16 @@ class RAGRetrievalEngine:
                         break
         
         logger.info(f"Total collections selected: {len(collections)}")
-        return collections[:3]  # Limit to 3 for performance
-  # Cap for i3 performance
+        return collections[:3]  
 
     def query(
         self,
         query_text: str,
         subject: str,
         n_results: int = 3,
-        stream_callback=None  # RESTORED for real-time feedback
+        stream_callback=None 
     ) -> Dict[str, Any]:
-        """Main query method, i3-optimized with streaming support."""
+        """Main query method, with streaming support."""
         start_time = time.time()
 
         # Edge case check
@@ -185,43 +197,34 @@ class RAGRetrievalEngine:
                 stream_callback(error_msg)
             return {"answer": error_msg, "type": "error"}
         
-        # ============ INPUT NORMALIZATION (NEW) ============
-        # Clean the question BEFORE retrieval
         normalization_result = self.input_normalizer.normalize(query_text)
         clean_question = normalization_result["clean_question"]
         
-        # Log normalization for debugging
         if normalization_result["notes"]:
             logger.info(f"Normalization applied: {normalization_result['notes']}")
             logger.info(f"Intent: {normalization_result['intent']}, Confidence: {normalization_result['confidence']:.2f}")
         
-        # Use clean question for the rest of the pipeline
         effective_query = clean_question if clean_question else query_text
 
-        # Cache check (exact match) - NO GRADE
-        # Use ORIGINAL query for cache key (user may ask same messy question)
         cached_result = self.cache.get(query_text, subject, "")
         if cached_result:
             logger.info(f"Cache HIT (exact)")
             if stream_callback:
-                # Stream cached answer word by word for smooth UX
+                # Streams cached answer word by word for smooth UX
                 answer = cached_result.get("answer", "")
                 words = answer.split()
                 for i, word in enumerate(words):
                     stream_callback(word + (" " if i < len(words) - 1 else ""))
             return {**cached_result, "processing_time": time.time() - start_time}
 
-        # IMMEDIATE FEEDBACK - Show status while processing
         if stream_callback:
             stream_callback("🔍 Searching knowledge base...\n\n")
 
-        # Embedding generation - USE CLEAN QUESTION
         if stream_callback:
             stream_callback("📊 Analyzing your question...\n\n")
         
         query_embedding = self.embedding_gen.generate_embeddings(effective_query)
 
-        # Cache check (semantic match) - NO GRADE
         semantic_hit = self.cache.find_similar(query_embedding, subject, "", threshold=0.88)
         if semantic_hit:
             logger.info(f"Cache HIT (semantic)")
@@ -232,16 +235,13 @@ class RAGRetrievalEngine:
                     stream_callback(word + (" " if i < len(words) - 1 else ""))
             return {**semantic_hit, "processing_time": time.time() - start_time}
 
-        # Collections selection - NO GRADE
         target_collections = self._get_relevant_collections(subject, "")
         if not target_collections:
             logger.warning(f"No collections found for {subject}")
         
-        # Show progress
         if stream_callback:
             stream_callback("🎯 Finding best matches...\n\n")
 
-        # Retrieval
         raw_results = []
         
         def query_collection(coll_name):
@@ -249,7 +249,7 @@ class RAGRetrievalEngine:
                 coll = self.chroma_client.get_collection(coll_name)
                 res = coll.query(
                     query_embeddings=[query_embedding.tolist()],
-                    n_results=min(2, n_results)  # Reduced for i3
+                    n_results=min(2, n_results)  
                 )
                 results = []
                 if res['documents']:
@@ -265,17 +265,15 @@ class RAGRetrievalEngine:
                 logger.error(f"Error querying {coll_name}: {e}")
                 return []
 
-        # Reduced threading for i3
         with ThreadPoolExecutor(max_workers=2) as executor:
             futures = [executor.submit(query_collection, name) for name in target_collections]
             for future in as_completed(futures):
                 raw_results.extend(future.result())
 
-        # Ranking & filtering
         ranked_chunks = self.anti_confusion.rank_results(raw_results, query_text)
         final_context_chunks = []
         current_len = 0
-        limit = 400  # Smaller context for i3
+        limit = 400
         
         for chunk in ranked_chunks:
             if chunk['final_score'] < 0.35:
@@ -290,43 +288,35 @@ class RAGRetrievalEngine:
         ordered_chunks = self.anti_confusion.resolve_conflicts(final_context_chunks)
         context_texts = [c['text'] for c in ordered_chunks]
         full_context_str = "\n\n".join(context_texts)
-        
-        # Show progress before generation
+ 
         if stream_callback:
             stream_callback("✨ Generating answer...\n\n")
 
-        # LLM generation with STREAMING
         answer = "Unable to generate answer."
         confidence = 0.0
         
         if self.llm:
             try:
                 if stream_callback:
-                    # STREAM tokens in real-time - NO BUFFERING
                     answer = ""
                     print("🚀 RAG: Starting token streaming...", flush=True)
                     token_count = 0
-                    
-                    # Use clean question for better Phi inference
                     for token in self.llm.handler.get_answer_stream(effective_query, full_context_str):
                         answer += token
                         print(f"📤 RAG: Sending token #{token_count}: '{token}'", flush=True)
-                        stream_callback(token)  # Send immediately
+                        stream_callback(token)  
                         token_count += 1
                     
-                    print(f"✅ RAG: Streaming complete. Total tokens: {token_count}", flush=True)
+                    print(f"RAG: Streaming complete. Total tokens: {token_count}", flush=True)
                     
-                    # Calculate confidence with RAG context quality
                     confidence = self._calculate_confidence(answer, effective_query, final_context_chunks)
                 else:
-                    # Non-streaming fallback
                     answer, confidence = self.llm.simple_handler.get_answer(effective_query, full_context_str)
             except Exception as e:
                 logger.error(f"LLM generation error: {e}")
                 if stream_callback:
                     stream_callback("Error generating answer.")
 
-        # ASCII diagrams
         diagram = self.diagram_library.find_diagram_by_text(query_text)
 
         result = {
@@ -339,7 +329,6 @@ class RAGRetrievalEngine:
             "type": "rag_response"
         }
 
-        # Cache result - NO GRADE
         self.cache.set(query_text, subject, "", result, embedding=query_embedding)
 
         return result
@@ -356,26 +345,21 @@ class RAGRetrievalEngine:
         if not answer or len(answer.split()) < 5:
             return 0.3
         
-        confidence = 0.5  # Base confidence
+        confidence = 0.5  
         
-        # Factor 1: Answer length (good educational answers are 50-150 words)
         word_count = len(answer.split())
         if 50 <= word_count <= 150:
-            confidence += 0.2  # Ideal length
+            confidence += 0.2  
         elif 30 <= word_count < 50 or 150 < word_count <= 200:
-            confidence += 0.1  # Acceptable length
-        # else: no bonus for too short or too long
+            confidence += 0.1 
         
-        # Factor 2: Question-answer relevance
         q_words = set(w.lower() for w in question.split() if len(w) > 3)
         a_words = set(w.lower() for w in answer.split())
         if q_words:
             relevance = len(q_words & a_words) / len(q_words)
             confidence += relevance * 0.2
         
-        # Factor 3: RAG context quality (if available)
         if context_chunks and len(context_chunks) > 0:
-            # If we have good RAG context, boost confidence
             avg_score = sum(c.get('final_score', 0.5) for c in context_chunks) / len(context_chunks)
             confidence += avg_score * 0.1
         

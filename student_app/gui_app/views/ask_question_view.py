@@ -1,6 +1,21 @@
+# Copyright (C) 2026 Aashik
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 import customtkinter as ctk
 
-class AskQuestionView(ctk.CTkFrame):
+class AskQuestionView(ctk.CTkScrollableFrame):
     def __init__(self, master, on_submit, on_back, on_ask_openai, *args, **kwargs):
         super().__init__(master, *args, **kwargs)
         self.on_submit = on_submit
@@ -95,16 +110,25 @@ class AskQuestionView(ctk.CTkFrame):
         """Calculate exact height needed for text content."""
         if not text:
             return 80
-            
-        chars_per_line = 65 
-        lines = 0
+        
+        # More accurate character counting
+        chars_per_line = 70  # Adjusted for typical textbox width
+        total_lines = 0
+        
         for paragraph in text.split('\n'):
-            lines += 1 + (len(paragraph) // chars_per_line)
-            
-        line_height = 28  
-        padding = 40      
-        needed_height = (lines * line_height) + padding
-        return max(100, min(needed_height, 500))
+            if not paragraph.strip():
+                total_lines += 1  # Empty line
+            else:
+                # Calculate wrapped lines for this paragraph
+                total_lines += max(1, (len(paragraph) + chars_per_line - 1) // chars_per_line)
+        
+        # More accurate line height and padding
+        line_height = 22  # Reduced from 28
+        padding = 40      # Reduced from 50
+        calculated_height = (total_lines * line_height) + padding
+        
+        # Set reasonable bounds - max 600px instead of 1200px
+        return max(100, min(calculated_height, 600))
     
     def append_answer_token(self, token):
         """Append a token to the streaming answer display."""
@@ -114,16 +138,23 @@ class AskQuestionView(ctk.CTkFrame):
                 widget.destroy()
             
             self.answer_frame = ctk.CTkFrame(self.result_frame, fg_color="#e3f2fd", corner_radius=8)
-            self.answer_frame.pack(pady=(0, 10), padx=10, fill='x', expand=True)
+            self.answer_frame.pack(pady=(0, 10), padx=10, fill='x', expand=False)
             
             starting_height = 120
-            self.answer_box = ctk.CTkTextbox(self.answer_frame, width=600, height=starting_height, font=ctk.CTkFont(size=16), wrap='word')
-            self.answer_box.pack(pady=(10, 10), padx=10, fill='both', expand=True)
+            self.answer_box = ctk.CTkTextbox(
+                self.answer_frame, 
+                width=600, 
+                height=starting_height, 
+                font=ctk.CTkFont(size=14), 
+                wrap='word'
+            )
+            self.answer_box.pack(pady=(10, 10), padx=10, fill='x', expand=False)
         
         self.streaming_answer += token
         self.answer_box.insert('end', token)
         self.answer_box.see('end')
         
+        # Dynamically adjust height during streaming
         if len(self.streaming_answer) % 100 == 0:
             new_height = self._calculate_fluid_height(self.streaming_answer)
             if new_height > self.answer_box.cget("height"):
@@ -134,23 +165,29 @@ class AskQuestionView(ctk.CTkFrame):
     def finalize_answer(self, confidence, hints=None, related=None, source_info=None, question=None, rag_chunks=None, llm_handler=None):
         self.set_loading(False)
         
-        # Generate diagram if applicable
+        # Generate diagram if applicable (Background Thread)
         if question and self.streaming_answer:
             try:
-                from system.diagrams import generate_and_append_diagram
-                self.streaming_answer = generate_and_append_diagram(
-                    question, 
-                    self.streaming_answer,
-                    rag_chunks=rag_chunks,
-                    llm_handler=llm_handler
+                # Show analyzing indicator - pack it in answer_frame after the answer box
+                self.analyzing_label = ctk.CTkLabel(
+                    self.answer_frame if self.answer_frame else self.result_frame,
+                    text="⚡ Analyzing for visual representation...",
+                    font=ctk.CTkFont(size=12, slant="italic"),
+                    text_color="#78909c"
                 )
-                if self.answer_box:
-                    self.answer_box.delete("1.0", "end")
-                    self.answer_box.insert("1.0", self.streaming_answer)
+                self.analyzing_label.pack(pady=(5, 10), padx=10, anchor='w')
+                
+                # Run generation in background thread
+                import threading
+                threading.Thread(
+                    target=self._generate_diagram_background,
+                    args=(question, self.streaming_answer, rag_chunks, llm_handler),
+                    daemon=True
+                ).start()
+                
             except Exception as e:
-                import logging
-                logging.getLogger(__name__).debug(f"Diagram generation failed: {e}")
-        
+                print(f"DEBUG: Failed to start background diagram thread: {e}")
+
         # If no streaming box exists, fall back to complete render
         if self.answer_box is None:
             self._render_complete_answer(
@@ -163,8 +200,22 @@ class AskQuestionView(ctk.CTkFrame):
             )
             return
         
-        final_height = self._calculate_fluid_height(self.streaming_answer)
+        # Get the actual required height from the textbox content
+        # The textbox knows how much space it needs
+        self.answer_box.update_idletasks()
+        
+        # Count actual lines in the textbox
+        line_count = int(self.answer_box.index('end-1c').split('.')[0])
+        
+        # Calculate height based on actual line count (not estimated)
+        line_height = 22
+        padding = 40
+        final_height = max(100, min((line_count * line_height) + padding, 600))
+        
         self.answer_box.configure(height=final_height, state="disabled")
+        
+        # Force update to finalize the answer_frame size
+        self.answer_frame.update_idletasks()
         
         if source_info and self.answer_frame:
             source_exists = any(
@@ -183,6 +234,57 @@ class AskQuestionView(ctk.CTkFrame):
         
         # Add confidence, hints, and related concepts
         self._add_metadata_sections(confidence, hints, related)
+
+    def _generate_diagram_background(self, question, answer, rag_chunks, llm_handler):
+        """Runs diagram generation in a separate thread."""
+        try:
+            print("DEBUG: Starting background diagram generation...")
+            from system.diagrams import generate_diagram_content
+            result = generate_diagram_content(
+                question, 
+                answer,
+                rag_chunks=rag_chunks,
+                llm_handler=llm_handler
+            )
+            # Schedule UI update on main thread
+            self.after(0, self._on_diagram_generated, result)
+        except Exception as e:
+            print(f"DEBUG: Background generation failed: {e}")
+            self.after(0, self._on_diagram_generated, None)
+
+    def _on_diagram_generated(self, result):
+        """Callback to update UI with generated diagram."""
+        # Remove analyzing label
+        if hasattr(self, 'analyzing_label') and self.analyzing_label:
+            self.analyzing_label.destroy()
+            
+        if result:
+            formatted_diagram, diagram_type = result
+            print(f"DEBUG: Diagram generated in background. Type: {diagram_type}")
+            
+            # Create diagram as a SEPARATE frame in result_frame (sibling to answer_frame, not child)
+            # This prevents the answer box from expanding when diagram is added
+            self.diagram_frame = ctk.CTkFrame(self.result_frame, fg_color="#fff3e0", corner_radius=8)
+            self.diagram_frame.pack(pady=(0, 10), padx=10, fill='x', expand=False)
+            
+            type_name = diagram_type.value if hasattr(diagram_type, 'value') else str(diagram_type)
+            ctk.CTkLabel(
+                self.diagram_frame, 
+                text=f"Visual Representation ({type_name.title()})", 
+                font=ctk.CTkFont(size=14, weight="bold"), 
+                text_color="#e65100"
+            ).pack(pady=(10, 5), padx=10, anchor='w')
+            
+            diagram_box = ctk.CTkTextbox(
+                self.diagram_frame, 
+                width=600, 
+                height=300, 
+                font=ctk.CTkFont(family="Consolas", size=12), 
+                wrap='none'
+            )
+            diagram_box.insert("1.0", formatted_diagram)
+            diagram_box.configure(state="disabled")
+            diagram_box.pack(pady=(0, 10), padx=10, fill='x', expand=False)
     
     def set_result(self, answer, confidence=None, hints=None, related=None, source_info=None, is_openai=False):
         """Complete answer result (non-streaming fallback)."""
@@ -212,7 +314,7 @@ class AskQuestionView(ctk.CTkFrame):
                 text_color="#512da8"
             ).pack(pady=5, padx=10, anchor='w')
             
-            answer_box = ctk.CTkTextbox(source_frame, width=600, height=height, font=ctk.CTkFont(size=15), wrap='word')
+            answer_box = ctk.CTkTextbox(source_frame, width=600, height=height, font=ctk.CTkFont(size=14), wrap='word')
             answer_box.insert('1.0', answer)
             answer_box.configure(state="disabled")
             answer_box.pack(pady=(5, 10), padx=10, fill='x', expand=True)
@@ -241,15 +343,22 @@ class AskQuestionView(ctk.CTkFrame):
                 text_color="#fbc02d"
             ).pack(pady=(10, 0), padx=10, anchor='w')
             
-            answer_box = ctk.CTkTextbox(warn_frame, width=600, height=height, font=ctk.CTkFont(size=15), wrap='word')
+            answer_box = ctk.CTkTextbox(warn_frame, width=600, height=height, font=ctk.CTkFont(size=14), wrap='word')
             answer_box.insert('1.0', answer)
             answer_box.configure(state="disabled")
             answer_box.pack(pady=(5, 10), padx=10, fill='x', expand=True)
             self.openai_btn.configure(state="normal")
         else:
             # Normal answer box
-            self.answer_box = ctk.CTkTextbox(self.result_frame, width=600, height=height, font=ctk.CTkFont(size=16), wrap='word')
+            self.answer_box = ctk.CTkTextbox(
+                self.result_frame, 
+                width=600, 
+                height=height, 
+                font=ctk.CTkFont(size=14), 
+                wrap='word'
+            )
             self.answer_box.insert('1.0', answer)
+            
             self.answer_box.configure(state="disabled")
             self.answer_box.pack(pady=(0, 10), padx=10, fill='x', expand=True)
         

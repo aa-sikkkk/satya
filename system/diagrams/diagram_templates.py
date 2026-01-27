@@ -1,97 +1,120 @@
+# Copyright (C) 2026 Aashik
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+"""
+ASCII Diagram Templates 
+Standardized templates for common logic structures.
+"""
+
 DIAGRAM_TEMPLATES = {
     "for_loop": """
-┌─────────┐
-│  Start  │
-└────┬────┘
-     │
-┌────▼────┐
-│ Get item│
-└────┬────┘
-     │
-┌────▼────┐
-│ Execute │
-└────┬────┘
-     │
-┌────▼────┐
-│  Next?  │
-└──┬────┬─┘
-Yes│    │No
-   └────┘
-     │
-┌────▼────┐
-│   End   │
-└─────────┘
+┌─────────────┐
+│    START    │
+└──────┬──────┘
+       │
+┌──────▼──────┐
+│  GET ITEM   │
+└──────┬──────┘
+       │
+┌──────▼──────┐
+│ EXECUTE BODY│
+└──────┬──────┘
+       │
+┌──────▼──────┐
+│  HAS NEXT?  │
+└──┬───────┬──┘
+ YES│       │NO
+    └───────┤
+            │
+      ┌─────▼─────┐
+      │    END    │
+      └───────────┘
 """.strip(),
     
     "while_loop": """
-┌─────────┐
-│  Start  │
-└────┬────┘
-     │
-┌────▼────┐
-│ Check   │
-│Condition│
-└──┬────┬─┘
-True│    │False
-    │    │
-┌───▼──┐ └───┐
-│ Body │     │
-└───┬──┘     │
-    │        │
-    └────────┘
-     │
-┌────▼────┐
-│   End   │
-└─────────┘
+┌─────────────┐
+│    START    │
+└──────┬──────┘
+       │
+┌──────▼──────┐
+│  CONDITION  │
+└──┬───────┬──┘
+ TRUE│      │FALSE
+     │      │
+┌────▼───┐  │
+│  BODY  │  │
+└────┬───┘  │
+     │      │
+     └──────┤
+            ▼
+      ┌───────────┐
+      │    END    │
+      └───────────┘
 """.strip(),
     
     "if_else": """
-┌─────────┐
-│  Start  │
-└────┬────┘
-     │
-┌────▼────┐
-│Condition│
-└──┬────┬─┘
-True│    │False
-    │    │
-┌───▼──┐ ┌───▼──┐
-│  If  │ │ Else │
-│ Block│ │ Block│
-└───┬──┘ └───┬──┘
-    │        │
-    └───┬────┘
-        │
-┌───────▼───────┐
-│   Continue    │
-└───────────────┘
+┌─────────────┐
+│    START    │
+└──────┬──────┘
+       │
+┌──────▼──────┐
+│  CONDITION  │
+└──┬───────┬──┘
+ TRUE│      │FALSE
+     │      │
+┌────▼───┐ ┌────▼───┐
+│   IF   │ │  ELSE  │
+│ BLOCK  │ │ BLOCK  │
+└────┬───┘ └────┬───┘
+     │          │
+     └────┬─────┘
+          │
+    ┌─────▼─────┐
+    │ CONTINUE  │
+    └───────────┘
 """.strip(),
     
     "process_3_steps": """
 ┌─────────────┐
-│   Step 1    │
+│   STEP 1    │
 └──────┬──────┘
        │
 ┌──────▼──────┐
-│   Step 2    │
+│   STEP 2    │
 └──────┬──────┘
        │
 ┌──────▼──────┐
-│   Step 3    │
+│   STEP 3    │
 └─────────────┘
 """.strip(),
 }
 
 
-def get_template(template_name: str) -> str:
+def get_template(template_name: str, fill_data: dict = None) -> str:
     """
-    Get diagram template by name.
+    Get diagram template by name and optionally fill it with data.
     
-    Args:
-        template_name: Name of the template
-    
-    Returns:
-        Template diagram string or empty string if not found
+    Example fill_data: {"CONDITION": "User Valid?", "STEP 1": "Login"}
     """
-    return DIAGRAM_TEMPLATES.get(template_name, "")
+    template = DIAGRAM_TEMPLATES.get(template_name, "")
+    
+    if not fill_data or not template:
+        return template
 
+    # If fill_data has "CONDITION": "Is Valid?", it replaces "CONDITION" in the ASCII
+    for key, value in fill_data.items():
+        if key in template:
+            template = template.replace(key, value.center(len(key)))
+    return template

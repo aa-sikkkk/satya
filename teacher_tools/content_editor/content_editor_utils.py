@@ -1,3 +1,18 @@
+# Copyright (C) 2026 Aashik
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 """
 Content Editor Utilities Module
 
@@ -94,16 +109,13 @@ def add_concept(content: Dict[str, Any], topic_name: str, subtopic_name: str, co
             if subtopic.get('name') == subtopic_name:
                 subtopic.setdefault('concepts', []).append(concept)
                 return True
-            # Recursively search deeper subtopics
             if add_to_subtopic(subtopic.get('subtopics', [])):
                 return True
         return False
     for topic in content.get('topics', []):
         if topic.get('name') == topic_name:
-            # Try to add to direct subtopics
             if add_to_subtopic(topic.get('subtopics', [])):
                 return True
-            # Or add directly to topic if subtopic_name matches topic
             if topic.get('name') == subtopic_name:
                 topic.setdefault('concepts', []).append(concept)
                 return True
@@ -127,7 +139,6 @@ def remove_concept(content: Dict[str, Any], topic_name: str, subtopic_name: str,
                 before = len(subtopic.get('concepts', []))
                 subtopic['concepts'] = [c for c in subtopic.get('concepts', []) if c.get('name') != concept_name]
                 return len(subtopic['concepts']) < before
-            # Recursively search deeper subtopics
             if remove_from_subtopic(subtopic.get('subtopics', [])):
                 return True
         return False
@@ -165,11 +176,9 @@ def add_question(content: Dict[str, Any], topic_name: str, subtopic_name: str, c
                     if concept.get('name') == concept_name:
                         concept.setdefault('questions', []).append(question)
                         return True
-                # Recursively search deeper subtopics
                 if add_to_concept(subtopic.get('subtopics', [])):
                     return True
             else:
-                # Recursively search deeper subtopics
                 if add_to_concept(subtopic.get('subtopics', [])):
                     return True
         return False
@@ -177,7 +186,6 @@ def add_question(content: Dict[str, Any], topic_name: str, subtopic_name: str, c
         if topic.get('name') == topic_name:
             if add_to_concept(topic.get('subtopics', [])):
                 return True
-            # Also allow direct add to topic if subtopic_name matches topic
             if topic.get('name') == subtopic_name:
                 for concept in topic.get('concepts', []):
                     if concept.get('name') == concept_name:
@@ -206,11 +214,9 @@ def remove_question(content: Dict[str, Any], topic_name: str, subtopic_name: str
                         before = len(concept.get('questions', []))
                         concept['questions'] = [q for q in concept.get('questions', []) if q.get('question') != question_text]
                         return len(concept['questions']) < before
-                # Recursively search deeper subtopics
                 if remove_from_concept(subtopic.get('subtopics', [])):
                     return True
             else:
-                # Recursively search deeper subtopics
                 if remove_from_concept(subtopic.get('subtopics', [])):
                     return True
         return False

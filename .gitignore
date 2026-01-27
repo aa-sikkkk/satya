@@ -1,3 +1,19 @@
+.env/
+.cursorignore
+.cursor
+.idea/
+.vscode/
+*.swp
+*.swo
+ideation.md
+run_gui_fixed.ps1
+python_embeddable/
+nuitka-crash-report.xml
+config.yaml
+tests/sanity_check.py
+satya_data/models/
+ai_model/model_utils/bitnet_handler.py
+satya_data/chroma_db/chroma.sqlite3
 # Python
 __pycache__/
 *.py[cod]
@@ -30,17 +46,11 @@ env/
 ENV/
 .venv/
 
-# Environment and IDE
-.env/
-.idea/
-.vscode/
-*.swp
-*.swo
-
 # Jupyter Notebook
 .ipynb_checkpoints
 *.ipynb
 
+RAG_SYSTEM_DESIGN.md
 # Model files and data
 *.pt
 *.pth
@@ -53,17 +63,74 @@ ENV/
 *.model
 *.pkl
 *.joblib
-satya_data/models/
+
+ai_model/exported_model/hint/
+ai_model/exported_model/qna/
 
 # Logs and databases
 *.log
 *.sqlite
 *.db
 
+# Documentation
+
+!docs/README.md
+!docs/PROJECT_OVERVIEW.md
+# !docs/PROJECT_STANDARDS.md
+!docs/STUDENT_GUIDE.md
+!docs/TEACHER_GUIDE.md
+!docs/TECHNICAL_IMPLEMENTATION.md
+!docs/PROJECT_STANDARDS.md
+!docs/content-explanation.md
+stories.txt
+research.txt
+
+ai_model/exported_model/phi2_model/
+ai_model/exported_model/phi2/
+
+
+# Project specific
+main.json
+example-computer.json
+.gitignore
+
 # OS specific
 .DS_Store
 Thumbs.db
+rules.json
+setup.py 
 
+PROJECT_STRUCTURE.md
+
+architecure.text
+test-suite.txt
+research.txt
+
+architecture.text
+FILE_REQUIREMENTS.md
+PROJECT_CONTINUATION.md
+PROJECT_MEMORY.md
+benchmark_results_20250611_092807.json
+benchmark_summary_20250611_092807.txt
+ai_model/benchmarks
+!docs/OpenAi-integration.md
+scripts/data_collection/extract_gpt_training_texts.py
+scripts/data_collection/data/processed
+ai_model/exported_model/onnx/hint
+ai_model/exported_model/onnx/qna
+
+textbooks/grade_10/computer_science_grade_10.pdf
+textbooks/grade_10/english_grade_10.pdf
+textbooks/grade_10/science_grade_10.pdf
+architecturenew.md
+PROJECT_INDEX.md
+scripts/profile_answer_generation.py
+scripts/profile_gui_flow.py
+new.txt
+satya_data/models/phi_1_5/phi-1_5-Q5_K_S.gguf
+plan.md
+scripts/perf/
+satya_data/models/phi_1_5/phi-1_5.Q4_K_M.gguf
 # Input Normalization System - Runtime Data
 satya_data/input_normalizer_phrases.json
 satya_data/normalization_logs/
@@ -72,10 +139,6 @@ satya_data/feedback_db.jsonl
 # ChromaDB - Too large for Git (658K+ documents)
 satya_data/chroma_db/
 satya_data/satya_chroma_db/
-
-# Textbooks and notes
-notes/
-textbooks/grade_10/*.pdf
-
-# Test artifacts
-tests/
+DATASETS.md
+METADATA_SCHEMA.md
+.gitignore

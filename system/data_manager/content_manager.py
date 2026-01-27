@@ -1,3 +1,18 @@
+# Copyright (C) 2026 Aashik
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 """
 Content Manager Module
 
@@ -19,8 +34,8 @@ from student_app.progress import progress_manager
 logging.basicConfig(
     level=logging.INFO,
     handlers=[
-        logging.FileHandler('satya.log'),  # Log to file instead of console
-        logging.NullHandler()  # Prevent logs from being displayed
+        logging.FileHandler('satya.log'),
+        logging.NullHandler()
     ]
 )
 logger = logging.getLogger(__name__)

@@ -1,3 +1,18 @@
+# Copyright (C) 2026 Aashik
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 """
 Input Normalization - Core Rule Engine
 Handles deterministic text transformations optimized for Phi-1.5.
@@ -66,8 +81,7 @@ class InputNormalizer:
             
             question = raw_question.strip()
             notes = []
-            
-            # Apply transformations
+
             question, n = self._transform_to_formal(question)
             notes.extend(n)
             
@@ -106,10 +120,10 @@ class InputNormalizer:
             self.learned_noise_phrases.add(phrase)
             self._save_learnable_database()
     
-    # === Private Methods ===
+    # Private Methods
     
     def _compile_noise_patterns(self) -> List[re.Pattern]:
-        """Compile exam meta-language patterns."""
+        """Compiles exam meta-language patterns."""
         patterns = [
             r"with reference to the (figure|diagram|graph|table|passage|text) (above|below|given)",
             r"according to the (passage|text|diagram|figure)",
@@ -160,7 +174,7 @@ class InputNormalizer:
             logger.warning(f"Could not save learned phrases: {e}")
     
     def _transform_to_formal(self, question: str) -> Tuple[str, List[str]]:
-        """Remove slang and casual language."""
+        """Removes slang and casual language."""
         notes, original = [], question
         
         for pattern in self.conversational_starters:
@@ -181,7 +195,7 @@ class InputNormalizer:
         return question, notes
     
     def _remove_noise(self, question: str) -> Tuple[str, List[str]]:
-        """Remove exam fluff using multiple strategies."""
+        """Removes exam fluff using multiple strategies."""
         notes, original = [], question
         
         for pattern in self.noise_patterns:
@@ -204,7 +218,7 @@ class InputNormalizer:
         return question, notes
     
     def _fuzzy_match(self, text: str, phrase: str) -> bool:
-        """Check fuzzy match using sliding window."""
+        """Checks fuzzy match using sliding window."""
         text_words, phrase_words = text.lower().split(), phrase.lower().split()
         if len(phrase_words) > len(text_words):
             return False
@@ -216,7 +230,7 @@ class InputNormalizer:
         return False
     
     def _remove_fuzzy(self, text: str, phrase: str) -> str:
-        """Remove fuzzy-matched phrase."""
+        """Removes fuzzy-matched phrase."""
         text_words = text.split()
         phrase_words = phrase.lower().split()
         best_idx, best_sim = -1, 0.0
@@ -232,7 +246,7 @@ class InputNormalizer:
         return text
     
     def _expand_abbreviations(self, question: str) -> Tuple[str, List[str]]:
-        """Expand domain abbreviations."""
+        """Expands domain abbreviations."""
         notes = []
         for abbrev, full in self.abbreviations.items():
             if re.search(abbrev, question):
@@ -241,7 +255,7 @@ class InputNormalizer:
         return question, notes
     
     def _normalize_sentence(self, question: str) -> Tuple[str, List[str]]:
-        """Fix case and punctuation."""
+        """Fixes case and punctuation."""
         notes, original = [], question
         
         if question.isupper():
@@ -259,7 +273,7 @@ class InputNormalizer:
         return question, notes
     
     def _expand_context(self, question: str) -> Tuple[str, List[str]]:
-        """Add implicit context for vague questions."""
+        """Adds implicit context for vague questions."""
         if len(question.split()) > 15:
             return question, []
         
@@ -280,14 +294,14 @@ class InputNormalizer:
         return question, notes
     
     def _classify_intent(self, question: str) -> str:
-        """Classify question intent."""
+        """Classifies question intent."""
         for intent, patterns in self.compiled_intent_patterns.items():
             if any(p.search(question.lower()) for p in patterns):
                 return intent
         return "DESCRIBE"
     
     def _calculate_confidence(self, original: str, clean: str, notes: List[str]) -> float:
-        """Calculate normalization confidence."""
+        """Calculates normalization confidence."""
         confidence = 1.0
         change_ratio = len(clean) / max(len(original), 1)
         

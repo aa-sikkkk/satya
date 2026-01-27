@@ -1,7 +1,24 @@
-"""Validation utilities for diagram content and structure."""
+# Copyright (C) 2026 Aashik
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+"""
+Validation utilities for diagram content and structure.
+"""
 
 import re
-from typing import NamedTuple
+from typing import NamedTuple, List, Tuple, Optional
 from dataclasses import dataclass
 
 
@@ -14,26 +31,27 @@ class ValidationResult(NamedTuple):
 @dataclass(frozen=True)
 class ValidationConfig:
     """Configuration for diagram validation thresholds."""
-    max_generic_ratio: float = 0.5
-    base_max_width: int = 80
-    max_width_ceiling: int = 150
+    max_generic_ratio: float = 0.7  
+    base_max_width: int = 60
+    max_width_ceiling: int = 100    
     width_per_line: int = 2
-    min_short_diagram_lines: int = 1
-    min_long_diagram_lines: int = 2
-    long_diagram_threshold: int = 50
-    structure_chars_ratio: int = 30
-    min_structure_chars: int = 2
+    min_short_diagram_lines: int = 3 
+    min_long_diagram_lines: int = 5
+    long_diagram_threshold: int = 100
+    structure_chars_ratio: int = 20  
+    min_structure_chars: int = 4
 
 
-BOX_DRAWING_CHARS = frozenset("┌┐└┘│─├┤┬┴")
+# Added '▼' and '▲' as they are core to our renderer
+BOX_DRAWING_CHARS = frozenset("┌┐└┘│─├┤┬┴▼▲")
 
 GENERIC_PATTERNS = [
-    r'Step\s+\d+',
-    r'Process\s+\d+',
-    r'Stage\s+\d+',
-    r'Item\s+\d+',
-    r'Part\s+\d+',
-    r'Phase\s+\d+',
+    r'^Step\s+\d+$',
+    r'^Process\s+\d+$',
+    r'^Stage\s+\d+$',
+    r'^Item\s+\d+$',
+    r'^Part\s+\d+$',
+    r'^Phase\s+\d+$',
 ]
 
 
@@ -44,55 +62,42 @@ class ContentValidator:
         self.config = config or ValidationConfig()
     
     def validate(self, diagram_text: str) -> ValidationResult:
-        """
-        Check if diagram has meaningful content vs generic placeholders.
-        
-        Returns ValidationResult with error if generic ratio exceeds threshold.
-        """
         if not diagram_text:
             return ValidationResult(False, "Empty diagram")
         
         content_lines = self._extract_content_lines(diagram_text)
         
         if not content_lines:
-            return ValidationResult(False, "No content in diagram")
+            return ValidationResult(False, "No meaningful text found in diagram boxes")
         
-        generic_ratio = self._calculate_generic_ratio(content_lines)
-        
-        if generic_ratio > self.config.max_generic_ratio:
-            percentage = int(generic_ratio * 100)
-            return ValidationResult(
-                False, 
-                f"Too much generic content ({percentage}% generic)"
-            )
+        if len(content_lines) > 3:
+            generic_ratio = self._calculate_generic_ratio(content_lines)
+            if generic_ratio > self.config.max_generic_ratio:
+                percentage = int(generic_ratio * 100)
+                return ValidationResult(
+                    False, 
+                    f"Content is too generic ({percentage}%). Try being more specific."
+                )
         
         return ValidationResult(True, "")
     
     @staticmethod
-    def _extract_content_lines(text: str) -> list[str]:
-        """Extract lines containing alphanumeric content."""
+    def _extract_content_lines(text: str) -> List[str]:
+        """Extract lines that likely contain diagram labels."""
         lines = text.split('\n')
-        return [line for line in lines if any(c.isalnum() for c in line)]
+        # Filter for lines that have letters/numbers and are inside/near box chars
+        return [line.strip().strip('│').strip() for line in lines if any(c.isalnum() for c in line)]
     
-    def _calculate_generic_ratio(self, lines: list[str]) -> float:
-        """Calculate ratio of lines matching generic patterns."""
+    def _calculate_generic_ratio(self, lines: List[str]) -> float:
         if not lines:
             return 0.0
         
-        generic_count = sum(
-            1 for line in lines
-            if self._is_generic_line(line)
-        )
-        
+        generic_count = sum(1 for line in lines if self._is_generic_line(line))
         return generic_count / len(lines)
     
     @staticmethod
     def _is_generic_line(line: str) -> bool:
-        """Check if line matches any generic pattern."""
-        return any(
-            re.search(pattern, line, re.IGNORECASE)
-            for pattern in GENERIC_PATTERNS
-        )
+        return any(re.search(pattern, line, re.IGNORECASE) for pattern in GENERIC_PATTERNS)
 
 
 class StructureValidator:
@@ -102,93 +107,33 @@ class StructureValidator:
         self.config = config or ValidationConfig()
     
     def validate(self, diagram_text: str) -> ValidationResult:
-        """
-        Validate diagram has proper structure with box drawing characters.
-        
-        Checks for:
-        - Presence of box drawing characters
-        - Appropriate width
-        - Minimum line count
-        - Sufficient structural elements
-        """
         if not diagram_text:
             return ValidationResult(False, "Empty diagram")
         
         if not self._has_box_chars(diagram_text):
-            return ValidationResult(False, "No diagram characters detected")
+            return ValidationResult(False, "Plain text detected; no ASCII structure")
         
-        lines = diagram_text.split('\n')
-        if not lines:
-            return ValidationResult(False, "No lines in diagram")
+        lines = [l for l in diagram_text.split('\n') if l.strip()]
         
-        width_check = self._validate_width(lines)
-        if not width_check.is_valid:
-            return width_check
+        max_width = max(len(line) for line in lines) if lines else 0
+        if max_width > self.config.max_width_ceiling:
+            return ValidationResult(
+                False,
+                f"Diagram too wide ({max_width} chars). GUI limit is {self.config.max_width_ceiling}."
+            )
         
-        line_count_check = self._validate_line_count(lines, diagram_text)
-        if not line_count_check.is_valid:
-            return line_count_check
-        
-        structure_check = self._validate_structure_chars(diagram_text)
-        if not structure_check.is_valid:
-            return structure_check
+        if len(lines) < self.config.min_short_diagram_lines:
+            return ValidationResult(False, "Diagram is vertically too small to be useful")
+
+        box_char_count = sum(1 for char in diagram_text if char in BOX_DRAWING_CHARS)
+        if box_char_count < self.config.min_structure_chars:
+            return ValidationResult(False, "Diagram structure is too sparse")
         
         return ValidationResult(True, "")
     
     @staticmethod
     def _has_box_chars(text: str) -> bool:
-        """Check if text contains box drawing characters."""
         return any(char in text for char in BOX_DRAWING_CHARS)
-    
-    def _validate_width(self, lines: list[str]) -> ValidationResult:
-        """Check if diagram width is within acceptable range."""
-        max_width = max(len(line) for line in lines) if lines else 0
-        adaptive_limit = self._calculate_adaptive_width_limit(len(lines))
-        
-        if max_width > adaptive_limit:
-            return ValidationResult(
-                False,
-                f"Diagram too wide ({max_width} chars, max {adaptive_limit})"
-            )
-        
-        return ValidationResult(True, "")
-    
-    def _calculate_adaptive_width_limit(self, line_count: int) -> int:
-        """Calculate adaptive width limit based on line count."""
-        calculated = self.config.base_max_width + (line_count * self.config.width_per_line)
-        return min(calculated, self.config.max_width_ceiling)
-    
-    def _validate_line_count(self, lines: list[str], text: str) -> ValidationResult:
-        """Check if diagram has minimum required lines."""
-        min_lines = (
-            self.config.min_long_diagram_lines 
-            if len(text) > self.config.long_diagram_threshold 
-            else self.config.min_short_diagram_lines
-        )
-        
-        if len(lines) < min_lines:
-            return ValidationResult(
-                False,
-                f"Diagram too short ({len(lines)} lines, min {min_lines})"
-            )
-        
-        return ValidationResult(True, "")
-    
-    def _validate_structure_chars(self, text: str) -> ValidationResult:
-        """Check if diagram has sufficient structural characters."""
-        box_char_count = sum(1 for char in text if char in BOX_DRAWING_CHARS)
-        min_required = max(
-            self.config.min_structure_chars,
-            len(text) // self.config.structure_chars_ratio
-        )
-        
-        if box_char_count < min_required:
-            return ValidationResult(
-                False,
-                f"Insufficient diagram structure ({box_char_count} box chars, min {min_required})"
-            )
-        
-        return ValidationResult(True, "")
 
 
 class DiagramValidator:
@@ -200,16 +145,6 @@ class DiagramValidator:
         self.structure_validator = StructureValidator(self.config)
     
     def validate(self, diagram_text: str, context: dict = None) -> ValidationResult:
-        """
-        Perform complete diagram validation.
-        
-        Args:
-            diagram_text: Diagram string to validate
-            context: Optional context dictionary (currently unused, reserved for future use)
-            
-        Returns:
-            ValidationResult with validation status and error message if invalid
-        """
         structure_result = self.structure_validator.validate(diagram_text)
         if not structure_result.is_valid:
             return structure_result
@@ -221,15 +156,14 @@ class DiagramValidator:
         return ValidationResult(True, "")
 
 
-def validate_diagram(diagram_text: str, context: dict = None) -> tuple[bool, str]:
-    """Legacy wrapper for backward compatibility."""
+# Legacy Wrappers for diagram_service.py
+
+def validate_diagram(diagram_text: str, context: dict = None) -> Tuple[bool, str]:
     validator = DiagramValidator()
     result = validator.validate(diagram_text, context)
     return result.is_valid, result.error_message
 
-
-def validate_diagram_content(diagram_text: str, context: dict = None) -> tuple[bool, str]:
-    """Legacy wrapper for backward compatibility."""
+def validate_diagram_content(diagram_text: str, context: dict = None) -> Tuple[bool, str]:
     validator = ContentValidator()
     result = validator.validate(diagram_text)
     return result.is_valid, result.error_message

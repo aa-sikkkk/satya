@@ -1,3 +1,18 @@
+# Copyright (C) 2026 Aashik
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 """
 Pattern Miner - Automated Noise Discovery
 Analyzes logs to find repeated patterns for learning.
@@ -13,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 class PatternMiner:
-    """Discover new noise phrases from production logs."""
+    """Discovers new noise phrases from production logs."""
     
     def __init__(self, min_frequency: int = 10, min_confidence: float = 0.6):
         self.min_frequency = min_frequency
@@ -24,7 +39,7 @@ class PatternMiner:
         ]
     
     def mine_new_patterns(self, feedback_logs: List[Dict]) -> List[Dict]:
-        """Discover patterns from low-confidence cases."""
+        """Discovers patterns from low-confidence cases."""
         low_conf = [log for log in feedback_logs if log.get('confidence', 1.0) < 0.7]
         
         if not low_conf:
@@ -53,7 +68,7 @@ class PatternMiner:
         return suggestions
     
     def generate_report(self, suggestions: List[Dict], output_file: str):
-        """Generate human-readable report."""
+        """Generates a human-readable report."""
         try:
             with open(output_file, 'w', encoding='utf-8') as f:
                 f.write("# Pattern Mining Report\n\n")
@@ -73,7 +88,7 @@ class PatternMiner:
     
     @staticmethod
     def load_feedback_logs(log_file: str) -> List[Dict]:
-        """Load feedback logs from JSONL file."""
+        """Loads feedback logs from JSONL file."""
         logs = []
         try:
             with open(log_file, 'r', encoding='utf-8') as f:
@@ -86,10 +101,10 @@ class PatternMiner:
             logger.error(f"Could not load logs: {e}")
             return []
     
-    # === Private Methods ===
+    # Private Methods 
     
     def _extract_ngrams(self, logs: List[Dict], n_range: tuple = (2, 4)) -> List[str]:
-        """Extract n-grams from logs."""
+        """Extracts n-grams from logs."""
         ngrams = []
         for log in logs:
             words = log.get('original', '').lower().split()
@@ -101,7 +116,7 @@ class PatternMiner:
         return ngrams
     
     def _is_likely_noise(self, phrase: str) -> bool:
-        """Check if phrase is likely noise."""
+        """Checks if phrase is likely noise."""
         phrase_lower = phrase.lower()
         
         if any(ind in phrase_lower for ind in self.noise_indicators):
@@ -119,7 +134,7 @@ class PatternMiner:
         return any(re.search(p, phrase_lower) for p in patterns)
     
     def _calculate_confidence(self, phrase: str, logs: List[Dict], frequency: int) -> float:
-        """Calculate confidence that phrase is noise."""
+        """Calculates confidence that phrase is noise."""
         confidence = 0.5
         
         if frequency > 50:
@@ -140,7 +155,7 @@ class PatternMiner:
         return min(1.0, confidence)
     
     def _get_examples(self, phrase: str, logs: List[Dict], limit: int) -> List[str]:
-        """Get example questions containing phrase."""
+        """Gets example questions containing phrase."""
         examples = []
         for log in logs:
             original = log.get('original', '')

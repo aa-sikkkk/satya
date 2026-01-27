@@ -1,3 +1,18 @@
+# Copyright (C) 2026 Aashik
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 """
 Resource Path Resolution Utility
 
@@ -18,11 +33,8 @@ def get_base_path() -> Path:
         Path: Base path to the application resources
     """
     if getattr(sys, 'frozen', False):
-        # Running as a bundled executable (PyInstaller)
         base_path = Path(sys._MEIPASS)
     else:
-        # Running as a script
-        # Get the project root (3 levels up from this file: system/utils/resource_path.py)
         this_file = Path(__file__).resolve()
         base_path = this_file.parent.parent.parent
     
@@ -42,13 +54,10 @@ def resolve_content_dir(relative_path: str) -> Path:
     base_path = get_base_path()
     resolved = base_path / relative_path
     
-    # If not found in base, try project root
     if not resolved.exists() and not getattr(sys, 'frozen', False):
-        # In development, try project root
         project_root = base_path
         resolved = project_root / relative_path
         
-        # Also try scripts/data_collection/data/content as fallback
         if not resolved.exists():
             fallback = project_root / "scripts" / "data_collection" / "data" / "content"
             if fallback.exists():
@@ -70,9 +79,7 @@ def resolve_model_dir(relative_path: str) -> Path:
     base_path = get_base_path()
     resolved = base_path / relative_path
     
-    # If not found in base, try project root
     if not resolved.exists() and not getattr(sys, 'frozen', False):
-        # In development, try project root
         project_root = base_path
         resolved = project_root / relative_path
     
@@ -92,9 +99,7 @@ def resolve_chroma_db_dir(relative_path: str = "satya_data/chroma_db") -> Path:
     base_path = get_base_path()
     resolved = base_path / relative_path
     
-    # If not found in base, try project root
     if not resolved.exists() and not getattr(sys, 'frozen', False):
-        # In development, try project root
         project_root = base_path
         resolved = project_root / relative_path
     

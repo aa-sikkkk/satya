@@ -1,3 +1,18 @@
+# Copyright (C) 2026 Aashik
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 """
 Anti-Confusion Engine for Satya Learning System
 
@@ -49,11 +64,11 @@ class AntiConfusionEngine:
         
         source = source_type.lower()
         
-        # Check for NEB first (highest priority)
+        # Checks for NEB first (highest priority)
         if 'neb' in source:
             return self.SOURCE_PRIORITY['neb']
         
-        # Check other sources
+        # Checks other sources
         for key, score in self.SOURCE_PRIORITY.items():
             if key in source:
                 return score
@@ -131,7 +146,7 @@ class AntiConfusionEngine:
         if not answer or not context_chunks:
             return False, "No answer or context"
         
-        # Skip validation for very short answers
+        # Skips validation for very short answers
         if len(answer.split()) < 5:
             return True, "Answer too short to validate"
             
