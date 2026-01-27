@@ -1,17 +1,10 @@
 # Copyright (C) 2026 Aashik
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# This software is subject to the terms of the PolyForm Noncommercial License 1.0.0.
+# A copy of the license can be found in the LICENSE file or at 
+# https://polyformproject.org/licenses/noncommercial/1.0.0/
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# USE OF THIS SOFTWARE FOR COMMERCIAL PURPOSES IS STRICTLY PROHIBITED.
 
 """
 Utilities for formatting and trimming diagram output
