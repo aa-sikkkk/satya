@@ -7,18 +7,18 @@
 # USE OF THIS SOFTWARE FOR COMMERCIAL PURPOSES IS STRICTLY PROHIBITED.
 
 import customtkinter as ctk
-from student_app.gui_app.views import WelcomeView, SubjectView, TopicView, ConceptView, ConceptDetailView, QuestionView, ProgressView, AskQuestionView, ProgressOpsView, AboutView, UserGuideView
+from student_app.gui_app.views import WelcomeView, GradeView, SubjectView, TopicView, ConceptView, ConceptDetailView, QuestionView, ProgressView, AskQuestionView, ProgressOpsView, AboutView, UserGuideView
 from system.data_manager.content_manager import ContentManager
 from system.rag.rag_retrieval_engine import RAGRetrievalEngine
 from student_app.progress import progress_manager
 from ai_model.model_utils.model_handler import ModelHandler
 from student_app.learning.openai_proxy_client import OpenAIProxyClient
 from system.utils.resource_path import resolve_model_dir, resolve_content_dir, resolve_chroma_db_dir
-from student_app.gui_app.components.diagram_viewer import DiagramViewer
 from student_app.gui_app.components.grade_selector import GradeSelector
 from student_app.gui_app.components.subject_selector import SubjectSelector
 
 import difflib
+import re
 import tkinter.filedialog as fd
 import tkinter.messagebox as mb
 import os
@@ -35,7 +35,6 @@ class NEBeduApp(ctk.CTk):
     def __init__(self):
         super().__init__()
         
-        # Windows Taskbar Icon Fix
         try:
             myappid = 'satya.learning.companion.1.0' 
             ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
@@ -77,7 +76,8 @@ class NEBeduApp(ctk.CTk):
         self.question_index = 0
         
         self.current_grade_filter = "10"
-        self.current_subject_filter = "Science" 
+        self.current_subject_filter = "Science"
+        self.selected_grade = None
 
         self._set_window_icon()
         self._create_ui_structure()
@@ -166,10 +166,14 @@ class NEBeduApp(ctk.CTk):
         )
         self.title_label.pack(side="left", padx=15)
         
+        self.grade_selector = GradeSelector(self.top_bar, command=self.on_grade_change, width=120)
+        self.grade_selector.pack(side="right", padx=5)
+
         self.subject_selector = SubjectSelector(self.top_bar, command=self.on_subject_change, width=140)
-        self.subject_selector.pack(side="right", padx=10)
+        self.subject_selector.pack(side="right", padx=5)
         
         self.current_subject_filter = self.subject_selector.get()
+        self.current_grade_filter = str(int(self.grade_selector.get().split()[-1]))
 
         self.sidebar_shown = False
 
@@ -183,10 +187,16 @@ class NEBeduApp(ctk.CTk):
         self.welcome_view = WelcomeView(self.main_frame, self.on_login)
         self.welcome_view.pack(fill='both', expand=True)
 
+    def on_grade_change(self, value):
+        try:
+            self.current_grade_filter = str(int(value.split()[-1]))
+            self.selected_grade = int(self.current_grade_filter)
+        except Exception:
+            pass
+
     def on_subject_change(self, value):
         self.current_subject_filter = value
         self.selected_subject = value
-        print(f"Subject changed to: {self.current_subject_filter}")
 
     def _create_sidebar(self):
         logo_frame = ctk.CTkFrame(self.sidebar, fg_color="transparent")
@@ -416,13 +426,33 @@ class NEBeduApp(ctk.CTk):
             action_btn.pack(pady=(0, 20))
 
     def show_browse(self):
+        """Show grade selection first, then proceed to subjects."""
         if self._loading: return
+        self._safe_destroy_widgets()
+        
+        view = GradeView(
+            self.main_frame, 
+            on_select=self.on_grade_selected, 
+            on_back=self.show_main_menu
+        )
+        view.pack(fill='both', expand=True)
+    
+    def on_grade_selected(self, grade: int):
+        """Handle grade selection, then show subjects."""
+        self.current_grade_filter = str(grade)
+        self.selected_grade = grade
+        
+        if hasattr(self, 'grade_selector'):
+            self.grade_selector.set(f"Grade {grade}")
+        
         if not self.content_manager:
             self._show_loading_message("Initializing... Please wait.")
-            self.after(100, self.show_browse)
+            self.after(100, lambda: self.on_grade_selected(grade))
             return
+        
         self._loading = True
         self._safe_destroy_widgets()
+        
         loading_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
         loading_frame.pack(fill='both', expand=True)
         loading_icon = ctk.CTkLabel(loading_frame, text="⏳", font=ctk.CTkFont(size=48))
@@ -430,12 +460,13 @@ class NEBeduApp(ctk.CTk):
         loading_label = ctk.CTkLabel(loading_frame, text="Loading subjects...", font=ctk.CTkFont(size=18), text_color="#666666")
         loading_label.pack(pady=10)
         self.update()
+        
         def load_subjects():
             try:
                 subjects = self.content_manager.get_all_subjects()
                 def show_subjects():
                     self._safe_destroy_widgets()
-                    view = SubjectView(self.main_frame, subjects, self.on_subject_selected, self.show_main_menu)
+                    view = SubjectView(self.main_frame, subjects, self.on_subject_selected, self.show_browse)
                     view.pack(fill='both', expand=True)
                     self._loading = False
                 self.after(0, show_subjects)
@@ -447,6 +478,7 @@ class NEBeduApp(ctk.CTk):
                     self._loading = False
                 self.after(0, show_error)
         threading.Thread(target=load_subjects, daemon=True).start()
+
 
     def _show_loading_message(self, message):
          self._safe_destroy_widgets()
@@ -564,7 +596,6 @@ class NEBeduApp(ctk.CTk):
         if self._loading: return
         self._loading = True
         
-        # Show loading state
         self._safe_destroy_widgets()
         loading = ctk.CTkLabel(self.main_frame, text="🤖 AI is grading your answer...", font=ctk.CTkFont(size=18))
         loading.pack(pady=40)
@@ -573,11 +604,9 @@ class NEBeduApp(ctk.CTk):
             user_ans = answer.strip()
             correct_ans = question.get('answer', '').strip()
             
-            # AI Grading
             is_correct, explanation = self._grade_answer_with_ai(question['question'], user_ans, correct_ans)
             
             def show_result():
-                # Save Progress
                 progress_manager.update_progress(self.username, self.selected_subject, self.selected_topic, self.selected_concept, question['question'], is_correct)
                 
                 self._safe_destroy_widgets()
@@ -594,7 +623,6 @@ class NEBeduApp(ctk.CTk):
                 label = ctk.CTkLabel(result_frame, text=msg, font=ctk.CTkFont(size=22, weight="bold"), text_color=color, wraplength=600)
                 label.pack(pady=(40, 10))
                 
-                # Show Explanation (AI provided or static fallback)
                 exp_text = explanation if explanation else question.get('explanation', f"The correct answer is: {correct_ans}")
                 
                 exp_frame = ctk.CTkFrame(result_frame, fg_color="#f5f5f5", corner_radius=10)
@@ -688,7 +716,6 @@ class NEBeduApp(ctk.CTk):
             is_correct = "[CORRECT]" in response_upper
             explanation = response
             
-            import re
             explanation = re.sub(r'^\[.*?\]', '', explanation).strip()
             
             if explanation.upper().startswith("VERDICT:"):
@@ -759,15 +786,13 @@ class NEBeduApp(ctk.CTk):
                     
                     confidence = response.get('confidence', 0.5)
                     diagram = response.get('diagram')
-                    rag_chunks = response.get('context_used', [])
-                    llm_handler = self.rag_engine.llm.handler if self.rag_engine and hasattr(self.rag_engine, 'llm') else None
                     
                     def finalize():
                         self.ask_view.finalize_answer(
                             confidence, 
                             question=normalized_question,
-                            rag_chunks=rag_chunks,
-                            llm_handler=llm_handler
+                            grade=self.selected_grade,
+                            subject=self.current_subject_filter
                         )
                         
                         if diagram:
@@ -827,7 +852,6 @@ class NEBeduApp(ctk.CTk):
                     subj_total += c_total
                     subj_correct += c_correct
             
-            # Subject stats
             if subj_total > 0:
                 pct = (subj_correct / subj_total) * 100
                 subject_stats[subject] = {
@@ -888,7 +912,7 @@ class NEBeduApp(ctk.CTk):
             try:
                 shutil.copy2(src, dest)
                 mb.showinfo("Success", "Progress imported successfully! Please restart to see changes.")
-                self.show_progress_ops() # Refresh
+                self.show_progress_ops()
             except Exception as e:
                 mb.showerror("Error", f"Failed to import: {e}")
 
@@ -899,7 +923,7 @@ class NEBeduApp(ctk.CTk):
                 if os.path.exists(path):
                     os.remove(path)
                 mb.showinfo("Success", "Progress has been reset.")
-                self.show_progress_ops() # Refresh
+                self.show_progress_ops()
             except Exception as e:
                 mb.showerror("Error", f"Failed to reset: {e}")
 

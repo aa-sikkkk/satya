@@ -1,0 +1,178 @@
+# ============================================================================
+# MASTER DATASET: COMPUTER SCIENCE GRADE 12 (NEB NEPAL)
+# Academic Master Edition - Version 2.0 (Post-SEE Professional)
+# ============================================================================
+
+metadata:
+  subject: "Computer Science"
+  grade: 12
+  curriculum: "NEB Nepal - New Syllabus (Common Core)"
+  last_updated: "2026-02-03"
+
+diagrams:
+
+  # ============================================================================
+  # UNIT 1: DATABASE MANAGEMENT SYSTEM (DBMS) - ADVANCED
+  # ============================================================================
+
+  acid_properties:
+    type: structure
+    title: "ACID Properties of Transactions"
+    keywords: [atomicity, consistency, isolation, durability, RDBMS]
+    main: "Database Transaction"
+    components:
+      - name: "Atomicity"
+        description: "All or nothing; if one part fails, the whole transaction fails."
+      - name: "Consistency"
+        description: "Database must change from one valid state to another."
+      - name: "Isolation"
+        description: "Concurrent transactions do not interfere with each other."
+      - name: "Durability"
+        description: "Once committed, data remains even during system failure."
+
+  relational_algebra_ops:
+    type: hierarchy
+    title: "Relational Algebra Operations"
+    root: "Operations"
+    children:
+      - name: "Unary Operations"
+        children:
+          - Select (σ) - Rows
+          - Project (π) - Columns
+      - name: "Binary Operations"
+        children:
+          - Union (∪)
+          - Set Difference (-)
+          - Cartesian Product (X)
+          - Join (⋈)
+
+  normalization_master_flow:
+    type: process
+    title: "Database Normalization Levels"
+    steps:
+      - 1NF: "Eliminate repeating groups; atomic values only."
+      - 2NF: "Meet 1NF + Remove partial functional dependency."
+      - 3NF: "Meet 2NF + Remove transitive dependency."
+      - BCNF: "Meet 3NF + Every determinant is a candidate key."
+    cyclic: false
+
+  # ============================================================================
+  # UNIT 2: NETWORKING & COMMUNICATION
+  # ============================================================================
+
+  osi_layer_functions:
+    type: structure
+    title: "Functional Detail of OSI Layers"
+    main: "7-Layer Model"
+    components:
+      - name: "Application"
+        description: "Network services to apps (HTTP, FTP, SMTP)."
+      - name: "Presentation"
+        description: "Data encryption, compression, translation."
+      - name: "Session"
+        description: "Establish, manage, terminate sessions."
+      - name: "Transport"
+        description: "End-to-end delivery, segments, flow control (TCP/UDP)."
+      - name: "Network"
+        description: "Routing, logical addressing, packets (IP)."
+      - name: "Data Link"
+        description: "MAC addressing, error detection, frames."
+      - name: "Physical"
+        description: "Binary transmission, cables, voltages."
+
+  ip_addressing_comparison:
+    type: comparison
+    title: "IPv4 vs IPv6"
+    item_a: "IPv4"
+    item_b: "IPv6"
+    similarities: [Layer 3 protocols, Network addressing, Packet routing]
+    differences:
+      address_size: ["32-bit", "128-bit"]
+      format: ["Dotted Decimal (192.168.1.1)", "Hexadecimal (2001:0db8:...)"]
+      address_space: ["4.3 Billion", "340 Undecillion"]
+      configuration: ["Manual/DHCP", "Stateless Auto-configuration (SLAAC)"]
+      security: ["Optional (IPsec)", "Mandatory/Integrated"]
+
+  # ============================================================================
+  # UNIT 3: OBJECT ORIENTED PROGRAMMING (OOP) - C++ Focus
+  # ============================================================================
+
+  oop_access_modifiers:
+    type: hierarchy
+    title: "Access Control in C++"
+    root: "Access Modifiers"
+    children:
+      - name: "Public"
+        description: "Accessible from anywhere in the program."
+      - name: "Private"
+        description: "Accessible only within the same class (Data Hiding)."
+      - name: "Protected"
+        description: "Accessible within class and by inherited child classes."
+
+  constructor_types:
+    type: hierarchy
+    title: "Types of Constructors in C++"
+    root: "Constructors"
+    children:
+      - Default Constructor: "Invoked automatically with no arguments."
+      - Parameterized Constructor: "Accepts arguments to initialize data."
+      - Copy Constructor: "Initializes an object using another object of same class."
+
+  # ============================================================================
+  # UNIT 4: SOFTWARE ENGINEERING (The Professional Lifecycle)
+  # ============================================================================
+
+  feasibility_study_types:
+    type: hierarchy
+    title: "Types of Feasibility Study"
+    root: "Feasibility"
+    children:
+      - name: "Technical"
+        description: "Can the current technology support the project?"
+      - name: "Economic"
+        description: "Cost-benefit analysis; is it profitable?"
+      - name: "Operational"
+        description: "Will the system be used effectively by the staff?"
+      - name: "Legal/Schedule"
+        description: "Law compliance and time constraints."
+
+  software_testing_strategies:
+    type: comparison
+    title: "Black Box vs White Box Testing"
+    item_a: "Black Box Testing"
+    item_b: "White Box Testing"
+    similarities: [Quality assurance, Bug detection, Software validation]
+    differences:
+      focus: ["Functional requirements", "Internal code structure/logic"]
+      knowledge: ["No internal knowledge needed", "Deep code knowledge required"]
+      tester: ["Usually End-users/QA", "Developers/Engineers"]
+      technique: ["Boundary value, Equivalence class", "Statement, Branch, Path coverage"]
+
+  # ============================================================================
+  # UNIT 5: RECENT TRENDS & AI
+  # ============================================================================
+
+  ai_subfields:
+    type: hierarchy
+    title: "Branches of Artificial Intelligence"
+    root: "AI"
+    children:
+      - name: "Machine Learning"
+        children: [Supervised, Unsupervised, Reinforcement]
+      - name: "Deep Learning"
+        description: "Neural Networks inspired by human brain."
+      - name: "NLP"
+        description: "Natural Language Processing (Speech/Text)."
+      - name: "Computer Vision"
+        description: "Image and Video recognition."
+
+  cloud_computing_models:
+    type: comparison
+    title: "Public vs Private vs Hybrid Cloud"
+    item_a: "Public Cloud"
+    item_b: "Private Cloud"
+    item_c: "Hybrid Cloud"
+    differences:
+      ownership: ["Third-party provider (AWS/Google)", "Single organization", "Shared"]
+      security: ["Lower/Generic", "Highest/Controlled", "Mixed"]
+      cost: ["Pay-per-use (Cheap)", "High capital investment", "Intermediate"]

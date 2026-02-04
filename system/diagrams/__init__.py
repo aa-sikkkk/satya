@@ -7,25 +7,49 @@
 # USE OF THIS SOFTWARE FOR COMMERCIAL PURPOSES IS STRICTLY PROHIBITED.
 
 """
-Diagram utilities for ASCII diagram extraction, generation, and validation.
+Diagram utilities for ASCII diagram generation.
 
-This module provides lightweight utilities for working with ASCII diagrams.
+This module provides:
+- DiagramLibrary: Load pre-built diagrams from YAML files
+- DiagramRenderer: Render ASCII diagrams (flowcharts, hierarchies, comparisons)
+- diagram_service: Main entry points for diagram generation
+
+Usage:
+    from system.diagrams import generate_diagram_content, DiagramRenderer
+    
+    result = generate_diagram_content(question, answer, grade=10, subject="science")
+    if result:
+        diagram, diagram_type = result
 """
 
-from .diagram_service import generate_and_append_diagram, should_attempt_diagram, generate_diagram_content
-from .diagram_detector import should_generate_diagram, extract_context_for_diagram
-from .custom_generator import generate_diagram
-from .diagram_validator import validate_diagram
-from .diagram_formatter import format_diagram
+from .diagram_service import (
+    generate_diagram_content,
+    should_attempt_diagram,
+    should_show_diagram,
+)
+from .diagram_library import DiagramLibrary
+from .diagram_renderer import DiagramRenderer
+from .diagram_config import (
+    DIAGRAM_CONFIG,
+    get_template_for_concept,
+    PROCESS_KEYWORDS,
+    COMPARISON_KEYWORDS,
+    HIERARCHY_KEYWORDS,
+)
 
 __all__ = [
-    'generate_and_append_diagram',
     'generate_diagram_content',
     'should_attempt_diagram',
-    'should_generate_diagram',
-    'extract_context_for_diagram',
-    'generate_diagram',
-    'validate_diagram',
-    'format_diagram',
+    'should_show_diagram',
+    
+    # Library access
+    'DiagramLibrary',
+    'DiagramRenderer',
+    
+    # Configuration
+    'DIAGRAM_CONFIG',
+    'get_template_for_concept',
+    'PROCESS_KEYWORDS',
+    'COMPARISON_KEYWORDS',
+    'HIERARCHY_KEYWORDS',
 ]
-

@@ -292,15 +292,11 @@ class RAGRetrievalEngine:
             try:
                 if stream_callback:
                     answer = ""
-                    print("🚀 RAG: Starting token streaming...", flush=True)
                     token_count = 0
                     for token in self.llm.handler.get_answer_stream(effective_query, full_context_str):
                         answer += token
-                        print(f"📤 RAG: Sending token #{token_count}: '{token}'", flush=True)
                         stream_callback(token)  
-                        token_count += 1
-                    
-                    print(f"RAG: Streaming complete. Total tokens: {token_count}", flush=True)
+                        token_count += 1                   
                     
                     confidence = self._calculate_confidence(answer, effective_query, final_context_chunks)
                 else:

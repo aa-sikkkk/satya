@@ -1,0 +1,248 @@
+# Complete Science Diagram Database - Grade 8
+# Based on NEB Nepal National Curriculum + International Standards
+# Version: 4.0 (Full Book Edition)
+
+metadata:
+  subject: "Science"
+  grade: 8
+  curriculum: "NEB Nepal / International"
+  total_units: 17
+
+diagrams:
+
+  # ============================================================================
+  # UNIT 1 & 2: SCIENTIFIC LEARNING & MEASUREMENT
+  # ============================================================================
+  
+  scientific_method:
+    type: process
+    title: "The Scientific Investigation Process"
+    keywords: [observation, hypothesis, experiment, conclusion]
+    steps:
+      - Observation (Identify problem)
+      - Hypothesis (Educated guess)
+      - Experimentation (Testing)
+      - Data Collection (Recording)
+      - Analysis (Calculations)
+      - Conclusion (Results)
+    cyclic: true
+
+  measurement_units:
+    type: hierarchy
+    title: "System of Units (SI)"
+    keywords: [fundamental, derived, physical quantities]
+    root: "Physical Quantities"
+    children:
+      - name: "Fundamental Quantities"
+        children: [Length (m), Mass (kg), Time (s), Temperature (K), Current (A)]
+      - name: "Derived Quantities"
+        children: [Area (m²), Volume (m³), Density (kg/m³), Force (N), Pressure (Pa)]
+
+  # ============================================================================
+  # UNIT 3, 4, & 5: PHYSICS - MECHANICS & ENERGY
+  # ============================================================================
+
+  motion_graphs:
+    type: comparison
+    title: "Distance-Time Graphs"
+    item_a: "Uniform Motion"
+    item_b: "Non-Uniform Motion"
+    item_c: "Body at Rest"
+    similarities: [Represent motion over time, Use X and Y axes]
+    differences:
+      line_shape: ["Straight diagonal line", "Curved line", "Horizontal straight line"]
+      speed_status: ["Constant speed", "Changing speed", "Zero speed"]
+
+  work_energy_power:
+    type: hierarchy
+    title: "Work, Energy, and Power Relationship"
+    root: "Mechanical Physics"
+    children:
+      - name: "Work"
+        description: "Force × Displacement (Joule)"
+      - name: "Energy"
+        children:
+          - name: "Kinetic"
+            description: "Energy of motion"
+          - name: "Potential"
+            description: "Energy of position/height"
+      - name: "Power"
+        description: "Rate of doing work (Watt)"
+
+  # ============================================================================
+  # UNIT 6, 7, & 8: HEAT, LIGHT, & SOUND
+  # ============================================================================
+
+  thermometer_types:
+    type: comparison
+    title: "Clinical vs. Laboratory Thermometer"
+    item_a: "Clinical Thermometer"
+    item_b: "Laboratory Thermometer"
+    similarities: [Use Mercury or Alcohol, Based on expansion of liquid]
+    differences:
+      range: ["35°C to 42°C", "-10°C to 110°C"]
+      kink: ["Has a kink/constriction", "No kink"]
+      use: ["Human body temperature", "Scientific experiments"]
+
+  refraction_of_light:
+    type: process
+    title: "Refraction through Glass Slab"
+    steps:
+      - Incident Ray (In Air)
+      - Bends towards normal (Entering Glass - Denser)
+      - Refracted Ray (Inside Glass)
+      - Bends away from normal (Entering Air - Rarer)
+      - Emergent Ray (Parallel to Incident)
+    cyclic: false
+
+  sound_propagation:
+    type: comparison
+    title: "Sound in Different Media"
+    item_a: "Solids"
+    item_b: "Liquids"
+    item_c: "Gases"
+    similarities: [Require a medium, Travel as longitudinal waves]
+    differences:
+      speed: ["Fastest speed", "Moderate speed", "Slowest speed"]
+      particle_density: ["Very high", "Moderate", "Low"]
+
+  # ============================================================================
+  # UNIT 10, 11: CHEMISTRY - MATTER & CHEMICALS
+  # ============================================================================
+
+  subatomic_particles:
+    type: hierarchy
+    title: "Subatomic Particles of an Atom"
+    root: "Atom"
+    children:
+      - name: "Nucleus (Center)"
+        children: [Protons (Positive), Neutrons (Neutral)]
+      - name: "Orbits (Shells)"
+        children: [Electrons (Negative)]
+
+  valency_chart:
+    type: hierarchy
+    title: "Valency of Common Elements"
+    root: "Elements"
+    children:
+      - name: "Monovalent (1)"
+        children: [Hydrogen, Sodium, Potassium, Chlorine]
+      - name: "Divalent (2)"
+        children: [Oxygen, Magnesium, Calcium, Zinc]
+      - name: "Trivalent (3)"
+        children: [Aluminium, Nitrogen, Iron-III]
+
+  # ============================================================================
+  # UNIT 12, 13, 14: BIOLOGY - LIVING BEINGS & PROCESSES
+  # ============================================================================
+
+  kingdom_classification:
+    type: hierarchy
+    title: "Five Kingdom Classification"
+    root: "Living Organisms"
+    children:
+      - name: "Monera"
+        description: "Bacteria (Prokaryotic)"
+      - name: "Protista"
+        description: "Amoeba, Paramecium"
+      - name: "Fungi"
+        description: "Mushroom, Yeast"
+      - name: "Plantae"
+        description: "All plants"
+      - name: "Animalia"
+        description: "Invertebrates and Vertebrates"
+
+  invertebrate_classification:
+    type: hierarchy
+    title: "Classification of Invertebrates"
+    root: "Invertebrates"
+    children:
+      - Protozoa: [Amoeba]
+      - Porifera: [Sponges]
+      - Coelenterata: [Hydra, Jellyfish]
+      - Platyhelminthes: [Tapeworm]
+      - Ashelminthes: [Roundworm]
+      - Annelida: [Earthworm, Leech]
+      - Arthropoda: [Insects, Crab]
+      - Mollusca: [Snail, Octopus]
+      - Echinodermata: [Starfish]
+
+  silk_moth_lifecycle:
+    type: process
+    title: "Life Cycle of Silk Moth (Sericulture)"
+    keywords: [egg, larva, pupa, cocoon, adult]
+    steps:
+      - Eggs (on Mulberry leaves)
+      - Larva (Caterpillar/Feeding stage)
+      - Pupa (Inside Cocoon)
+      - Adult Silk Moth
+    cyclic: true
+
+  # ============================================================================
+  # UNIT 15: HEREDITY
+  # ============================================================================
+
+  chromosomes_structure:
+    type: structure
+    title: "Structure of a Chromosome"
+    main: "Chromosome"
+    components:
+      - name: "Centromere"
+        description: "Central attachment point"
+      - name: "Chromatids"
+        description: "The two thread-like strands"
+      - name: "DNA"
+        description: "Genetic material inside"
+      - name: "Genes"
+        description: "Functional units of heredity"
+
+  # ============================================================================
+  # UNIT 16, 17: ENVIRONMENT, EARTH & SPACE
+  # ============================================================================
+
+  ecosystem_components:
+    type: hierarchy
+    title: "Components of an Ecosystem"
+    root: "Ecosystem"
+    children:
+      - name: "Biotic (Living)"
+        children: [Producers, Consumers, Decomposers]
+      - name: "Abiotic (Non-living)"
+        children: [Sunlight, Air, Water, Soil, Temperature]
+
+  industrial_pollution:
+    type: process
+    title: "Formation of Acid Rain"
+    steps:
+      - Emission of SO2 and NOx (Factories/Cars)
+      - Mixing with Water Vapor in clouds
+      - Formation of Sulphuric/Nitric Acid
+      - Precipitation (Acid Rain)
+      - Damage to soil and monuments (e.g., Taj Mahal)
+    cyclic: false
+
+  comet_structure:
+    type: structure
+    title: "Structure of a Comet"
+    main: "Comet"
+    components:
+      - name: "Nucleus"
+        description: "Solid core of ice and dust"
+      - name: "Coma"
+        description: "Cloud of gas around nucleus"
+      - name: "Tail"
+        description: "Points away from the sun"
+
+  # ============================================================================
+  # UNIT 9: INFORMATION & COMMUNICATION TECHNOLOGY (ICT)
+  # ============================================================================
+
+  computer_system:
+    type: process
+    title: "IPOS Cycle (Computer Data Processing)"
+    steps:
+      - Input (Keyboard/Mouse)
+      - Processing (CPU)
+      - Output (Monitor/Printer)
+      - Storage (Hard Drive/RAM)
+    cyclic: true

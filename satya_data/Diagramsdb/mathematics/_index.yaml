@@ -1,0 +1,10 @@
+# Mathematics Diagrams
+# Place chapter-specific YAML files here
+
+metadata:
+  subject: "Mathematics"
+  grades: [10, 11, 12]
+  
+# Example structure:
+# - grade_10_chapter_01_algebra.yaml
+# - grade_10_chapter_02_geometry.yaml

@@ -1,0 +1,187 @@
+# ============================================================================
+# MASTER DATASET: COMPUTER SCIENCE GRADE 10 (NEB / SEE LEVEL)
+# Complete Curriculum Version 4.0 - Professional Edition
+# ============================================================================
+
+metadata:
+  subject: "Computer Science"
+  grade: 10
+  examination: "SEE (Secondary Education Examination)"
+  curriculum: "Nepal Education Board (NEB) - Newest Syllabus"
+  last_updated: "2024-05-22"
+
+diagrams:
+
+  # ============================================================================
+  # UNIT 1: NETWORKING & TELECOMMUNICATION (Advanced)
+  # ============================================================================
+
+  network_hardware_hierarchy:
+    type: hierarchy
+    title: "Network Connectivity Devices"
+    keywords: [Hub, Switch, Router, Bridge, NIC, Gateway]
+    root: "Network Hardware"
+    children:
+      - name: "Internal"
+        children: [NIC (Network Interface Card), Modem]
+      - name: "Interconnecting"
+        children: [Hub (Broadcast), Switch (Smart), Bridge]
+      - name: "Gateway & Routing"
+        children: [Router (Pathfinder), Gateway (Protocol Converter)]
+
+  hub_vs_switch:
+    type: comparison
+    title: "Network Hub vs. Network Switch"
+    item_a: "Hub"
+    item_b: "Switch"
+    similarities: [Connect multiple devices in a LAN, Central connection points, Use Star topology]
+    differences:
+      intelligence: ["Dumb device (Broadcasts to all ports)", "Smart device (Sends to specific MAC address)"]
+      bandwidth: ["Shared among all ports", "Dedicated to each port"]
+      transmission_mode: ["Half-duplex", "Full-duplex"]
+      data_collision: ["High chance of collisions", "Collisions are avoided"]
+
+  # ============================================================================
+  # UNIT 2: DATABASE MANAGEMENT SYSTEM (MS-ACCESS FOCUS)
+  # ============================================================================
+
+  ms_access_objects:
+    type: hierarchy
+    title: "Main Objects of MS-Access"
+    root: "MS-Access Database"
+    children:
+      - name: "Table"
+        description: "Primary object to store data in rows and columns."
+      - name: "Query"
+        description: "Extracts or retrieves specific data based on conditions."
+      - name: "Form"
+        description: "User-friendly interface for data entry and viewing."
+      - name: "Report"
+        description: "Formatted output for printing or summarizing data."
+
+  primary_key_concept:
+    type: structure
+    title: "Primary Key vs. Foreign Key"
+    main: "Relational Database"
+    components:
+      - name: "Primary Key"
+        description: "Unique identifier for each record in a table (No Null, No Duplicates)."
+      - name: "Foreign Key"
+        description: "A field in one table that links to the Primary Key of another table."
+      - name: "Relationship"
+        description: "Links tables together (One-to-One, One-to-Many, Many-to-Many)."
+
+  # ============================================================================
+  # UNIT 3: MODULAR PROGRAMMING (QBASIC Advanced)
+  # ============================================================================
+
+  modular_programming_types:
+    type: hierarchy
+    title: "Procedures in QBASIC"
+    root: "Modular Programming"
+    children:
+      - name: "Sub Procedure"
+        description: "Performs a task but does NOT return a value to the calling module."
+        keywords: [SUB, END SUB, CALL]
+      - name: "Function Procedure"
+        description: "Performs a task and returns a single value to the calling module."
+        keywords: [FUNCTION, END FUNCTION]
+
+  sub_vs_function:
+    type: comparison
+    title: "SUB Procedure vs. FUNCTION Procedure"
+    item_a: "SUB Procedure"
+    item_b: "FUNCTION Procedure"
+    similarities: [Modular blocks of code, Support arguments/parameters, Help in debugging]
+    differences:
+      return_value: ["Does not return a value", "Returns a single value"]
+      calling_method: ["Called using CALL statement", "Called by expression or assignment"]
+      name_suffix: ["Name doesn't have a type suffix", "Name has a type suffix ($, %, etc.)"]
+
+  parameters_vs_arguments:
+    type: comparison
+    title: "Formal vs. Actual Parameters"
+    item_a: "Formal Parameters"
+    item_b: "Actual Parameters (Arguments)"
+    differences:
+      location: ["Defined in the SUB/FUNCTION header", "Used in the CALLing statement"]
+      purpose: ["Variables that receive values", "Constants/Variables that provide values"]
+
+  # ============================================================================
+  # UNIT 4: C PROGRAMMING (Introduction for SEE)
+  # ============================================================================
+
+  c_program_structure:
+    type: process
+    title: "Structure of a C Program"
+    steps:
+      - Header Files (#include <stdio.h>)
+      - Main Function (void main() or int main())
+      - Variable Declaration (int a, b;)
+      - Processing/Input (scanf, calculations)
+      - Output (printf)
+      - Return/End (return 0;)
+    cyclic: false
+
+  # ============================================================================
+  # UNIT 5: ETHICAL & SOCIAL ISSUES
+  # ============================================================================
+
+  digital_signature_process:
+    type: process
+    title: "How Digital Signatures Work"
+    steps:
+      - Message Creation
+      - Hashing (Message converted to unique code)
+      - Encryption (Using Sender's Private Key)
+      - Transmission (Message + Signature)
+      - Decryption (Using Sender's Public Key)
+      - Verification (Matching hashes)
+    cyclic: false
+
+  # ============================================================================
+  # UNIT 6: CONTEMPORARY TECHNOLOGY (Modern Trends)
+  # ============================================================================
+
+  contemporary_tech_trends:
+    type: hierarchy
+    title: "Modern IT Trends"
+    root: "Information Technology"
+    children:
+      - name: "Cloud Computing"
+        description: "Storing and accessing data over the internet (Google Drive, iCloud)."
+      - name: "Artificial Intelligence (AI)"
+        description: "Machines simulating human intelligence."
+      - name: "IoT (Internet of Things)"
+        description: "Physical devices connected to the internet (Smart homes)."
+      - name: "Virtual Reality (VR)"
+        description: "Computer-generated 3D environment."
+      - name: "Big Data"
+        description: "Analyzing extremely large datasets for patterns."
+
+  cloud_service_models:
+    type: hierarchy
+    title: "Cloud Service Models"
+    root: "Cloud Services"
+    children:
+      - name: "SaaS"
+        description: "Software as a Service (e.g., Gmail, MS Office 365)"
+      - name: "PaaS"
+        description: "Platform as a Service (e.g., Google App Engine)"
+      - name: "IaaS"
+        description: "Infrastructure as a Service (e.g., Amazon Web Services - AWS)"
+
+  # ============================================================================
+  # UNIT 7: NUMBER SYSTEMS (Calculations Review)
+  # ============================================================================
+
+  binary_arithmetic_rules:
+    type: comparison
+    title: "Binary Addition vs. Subtraction"
+    item_a: "Addition"
+    item_b: "Subtraction"
+    differences:
+      rules_1: ["0+0=0", "0-0=0"]
+      rules_2: ["0+1=1", "1-0=1"]
+      rules_3: ["1+0=1", "1-1=0"]
+      rules_4: ["1+1=10 (0 carry 1)", "10-1=1 (Borrow 1)"]

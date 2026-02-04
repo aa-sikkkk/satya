@@ -1,0 +1,10 @@
+# Computer Science Diagrams
+# Place chapter-specific YAML files here
+
+metadata:
+  subject: "Computer Science"
+  grades: [10, 11, 12]
+  
+# Example structure:
+# - grade_10_chapter_01_intro.yaml
+# - grade_11_chapter_01_programming.yaml

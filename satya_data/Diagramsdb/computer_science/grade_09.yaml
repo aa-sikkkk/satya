@@ -1,0 +1,210 @@
+# ============================================================================
+# MASTER DATASET: COMPUTER SCIENCE GRADE 9 (NEB NEPAL)
+# Full Curriculum Version 3.0 - Extended Master Edition
+# ============================================================================
+
+metadata:
+  subject: "Computer Science"
+  grade: 9
+  curriculum: "Nepal Education Board (NEB) - New Syllabus"
+  last_updated: "2024-05-22"
+
+diagrams:
+
+  # ============================================================================
+  # UNIT 1: COMPUTER ARCHITECTURE & MEMORY
+  # ============================================================================
+
+  von_neumann_architecture:
+    type: structure
+    title: "Computer Architecture (Von Neumann Model)"
+    keywords: [CPU, Input, Output, Memory, Bus]
+    main: "Computer System"
+    components:
+      - name: "Input Unit"
+        description: "Accepts raw data and instructions."
+      - name: "CPU"
+        children: [ALU, Control Unit, Registers]
+      - name: "Memory Unit"
+        description: "Primary (RAM/ROM) and Secondary (Disk)."
+      - name: "Output Unit"
+        description: "Presents processed information."
+      - name: "Bus System"
+        description: "Data Bus, Address Bus, and Control Bus."
+
+  memory_hierarchy:
+    type: hierarchy
+    title: "Computer Memory Hierarchy"
+    root: "Memory"
+    children:
+      - name: "Internal (Fastest)"
+        children: [CPU Registers, Cache Memory]
+      - name: "Primary (Volatile)"
+        children: [RAM (SRAM, DRAM), ROM (PROM, EPROM, EEPROM)]
+      - name: "Secondary (Mass Storage)"
+        children: [Magnetic (HDD), Optical (DVD), Flash (SSD, USB)]
+
+  # ============================================================================
+  # UNIT 2: NUMBER SYSTEMS (Mathematical Foundations)
+  # ============================================================================
+
+  number_system_master:
+    type: hierarchy
+    title: "Digital Number Systems"
+    root: "Number Systems"
+    children:
+      - name: "Decimal (Base 10)"
+        description: "Digits 0-9; used by humans."
+      - name: "Binary (Base 2)"
+        description: "Digits 0, 1; machine language."
+      - name: "Octal (Base 8)"
+        description: "Digits 0-7."
+      - name: "Hexadecimal (Base 16)"
+        description: "Digits 0-9, A-F; memory addressing."
+
+  conversion_rules:
+    type: process
+    title: "Number System Conversion Process"
+    steps:
+      - Decimal to Any: "Successive division by target base, collect remainders."
+      - Any to Decimal: "Multiply digits by base power and sum up."
+      - Binary to Octal: "Group bits into 3 from right to left."
+      - Binary to Hex: "Group bits into 4 from right to left."
+    cyclic: false
+
+  # ============================================================================
+  # UNIT 3: COMPUTER LOGIC (Logic Gates)
+  # ============================================================================
+
+  logic_gates_hierarchy:
+    type: hierarchy
+    title: "Classification of Logic Gates"
+    root: "Logic Gates"
+    children:
+      - name: "Primary Gates"
+        children: [AND, OR, NOT]
+      - name: "Universal Gates"
+        children: [NAND, NOR]
+      - name: "Special Purpose"
+        children: [XOR, XNOR]
+
+  gate_functions:
+    type: structure
+    title: "Boolean Functions and Truth Tables"
+    main: "Logic Operations"
+    components:
+      - name: "AND Gate"
+        description: "Output 1 only if all inputs are 1 (Product: A.B)."
+      - name: "OR Gate"
+        description: "Output 1 if at least one input is 1 (Sum: A+B)."
+      - name: "NOT Gate"
+        description: "Inverts input (Complement: A')."
+      - name: "NAND Gate"
+        description: "Opposite of AND; Output 0 only if all inputs 1."
+
+  # ============================================================================
+  # UNIT 4: NETWORKING TRANSMISSION MEDIA
+  # ============================================================================
+
+  transmission_media:
+    type: hierarchy
+    title: "Network Communication Channels"
+    root: "Transmission Media"
+    children:
+      - name: "Guided (Wired)"
+        children:
+          - Twisted Pair (UTP, STP)
+          - Coaxial Cable (TV Cables)
+          - Fiber Optics (Fastest, uses light)
+      - name: "Unguided (Wireless)"
+        children:
+          - Radio waves (WiFi, Bluetooth)
+          - Microwave (Satellite)
+          - Infrared (TV Remotes)
+
+  # ============================================================================
+  # UNIT 5: WEB TECHNOLOGY (HTML)
+  # ============================================================================
+
+  html_tag_structure:
+    type: structure
+    title: "Basic HTML Document Structure"
+    main: "<html>"
+    components:
+      - name: "<head>"
+        description: "Meta info, <title>, Styles."
+      - name: "<body>"
+        description: "Visible content like <h1>, <p>, <img>."
+      - name: "List Tags"
+        description: "<ul> (unordered), <ol> (ordered), <li> (item)."
+      - name: "Table Tags"
+        description: "<table>, <tr> (row), <td> (data)."
+
+  # ============================================================================
+  # UNIT 6: QBASIC PROGRAMMING (Control Structures)
+  # ============================================================================
+
+  qbasic_statements:
+    type: hierarchy
+    title: "QBASIC Statement Types"
+    root: "Statements"
+    children:
+      - name: "Input/Output"
+        children: [INPUT, PRINT, LPRINT]
+      - name: "Assignment"
+        children: [LET, READ-DATA]
+      - name: "Control (Branching/Looping)"
+        children: [IF...THEN, SELECT CASE, FOR...NEXT, WHILE...WEND]
+
+  looping_logic:
+    type: comparison
+    title: "FOR...NEXT vs WHILE...WEND"
+    item_a: "FOR...NEXT (Counter Loop)"
+    item_b: "WHILE...WEND (Conditional Loop)"
+    similarities: [Used to repeat a block of code, Require a termination condition]
+    differences:
+      initialization: ["Built-in (I = 1 TO 10)", "Done before the loop"]
+      increment: ["Automatic (STEP)", "Must be done manually inside loop"]
+      usage: ["When number of iterations is known", "When iterations depend on a condition"]
+
+  # ============================================================================
+  # UNIT 7: CYBER ETHICS & NEPAL CYBER LAW
+  # ============================================================================
+
+  cyber_law_nepal:
+    type: structure
+    title: "Electronic Transaction Act (ETA) 2063"
+    keywords: [Nepal, Law, ETA, Cyber Crime]
+    main: "Cyber Law Objectives"
+    components:
+      - name: "Legal Validity"
+        description: "Provides legal status to digital signatures and records."
+      - name: "Crime Prevention"
+        description: "Defines punishment for hacking, data theft, and piracy."
+      - name: "E-Commerce"
+        description: "Promotes secure online business in Nepal."
+
+  # ============================================================================
+  # UNIT 8: OFFICE AUTOMATION (Extended Features)
+  # ============================================================================
+
+  ms_powerpoint_logic:
+    type: process
+    title: "Presentation Development Life Cycle"
+    steps:
+      - Plan Content (Audience analysis)
+      - Design Layout (Themes and Master Slide)
+      - Add Multimedia (Images, Video, Audio)
+      - Animation & Transition (Entry/Exit effects)
+      - Slide Show (Rehearsal and delivery)
+    cyclic: false
+
+  excel_formulas_functions:
+    type: comparison
+    title: "Formulas vs Functions in Excel"
+    item_a: "Formulas"
+    item_b: "Functions"
+    differences:
+      definition: ["User-defined equation (=A1+B1)", "Built-in pre-defined formula (=SUM(A1:B1))"]
+      complexity: ["Manual calculation", "Handles large ranges easily"]
+      examples: ["= (B2*13/100)", "=MAX(A1:A50), =AVERAGE(C1:C10)"]

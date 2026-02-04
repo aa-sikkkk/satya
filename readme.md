@@ -155,7 +155,9 @@ Satya proves that **intelligent, personalized education doesn't require expensiv
 #### Visual Explanations
 
 - **ASCII Diagrams** - Generates structural, process, and flowchart diagrams from text
-- **Pattern Recognition** - Identifies cycles, hierarchies, and sequential steps
+- **Grade-Aware Library** - Pre-built library of age-appropriate diagrams (Grades 8-12)
+- **Natural Triggering** - Intelligent logic to show diagrams only when visually helpful
+- **Pattern Recognition** - Identifies cycles, hierarchies, and sequential steps from RAG content
 - **Zero-Dependency** - Pure text rendering requiring no external libraries
 
 #### User Interfaces
@@ -199,7 +201,7 @@ graph TB
     
     subgraph "Application Layer"
         RAG[RAG Retrieval Engine]
-        DG[Diagram Generator]
+        DS[Diagram Service]
         PM[Progress Manager]
     end
     
@@ -210,21 +212,23 @@ graph TB
     
     subgraph "Data Layer"
         CDB[(ChromaDB)]
+        DL[(Diagram Library)]
         PROG[Progress Data]
     end
     
     CLI --> RAG
     CLI --> MH
-    CLI --> DG
+    CLI --> DS
     GUI --> RAG
     GUI --> MH
-    GUI --> DG
+    GUI --> DS
     
     PM --> PROG
     RAG --> CDB
     MH --> PH
     PH --> CDB
-    DG -.-> MH
+    DS --> DL
+    DS -.-> MH
 ```
 
 ### Component Architecture
@@ -302,11 +306,11 @@ ChromaDB Storage
 
 #### 4. Diagram Generation Engine
 
-**Implementation** (`system/diagrams/custom_generator.py`)
+**Implementation** (`system/diagrams/diagram_service.py`)
 
-- **Pattern Mining** - Regex-based extraction of processes, cycles, and hierarchies from text
-- **Template System** - Pre-defined ASCII art templates for common structures
-- **Zero-Dependency** - Generates standard text output compatible with any terminal/UI
+- **Modular Architecture** - Separated concerns: Service (Logic), Library (Data), Renderer (Visuals)
+- **Library-First Approach** - Checks grade-appropriate manual diagrams before attempting generation
+- **Pattern Mining** - Regex-based extraction of processes, cycles, and hierarchies from text as a fallback
 - **Context-Integrated** - Uses RAG context to enrich diagram labels
 
 **Generation Flow:**
@@ -314,11 +318,13 @@ ChromaDB Storage
 ```
 Answer Text
     ↓
-Pattern Recognition (Cycle/Process/Structure)
+Check Diagram Library (Grade/Subject Filter)
     ↓
-Entity Extraction (LLM/Regex)
+Match Found? ──Yes──→ Render Pre-built Diagram
+    ↓ No
+Analyze Visual Potential (should_show_diagram)
     ↓
-Template Selection
+Pattern Recognition / AI Extraction
     ↓
 ASCII Rendering
 ```
@@ -377,7 +383,11 @@ Satya/
 │   └── rag_data_preparation/         # Data pipeline utilities
 │
 ├── system/
-│   ├── diagrams/                     # Diagram generation engine
+│   ├── diagrams/                     # Modular diagram system
+│   │   ├── diagram_service.py        # Orchestration logic
+│   │   ├── diagram_library.py        # YAML library manager
+│   │   ├── diagram_renderer.py       # ASCII/Mermaid rendering
+│   │   └── diagram_config.py         # Visual configuration
 │   ├── input_processing/             # Text normalization & cleaning
 │   ├── rag/                          # RAG retrieval engine
 │   └── utils/                        # Shared utilities
@@ -805,12 +815,19 @@ Special thanks to:
 
 ## Version History
 
-### Current Version: 2.1 (January 2026)
+### Current Version: 2.2 (February 2026)
 
 **Major Features:**
+- **Diagram System Overhaul** - New modular architecture
+  - `system.diagrams` package replacing monolithic generator
+  - Grade-aware Diagram Library (Grades 8-12)
+  - Natural triggering logic (`should_show_diagram`) to reduce visual clutter
+- **CLI/GUI Parity** - Complete synchronization of interfaces
+  - Reconciled AI grading logic with identical prompts and evaluation
+  - Robust fallback for missing `correct_answer` fields in datasets
+  - Rich-text diagram rendering in terminal
 - **Input Normalization System** - Production-ready adaptive learning layer
   - Rule-based core with 4-layer noise removal
-  - LanguageTool integration (offline grammar/spell correction)
   - Automated pattern mining from production logs
   - Human-in-the-loop learning workflow
 - **Enhanced RAG Architecture**

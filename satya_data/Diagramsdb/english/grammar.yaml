@@ -1,0 +1,168 @@
+# ============================================================================
+# MASTER DATASET: ENGLISH GRAMMAR & LITERATURE (GRADES 8-12)
+# NEB Nepal Curriculum - Comprehensive Version 2.0
+# ============================================================================
+
+metadata:
+  subject: "English"
+  grades: ["8", "9", "10", "11", "12"]
+  curriculum: "NEB (SEE & Higher Secondary)"
+  last_updated: "2024-05-22"
+
+diagrams:
+
+  # ----------------------------------------------------------------------------
+  # UNIT 1: VERB DYNAMICS & TRANSFORMATIONS (High Exam Weightage)
+  # ----------------------------------------------------------------------------
+
+  conditional_sentences_master:
+    type: hierarchy
+    title: "Conditional Sentences (If-Clauses)"
+    keywords: [if clause, real, unreal, hypothetical]
+    root: "Conditionals"
+    children:
+      - name: "Zero Conditional (Facts)"
+        description: "If + Simple Present, Simple Present"
+        example: "If you heat ice, it melts."
+      - name: "Type 1 (Possible)"
+        description: "If + Simple Present, Will + Verb"
+        example: "If it rains, we will stay home."
+      - name: "Type 2 (Unreal Present)"
+        description: "If + Simple Past, Would + Verb"
+        example: "If I were a bird, I would fly."
+      - name: "Type 3 (Impossible Past)"
+        description: "If + Past Perfect, Would have + V3"
+        example: "If he had studied, he would have passed."
+
+  reported_speech_rules:
+    type: process
+    title: "Steps for Indirect Speech Transformation"
+    steps:
+      - Change the Reporting Verb (said -> told/asked/ordered)
+      - Remove inverted commas and add 'that/if/whether/to'
+      - Change Pronouns (First/Second person -> Third person)
+      - Backshift Tenses (Present -> Past, Past -> Past Perfect)
+      - Change Time and Place (now -> then, here -> there, today -> that day)
+    cyclic: false
+
+  question_tag_rules:
+    type: comparison
+    title: "Question Tag Mechanics"
+    item_a: "Positive Statement"
+    item_b: "Negative Statement"
+    similarities: [Use auxiliary verbs, Always use pronouns, End with ?]
+    differences:
+      tag_polarity: ["Negative Tag (e.g., isn't he?)", "Positive Tag (e.g., is he?)"]
+      comma_usage: ["Statement, Tag?", "Statement, Tag?"]
+      imperative_special: ["Let's... -> shall we?", "Close the door -> will you?"]
+
+  # ----------------------------------------------------------------------------
+  # UNIT 2: ADVANCED SENTENCE SYNTHESIS (Grade 11-12 Focus)
+  # ----------------------------------------------------------------------------
+
+  clause_classification:
+    type: hierarchy
+    title: "Classification of Clauses"
+    root: "Clauses"
+    children:
+      - name: "Independent Clause"
+        description: "Can stand alone as a complete sentence."
+      - name: "Dependent (Subordinate)"
+        children:
+          - Noun Clause: "Acts as a subject or object."
+          - Adjective (Relative) Clause: "Defines a noun (who, which, that)."
+          - Adverbial Clause: "Shows time, reason, or condition."
+
+  relative_clauses_deep:
+    type: comparison
+    title: "Defining vs. Non-Defining Clauses"
+    item_a: "Defining Relative Clause"
+    item_b: "Non-Defining Relative Clause"
+    differences:
+      necessity: ["Essential to sentence meaning", "Extra information; not essential"]
+      punctuation: ["No commas used", "Enclosed in commas ( , , )"]
+      pronoun_that: ["Can use 'that'", "Cannot use 'that'"]
+      example: ["The boy who won is my friend.", "John, who won, is my friend."]
+
+  article_vs_essay:
+    type: comparison
+    title: "News Report vs Feature Article"
+    item_a: "News Report"
+    item_b: "Feature Article"
+    differences:
+      tone: ["Objective, factual, neutral", "Descriptive, creative, subjective"]
+      tense: ["Past tense mostly", "Varied tenses"]
+      structure: ["Inverted pyramid (Important first)", "Narrative/Creative flow"]
+      byline: ["Place and date included", "Author name only"]
+
+  # ----------------------------------------------------------------------------
+  # UNIT 4: LITERARY ANALYSIS (Class 11-12 NEB Literature)
+  # ----------------------------------------------------------------------------
+
+  short_story_elements:
+    type: structure
+    title: "Freytag's Pyramid (Plot Structure)"
+    main: "Story Arc"
+    components:
+      - name: "Exposition"
+        description: "Setting the scene and characters."
+      - name: "Rising Action"
+        description: "Series of conflicts leading to climax."
+      - name: "Climax"
+        description: "The turning point or highest tension."
+      - name: "Falling Action"
+        description: "The fallout from the climax."
+      - name: "Resolution (Denouement)"
+        description: "The final outcome of the conflict."
+
+  literary_devices_advanced:
+    type: hierarchy
+    title: "Advanced Literary Devices"
+    root: "Devices"
+    children:
+      - name: "Irony"
+        children: [Verbal, Situational, Dramatic]
+      - name: "Imagery"
+        children: [Visual, Auditory, Olfactory, Gustatory, Tactile]
+      - name: "Symbolism"
+        description: "Objects representing abstract ideas (e.g., Dove = Peace)."
+      - name: "Paradox"
+        description: "A self-contradictory statement that reveals a truth."
+
+  narrative_perspective:
+    type: comparison
+    title: "Point of View (POV)"
+    item_a: "First Person"
+    item_b: "Third Person Omniscient"
+    item_c: "Third Person Limited"
+    differences:
+      pronouns: ["I, Me, We", "He, She, They", "He, She, They"]
+      knowledge: ["Character's internal thoughts only", "Knows thoughts of ALL characters", "Knows thoughts of ONE character"]
+
+  # ----------------------------------------------------------------------------
+  # UNIT 5: PRACTICAL GRAMMAR (Common Mistakes)
+  # ----------------------------------------------------------------------------
+
+  subject_verb_agreement_tricky:
+    type: hierarchy
+    title: "Tricky Subject-Verb Rules"
+    root: "S-V Agreement"
+    children:
+      - name: "Collective Nouns"
+        description: "Usually singular (The team IS winning)."
+      - name: "Indefinite Pronouns"
+        description: "Each, Everyone, Someone -> Singular verb."
+      - name: "Either/Or & Neither/Nor"
+        description: "Verb agrees with the CLOSEST subject."
+      - name: "Plural-looking Singulars"
+        description: "Mathematics, Physics, News -> Singular verb."
+
+  preposition_usage_map:
+    type: comparison
+    title: "Prepositions of Time/Place"
+    item_a: "At"
+    item_b: "On"
+    item_c: "In"
+    differences:
+      time: ["Precise time (At 5:00, At noon)", "Days/Dates (On Monday, On May 1st)", "Months/Years/Long periods (In 2024, In Summer)"]
+      place: ["Specific point (At the door)", "Surface (On the table)", "Enclosed space (In the room)"]

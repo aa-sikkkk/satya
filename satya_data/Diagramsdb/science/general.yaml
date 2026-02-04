@@ -1,0 +1,372 @@
+# ============================================================================
+# GENERAL SCIENCE DIAGRAMS - Universal Concepts (Grades 8-12)
+# ============================================================================
+
+metadata:
+  subject: "Science"
+  grades: [8, 9, 10, 11, 12]
+  curriculum: "NEB Nepal - Universal Topics"
+  last_updated: "2026-02-04"
+
+diagrams:
+
+  # ----------------------------------------------------------------------------
+  # BIOLOGY - Life Processes
+  # ----------------------------------------------------------------------------
+
+  photosynthesis:
+    type: process
+    title: "Photosynthesis Process"
+    keywords:
+      - photosynthesis
+      - chlorophyll
+      - light reaction
+      - dark reaction
+      - calvin cycle
+      - carbon fixation
+      - glucose
+      - how plants make food
+      - green plants
+      - sunlight
+    steps:
+      - Light Absorption
+      - Water Splitting
+      - Electron Transport
+      - ATP Formation
+      - Carbon Fixation
+      - Glucose Synthesis
+    cyclic: false
+
+  respiration:
+    type: process
+    title: "Cellular Respiration"
+    keywords:
+      - respiration
+      - cellular respiration
+      - breathing
+      - glycolysis
+      - krebs cycle
+      - atp
+      - energy
+      - mitochondria
+      - aerobic
+      - anaerobic
+    steps:
+      - Glycolysis
+      - Pyruvate Oxidation
+      - Krebs Cycle
+      - Electron Transport
+      - ATP Synthesis
+    cyclic: false
+
+  water_cycle:
+    type: process
+    title: "Water Cycle (Hydrological Cycle)"
+    keywords:
+      - water cycle
+      - hydrological cycle
+      - evaporation
+      - condensation
+      - precipitation
+      - rain
+      - clouds
+    steps:
+      - Evaporation
+      - Transpiration
+      - Condensation
+      - Cloud Formation
+      - Precipitation
+      - Collection
+    cyclic: true
+
+  nitrogen_cycle:
+    type: process
+    title: "Nitrogen Cycle"
+    keywords:
+      - nitrogen cycle
+      - nitrogen fixation
+      - denitrification
+      - nitrification
+      - ammonia
+    steps:
+      - Nitrogen Fixation
+      - Ammonification
+      - Nitrification
+      - Assimilation
+      - Denitrification
+    cyclic: true
+
+  carbon_cycle:
+    type: process
+    title: "Carbon Cycle"
+    keywords:
+      - carbon cycle
+      - carbon dioxide
+      - greenhouse
+      - fossil fuels
+      - decomposition
+    steps:
+      - Photosynthesis
+      - Respiration
+      - Decomposition
+      - Combustion
+      - Ocean Absorption
+    cyclic: true
+
+  cell_structure:
+    type: structure
+    title: "Cell Structure"
+    keywords:
+      - cell
+      - plant cell
+      - animal cell
+      - organelles
+      - nucleus
+      - mitochondria
+      - cytoplasm
+    main: "Cell"
+    components:
+      - name: "Cell Membrane"
+        description: "Controls substance entry/exit"
+      - name: "Nucleus"
+        description: "Contains DNA"
+      - name: "Mitochondria"
+        description: "Produces ATP (energy)"
+      - name: "Cytoplasm"
+        description: "Gel-like fluid"
+      - name: "Chloroplast"
+        description: "Photosynthesis (plants)"
+      - name: "Vacuole"
+        description: "Storage"
+
+  digestive_system:
+    type: process
+    title: "Human Digestive System"
+    keywords:
+      - digestion
+      - digestive system
+      - stomach
+      - intestine
+      - enzymes
+      - food
+      - absorption
+    steps:
+      - Ingestion (Mouth)
+      - Digestion (Stomach)
+      - Absorption (Small Intestine)
+      - Assimilation
+      - Egestion
+    cyclic: false
+
+  mitosis_vs_meiosis:
+    type: comparison
+    title: "Mitosis vs Meiosis"
+    keywords:
+      - mitosis
+      - meiosis
+      - cell division
+      - chromosomes
+      - daughter cells
+    item_a: "Mitosis"
+    item_b: "Meiosis"
+    similarities:
+      - Cell division process
+      - DNA replication first
+      - Involves chromosomes
+    differences:
+      divisions: ["1 division", "2 divisions"]
+      cells: ["2 identical", "4 different"]
+      purpose: ["Growth/repair", "Reproduction"]
+
+  food_chain:
+    type: process
+    title: "Food Chain / Food Web"
+    keywords:
+      - food chain
+      - food web
+      - producer
+      - consumer
+      - decomposer
+      - ecosystem
+      - trophic level
+    steps:
+      - Producers (Plants)
+      - Primary Consumers
+      - Secondary Consumers
+      - Tertiary Consumers
+      - Decomposers
+    cyclic: false
+
+  # ----------------------------------------------------------------------------
+  # PHYSICS - Core Concepts
+  # ----------------------------------------------------------------------------
+
+  newtons_laws:
+    type: structure
+    title: "Newton's Laws of Motion"
+    keywords:
+      - newton
+      - laws of motion
+      - inertia
+      - force
+      - acceleration
+      - action reaction
+    main: "Newton's Laws"
+    components:
+      - name: "First Law (Inertia)"
+        description: "Object stays at rest or motion unless acted upon"
+      - name: "Second Law (F=ma)"
+        description: "Force equals mass times acceleration"
+      - name: "Third Law"
+        description: "Every action has equal opposite reaction"
+
+  simple_machines:
+    type: hierarchy
+    title: "Types of Simple Machines"
+    keywords:
+      - simple machines
+      - lever
+      - pulley
+      - inclined plane
+      - mechanical advantage
+    root: "Simple Machines"
+    children:
+      - Lever
+      - Pulley
+      - Wheel and Axle
+      - Inclined Plane
+      - Wedge
+      - Screw
+
+  light_reflection:
+    type: structure
+    title: "Laws of Reflection"
+    keywords:
+      - reflection
+      - mirror
+      - incident ray
+      - reflected ray
+      - angle of incidence
+      - light
+    main: "Reflection"
+    components:
+      - name: "Incident Ray"
+        description: "Light ray hitting surface"
+      - name: "Reflected Ray"
+        description: "Light ray bouncing back"
+      - name: "Normal"
+        description: "Perpendicular to surface"
+      - name: "Law"
+        description: "Angle of incidence = Angle of reflection"
+
+  electric_circuit:
+    type: structure
+    title: "Electric Circuit Components"
+    keywords:
+      - circuit
+      - electricity
+      - current
+      - voltage
+      - resistance
+      - ohm
+    main: "Electric Circuit"
+    components:
+      - name: "Battery/Cell"
+        description: "Provides voltage (EMF)"
+      - name: "Resistor"
+        description: "Opposes current flow"
+      - name: "Ammeter"
+        description: "Measures current (series)"
+      - name: "Voltmeter"
+        description: "Measures voltage (parallel)"
+
+  # ----------------------------------------------------------------------------
+  # CHEMISTRY - Core Concepts
+  # ----------------------------------------------------------------------------
+
+  atom_structure:
+    type: structure
+    title: "Atomic Structure"
+    keywords:
+      - atom
+      - atomic structure
+      - proton
+      - neutron
+      - electron
+      - nucleus
+      - shell
+    main: "Atom"
+    components:
+      - name: "Nucleus"
+        description: "Contains protons (+) and neutrons"
+      - name: "Protons"
+        description: "Positive charge, determines element"
+      - name: "Neutrons"
+        description: "No charge, adds mass"
+      - name: "Electrons"
+        description: "Negative charge, orbits nucleus"
+      - name: "Shells"
+        description: "Electron energy levels"
+
+  acids_vs_bases:
+    type: comparison
+    title: "Acids vs Bases"
+    keywords:
+      - acid
+      - base
+      - alkali
+      - pH
+      - indicator
+      - neutralization
+    item_a: "Acids"
+    item_b: "Bases"
+    similarities:
+      - Electrolytes
+      - React with each other
+      - Affect indicators
+    differences:
+      ph: ["pH < 7", "pH > 7"]
+      taste: ["Sour", "Bitter"]
+      touch: ["Corrosive", "Soapy/slippery"]
+      litmus: ["Turns blue to red", "Turns red to blue"]
+
+  chemical_bonding:
+    type: comparison
+    title: "Ionic vs Covalent Bonding"
+    keywords:
+      - ionic bond
+      - covalent bond
+      - chemical bond
+      - electron transfer
+      - electron sharing
+    item_a: "Ionic Bond"
+    item_b: "Covalent Bond"
+    similarities:
+      - Involves electrons
+      - Forms compounds
+      - Achieves stability
+    differences:
+      mechanism: ["Electron transfer", "Electron sharing"]
+      occurs: ["Metal + Non-metal", "Non-metal + Non-metal"]
+      state: ["Solid at room temp", "Can be gas/liquid/solid"]
+
+  states_of_matter:
+    type: comparison
+    title: "States of Matter"
+    keywords:
+      - states of matter
+      - solid
+      - liquid
+      - gas
+      - plasma
+      - particles
+    item_a: "Solid"
+    item_b: "Liquid"
+    similarities:
+      - Made of particles
+      - Have mass
+      - Occupy space
+    differences:
+      shape: ["Fixed shape", "Takes container shape"]
+      volume: ["Fixed volume", "Fixed volume"]
+      particles: ["Tightly packed", "Loosely arranged"]

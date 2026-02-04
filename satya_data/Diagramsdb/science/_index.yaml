@@ -1,0 +1,10 @@
+# Science Diagrams - Grade 10
+# Place chapter-specific YAML files here
+
+metadata:
+  subject: "Science"
+  grades: [10]
+  
+# Example structure:
+# - grade_10_chapter_01_life_processes.yaml
+# - grade_10_chapter_02_control_coordination.yaml

@@ -1,0 +1,211 @@
+# ============================================================================
+# MASTER DATASET: COMPUTER SCIENCE GRADE 8 (NEB NEPAL)
+# Full Curriculum Version 2.0 - Complete Edition
+# ============================================================================
+
+metadata:
+  subject: "Computer Science"
+  grade: 8
+  curriculum: "Nepal Education Board (NEB) / CDC Nepal"
+  last_updated: "2024-05-22"
+
+diagrams:
+
+  # ============================================================================
+  # UNIT 1: COMPUTER ORGANIZATION & HARDWARE
+  # ============================================================================
+
+  cpu_internal_structure:
+    type: structure
+    title: "The Central Processing Unit (CPU) Components"
+    keywords: [ALU, CU, Registers, Brain of Computer]
+    main: "Central Processing Unit"
+    components:
+      - name: "Arithmetic Logic Unit (ALU)"
+        description: "Performs mathematical and logical operations."
+      - name: "Control Unit (CU)"
+        description: "Directs operations and coordinates between components."
+      - name: "Registers"
+        description: "Temporary high-speed storage locations within the CPU."
+      - name: "Internal Bus"
+        description: "Pathways for data travel inside the CPU."
+
+  system_software_hierarchy:
+    type: hierarchy
+    title: "Classification of Software"
+    root: "Software"
+    children:
+      - name: "System Software"
+        children:
+          - Operating System (Windows, Linux)
+          - Device Drivers
+          - Utility Software (Antivirus, Disk Cleaners)
+          - Language Processors (Compiler, Interpreter)
+      - name: "Application Software"
+        children:
+          - Customized (Payrolls)
+          - Packaged (MS Word, Excel, Photoshop)
+
+  # ============================================================================
+  # UNIT 2: OPERATING SYSTEMS & GUI
+  # ============================================================================
+
+  os_functions:
+    type: hierarchy
+    title: "Functions of an Operating System"
+    root: "OS Roles"
+    children:
+      - name: "Process Management"
+        description: "Handles running multiple programs"
+      - name: "Memory Management"
+        description: "Allocates RAM for different tasks"
+      - name: "File Management"
+        description: "Organizes data in folders and files"
+      - name: "Security"
+        description: "Password protection and user accounts"
+
+  cli_vs_gui:
+    type: comparison
+    title: "CLI vs GUI Operating Systems"
+    item_a: "Command Line Interface (CLI)"
+    item_b: "Graphical User Interface (GUI)"
+    similarities: [Manage hardware, Run applications, Provide user interaction]
+    differences:
+      interaction: ["Typing commands", "Icons, menus, and mouse clicks"]
+      learning_curve: ["Difficult for beginners", "User-friendly"]
+      multitasking: ["Limited", "Fully supported"]
+      examples: ["MS-DOS, Disk Operating System", "Windows 11, macOS"]
+
+  # ============================================================================
+  # UNIT 3: COMPUTER NETWORKING (High Weightage)
+  # ============================================================================
+
+  network_topology_types:
+    type: hierarchy
+    title: "Computer Network Topologies"
+    keywords: [bus, star, ring, mesh, connections]
+    root: "Topologies"
+    children:
+      - name: "Bus Topology"
+        description: "All nodes connected to a single central cable (Backbone)."
+      - name: "Star Topology"
+        description: "Nodes connected to a central Hub or Switch (Most common in labs)."
+      - name: "Ring Topology"
+        description: "Each node connects to exactly two other nodes, forming a circle."
+      - name: "Mesh Topology"
+        description: "Every node connected to every other node (Reliable but expensive)."
+
+  network_types:
+    type: hierarchy
+    title: "Network Scale (LAN, MAN, WAN)"
+    root: "Network Coverage"
+    children:
+      - name: "LAN (Local Area)"
+        description: "Small area like a room or school building."
+      - name: "MAN (Metropolitan)"
+        description: "Connects multiple LANs across a city."
+      - name: "WAN (Wide Area)"
+        description: "Spans across countries or the entire world (Internet)."
+
+  # ============================================================================
+  # UNIT 4: INTERNET AND WEB TECHNOLOGIES
+  # ============================================================================
+
+  browser_vs_search_engine:
+    type: comparison
+    title: "Web Browser vs Search Engine"
+    item_a: "Web Browser"
+    item_b: "Search Engine"
+    similarities: [Used to access information online, Require internet]
+    differences:
+      definition: ["Software used to open websites", "Website used to find other websites"]
+      examples: ["Google Chrome, Firefox, Safari", "Google, Bing, Yahoo"]
+      installation: ["Must be installed on PC", "Accessed through a browser"]
+
+  # ============================================================================
+  # UNIT 5: PROGRAMMING LOGIC & QBASIC (Core Concepts)
+  # ============================================================================
+
+  flowchart_symbols:
+    type: structure
+    title: "Standard Flowchart Symbols"
+    main: "Flowcharting"
+    components:
+      - name: "Oval (Terminal)"
+        description: "Indicates START and STOP."
+      - name: "Parallelogram"
+        description: "Used for INPUT and OUTPUT."
+      - name: "Rectangle"
+        description: "Used for PROCESS (Calculations)."
+      - name: "Diamond"
+        description: "Used for DECISION (Yes/No questions)."
+      - name: "Flow Lines (Arrows)"
+        description: "Indicate the direction of flow."
+
+  algorithm_to_program:
+    type: process
+    title: "Steps in Problem Solving"
+    steps:
+      - Problem Identification (Understanding the task)
+      - Algorithm (Step-by-step logic in English)
+      - Flowchart (Visual representation)
+      - Coding (Writing in QBASIC/Python)
+      - Debugging (Finding and fixing errors)
+      - Implementation (Running the final program)
+    cyclic: false
+
+  qbasic_elements:
+    type: hierarchy
+    title: "Elements of QBASIC"
+    root: "QBASIC Components"
+    children:
+      - name: "Constants"
+        children: [Numeric (10, 2.5), String ("Hello", "Grade 8")]
+      - name: "Variables"
+        children: [Numeric (A, B1), String (N$, ADDR$)]
+      - name: "Operators"
+        children: [Arithmetic (+, -, *, /), Relational (<, >, =), Logical (AND, OR, NOT)]
+
+  # ============================================================================
+  # UNIT 6: MULTIMEDIA & CYBER ETHICS
+  # ============================================================================
+
+  multimedia_components:
+    type: hierarchy
+    title: "Components of Multimedia"
+    root: "Multimedia"
+    children:
+      - Text: "Alphabetical and numerical data"
+      - Graphics: "Still images and drawings"
+      - Audio: "Sound and music"
+      - Video: "Moving pictures"
+      - Animation: "Computer-generated motion"
+
+  cyber_ethics_dos_donts:
+    type: comparison
+    title: "Cyber Ethics: Rules of the Internet"
+    item_a: "Good Practices (Dos)"
+    item_b: "Cyber Crimes (Don'ts)"
+    differences:
+      privacy: ["Use strong passwords", "Share passwords with strangers"]
+      copyright: ["Give credit to authors", "Pirate software and movies"]
+      behavior: ["Be polite and respectful", "Cyber-bullying or Harassment"]
+      security: ["Use Antivirus", "Open suspicious email links"]
+
+  # ============================================================================
+  # UNIT 7: WORD PROCESSING & SPREADSHEETS (Concepts)
+  # ============================================================================
+
+  spreadsheet_terminology:
+    type: structure
+    title: "Basics of MS-Excel"
+    main: "Excel Worksheet"
+    components:
+      - name: "Cell"
+        description: "Intersection of a column and a row."
+      - name: "Cell Address"
+        description: "Unique ID like A1, B10 (Column Letter + Row Number)."
+      - name: "Formula Bar"
+        description: "Area where formulas are entered (Starting with =)."
+      - name: "Workbook"
+        description: "The entire file containing multiple sheets."

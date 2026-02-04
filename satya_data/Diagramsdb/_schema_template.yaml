@@ -1,0 +1,162 @@
+# ============================================================================
+# SATYA DIAGRAM LIBRARY - UNIVERSAL YAML SCHEMA
+# ============================================================================
+# This file defines the standard format for diagram data across all subjects.
+# Place subject files in: satya_data/Diagramsdb/{subject}/{chapter}.yaml
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# METADATA (Required at top of each file)
+# ----------------------------------------------------------------------------
+metadata:
+  subject: "Science"           # Subject name
+  grade: 10                    # Grade level (8-12)
+  chapter: "Life Processes"    # Chapter name
+  version: 1.0                 # Schema version
+
+# ----------------------------------------------------------------------------
+# DIAGRAMS SECTION
+# Each concept gets its own entry with a unique ID
+# ----------------------------------------------------------------------------
+diagrams:
+
+  # ==========================================================================
+  # TYPE 1: PROCESS DIAGRAMS (Sequential steps)
+  # Use for: Water cycle, photosynthesis, cell division, algorithms, etc.
+  # ==========================================================================
+  photosynthesis:
+    type: process
+    title: "Photosynthesis Process"
+    keywords:
+      - photosynthesis
+      - chlorophyll
+      - light reaction
+      - dark reaction
+      - calvin cycle
+    steps:
+      - Light absorption
+      - Water splitting
+      - Electron transport
+      - ATP formation
+      - Carbon fixation
+      - Glucose synthesis
+    # Optional: Set to true if the process repeats
+    cyclic: false
+
+  water_cycle:
+    type: process
+    title: "Water Cycle"
+    keywords:
+      - water cycle
+      - evaporation
+      - condensation
+      - precipitation
+      - hydrological cycle
+    steps:
+      - Evaporation
+      - Condensation
+      - Precipitation
+      - Collection
+      - Runoff
+    cyclic: true
+
+  # ==========================================================================
+  # TYPE 2: COMPARISON DIAGRAMS (Two items compared)
+  # Use for: Mitosis vs Meiosis, Plant vs Animal cell, etc.
+  # ==========================================================================
+  mitosis_vs_meiosis:
+    type: comparison
+    title: "Mitosis vs Meiosis"
+    keywords:
+      - mitosis
+      - meiosis
+      - cell division
+      - compare mitosis meiosis
+    item_a: "Mitosis"
+    item_b: "Meiosis"
+    similarities:
+      - Cell division process
+      - DNA replication occurs
+      - Involves chromosomes
+    differences:
+      - divisions: ["1 division", "2 divisions"]
+      - daughter_cells: ["2 identical", "4 different"]
+      - purpose: ["Growth/repair", "Reproduction"]
+      - chromosome_number: ["Same (2n)", "Half (n)"]
+
+  # ==========================================================================
+  # TYPE 3: HIERARCHY DIAGRAMS (Parent-child structure)
+  # Use for: Classification, organization charts, taxonomies, etc.
+  # ==========================================================================
+  classification_of_living_things:
+    type: hierarchy
+    title: "Classification of Living Things"
+    keywords:
+      - classification
+      - taxonomy
+      - kingdom
+      - living things
+    root: "Living Things"
+    children:
+      - name: "Animalia"
+        children:
+          - Vertebrates
+          - Invertebrates
+      - name: "Plantae"
+        children:
+          - Flowering
+          - Non-flowering
+      - name: "Fungi"
+      - name: "Protista"
+      - name: "Monera"
+
+  # ==========================================================================
+  # TYPE 4: STRUCTURE DIAGRAMS (Parts of something)
+  # Use for: Cell structure, computer parts, anatomy, etc.
+  # ==========================================================================
+  plant_cell_structure:
+    type: structure
+    title: "Plant Cell Structure"
+    keywords:
+      - plant cell
+      - cell structure
+      - organelles
+    main: "Plant Cell"
+    components:
+      - name: "Cell Wall"
+        description: "Outer rigid layer"
+      - name: "Cell Membrane"
+        description: "Controls entry/exit"
+      - name: "Nucleus"
+        description: "Control center"
+      - name: "Chloroplast"
+        description: "Photosynthesis"
+      - name: "Vacuole"
+        description: "Storage"
+      - name: "Mitochondria"
+        description: "Energy production"
+
+  # ==========================================================================
+  # TYPE 5: TIMELINE DIAGRAMS (Events in order)
+  # Use for: Historical events, development stages, etc.
+  # ==========================================================================
+  computer_generations:
+    type: timeline
+    title: "Computer Generations"
+    keywords:
+      - computer generations
+      - history of computers
+      - evolution of computers
+    events:
+      - period: "1940-1956"
+        name: "First Generation"
+        detail: "Vacuum tubes"
+      - period: "1956-1963"
+        name: "Second Generation"
+        detail: "Transistors"
+      - period: "1964-1971"
+        name: "Third Generation"
+        detail: "Integrated circuits"
+      - period: "1971-Present"
+        name: "Fourth Generation"
+        detail: "Microprocessors"

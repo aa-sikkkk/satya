@@ -1,0 +1,203 @@
+# ============================================================================
+# MASTER DATASET: GRADE 12 SCIENCE (NEB NEPAL)
+# Professional/Entrance Preparation Edition - Version 9.0
+# ============================================================================
+
+metadata:
+  subject: "Science"
+  grade: 12
+  curriculum: "NEB Nepal - Latest Revised (2080/2081)"
+  last_updated: "2026-02-03"
+
+diagrams:
+
+  # ----------------------------------------------------------------------------
+  # PHYSICS - Optics, Electricity, and Magnetism
+  # ----------------------------------------------------------------------------
+
+  wave_optics_interference:
+    type: structure
+    title: "Young's Double Slit Experiment (YDSE)"
+    main: "Wave Nature of Light"
+    components:
+      - name: "Coherent Sources"
+        description: "Two sources with constant phase difference."
+      - name: "Path Difference (∆x)"
+        formula: "d sin θ ≈ d(y/D)"
+      - name: "Constructive Interference"
+        condition: "∆x = nλ (Bright fringes)"
+      - name: "Destructive Interference"
+        condition: "∆x = (2n-1)λ/2 (Dark fringes)"
+      - name: "Fringe Width (β)"
+        formula: "β = λD / d"
+
+  dc_circuits_kirchhoff:
+    type: process
+    title: "Kirchhoff’s Laws of Electrical Circuits"
+    steps:
+      - Junction Law (KCL): "Total Current In = Total Current Out (Charge conservation)"
+      - Loop Law (KVL): "Sum of EMFs = Sum of IR drops (Energy conservation)"
+      - Wheatstone Bridge Condition: "P/Q = R/S (When galvanometer current is zero)"
+      - Potentiometer Application: "E1/E2 = l1/l2"
+
+  alternating_current_lcr:
+    type: structure
+    title: "LCR Series Resonance Circuit"
+    main: "AC Impedance"
+    components:
+      - name: "Impedance (Z)"
+        formula: "Z = √[R² + (XL - XC)²]"
+      - name: "Resonant Frequency (fr)"
+        formula: "fr = 1 / [2π√(LC)]"
+      - name: "Phase Angle (Φ)"
+        formula: "tan Φ = (XL - XC) / R"
+      - name: "Quality Factor (Q)"
+        description: "Sharpness of resonance; Q = (1/R) * √(L/C)"
+
+  # ----------------------------------------------------------------------------
+  # PHYSICS - Modern Physics & Semiconductors
+  # ----------------------------------------------------------------------------
+
+  semiconductor_diode:
+    type: comparison
+    title: "P-N Junction Biasing"
+    item_a: "Forward Bias"
+    item_b: "Reverse Bias"
+    differences:
+      connection: ["P to +ve, N to -ve", "P to -ve, N to +ve"]
+      depletion_layer: ["Decreases/Thin", "Increases/Thick"]
+      resistance: ["Very Low", "Very High"]
+      current_flow: ["Majority carriers (mA)", "Minority carriers (µA)"]
+
+  bohr_model_hydrogen:
+    type: process
+    title: "Bohr’s Atomic Model and Spectral Series"
+    steps:
+      - Electrons revolve in discrete stationary orbits.
+      - Angular momentum is quantized: "mvr = nh/2π"
+      - Energy emitted/absorbed during transitions: "E2 - E1 = hf"
+      - Lyman Series: "Transitions to n=1 (Ultraviolet)"
+      - Balmer Series: "Transitions to n=2 (Visible)"
+      - Paschen Series: "Transitions to n=3 (Infrared)"
+
+  # ----------------------------------------------------------------------------
+  # CHEMISTRY - Physical and Inorganic Chemistry
+  # ----------------------------------------------------------------------------
+
+  chemical_kinetics_rates:
+    type: comparison
+    title: "Order vs Molecularity of Reaction"
+    item_a: "Order"
+    item_b: "Molecularity"
+    differences:
+      nature: ["Experimental quantity", "Theoretical quantity"]
+      values: ["Can be zero, fractional, or negative", "Always a whole number (1, 2, 3)"]
+      mechanism: ["Applies to overall reaction", "Applies to elementary step only"]
+
+  transition_metals_d_block:
+    type: hierarchy
+    title: "Properties of d-Block Elements (Transition Metals)"
+    root: "3d Series (Sc to Zn)"
+    children:
+      - name: "Variable Oxidation States"
+        description: "Due to small energy gap between ns and (n-1)d subshells."
+      - name: "Catalytic Property"
+        description: "Due to large surface area and variable valency."
+      - name: "Complex Formation"
+        description: "Small size, high nuclear charge, and vacant d-orbitals."
+      - name: "Color/Magnetism"
+        description: "Unpaired electrons lead to d-d transitions (color) and paramagnetism."
+
+  # ----------------------------------------------------------------------------
+  # CHEMISTRY - Organic Mechanisms (Entrance Focus)
+  # ----------------------------------------------------------------------------
+
+  nucleophilic_substitution_mechanisms:
+    type: comparison
+    title: "SN1 vs SN2 Mechanisms"
+    item_a: "SN1 (Unimolecular)"
+    item_b: "SN2 (Bimolecular)"
+    similarities: [Substitution of a leaving group by a nucleophile]
+    differences:
+      steps: ["Two steps (Carbocation intermediate)", "One step (Transition state)"]
+      rate_law: ["Rate = k[Substrate]", "Rate = k[Substrate][Nucleophile]"]
+      stereochemistry: ["Racemization", "Walden Inversion"]
+      reactivity_order: ["3° > 2° > 1°", "1° > 2° > 3°"]
+
+  carbonyl_reactions:
+    type: hierarchy
+    title: "Key Named Reactions of Aldehydes/Ketones"
+    root: "Carbonyl Chemistry"
+    children:
+      - name: "Aldol Condensation"
+        description: "Requires alpha-hydrogen; forms beta-hydroxy aldehyde."
+      - name: "Cannizzaro Reaction"
+        description: "No alpha-hydrogen; self oxidation-reduction (disproportionation)."
+      - name: "Clemmensen Reduction"
+        description: "C=O to CH2 using Zn-Hg/HCl."
+
+  # ----------------------------------------------------------------------------
+  # BIOLOGY - Botany & Physiology
+  # ----------------------------------------------------------------------------
+
+  photosynthesis_pathways:
+    type: comparison
+    title: "C3 vs C4 Plants"
+    item_a: "C3 Plants (Calvin Cycle)"
+    item_b: "C4 Plants (Hatch-Slack Pathway)"
+    differences:
+      first_stable_product: ["3-PGA (3 Carbon)", "Oxaloacetate (4 Carbon)"]
+      anatomy: ["Normal leaf anatomy", "Kranz Anatomy (Bundle sheath cells)"]
+      photorespiration: ["High (wasteful)", "Negligible/Absent"]
+      efficiency: ["Moderate", "High in hot/dry climates"]
+      examples: ["Wheat, Rice", "Maize, Sugarcane"]
+
+  biotechnology_pcr:
+    type: process
+    title: "Polymerase Chain Reaction (PCR)"
+    steps:
+      - Denaturation (94°C): "DNA strands separate."
+      - Annealing (54°C): "Primers bind to template."
+      - Extension (72°C): "Taq Polymerase synthesizes new strands."
+      - Repeat: "Exponential amplification of DNA."
+    cyclic: true
+
+  # ----------------------------------------------------------------------------
+  # BIOLOGY - Zoology & Human Physiology
+  # ----------------------------------------------------------------------------
+
+  human_excretory_nephron:
+    type: structure
+    title: "Structure and Function of the Nephron"
+    main: "Functional Unit of Kidney"
+    components:
+      - name: "Malpighian Body"
+        description: "Glomerulus + Bowman's Capsule (Ultrafiltration)"
+      - name: "PCT"
+        description: "Selective reabsorption of glucose and amino acids."
+      - name: "Loop of Henle"
+        description: "Counter-current multiplier; water and salt balance."
+      - name: "DCT & Collecting Duct"
+        description: "Conditional reabsorption under ADH/Aldosterone control."
+
+  nervous_system_reflex_arc:
+    type: process
+    title: "The Reflex Arc Pathway"
+    steps:
+      - Receptor (Sense organ detects stimulus)
+      - Sensory Neuron (Afferent pathway to Spinal Cord)
+      - Interneuron (Processing in Gray Matter)
+      - Motor Neuron (Efferent pathway to Effector)
+      - Effector (Muscle/Gland responds)
+    cyclic: false
+
+  gametogenesis_deep:
+    type: comparison
+    title: "Spermatogenesis vs Oogenesis"
+    item_a: "Spermatogenesis"
+    item_b: "Oogenesis"
+    differences:
+      location: ["Testes", "Ovaries"]
+      outcome: ["Four functional sperm", "One functional ovum + three polar bodies"]
+      timing: ["Continuous from puberty", "Initiated before birth; suspended until puberty"]
+      duration: ["Short (approx 64-74 days)", "Long (years; ends at menopause)"]

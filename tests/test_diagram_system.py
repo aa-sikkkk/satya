@@ -6,201 +6,244 @@
 #
 # USE OF THIS SOFTWARE FOR COMMERCIAL PURPOSES IS STRICTLY PROHIBITED.
 
+"""
+Tests for the YAML-based Diagram Library System.
+
+This test suite validates:
+- DiagramLibrary loading and indexing
+- Keyword matching and scoring algorithm
+- Diagram rendering pipeline
+- should_show_diagram logic
+- End-to-end diagram generation
+"""
+
 import unittest
 import sys
 import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from system.diagrams.custom_generator import extract_steps_from_answer, generate_diagram
-from system.diagrams.diagram_validator import validate_diagram, validate_diagram_content
-from system.diagrams.diagram_detector import should_generate_diagram, extract_context_for_diagram
-from system.diagrams.diagram_service import should_attempt_diagram, generate_and_append_diagram
+from system.diagrams.diagram_library import DiagramLibrary
+from system.diagrams.diagram_renderer import DiagramRenderer
+from system.diagrams.diagram_service import (
+    generate_diagram_content,
+    should_show_diagram,
+    should_attempt_diagram
+)
+from system.diagrams.diagram_config import PROCESS_KEYWORDS, COMPARISON_KEYWORDS
 
 
-class TestStepExtraction(unittest.TestCase):
+class TestDiagramLibraryLoading(unittest.TestCase):
+    """Tests for DiagramLibrary initialization and YAML loading."""
     
-    def test_biology_life_cycle_extraction(self):
-        answer = "The life cycle has four stages. Stage 1: Egg. Stage 2: Larva. Stage 3: Pupa. Stage 4: Adult."
-        steps = extract_steps_from_answer(answer)
-        self.assertGreaterEqual(len(steps), 3)
-        self.assertTrue(any('egg' in s.lower() for s in steps))
-        self.assertTrue(any('larva' in s.lower() for s in steps))
+    @classmethod
+    def setUpClass(cls):
+        """Load library once for all tests."""
+        cls.library = DiagramLibrary.get_instance()
     
-    def test_chemistry_process_extraction(self):
-        answer = "The water cycle involves processes such as evaporation, condensation, precipitation, and collection."
-        steps = extract_steps_from_answer(answer)
-        self.assertGreaterEqual(len(steps), 3)
-        self.assertTrue(any('evaporation' in s.lower() for s in steps))
-        self.assertTrue(any('condensation' in s.lower() for s in steps))
+    def test_library_loads_diagrams(self):
+        """Verify library loads diagrams from YAML files."""
+        self.assertGreater(len(self.library.diagrams), 0)
     
-    def test_numbered_list_extraction(self):
-        answer = "The metamorphosis has stages: Stage 1: Egg laid on leaf. Stage 2: Larva hatches and eats. Stage 3: Pupa forms chrysalis."
-        steps = extract_steps_from_answer(answer)
-        self.assertGreaterEqual(len(steps), 2)
+    def test_diagrams_indexed_by_subject(self):
+        """Verify diagrams are indexed by subject."""
+        self.assertIn('science', self.library.by_subject)
     
-    def test_no_extraction_for_simple_definition(self):
-        answer = "Photosynthesis is the process by which plants convert sunlight into energy."
-        steps = extract_steps_from_answer(answer)
-        self.assertEqual(len(steps), 0)
+    def test_diagrams_indexed_by_grade(self):
+        """Verify diagrams are indexed by grade."""
+        # At least some grades should be indexed
+        self.assertGreater(len(self.library.by_grade), 0)
     
-    def test_no_generic_steps(self):
-        answer = "The process has three steps. First, preparation. Then, execution. Finally, completion."
-        steps = extract_steps_from_answer(answer)
-        for step in steps:
-            self.assertFalse(any(x in step.lower() for x in ['step 1', 'step 2', 'step 3']))
+    def test_diagram_has_required_fields(self):
+        """Verify normalized diagrams have required fields."""
+        for diagram_id, diagram in self.library.diagrams.items():
+            self.assertIn('id', diagram)
+            self.assertIn('type', diagram)
+            self.assertIn('keywords', diagram)
+            self.assertIn('subject', diagram)
+    
+    def test_photosynthesis_diagram_exists(self):
+        """Verify photosynthesis diagram is loaded from general.yaml."""
+        photo_diagrams = [k for k in self.library.diagrams.keys() if 'photosynthesis' in k]
+        self.assertGreater(len(photo_diagrams), 0)
 
 
-class TestContentValidation(unittest.TestCase):
+class TestKeywordMatching(unittest.TestCase):
+    """Tests for the keyword matching and scoring algorithm."""
     
-    def test_reject_generic_diagram(self):
-        generic_diagram = """
-┌────────┐
-│ Step 1 │
-└────┬───┘
-     │
-┌────▼───┐
-│ Step 2 │
-└────────┘
-"""
-        is_valid, error = validate_diagram_content(generic_diagram)
-        self.assertFalse(is_valid)
-        self.assertIn('generic', error.lower())
+    @classmethod
+    def setUpClass(cls):
+        cls.library = DiagramLibrary.get_instance()
     
-    def test_accept_good_diagram(self):
-        good_diagram = """
-┌──────────┐
-│   Egg    │
-└────┬─────┘
-     │
-┌────▼─────┐
-│  Larva   │
-└──────────┘
-"""
-        is_valid, error = validate_diagram_content(good_diagram)
-        self.assertTrue(is_valid)
+    def test_photosynthesis_query_matches(self):
+        """Verify photosynthesis query finds correct diagram."""
+        match = self.library.find_diagram("What is photosynthesis process?", "Science")
+        self.assertIsNotNone(match)
+        self.assertIn('photosynthesis', match['id'].lower())
     
-    def test_reject_empty_diagram(self):
-        is_valid, error = validate_diagram_content("")
-        self.assertFalse(is_valid)
+    def test_score_above_threshold(self):
+        """Verify matched diagram has score above 0.3 threshold."""
+        match = self.library.find_diagram("Explain photosynthesis", "Science")
+        self.assertIsNotNone(match)
+        self.assertGreaterEqual(match['confidence'], 0.3)
     
-    def test_full_validation_with_context(self):
-        good_diagram = """
-┌──────────┐
-│   Egg    │
-└────┬─────┘
-     │
-┌────▼─────┐
-│  Larva   │
-└──────────┘
-"""
-        context = {"question": "life cycle", "answer": "egg larva pupa"}
-        is_valid, error = validate_diagram(good_diagram, context)
-        self.assertTrue(is_valid)
+    def test_no_match_for_random_query(self):
+        """Verify no match for unrelated queries."""
+        match = self.library.find_diagram("How to cook pasta?", "Science")
+        # Should return None or very low confidence
+        self.assertTrue(match is None or match['confidence'] < 0.3)
+    
+    def test_grade_filtering(self):
+        """Verify grade filter narrows candidates."""
+        # General diagrams should match any grade
+        match = self.library.find_diagram("photosynthesis", "Science", grade=10)
+        self.assertIsNotNone(match)
+    
+    def test_subject_filtering(self):
+        """Verify subject filter works correctly."""
+        match = self.library.find_diagram("electric circuit", "Science")
+        if match:
+            self.assertEqual(match['diagram']['subject'].lower(), 'science')
 
 
-class TestDiagramDetection(unittest.TestCase):
+class TestShouldShowDiagram(unittest.TestCase):
+    """Tests for the should_show_diagram logic."""
     
-    def test_detect_process_question(self):
+    def test_process_question_triggers_diagram(self):
+        """Process questions should trigger diagram display."""
         question = "Explain how photosynthesis works"
-        answer = "Photosynthesis involves several key processes such as light absorption, water splitting, carbon fixation, and glucose production. First, chlorophyll absorbs light energy. Then, water molecules are split. Next, carbon dioxide is fixed. Finally, glucose is produced."
-        should_gen, diagram_type = should_generate_diagram(question, answer)
-        self.assertTrue(should_gen)
-        self.assertIn(diagram_type, ["flowchart", "process"])
+        answer = "Photosynthesis is a process involving light absorption, water splitting, and glucose production. " * 5
+        result = should_show_diagram(question, answer, match_confidence=0.7)
+        self.assertTrue(result)
     
-    def test_detect_cycle_question(self):
-        question = "Describe the water cycle"
-        answer = "The water cycle includes evaporation, condensation, precipitation, and collection."
-        should_gen, diagram_type = should_generate_diagram(question, answer)
-        self.assertTrue(should_gen)
-    
-    def test_no_diagram_for_short_answer(self):
+    def test_short_answer_skips_diagram(self):
+        """Short answers should not show diagrams."""
         question = "What is DNA?"
         answer = "DNA is genetic material."
-        should_gen, diagram_type = should_generate_diagram(question, answer)
-        self.assertFalse(should_gen)
+        result = should_show_diagram(question, answer, match_confidence=0.8)
+        self.assertFalse(result)
+    
+    def test_definition_skips_diagram(self):
+        """Definition questions should skip diagrams."""
+        question = "What is photosynthesis?"
+        answer = "Photosynthesis is a process. " * 10
+        result = should_show_diagram(question, answer, match_confidence=0.8)
+        self.assertFalse(result)
+    
+    def test_low_confidence_skips_diagram(self):
+        """Low confidence matches should skip diagrams."""
+        question = "Explain how cells divide"
+        answer = "Cell division involves multiple steps. " * 10
+        result = should_show_diagram(question, answer, match_confidence=0.2)
+        self.assertFalse(result)
 
 
-class TestExclusionPatterns(unittest.TestCase):
+class TestShouldAttemptDiagram(unittest.TestCase):
+    """Tests for the exclusion pattern logic."""
     
     def test_exclude_math_solve(self):
-        question = "How do you solve a quadratic equation?"
-        self.assertFalse(should_attempt_diagram(question))
+        """Math solve questions should be excluded."""
+        self.assertFalse(should_attempt_diagram("How do you solve x + 5 = 10?"))
     
-    def test_exclude_math_calculate(self):
-        question = "Calculate the value of x in the equation"
-        self.assertFalse(should_attempt_diagram(question))
+    def test_exclude_calculate(self):
+        """Calculate questions should be excluded."""
+        self.assertFalse(should_attempt_diagram("Calculate the value of x"))
     
     def test_exclude_definition(self):
-        question = "What is photosynthesis?"
-        self.assertFalse(should_attempt_diagram(question))
+        """What is questions should be excluded."""
+        self.assertFalse(should_attempt_diagram("What is photosynthesis?"))
     
-    def test_exclude_mathematical(self):
-        question = "Explain the mathematical formula for area"
-        self.assertFalse(should_attempt_diagram(question))
+    def test_include_explain_process(self):
+        """Explain process questions should be included."""
+        self.assertTrue(should_attempt_diagram("Explain how the water cycle works"))
     
-    def test_include_process_question(self):
-        question = "Explain how the water cycle works"
-        self.assertTrue(should_attempt_diagram(question))
-    
-    def test_include_structure_question(self):
-        question = "What is the structure of a cell?"
-        self.assertTrue(should_attempt_diagram(question))
+    def test_include_describe_structure(self):
+        """Describe structure questions should be included."""
+        self.assertTrue(should_attempt_diagram("Describe the structure of a cell"))
 
 
-class TestEndToEndDiagram(unittest.TestCase):
+class TestDiagramRenderer(unittest.TestCase):
+    """Tests for the ASCII diagram renderer."""
     
-    def test_biology_full_pipeline(self):
-        question = "Explain the life cycle of a butterfly"
-        answer = "The butterfly life cycle has four stages. Stage 1: Egg. The female lays eggs. Stage 2: Larva. The caterpillar hatches. Stage 3: Pupa. Forms a chrysalis. Stage 4: Adult. The butterfly emerges."
-        
-        result = generate_and_append_diagram(question, answer)
-        
-        self.assertIn(answer, result)
-        if "Diagram:" in result:
-            self.assertIn("Egg", result)
-            self.assertNotIn("Step 1", result)
+    def test_render_flowchart(self):
+        """Verify flowchart rendering produces valid output."""
+        steps = ["Step 1", "Step 2", "Step 3"]
+        result = DiagramRenderer.render_step_based_flowchart(steps)
+        self.assertIsNotNone(result)
+        # Renderer uppercases labels
+        self.assertIn("STEP 1", result)
+        self.assertIn("STEP 2", result)
+        self.assertIn("│", result)  # Vertical connector
     
-    def test_chemistry_full_pipeline(self):
-        question = "Describe the water cycle"
-        answer = "The water cycle involves processes such as evaporation, condensation, precipitation, and collection."
-        
-        result = generate_and_append_diagram(question, answer)
-        
-        self.assertIn(answer, result)
-        if "Diagram:" in result:
-            self.assertIn("Evaporation", result)
+    def test_render_structure(self):
+        """Verify structure diagram rendering."""
+        components = ["Part A", "Part B", "Part C"]
+        result = DiagramRenderer.render_component_structure(components)
+        self.assertIsNotNone(result)
+        # Check case-insensitive since renderer may uppercase
+        self.assertIn("PART A", result.upper())
     
-    def test_math_excluded(self):
-        question = "How do you solve x² + 5x + 6 = 0?"
-        answer = "To solve: 1. Identify a=1, b=5, c=6. 2. Apply quadratic formula. 3. Calculate discriminant. 4. Find roots."
-        
-        result = generate_and_append_diagram(question, answer)
-        
-        self.assertEqual(result, answer)
-        self.assertNotIn("Diagram:", result)
+    def test_render_comparison(self):
+        """Verify comparison table rendering."""
+        data = {
+            'similarities': ['Both are processes'],
+            'differences': {'key': ['Value A', 'Value B']}
+        }
+        result = DiagramRenderer.render_comparison_table(data)
+        self.assertIsNotNone(result)
     
-    def test_definition_excluded(self):
-        question = "What is photosynthesis?"
-        answer = "Photosynthesis is the process by which plants convert sunlight into energy."
-        
-        result = generate_and_append_diagram(question, answer)
-        
-        self.assertEqual(result, answer)
-        self.assertNotIn("Diagram:", result)
+    def test_render_cycle(self):
+        """Verify cyclic diagram rendering."""
+        steps = ["Evaporation", "Condensation", "Precipitation"]
+        result = DiagramRenderer.render_cycle_diagram(steps)
+        self.assertIsNotNone(result)
 
 
-class TestContextExtraction(unittest.TestCase):
+class TestEndToEndGeneration(unittest.TestCase):
+    """End-to-end tests for diagram generation pipeline."""
     
-    def test_extract_process_context(self):
-        question = "How does photosynthesis work?"
-        answer = "Photosynthesis involves light absorption, carbon fixation, and glucose production."
+    def test_photosynthesis_generates_diagram(self):
+        """Verify photosynthesis query generates a diagram."""
+        # Use simpler query with fewer keywords for better match ratio
+        question = "Describe photosynthesis process"
+        answer = "Photosynthesis is a complex process involving light absorption, water splitting, electron transport, and glucose synthesis. " * 3
         
-        context = extract_context_for_diagram(question, answer, "process")
+        result = generate_diagram_content(question, answer, subject="Science")
         
-        self.assertIn("question", context)
-        self.assertIn("answer", context)
-        self.assertEqual(context["diagram_type"], "process")
+        self.assertIsNotNone(result)
+        diagram, diagram_type = result
+        self.assertIn("process", diagram_type.lower())
+        self.assertGreater(len(diagram), 50)
+    
+    def test_definition_returns_none(self):
+        """Verify definition questions return None."""
+        question = "What is DNA?"
+        answer = "DNA is genetic material."
+        
+        result = generate_diagram_content(question, answer, subject="Science")
+        self.assertIsNone(result)
+    
+    def test_random_query_returns_none(self):
+        """Verify unrelated queries return None."""
+        question = "What is the capital of Nepal?"
+        answer = "Kathmandu is the capital of Nepal."
+        
+        result = generate_diagram_content(question, answer, subject="Science")
+        self.assertIsNone(result)
+
+
+class TestDiagramConfig(unittest.TestCase):
+    """Tests for diagram configuration."""
+    
+    def test_process_keywords_exist(self):
+        """Verify process keywords are defined."""
+        self.assertIsInstance(PROCESS_KEYWORDS, (list, set, tuple))
+        self.assertGreater(len(PROCESS_KEYWORDS), 0)
+    
+    def test_comparison_keywords_exist(self):
+        """Verify comparison keywords are defined."""
+        self.assertIsInstance(COMPARISON_KEYWORDS, (list, set, tuple))
+        self.assertGreater(len(COMPARISON_KEYWORDS), 0)
 
 
 if __name__ == '__main__':
