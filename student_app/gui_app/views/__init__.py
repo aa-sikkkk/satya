@@ -7,6 +7,7 @@
 # USE OF THIS SOFTWARE FOR COMMERCIAL PURPOSES IS STRICTLY PROHIBITED.
 
 from .welcome_view import WelcomeView
+from .grade_view import GradeView
 from .subject_view import SubjectView
 from .topic_view import TopicView
 from .concept_view import ConceptView

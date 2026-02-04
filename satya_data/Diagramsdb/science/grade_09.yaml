@@ -1,0 +1,223 @@
+# ============================================================================
+# THE COMPLETE GRADE 9 SCIENCE DATASET (NEB NEPAL & INTERNATIONAL)
+# Version: 5.0 (Master Edition)
+# ============================================================================
+
+metadata:
+  subject: "Science"
+  grade: 9
+  last_updated: "2024-05-22"
+
+diagrams:
+
+  # ----------------------------------------------------------------------------
+  # PHYSICS - Mechanics, Pressure, and Energy
+  # ----------------------------------------------------------------------------
+
+  equations_of_motion:
+    type: hierarchy
+    title: "Equations of Uniformly Accelerated Motion"
+    root: "Kinematic Equations"
+    children:
+      - First: "v = u + at (Velocity-Time)"
+      - Second: "s = ut + ½at² (Distance-Time)"
+      - Third: "v² = u² + 2as (Velocity-Distance)"
+      - Average: "s = [(u + v) / 2] * t"
+
+  momentum_concept:
+    type: structure
+    title: "Momentum (P = mv)"
+    main: "Momentum"
+    components:
+      - name: "Mass (m)"
+        description: "Quantity of matter (kg)"
+      - name: "Velocity (v)"
+        description: "Speed in a direction (m/s)"
+      - name: "Vector Nature"
+        description: "Has both magnitude and direction"
+
+  liquid_pressure_laws:
+    type: process
+    title: "Characteristics of Liquid Pressure"
+    steps:
+      - Increases with depth (h)
+      - Increases with density of liquid (d)
+      - Acts equally in all directions at a point
+      - Depends on acceleration due to gravity (g)
+      - Independent of the shape of the container
+    cyclic: false
+
+  laws_of_flotation:
+    type: comparison
+    title: "Conditions for Floating and Sinking"
+    item_a: "Floating"
+    item_b: "Sinking"
+    similarities: [Involve Weight and Upthrust, Occur in fluids]
+    differences:
+      condition: ["Upthrust ≥ Weight", "Weight > Upthrust"]
+      density_relation: ["Object density < Liquid density", "Object density > Liquid density"]
+      displacement: ["Displaces liquid equal to its weight", "Displaces liquid equal to its volume"]
+
+  # ----------------------------------------------------------------------------
+  # PHYSICS - Light, Heat, and Electricity
+  # ----------------------------------------------------------------------------
+
+  refraction_phenomena:
+    type: hierarchy
+    title: "Effects of Refraction"
+    root: "Refraction of Light"
+    children:
+      - name: "Bending of Light"
+        description: "Rarer to Denser (Towards Normal), Denser to Rarer (Away)"
+      - name: "Real and Apparent Depth"
+        description: "Objects in water appear shallower"
+      - name: "Refractive Index"
+        description: "Ratio of speed of light in vacuum to medium"
+
+  eye_defects_correction:
+    type: comparison
+    title: "Myopia vs Hypermetropia"
+    item_a: "Myopia (Short-sightedness)"
+    item_b: "Hypermetropia (Long-sightedness)"
+    similarities: [Refractive errors of the eye, Correctable with lenses]
+    differences:
+      vision: ["Can't see far objects", "Can't see near objects"]
+      image_focus: ["Formed in front of Retina", "Formed behind Retina"]
+      eyeball_shape: ["Too long", "Too short"]
+      lens_correction: ["Concave Lens", "Convex Lens"]
+
+  ohms_law_logic:
+    type: structure
+    title: "Ohm's Law (V = IR)"
+    main: "Electrical Relationship"
+    components:
+      - name: "Voltage (V)"
+        description: "Potential difference (Volts)"
+      - name: "Current (I)"
+        description: "Flow of electrons (Amperes)"
+      - name: "Resistance (R)"
+        description: "Opposition to flow (Ohms)"
+
+  # ----------------------------------------------------------------------------
+  # CHEMISTRY - Atomic Structure & Periodic Table
+  # ----------------------------------------------------------------------------
+
+  electronic_configuration_rules:
+    type: process
+    title: "Bohr-Bury Scheme (K, L, M, N Shells)"
+    steps:
+      - Maximum electrons in shell = 2n²
+      - Outermost shell cannot have > 8 electrons
+      - Penultimate shell cannot have > 18 electrons
+      - Electrons fill inner shells first
+    cyclic: false
+
+  periodic_table_trends:
+    type: hierarchy
+    title: "Trends in Modern Periodic Table"
+    root: "Periodic Trends (Left to Right)"
+    children:
+      - name: "Atomic Size"
+        description: "Decreases (Increased nuclear charge)"
+      - name: "Valency"
+        description: "Increases 1 to 4, then decreases to 0"
+      - name: "Metallic Character"
+        description: "Decreases (Non-metallic increases)"
+      - name: "Ionization Energy"
+        description: "Increases"
+
+  solubility_states:
+    type: comparison
+    title: "Saturated vs Unsaturated Solutions"
+    item_a: "Unsaturated Solution"
+    item_b: "Saturated Solution"
+    similarities: [Homogeneous mixtures, Contain solute and solvent]
+    differences:
+      capacity: ["Can dissolve more solute", "Cannot dissolve more solute at that temp"]
+      crystallization: ["No crystals form on cooling", "Crystals form on cooling"]
+      concentration: ["Lower", "Maximum possible"]
+
+  # ----------------------------------------------------------------------------
+  # BIOLOGY - Tissues and Life Systems
+  # ----------------------------------------------------------------------------
+
+  plant_tissue_hierarchy:
+    type: hierarchy
+    title: "Classification of Plant Tissues"
+    root: "Plant Tissues"
+    children:
+      - name: "Meristematic"
+        children: [Apical, Lateral, Intercalary]
+      - name: "Permanent"
+        children:
+          - Simple: [Parenchyma, Collenchyma, Sclerenchyma]
+          - Complex: [Xylem (Water), Phloem (Food)]
+
+  blood_composition:
+    type: structure
+    title: "Components of Human Blood"
+    main: "Blood"
+    components:
+      - name: "Plasma"
+        description: "55% liquid part (water, proteins, salts)"
+      - name: "RBC (Erythrocytes)"
+        description: "Transport oxygen via Hemoglobin"
+      - name: "WBC (Leucocytes)"
+        description: "Immune defense (Soldiers of body)"
+      - name: "Platelets (Thrombocytes)"
+        description: "Blood clotting"
+
+  evolution_theories:
+    type: comparison
+    title: "Lamarckism vs Darwinism"
+    item_a: "Lamarck's Theory"
+    item_b: "Darwin's Theory"
+    similarities: [Explain origin of species, Focus on adaptation]
+    differences:
+      mechanism: ["Inheritance of acquired characters", "Natural Selection"]
+      example: ["Giraffe neck stretched by use", "Giraffes with long necks survived better"]
+      key_phrase: ["Use and Disuse", "Survival of the fittest"]
+
+  # ----------------------------------------------------------------------------
+  # EARTH, SPACE, AND ENVIRONMENT
+  # ----------------------------------------------------------------------------
+
+  earthquake_structure:
+    type: structure
+    title: "Anatomy of an Earthquake"
+    main: "Seismic Event"
+    components:
+      - name: "Focus (Hypocenter)"
+        description: "Origin point inside the Earth"
+      - name: "Epicenter"
+        description: "Point on surface directly above focus"
+      - name: "Seismic Waves"
+        description: "Energy ripples (P-waves, S-waves)"
+      - name: "Fault Line"
+        description: "Crack in Earth's crust"
+
+  climate_change_cycle:
+    type: process
+    title: "The Positive Feedback Loop of Global Warming"
+    steps:
+      - Rising CO2 levels
+      - Increased atmospheric temperature
+      - Melting of Polar Ice/Glaciers
+      - Decreased Albedo (Earth reflects less heat)
+      - Higher heat absorption by oceans
+      - Accelerated warming
+    cyclic: true
+
+  # ----------------------------------------------------------------------------
+  # APPLIED TECHNOLOGY
+  # ----------------------------------------------------------------------------
+
+  ict_networking_types:
+    type: hierarchy
+    title: "Types of Computer Networks"
+    root: "Network Scale"
+    children:
+      - PAN: "Personal Area (Bluetooth)"
+      - LAN: "Local Area (Home/Office)"
+      - MAN: "Metropolitan (City-wide)"
+      - WAN: "Wide Area (Internet)"

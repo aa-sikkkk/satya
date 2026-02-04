@@ -1,0 +1,205 @@
+# ============================================================================
+# MASTER DATASET: MATHEMATICS (GRADES 8-12)
+# NEB Nepal Curriculum - Professional Edition
+# ============================================================================
+
+metadata:
+  subject: "Mathematics"
+  grades: [8, 9, 10, 11, 12]
+  curriculum: "NEB (Nepal) - New Syllabus"
+  last_updated: "2024-05-22"
+
+diagrams:
+
+  # ----------------------------------------------------------------------------
+  # UNIT 1: FINANCIAL MATHEMATICS (Grade 9-10 SEE Focus)
+  # ----------------------------------------------------------------------------
+
+  interest_comparison:
+    type: comparison
+    title: "Simple Interest vs Compound Interest"
+    keywords: [interest, principal, financial math]
+    item_a: "Simple Interest (I = PTR/100)"
+    item_b: "Compound Interest (CI = P[(1+R/100)^T - 1])"
+    similarities: [Depend on Principal, Rate, and Time, Used in banking and loans]
+    differences:
+      calculation: ["Interest calculated only on Principal", "Interest calculated on Principal + accumulated interest"]
+      growth_pattern: ["Linear growth", "Exponential growth"]
+      profitability: ["Lower returns for lenders", "Higher returns for lenders"]
+      common_use: ["Short-term loans", "Savings accounts, Long-term investments"]
+
+  taxation_vat_process:
+    type: process
+    title: "Pricing Calculation with Discount and VAT"
+    steps:
+      - Marked Price (MP)
+      - Apply Discount (MP - Discount %)
+      - Selling Price (SP)
+      - Apply VAT (SP + VAT %)
+      - Final Price (SP with VAT)
+    cyclic: false
+
+  # ----------------------------------------------------------------------------
+  # UNIT 2: ALGEBRA & FUNCTIONS (Master Level)
+  # ----------------------------------------------------------------------------
+
+  laws_of_indices:
+    type: hierarchy
+    title: "Laws of Indices"
+    root: "Index Laws"
+    children:
+      - name: "Product Rule"
+        description: "a^m × a^n = a^(m+n)"
+      - name: "Quotient Rule"
+        description: "a^m ÷ a^n = a^(m-n)"
+      - name: "Power Rule"
+        description: "(a^m)^n = a^(mn)"
+      - name: "Negative Index"
+        description: "a⁻ⁿ = 1/aⁿ"
+      - name: "Zero Index"
+        description: "a⁰ = 1"
+
+  complex_numbers_structure:
+    type: structure
+    title: "Anatomy of a Complex Number (z = a + ib)"
+    main: "Complex Number"
+    components:
+      - name: "Real Part (a)"
+        description: "Pure number on the x-axis (Real axis)"
+      - name: "Imaginary Part (b)"
+        description: "Coefficient of i on the y-axis (Imaginary axis)"
+      - name: "Imaginary Unit (i)"
+        description: "√(-1); i² = -1"
+      - name: "Modulus |z|"
+        description: "√(a² + b²); Distance from origin"
+      - name: "Argument (θ)"
+        description: "tan⁻¹(b/a); Angle with real axis"
+
+  # ----------------------------------------------------------------------------
+  # UNIT 3: GEOMETRY & TRIGONOMETRY (Theorem Focus)
+  # ----------------------------------------------------------------------------
+
+  circle_theorems:
+    type: hierarchy
+    title: "Key Circle Theorems (Grade 10)"
+    root: "Circle Geometry"
+    children:
+      - name: "Central vs Inscribed"
+        description: "Angle at center is twice the angle at circumference"
+      - name: "Angles in Semicircle"
+        description: "Angle in a semicircle is always 90°"
+      - name: "Cyclic Quadrilaterals"
+        description: "Opposite angles sum to 180°"
+      - name: "Tangent Properties"
+        description: "Radius is perpendicular to tangent at point of contact"
+
+  trigonometric_quadrants:
+    type: structure
+    title: "CAST Rule (All-Silver-Tea-Cups)"
+    main: "Four Quadrants"
+    components:
+      - name: "Quadrant I (0-90°)"
+        description: "ALL ratios (sin, cos, tan) are positive"
+      - name: "Quadrant II (90-180°)"
+        description: "Only SIN (and cosec) are positive"
+      - name: "Quadrant III (180-270°)"
+        description: "Only TAN (and cot) are positive"
+      - name: "Quadrant IV (270-360°)"
+        description: "Only COS (and sec) are positive"
+
+  # ----------------------------------------------------------------------------
+  # UNIT 4: CALCULUS (Grade 11-12 Advanced)
+  # ----------------------------------------------------------------------------
+
+  limit_continuity_logic:
+    type: process
+    title: "Conditions for Continuity at x = a"
+    steps:
+      - f(a) is defined (Functional value exists)
+      - Left Hand Limit (LHL) exists
+      - Right Hand Limit (RHL) exists
+      - LHL = RHL = f(a)
+    cyclic: false
+
+  integration_methods:
+    type: hierarchy
+    title: "Methods of Integration"
+    root: "Integration"
+    children:
+      - name: "Integration by Substitution"
+        description: "Change of variable to simplify the integrand"
+      - name: "Integration by Parts"
+        description: "∫u dv = uv - ∫v du"
+      - name: "Partial Fractions"
+        description: "Breaking complex fractions into simpler ones"
+      - name: "Definite Integral"
+        description: "Evaluation with upper and lower limits (Area)"
+
+  # ----------------------------------------------------------------------------
+  # UNIT 5: VECTORS & MATRICES
+  # ----------------------------------------------------------------------------
+
+  vector_products_comparison:
+    type: comparison
+    title: "Dot Product vs Cross Product"
+    item_a: "Dot Product (Scalar)"
+    item_b: "Cross Product (Vector)"
+    similarities: [Involve two vectors, Depend on magnitude and angle]
+    differences:
+      formula: ["a·b = |a||b| cosθ", "a×b = |a||b| sinθ n̂"]
+      result_type: ["Scalar (a number)", "Vector (perpendicular to both)"]
+      orthogonality: ["Zero if vectors are perpendicular", "Zero if vectors are parallel"]
+      application: ["Work done, angle between vectors", "Torque, area of parallelogram"]
+
+  matrix_inverse_process:
+    type: process
+    title: "Finding the Inverse of a 2x2 Matrix"
+    steps:
+      - Find the Determinant (ad - bc)
+      - Check if Determinant ≠ 0 (Must be non-singular)
+      - Find the Adjoint (Swap a,d; Change signs of b,c)
+      - Multiply Adjoint by 1/Determinant
+    cyclic: false
+
+  # ----------------------------------------------------------------------------
+  # UNIT 6: SETS & PROBABILITY (Grade 8-12)
+  # ----------------------------------------------------------------------------
+
+  cardinality_formula_3_sets:
+    type: structure
+    title: "Cardinality of Three Sets (A, B, C)"
+    main: "n(A∪B∪C)"
+    components:
+      - Singles: "n(A) + n(B) + n(C)"
+      - Doubles: "- [n(A∩B) + n(B∩C) + n(C∩A)]"
+      - Triple: "+ n(A∩B∩C)"
+
+  probability_hierarchy:
+    type: hierarchy
+    title: "Types of Events in Probability"
+    root: "Probability"
+    children:
+      - name: "Mutually Exclusive"
+        description: "Cannot happen at the same time; P(A∪B) = P(A) + P(B)"
+      - name: "Independent Events"
+        description: "One doesn't affect the other; P(A∩B) = P(A) × P(B)"
+      - name: "Dependent Events"
+        description: "Conditional probability; P(A|B)"
+
+  # ----------------------------------------------------------------------------
+  # UNIT 7: MENSURATION (3D Solids)
+  # ----------------------------------------------------------------------------
+
+  mensuration_solids_master:
+    type: hierarchy
+    title: "Surface Area & Volume of Solids"
+    root: "3D Shapes"
+    children:
+      - name: "Cylinder"
+        children: ["CSA = 2πrh", "TSA = 2πr(r+h)", "V = πr²h"]
+      - name: "Sphere"
+        children: ["Surface Area = 4πr²", "Volume = 4/3 πr³"]
+      - name: "Cone"
+        children: ["CSA = πrl", "TSA = πr(r+l)", "V = 1/3 πr²h"]
+      - name: "Prism/Pyramid"
+        children: ["V = Base Area × Height", "V = 1/3 Base Area × Height"]

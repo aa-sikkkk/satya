@@ -1,0 +1,15 @@
+{
+  "Computer Science": {
+    "Computer Network": {
+      "Introduction to Computer Networks": {
+        "questions": [
+          {
+            "question": "What is a computer network? Explain its importance. [5 marks]",
+            "attempts": 5,
+            "correct": 0
+          }
+        ]
+      }
+    }
+  }
+}

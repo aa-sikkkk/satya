@@ -1,0 +1,215 @@
+# ============================================================================
+# MASTER DATASET: GRADE 11 SCIENCE (NEB NEPAL)
+# Advanced Academic Edition - Version 8.0
+# ============================================================================
+
+metadata:
+  subject: "Science"
+  grade: 11
+  curriculum: "Nepal Education Board (NEB) - Revised Syllabus"
+  last_updated: "2026-02-03"
+
+diagrams:
+
+  # ----------------------------------------------------------------------------
+  # PHYSICS: MECHANICS & PROPERTIES OF MATTER
+  # ----------------------------------------------------------------------------
+
+  vector_analysis_deep:
+    type: structure
+    title: "Vector Addition and Resolution"
+    main: "Parallelogram Law of Vectors"
+    components:
+      - name: "Resultant Magnitude"
+        formula: "R = √(P² + Q² + 2PQ cosθ)"
+      - name: "Direction (Alpha)"
+        formula: "tan α = (Q sinθ) / (P + Q cosθ)"
+      - name: "Resolution"
+        description: "Rx = R cosθ (Horizontal), Ry = R sinθ (Vertical)"
+
+  circular_motion_mechanics:
+    type: process
+    title: "Dynamics of Circular Motion"
+    keywords: [centripetal force, banking of roads, tension]
+    steps:
+      - Centripetal Force (Fc = mv²/r)
+      - Centrifugal Force (Inertial frame reaction)
+      - Banking of Roads: "tan θ = v² / rg"
+      - Velocity at Lowest Point (Vertical Circle): "v = √(5rg)"
+      - Velocity at Highest Point (Vertical Circle): "v = √(rg)"
+
+  fluid_dynamics_bernoulli:
+    type: process
+    title: "Bernoulli’s Principle and Continuity"
+    steps:
+      - Equation of Continuity: "A1V1 = A2V2"
+      - Total Energy: "Pressure Energy + Kinetic Energy + Potential Energy = Constant"
+      - Formula: "P + ½ρv² + ρgh = Constant"
+    applications: [Venturimeter, Working of Aeroplane wings, Bunsen Burner]
+
+  # ----------------------------------------------------------------------------
+  # PHYSICS: HEAT AND THERMODYNAMICS (The Core of Grade 11 Physics)
+  # ----------------------------------------------------------------------------
+
+  thermodynamic_laws:
+    type: hierarchy
+    title: "Laws of Thermodynamics"
+    root: "Thermodynamics"
+    children:
+      - name: "Zeroth Law"
+        description: "Concept of Temperature and Thermal Equilibrium"
+      - name: "First Law (Law of Energy)"
+        formula: "dQ = dU + dW"
+        description: "Heat supplied = Change in internal energy + Work done"
+      - name: "Second Law"
+        children: [Kelvin-Planck Statement (Heat Engines), Clausius Statement (Refrigerators)]
+
+  carnot_cycle_deep:
+    type: process
+    title: "The Carnot Engine Cycle"
+    steps:
+      - Isothermal Expansion (Heat absorbed at T1)
+      - Adiabatic Expansion (Temperature drops to T2)
+      - Isothermal Compression (Heat rejected at T2)
+      - Adiabatic Compression (Return to original state)
+    efficiency: "η = 1 - (T2 / T1)"
+
+  # ----------------------------------------------------------------------------
+  # CHEMISTRY: GENERAL & PHYSICAL CHEMISTRY
+  # ----------------------------------------------------------------------------
+
+  quantum_numbers_logic:
+    type: hierarchy
+    title: "Quantum Numbers and Atomic Address"
+    root: "Quantum State"
+    children:
+      - name: "Principal (n)"
+        description: "Shell number / Size and energy"
+      - name: "Azimuthal (l)"
+        description: "Shape of orbital (s=0, p=1, d=2, f=3)"
+      - name: "Magnetic (ml)"
+        description: "Orientation in space (-l to +l)"
+      - name: "Spin (ms)"
+        description: "Direction of electron spin (+½ or -½)"
+
+  chemical_equilibrium_factors:
+    type: structure
+    title: "Le Chatelier's Principle"
+    main: "Equilibrium Stress Response"
+    components:
+      - name: "Concentration"
+        description: "Add reactant -> Shift to product side"
+      - name: "Pressure"
+        description: "Increase P -> Shift to side with fewer gas moles"
+      - name: "Temperature"
+        description: "Increase T -> Shift in endothermic direction"
+      - name: "Catalyst"
+        description: "No change in equilibrium position; only speeds up attainment"
+
+  # ----------------------------------------------------------------------------
+  # CHEMISTRY: ORGANIC CHEMISTRY (Fundamental Principles)
+  # ----------------------------------------------------------------------------
+
+  organic_reaction_intermediates:
+    type: comparison
+    title: "Reaction Intermediates"
+    item_a: "Carbocation"
+    item_b: "Carbanion"
+    item_c: "Free Radical"
+    similarities: [Short-lived species, High energy, Formed during bond fission]
+    differences:
+      charge: ["Positive", "Negative", "Neutral"]
+      hybridization: ["sp² (Planar)", "sp³ (Pyramidal)", "sp²"]
+      stability_order: ["3° > 2° > 1°", "1° > 2° > 3°", "3° > 2° > 1°"]
+
+  isomerism_hierarchy:
+    type: hierarchy
+    title: "Classification of Isomerism"
+    root: "Isomerism"
+    children:
+      - name: "Structural"
+        children: [Chain, Position, Functional, Metamerism, Tautomerism]
+      - name: "Stereo"
+        children: [Geometrical (Cis-Trans), Optical (Enantiomers)]
+
+  # ----------------------------------------------------------------------------
+  # BIOLOGY: BOTANY (Anatomy, Physiology & Taxonomy)
+  # ----------------------------------------------------------------------------
+
+  plant_anatomy_secondary_growth:
+    type: process
+    title: "Secondary Growth in Dicot Stem"
+    steps:
+      - Formation of Intrafascicular Cambium
+      - Development of Interfascicular Cambium (Formation of Ring)
+      - Production of Secondary Xylem (Inside) and Secondary Phloem (Outside)
+      - Formation of Cork Cambium (Phellogen)
+      - Creation of Periderm (Bark)
+    result: "Increase in thickness/girth"
+
+  angiosperm_families_neb:
+    type: hierarchy
+    title: "Key Taxonomic Families (NEB Curriculum)"
+    root: "Angiospermae"
+    children:
+      - name: "Cruciferae (Brassicaceae)"
+        description: "Cruciform corolla, Tetradynamous stamens (Mustard)"
+      - name: "Solanaceae"
+        description: "Oblique ovary, Persistent calyx (Potato, Tomato)"
+      - name: "Leguminosae"
+        description: "Papilionaceous corolla, Marginal placentation (Pea)"
+      - name: "Gramineae (Poaceae)"
+        description: "Glumes, Feathery stigma (Wheat, Rice)"
+
+  # ----------------------------------------------------------------------------
+  # BIOLOGY: ZOOLOGY (Human Systems & Protozoa)
+  # ----------------------------------------------------------------------------
+
+  plasmodium_life_cycle:
+    type: process
+    title: "Life Cycle of Malarial Parasite"
+    steps:
+      - Inoculation (Mosquito bites human - Sporozoites enter)
+      - Liver Stage (Exo-erythrocytic schizogony)
+      - RBC Stage (Erythrocytic schizogony - Signet ring stage)
+      - Gametocyte formation (In human blood)
+      - Fertilization & Sporogony (In Mosquito gut)
+    cyclic: true
+
+  biochemical_enzymes:
+    type: process
+    title: "Enzyme Action (Induced Fit vs Lock & Key)"
+    steps:
+      - Substrate binds to Active Site
+      - Formation of Enzyme-Substrate (ES) Complex
+      - Lowering of Activation Energy (Ea)
+      - Conversion of substrate to product
+      - Release of product; Enzyme remains unchanged
+    cyclic: true
+
+  human_respiratory_mechanics:
+    type: comparison
+    title: "Inspiration vs Expiration"
+    item_a: "Inspiration"
+    item_b: "Expiration"
+    differences:
+      diaphragm: ["Contracts (Moves down)", "Relaxes (Moves up)"]
+      intercostal_muscles: ["Contract (Ribs move out)", "Relax (Ribs move in)"]
+      thoracic_volume: ["Increases", "Decreases"]
+      intra_pulmonary_pressure: ["Decreases (below atmospheric)", "Increases (above atmospheric)"]
+
+  # ----------------------------------------------------------------------------
+  # ECOLOGY & ENVIRONMENT
+  # ----------------------------------------------------------------------------
+
+  ecological_pyramids:
+    type: hierarchy
+    title: "Types of Ecological Pyramids"
+    root: "Energy Flow"
+    children:
+      - name: "Pyramid of Number"
+        description: "Can be upright or inverted (Parasitic)"
+      - name: "Pyramid of Biomass"
+        description: "Usually upright (Land); Inverted (Aquatic)"
+      - name: "Pyramid of Energy"
+        description: "Always Upright (10% Law)"

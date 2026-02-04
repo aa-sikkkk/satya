@@ -1,0 +1,10 @@
+# English Diagrams
+# Place chapter-specific YAML files here
+
+metadata:
+  subject: "English"
+  grades: [10, 11, 12]
+  
+# Example structure:
+# - grammar_parts_of_speech.yaml
+# - grammar_sentence_structure.yaml

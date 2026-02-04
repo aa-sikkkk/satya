@@ -1,0 +1,194 @@
+# ============================================================================
+# MASTER DATASET: COMPUTER SCIENCE GRADE 11 (NEB NEPAL)
+# Academic Master Edition - Version 2.0
+# ============================================================================
+
+metadata:
+  subject: "Computer Science"
+  grade: 11
+  curriculum: "NEB Nepal - New Syllabus (Common Core)"
+  last_updated: "2026-02-03"
+
+diagrams:
+
+  # ============================================================================
+  # UNIT 1: COMPUTER SYSTEM & ARCHITECTURE
+  # ============================================================================
+
+  computer_architecture_bus:
+    type: structure
+    title: "System Bus Architecture"
+    keywords: [address bus, data bus, control bus, CPU, Memory]
+    main: "System Interconnect"
+    components:
+      - name: "Data Bus"
+        description: "Bi-directional; carries actual data between CPU, memory, and I/O."
+      - name: "Address Bus"
+        description: "Uni-directional; carries the location address of data."
+      - name: "Control Bus"
+        description: "Carries command signals (Read/Write) from the CU."
+      - name: "Registers"
+        description: "High-speed storage (PC, IR, MAR, MDR, Accumulator)."
+
+  software_classification_deep:
+    type: hierarchy
+    title: "Detailed Software Hierarchy"
+    root: "Software System"
+    children:
+      - name: "System Software"
+        children:
+          - Operating Systems (Windows, Linux, RTOS)
+          - Language Processors (Assembler, Interpreter, Compiler)
+          - Device Drivers
+          - Utility Software (Disk fragmenters, Compression)
+      - name: "Application Software"
+        children:
+          - Packaged Software (MS-Office, Browser)
+          - Tailored/Customized (Banking system, Billing)
+
+  # ============================================================================
+  # UNIT 2: NUMBER SYSTEMS & BOOLEAN LOGIC (The Mathematical Foundation)
+  # ============================================================================
+
+  boolean_algebra_laws:
+    type: hierarchy
+    title: "Fundamental Laws of Boolean Algebra"
+    root: "Boolean Laws"
+    children:
+      - name: "Commutative Law"
+        description: "A+B = B+A | A.B = B.A"
+      - name: "Associative Law"
+        description: "A+(B+C) = (A+B)+C | A.(B.C) = (A.B).C"
+      - name: "Distributive Law"
+        description: "A.(B+C) = A.B + A.C"
+      - name: "De Morgan's Theorems"
+        description: "1. (A+B)' = A'.B' | 2. (A.B)' = A'+B'"
+
+  universal_gates_logic:
+    type: comparison
+    title: "Universal Gates: NAND vs NOR"
+    item_a: "NAND Gate"
+    item_b: "NOR Gate"
+    similarities:
+      - Can implement any basic gate (AND, OR, NOT)
+      - Used in integrated circuit fabrication
+    differences:
+      logic: ["NOT of AND", "NOT of OR"]
+      output_zero: ["Only when all inputs are 1", "When at least one input is 1"]
+      boolean_expression: ["Y = (A.B)'", "Y = (A+B)'"]
+
+  # ============================================================================
+  # UNIT 3: COMPUTER PROGRAMMING (Advanced C Logic)
+  # ============================================================================
+
+  c_control_flow:
+    type: hierarchy
+    title: "C Control Structures"
+    root: "Control Flow"
+    children:
+      - name: "Branching (Selection)"
+        children:
+          - if...else (Simple, Nested, Ladder)
+          - switch...case (Multi-way selection)
+      - name: "Looping (Iteration)"
+        children:
+          - Entry-Controlled (for, while)
+          - Exit-Controlled (do...while)
+      - name: "Jumping"
+        children: [break, continue, goto, return]
+
+  entry_vs_exit_loops:
+    type: comparison
+    title: "Entry-Controlled vs Exit-Controlled Loops"
+    item_a: "while / for loop"
+    item_b: "do-while loop"
+    similarities: [Used for repetitive execution, Require loop variable and condition]
+    differences:
+      condition_check: ["Checked before body execution", "Checked after body execution"]
+      min_iterations: ["Zero times", "At least once"]
+      syntax_style: ["while(cond) { ... }", "do { ... } while(cond);"]
+
+  c_function_types:
+    type: hierarchy
+    title: "Functions in C Programming"
+    root: "Functions"
+    children:
+      - name: "Library Functions"
+        description: "Built-in (printf, scanf, sqrt, strlen)"
+      - name: "User-Defined Functions"
+        children:
+          - No arguments & no return value
+          - With arguments & no return value
+          - No arguments & with return value
+          - With arguments & with return value
+
+  # ============================================================================
+  # UNIT 4: WEB TECHNOLOGY (HTML5 & CSS3)
+  # ============================================================================
+
+  css_selectors_hierarchy:
+    type: hierarchy
+    title: "Types of CSS Selectors"
+    root: "Selectors"
+    children:
+      - Element Selector (e.g., p, h1)
+      - ID Selector (e.g., #header)
+      - Class Selector (e.g., .container)
+      - Universal Selector (*)
+      - Attribute Selector (e.g., [type='text'])
+
+  css_box_model:
+    type: process
+    title: "The CSS Box Model Layering"
+    steps:
+      - Content (Text, Image)
+      - Padding (Space around content)
+      - Border (Surrounds padding)
+      - Margin (Space outside the border)
+    cyclic: false
+
+  # ============================================================================
+  # UNIT 5: MULTIMEDIA & SOCIAL IMPACT OF IT
+  # ============================================================================
+
+  multimedia_components_system:
+    type: structure
+    title: "Multimedia Building Blocks"
+    main: "Multimedia System"
+    components:
+      - name: "Dynamic Elements"
+        description: "Video, Animation, Audio"
+      - name: "Static Elements"
+        description: "Text, Graphics/Images"
+      - name: "Interactive Element"
+        description: "Hyperlinks, Navigation buttons"
+
+  cyber_crime_classification:
+    type: hierarchy
+    title: "Types of Cyber Crimes"
+    root: "Cyber Crime"
+    children:
+      - name: "Against Individuals"
+        children: [Cyberstalking, Identity Theft, Phishing]
+      - name: "Against Property"
+        children: [Hacking, Software Piracy, Intellectual Property Theft]
+      - name: "Against Society"
+        children: [Cyber Terrorism, Financial Crimes, Forgery]
+
+  # ============================================================================
+  # UNIT 6: RECENT TRENDS IN IT
+  # ============================================================================
+
+  modern_it_trends:
+    type: hierarchy
+    title: "Contemporary IT Technologies"
+    root: "IT Trends"
+    children:
+      - name: "Artificial Intelligence"
+        children: [Machine Learning, Robotics, NLP]
+      - name: "Cloud Computing"
+        children: [SaaS, PaaS, IaaS]
+      - name: "Big Data"
+        description: "Velocity, Volume, Variety, Veracity"
+      - name: "IoT"
+        description: "Interconnectivity of physical devices"

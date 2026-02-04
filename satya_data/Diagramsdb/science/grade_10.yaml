@@ -1,0 +1,247 @@
+# ============================================================================
+# THE ULTIMATE GRADE 10 (SEE) SCIENCE MASTER DATASET
+# Version: 6.0 (Complete Curriculum Edition)
+# ============================================================================
+
+metadata:
+  subject: "Science"
+  grade: 10
+  curriculum: "NEB Nepal (SEE) + International"
+  last_updated: "2024-05-22"
+
+diagrams:
+
+  # ----------------------------------------------------------------------------
+  # PHYSICS - Force, Pressure, and Energy
+  # ----------------------------------------------------------------------------
+
+  gravitational_force_logic:
+    type: structure
+    title: "Newton's Universal Law of Gravitation"
+    main: "F = G * (m1 * m2) / d²"
+    components:
+      - name: "Mass (m1, m2)"
+        description: "Directly proportional; force increases as mass increases"
+      - name: "Distance (d)"
+        description: "Inverse square law; force decreases rapidly as distance increases"
+      - name: "G (Constant)"
+        description: "Universal Gravitational Constant (6.67 x 10^-11 Nm²/kg²)"
+      - name: "Gravity (g)"
+        description: "Acceleration due to gravity; varies by planet radius"
+
+  fluid_mechanics_master:
+    type: hierarchy
+    title: "Laws of Fluid Mechanics"
+    root: "Fluid Dynamics"
+    children:
+      - name: "Pascal's Law"
+        description: "Pressure in enclosed liquid (Hydraulic Garage Lift, Brakes)"
+      - name: "Archimedes' Principle"
+        description: "Upthrust = Weight of displaced liquid"
+      - name: "Law of Flotation"
+        description: "Weight of body = Weight of displaced liquid (Submarines/Hydrometers)"
+      - name: "Pressure Formula"
+        description: "P = h * d * g (Height, Density, Gravity)"
+
+  energy_sources_efficiency:
+    type: comparison
+    title: "Nuclear Fission vs Nuclear Fusion"
+    item_a: "Nuclear Fission"
+    item_b: "Nuclear Fusion"
+    similarities: [Release massive energy, Involve nuclear changes, Follow E=mc²]
+    differences:
+      mechanism: ["Heavy nucleus splits into lighter ones", "Light nuclei combine into a heavy one"]
+      temperature: ["Does not require high temp", "Requires extreme temp (Sun/Stars)"]
+      waste: ["Produces radioactive waste", "Produces little to no waste"]
+      fuel: ["Uranium / Plutonium", "Hydrogen isotopes (Deuterium/Tritium)"]
+
+  # ----------------------------------------------------------------------------
+  # PHYSICS - Heat, Light, and Electricity
+  # ----------------------------------------------------------------------------
+
+  heat_equations:
+    type: structure
+    title: "Thermal Physics Relationships"
+    main: "Heat Equation (Q = msΔt)"
+    components:
+      - name: "Specific Heat Capacity (s)"
+        description: "Amount of heat to raise 1kg by 1°C (Water has high s = 4200 J/kg°C)"
+      - name: "Temperature Gradient"
+        description: "Heat flows from Higher to Lower temperature"
+      - name: "Principle of Calorimetry"
+        description: "Heat Lost = Heat Gained"
+
+  optical_instruments:
+    type: hierarchy
+    title: "Lenses and Their Applications"
+    root: "Lenses"
+    children:
+      - name: "Convex (Converging)"
+        children: [Microscope, Telescope, Camera, Correction of Hypermetropia]
+      - name: "Concave (Diverging)"
+        children: [Peep holes in doors, Flashlights, Correction of Myopia]
+
+  electricity_generation:
+    type: comparison
+    title: "Step-up vs Step-down Transformers"
+    item_a: "Step-up Transformer"
+    item_b: "Step-down Transformer"
+    similarities: [Work on Mutual Induction, Use AC current only, Have primary/secondary coils]
+    differences:
+      voltage_change: ["Increases Voltage", "Decreases Voltage"]
+      turn_ratio: ["Ns > Np", "Np > Ns"]
+      location: ["Power stations", "Substations / Near homes"]
+      current: ["Decreases Current", "Increases Current"]
+
+  # ----------------------------------------------------------------------------
+  # CHEMISTRY - Periodic Table, Bonding, and Reactions
+  # ----------------------------------------------------------------------------
+
+  modern_periodic_trends:
+    type: process
+    title: "Chemical Trends in Periodic Table"
+    steps:
+      - Atomic Size (Decreases across Period, Increases down Group)
+      - Ionization Energy (Increases across Period, Decreases down Group)
+      - Electronegativity (Increases across Period, Decreases down Group)
+      - Valency (Increases 1-4 then 0 across Period, Constant down Group)
+    cyclic: false
+
+  chemical_reaction_rates:
+    type: hierarchy
+    title: "Factors Affecting Rate of Reaction"
+    root: "Reaction Kinetics"
+    children:
+      - Temperature: "Increased kinetic energy"
+      - Concentration: "More collisions per second"
+      - Surface Area: "Fine powder reacts faster than lumps"
+      - Catalysts: "Lower activation energy (Positive/Negative)"
+      - Pressure: "Mainly for gaseous reactions"
+
+  acid_base_salt_indicators:
+    type: comparison
+    title: "Chemical Indicators"
+    item_a: "Litmus Paper"
+    item_b: "Methyl Orange"
+    item_c: "Phenolphthalein"
+    similarities: [Change color based on pH, Identify chemical nature]
+    differences:
+      acid_color: ["Red", "Pink/Red", "Colorless"]
+      base_color: ["Blue", "Yellow", "Pink"]
+
+  # ----------------------------------------------------------------------------
+  # CHEMISTRY - Metals and Organic Chemistry (Highly Tested)
+  # ----------------------------------------------------------------------------
+
+  metallurgy_processes:
+    type: hierarchy
+    title: "Metals and Their Ores (NEB Specific)"
+    root: "Common Metals"
+    children:
+      - Iron (Fe): [Magnetite, Haematite]
+      - Aluminum (Al): [Bauxite]
+      - Copper (Cu): [Chalcocite, Chalcopyrite]
+      - Silver (Ag): [Argentite]
+      - Gold (Au): [Native State / Calaverite]
+
+  hydrocarbon_classification:
+    type: hierarchy
+    title: "Organic Compounds Hierarchy"
+    root: "Hydrocarbons"
+    children:
+      - name: "Saturated"
+        children: ["Alkanes (CnH2n+2) - Single Bond"]
+      - name: "Unsaturated"
+        children:
+          - "Alkenes (CnH2n) - Double Bond"
+          - "Alkynes (CnH2n-2) - Triple Bond"
+      - name: "Functional Groups"
+        children: [Alcohol (-OH), Glycerol, Ether]
+
+  industrial_materials:
+    type: hierarchy
+    title: "Materials in Modern Society"
+    root: "Applied Chemistry"
+    children:
+      - name: "Glass Types"
+        children: [Water Glass, Flint Glass, Borosilicate (Pyrex), Hard Glass]
+      - name: "Polymers"
+        children: [Thermoplastics (PVC), Thermosetting (Bakelite)]
+      - name: "Chemicals"
+        children: [Fertilizers (NPK), Cement, Ceramics, Soap vs Detergent]
+
+  # ----------------------------------------------------------------------------
+  # BIOLOGY - Heredity, Evolution, and Human Systems
+  # ----------------------------------------------------------------------------
+
+  mendelian_genetics:
+    type: process
+    title: "Mendel's Monohybrid Cross"
+    steps:
+      - P1 Generation (Pure Tall TT x Pure Dwarf tt)
+      - Gamete Formation (T and t)
+      - F1 Generation (All Hybrid Tall Tt)
+      - F1 Self-pollination (Tt x Tt)
+      - F2 Generation (3 Tall : 1 Dwarf Ratio)
+    cyclic: false
+
+  sex_determination:
+    type: process
+    title: "Human Sex Determination"
+    steps:
+      - Male Gametes (50% X, 50% Y)
+      - Female Gametes (100% X)
+      - Fusion X + X = Female (XX)
+      - Fusion Y + X = Male (XY)
+    cyclic: false
+
+  blood_circulatory_system:
+    type: process
+    title: "Double Circulation in Humans"
+    steps:
+      - Pulmonary Circulation (Heart to Lungs to Heart)
+      - Systemic Circulation (Heart to Body to Heart)
+      - Oxygenation (In Alveoli)
+      - Nutrient Transport (Via Arteries)
+      - Waste Removal (Via Veins)
+    cyclic: true
+
+  # ----------------------------------------------------------------------------
+  # EARTH AND SPACE
+  # ----------------------------------------------------------------------------
+
+  star_evolution_path:
+    type: hierarchy
+    title: "Life Cycle of Stars (Based on Mass)"
+    root: "Nebula"
+    children:
+      - name: "Average Star (Sun-sized)"
+        children: [Red Giant, Planetary Nebula, White Dwarf, Black Dwarf]
+      - name: "Massive Star"
+        children: [Red Supergiant, Supernova, Neutron Star OR Black Hole]
+
+  geological_history:
+    type: process
+    title: "History of Earth (Eras)"
+    steps:
+      - Azoic (No life)
+      - Paleozoic (Invertebrates/Fish)
+      - Mesozoic (Age of Reptiles/Dinosaurs)
+      - Cenozoic (Age of Mammals/Humans)
+    cyclic: false
+
+  # ----------------------------------------------------------------------------
+  # APPLIED TECHNOLOGY
+  # ----------------------------------------------------------------------------
+
+  future_tech:
+    type: hierarchy
+    title: "Modern Technology Trends"
+    root: "Digital Age"
+    children:
+      - name: "AI & Robotics"
+        description: "Machine learning and automation"
+      - name: "Sustainability"
+        description: "Bio-fuels, Solar energy, E-waste management"
+      - name: "Communication"
+        description: "5G, Fiber optics, Satellite internet"
