@@ -49,35 +49,21 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('satya.log'),  # Log to file instead of console
-        logging.StreamHandler()  # Also log to console for debugging
+        logging.FileHandler('satya.log'),
+        logging.StreamHandler()
     ]
 )
 logger = logging.getLogger(__name__)
 
-# Configure rich console
 console = Console()
 
-# Configure prompt_toolkit styles
 style = Style.from_dict({
     'prompt': 'ansicyan bold',
     'input': 'ansigreen',
 })
 
-# Configure key bindings
 bindings = KeyBindings()
 
-@bindings.add('h')
-def _(event):
-    """Show help when 'h' is pressed."""
-    event.app.current_buffer.insert_text('help')
-
-@bindings.add('q')
-def _(event):
-    """Exit when 'q' is pressed."""
-    event.app.current_buffer.insert_text('exit')
-
-# Patch Confirm.ask to always accept y/n/yes/no (case-insensitive) and show clear prompt
 from rich.prompt import Prompt as _Prompt
 
 def patched_confirm_ask(prompt, default=False):
@@ -117,9 +103,8 @@ class CLIInterface:
         console.print("[cyan]Initializing Satya CLI...[/cyan]")
         self.content_manager = ContentManager(content_dir)
         
-        # 1. Initialize Model Handler FIRST (Shared Resource)
+        # Initialize Model Handler
         console.print("[dim]Loading AI Model...[/dim]")
-        # Ensure model path exists
         if not os.path.exists(model_path):
             raise FileNotFoundError(f"Model directory not found: {model_path}")
             
@@ -134,10 +119,9 @@ class CLIInterface:
             ))
             raise
 
-        # 2. Initialize RAG Engine with Shared Model Handler
+        # Initialize RAG Engine
         console.print("[dim]Initializing Knowledge Engine...[/dim]")
         try:
-            # Resolve ChromaDB path using utility
             chroma_db_path = str(resolve_chroma_db_dir("satya_data/chroma_db"))
             
             self.rag_engine = RAGRetrievalEngine(
@@ -449,90 +433,104 @@ class CLIInterface:
             if not self.model_handler.handler.llm:
                 self.model_handler.handler.load_model()
             
-            # Define stream callback
+            # Define stream callback with Live display
             full_answer = ""
-            def stream_callback(token):
-                nonlocal full_answer
-                full_answer += token
-                print(token, end="", flush=True)
-
-            with console.status("[bold green]Generating detailed answer...[/bold green]"):
-                log_resource_usage("Before model inference")
-                
-                # Use the RAG engine to query and stream the answer
-                try:
-                    response = self.rag_engine.query(
-                        query_text=question,
-                        subject="",
-                        stream_callback=stream_callback
-                    )
-                    
-                    # Ensure newline after streaming
-                    print("\n")
-                    
-                    answer = response.get('answer', '')
-                    confidence = response.get('confidence', 0.0)
-                    relevant_content = response.get('sources', [])
-                    
-                    # --- Post-Answer Diagram Generation ---
-                    try: 
-                        rag_diagram = response.get('diagram')
-                        dynamic_diagram_content = generate_diagram_content(
-                            question=question,
-                            answer=full_answer,
-                            grade=self.selected_grade,
-                            subject=self.selected_subject
-                        )
-                        
-                        final_diagram = None
-                        diagram_type = None
-                        diagram_source = None
-                        
-                        if dynamic_diagram_content:
-                            final_diagram = dynamic_diagram_content[0]
-                            diagram_type = dynamic_diagram_content[1]
-                            diagram_source = "Generated"
-                        elif rag_diagram:
-                            final_diagram = rag_diagram
-                            diagram_type = 'default'
-                            diagram_source = "Knowledge Base"
-                        
-                        if final_diagram:
-                            # Use rich-based concept-aware rendering
-                            from student_app.interface.cli_renderer import CLIRenderer
-                            CLIRenderer.render_diagram(
-                                diagram_content=final_diagram,
-                                diagram_type=diagram_type,
-                                source=diagram_source
-                            )
-                    except Exception as diag_e:
-                        logger.error(f"Diagram generation failed: {diag_e}")
-
-                    # --- Confidence & Fallback ---
-                    confidence_color = "green" if confidence > 0.7 else "yellow" if confidence > 0.4 else "red"
-                    console.print(f"[{confidence_color}]Confidence Score: {confidence:.2f}[/{confidence_color}]")
+            live_display = None
             
-                    # Show sources if low confidence
-                    if confidence < 0.6:
-                        sources = response.get('sources', [])
-                        if sources:
-                            console.print("\n[dim]Sources used:[/dim]")
-                            for s in sources[:2]:
-                                console.print(f"[dim]- {s.get('source', 'Unknown')}[/dim]")
-                                
-                    # Ask OpenAI if confidence is low
-                    if confidence < 0.4:
-                        console.print("\n[yellow]My confidence is low on this one.[/yellow]")
-                        if Confirm.ask("Would you like to search online (OpenAI)?"):
-                            self._search_with_openai(question)
+            def stream_callback(token):
+                nonlocal full_answer, live_display
+                full_answer += token
+                
+                # Initialize Live display on first token to avoid conflict with RAG status logs
+                if live_display is None:
+                    live_display = Live(
+                        Panel(full_answer, title="Answer", border_style="green", padding=(1, 2)),
+                        console=console,
+                        refresh_per_second=10,
+                        transient=False,
+                        # auto_refresh=True
+                    )
+                    live_display.start()
+                else:
+                    live_display.update(Panel(full_answer, title="Answer", border_style="green", padding=(1, 2)))
 
-                except Exception as e:
-                    logger.error(f"Error searching content: {str(e)}")
-                    console.print("[red]Error searching content. Please try again.[/red]")
-                    return
+            # log_resource_usage("Before model inference")
+            
+            # Use the RAG engine to query and stream the answer
+            try:
+                # Remove console.status to prevent layout conflicts with RAG prints and streaming
+                response = self.rag_engine.query(
+                    query_text=question,
+                    subject="",
+                    stream_callback=stream_callback
+                )
                 
-                log_resource_usage("After model inference")
+            finally:
+                # Ensure Live display is stopped properly
+                if live_display:
+                    live_display.stop()
+                elif not full_answer:
+                    # If no answer was generated (e.g. error before streaming), handle gracefully
+                    pass
+            
+            answer = response.get('answer', '')
+            confidence = response.get('confidence', 0.0)
+            relevant_content = response.get('sources', [])
+            
+            # --- Post-Answer Diagram Generation ---
+            try: 
+                rag_diagram = response.get('diagram')
+                dynamic_diagram_content = generate_diagram_content(
+                    question=question,
+                    answer=full_answer,
+                    grade=self.selected_grade,
+                    subject=self.selected_subject
+                )
                 
+                final_diagram = None
+                diagram_type = None
+                diagram_source = None
+                
+                if dynamic_diagram_content:
+                    final_diagram = dynamic_diagram_content[0]
+                    diagram_type = dynamic_diagram_content[1]
+                    diagram_source = "Generated"
+                elif rag_diagram:
+                    final_diagram = rag_diagram
+                    diagram_type = 'default'
+                    diagram_source = "Knowledge Base"
+                
+                if final_diagram:
+                    # Use rich-based concept-aware rendering
+                    from student_app.interface.cli_renderer import CLIRenderer
+                    CLIRenderer.render_diagram(
+                        diagram_content=final_diagram,
+                        diagram_type=diagram_type,
+                        source=diagram_source
+                    )
+            except Exception as diag_e:
+                logger.error(f"Diagram generation failed: {diag_e}")
+
+            # --- Confidence & Fallback ---
+            confidence_color = "green" if confidence > 0.7 else "yellow" if confidence > 0.4 else "red"
+            console.print(f"[{confidence_color}]Confidence Score: {confidence:.2f}[/{confidence_color}]")
+    
+            # Show sources if low confidence
+            if confidence < 0.6:
+                sources = response.get('sources', [])
+                if sources:
+                    console.print("\n[dim]Sources used:[/dim]")
+                    for s in sources[:2]:
+                        console.print(f"[dim]- {s.get('source', 'Unknown')}[/dim]")
+                        
+            # Ask OpenAI if confidence is low
+            if confidence < 0.4:
+                console.print("\n[yellow]My confidence is low on this one.[/yellow]")
+                if Confirm.ask("Would you like to search online (OpenAI)?"):
+                    self._search_with_openai(question)
+
+            # log_resource_usage("After model inference")
+            
             # Handle empty or low confidence answers (Last Resort)
             if not answer or (isinstance(answer, str) and len(answer.strip()) == 0):
                 console.print(Panel(
@@ -548,19 +546,13 @@ class CLIInterface:
         except Exception as e:
             logger.error(f"Error in _handle_free_text_question: {str(e)}")
             console.print(f"[red]Error: {str(e)}[/red]")
-
-
-                
-            # Display final answer with confidence indicator and source info
-            # (Answer was already displayed during streaming, now show final stats)
             confidence_color = "green" if confidence > 0.7 else "yellow" if confidence > 0.4 else "red"
             
             # Add source information if available
             source_display = ""
             if 'source_info' in locals():
                 source_display = f"\n[cyan]Source: {source_info}[/cyan]"
-            
-            # --- 3. Confidence & Metadata ---
+
             confidence = response.get('confidence', 0.0)
             color = "green" if confidence > 0.7 else "yellow" if confidence > 0.4 else "red"
             console.print(f"[{color}]Confidence Score: {confidence:.2f}[/{color}]")
@@ -572,10 +564,6 @@ class CLIInterface:
                     console.print("\n[dim]Sources used:[/dim]")
                     for s in sources[:2]:
                         console.print(f"[dim]- {s.get('source', 'Unknown')}[/dim]")
-
-            # --- 4. Follow-up (Hints/Related) ---
-            # (Optional: Re-use existing hint logic or keep it minimal)
-            
         except Exception as e:
             logger.error(f"Error in _handle_free_text_question: {str(e)}")
             console.print(f"[red]Error: {str(e)}[/red]")
@@ -666,18 +654,15 @@ class CLIInterface:
         if not concepts:
             console.print("[yellow]No concepts available.[/yellow]")
             return
-            
-        # Select concept
+
         concept = self._create_menu(
             "Select a Concept",
             [c["name"] for c in concepts]
         )
-        
-        # Display concept
+
         concept_data = next(c for c in concepts if c["name"] == concept)
         self._display_concept(concept_data)
-        
-        # Handle questions
+
         if concept_data["questions"]:
             if Confirm.ask("Would you like to try some questions?"):
                 for question in concept_data["questions"]:
@@ -692,13 +677,11 @@ class CLIInterface:
                         break
                         
     def _ask_question(self) -> None:
-        """Handle free-text questions."""
-        # Create a word completer for subjects
+        """Handles free-text questions."""
         subject_completer = WordCompleter(self.content_manager.get_all_subjects())
         
         while True:
             try:
-                # Use prompt_toolkit's session with completer
                 question = self.session.prompt(
                     "\nAsk any question (or 'back' to return) ",
                     completer=subject_completer
@@ -818,8 +801,6 @@ class CLIInterface:
             log_resource_usage("After progress reset")
             console.print("[green]Progress has been reset.[/green]")
 
-
-
     def _search_with_openai(self) -> None:
         """Prompt the user for a question and search using the OpenAI proxy."""
         while True:
@@ -836,13 +817,10 @@ class CLIInterface:
 
 if __name__ == "__main__":
     try:
-        # Use robust resource resolution
         content_dir = str(resolve_content_dir("satya_data/content"))
         model_path = str(resolve_model_dir("satya_data/models/phi15"))
-        
-        # Verify paths exist
+
         if not os.path.exists(content_dir):
-            # Try semantic fallback if default content dir fails
              content_dir = str(resolve_content_dir("scripts/data_collection/data/content"))
 
         if not os.path.exists(content_dir): 

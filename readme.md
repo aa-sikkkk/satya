@@ -371,25 +371,33 @@ ASCII Rendering
 ```
 Satya/
 ├── satya_data/
-│   ├── models/
+│   ├── models/                       # AI Models
 │   │   ├── phi15/                    # Language Model
 │   │   ├── embedding/                # Sentence Transformers
 │   ├── chroma_db/                    # Vector Database
-│   └── content/                      # Raw Educational Content
+│   ├── content/                      # Raw Educational Content
+│   ├── Diagramsdb/                   # Pre-built Diagrams
+│   └── normalization_logs/           # Log files
 │
 ├── scripts/
 │   ├── ingest_content.py             # Universal ingestion script
 │   ├── run_pattern_mining.py         # Pattern mining tool
-│   └── rag_data_preparation/         # Data pipeline utilities
+│   ├── rag_data_preparation/         # Data pipeline utilities
+│   ├── data_collection/              # Dataset collection tools
+│   ├── release/                      # Release management
+│   └── validation/                   # Data validation scripts
 │
 ├── system/
 │   ├── diagrams/                     # Modular diagram system
 │   │   ├── diagram_service.py        # Orchestration logic
 │   │   ├── diagram_library.py        # YAML library manager
 │   │   ├── diagram_renderer.py       # ASCII/Mermaid rendering
-│   │   └── diagram_config.py         # Visual configuration
+│   │   ├── diagram_config.py         # Visual configuration
 │   ├── input_processing/             # Text normalization & cleaning
 │   ├── rag/                          # RAG retrieval engine
+│   ├── data_manager/                 # Data handling logic
+│   ├── performance/                  # Performance benchmarks
+│   ├── security/                     # Security protocols
 │   └── utils/                        # Shared utilities
 │
 ├── ai_model/
@@ -398,9 +406,14 @@ Satya/
 ├── student_app/
 │   ├── gui_app/                      # CustomTkinter GUI
 │   ├── interface/                    # CLI implementation
-│   └── progress/                     # Progress tracking logic
+│   ├── progress/                     # Progress tracking logic
+│   ├── learning/                     # Learning session logic
+│   └── main.py                       # Application entry point
 │
-├── teacher_tools/                    # Content creation tools
+├── teacher_tools/
+│   ├── analytics/                    # Student performance analytics
+│   └── content_editor/               # Content creation tools
+│
 ├── docs/                             # Documentation & Guides
 ├── textbooks/                        # Input source: Textbooks
 ├── notes/                            # Input source: Teacher Notes
