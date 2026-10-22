@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   lint:
-    name: Lint & type check
+    name: Lint
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
