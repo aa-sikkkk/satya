@@ -1,0 +1,47 @@
+# PR auto-labels by path (actions/labeler v5 format)
+rag:
+  - changed-files:
+      - any-glob-to-any-file: "system/rag/**"
+      - any-glob-to-any-file: "scripts/rag_data_preparation/**"
+
+gui:
+  - changed-files:
+      - any-glob-to-any-file: "student_app/gui_app/**"
+
+cli:
+  - changed-files:
+      - any-glob-to-any-file: "student_app/interface/**"
+
+model:
+  - changed-files:
+      - any-glob-to-any-file: "ai_model/**"
+
+ingestion:
+  - changed-files:
+      - any-glob-to-any-file: "scripts/ingest_content.py"
+      - any-glob-to-any-file: "system/input_processing/**"
+
+diagrams:
+  - changed-files:
+      - any-glob-to-any-file: "system/diagrams/**"
+
+teacher-tools:
+  - changed-files:
+      - any-glob-to-any-file: "teacher_tools/**"
+
+tests:
+  - changed-files:
+      - all-globs-to-all-files: "tests/**"
+
+docs:
+  - changed-files:
+      - any-glob-to-any-file: "**/*.md"
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file: ".github/**"
+      - any-glob-to-any-file: "pyproject.toml"
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file: "requirements*.txt"

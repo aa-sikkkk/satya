@@ -9,4 +9,11 @@
 Satya AI Learning Companion package.
 """
 
-__version__ = "2.1.1" 
+try:
+    from importlib.metadata import version as _version
+    from importlib.metadata import PackageNotFoundError
+
+    __version__ = _version("satya-learning-system")
+except PackageNotFoundError:
+    # Package metadata not installed (plain source checkout)
+    __version__ = "unknown"

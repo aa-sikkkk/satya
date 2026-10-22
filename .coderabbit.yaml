@@ -1,0 +1,66 @@
+# CodeRabbit AI code review — free tier for public/open-source repositories.
+# Install the GitHub App once at https://github.com/apps/coderabbitai
+# Schema ref: https://coderabbit.ai/integrations/schema.v2.json
+yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+
+language: en
+
+chat:
+  auto_reply: true
+
+reviews:
+  auto_review:
+    enabled: true
+    ignore_title_keywords:
+      - "WIP"
+    base_branches:
+      - main
+      - develop
+
+  high_level_summary: true
+  sequence_diagrams: true
+  review_status: true
+  changed_files_summary: true
+  collapse_walkthrough: false
+  poem: false
+  path_filters:
+    - "!venv/**"
+    - "!dist/**"
+    - "!satya_data/**"
+    - "!textbooks/**"
+    - "!notes/**"
+    - "!logs/**"
+    - "!student_app/gui_app/images/**"
+    - "!**/*.log"
+    - "!**/*.pickle"
+    - "!**/*.pdf"
+    - "!**/*.json"
+
+  path_instructions:
+    - path: "**/*.py"
+      instructions: |
+        Enforce docs/PROJECT_STANDARDS.md: PEP 8 (88-char lines), Google-style
+        docstrings, full type hints. Flag any new runtime network call — Satya is
+        strictly offline-first; dev-time downloads must be cached and documented.
+        Flag any GPU/nvidia-cuda dependency — inference must stay CPU-only
+        (n_gpu_layers: 0, target 4GB RAM i3 hardware). Never commit secrets or
+        model binaries; satya_data/models/ content must stay gitignored.
+    - path: "student_app/**"
+      instructions: |
+        GUI/CLI changes must preserve parity between student_app/interface and
+        student_app/gui_app behaviors, and must degrade gracefully when the LLM
+        model files are absent (4GB-RAM target device may not have them).
+    - path: "system/rag/**"
+      instructions: |
+        RAG changes must respect the cache/serving budget: no unbounded caches,
+        no blocking calls inside the retrieval path, and keep chromadb collection
+        routing stable (subject/grade-based collections).
+    - path: "tests/**"
+      instructions: |
+        Tests depending on downloaded GGUF models must be marked
+        @pytest.mark.requires_model so CI (`pytest -m "not requires_model"`)
+        stays model-free.
+    - path: "**/*.md"
+      instructions: |
+        Code-affecting changes should append a bullet to CHANGELOG.md. Scratch/
+        planning notes belong in plan/ (untracked), never at repo root.

@@ -1,0 +1,8 @@
+# Satya — optional OCR support (scanned PDFs + handwritten notes)
+# Install: pip install -r requirements.txt -r requirements-ocr.txt
+# Tesseract binary must be installed at system level (see docs/HOW_TO_PROCESS.md)
+
+pytesseract>=0.3.10
+easyocr>=1.7.0
+Pillow>=9.0.0
+opencv-python>=4.8.0

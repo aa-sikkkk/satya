@@ -57,12 +57,3 @@ def log_resource_usage(note: str = "") -> None:
     mem = process.memory_info().rss / (1024 * 1024)  # MB
     cpu = process.cpu_percent(interval=0.1)
     logging.info(f"{note} Memory usage: {mem:.2f} MB, CPU usage: {cpu:.2f}%.")
-
-
-def log_performance_metric(message: str) -> None:
-    """
-    Log a custom performance metric message.
-    Args:
-        message (str): The message to log
-    """
-    logging.info(message) 

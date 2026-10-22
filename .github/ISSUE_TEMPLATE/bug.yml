@@ -1,0 +1,37 @@
+name: Bug report
+description: Report something broken in Satya
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Include the exact question you asked and the wrong/unexpected output.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: "1. python -m student_app.interface.cli_interface\n2. Ask ..."
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Which mode?
+      options: ["CLI", "GUI", "Both", "Teacher tooling"]
+    validations:
+      required: true
+  - type: input
+    id: hardware
+    attributes:
+      label: Hardware / OS
+      placeholder: "e.g. i3-3220, 4GB RAM, Windows 10"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: Paste from satya.log or the terminal. Do not paste API keys.

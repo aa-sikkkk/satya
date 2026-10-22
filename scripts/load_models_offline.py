@@ -9,9 +9,8 @@ import os
 import sys
 from pathlib import Path
 
-# Add the models directory to the path
-models_dir = Path(__file__).parent
-sys.path.insert(0, str(models_dir))
+# Model bundle lives in satya_data/models/ relative to the project root
+models_dir = Path(__file__).resolve().parents[1] / "satya_data" / "models"
 
 def load_phi_model():
     """Load Phi 1.5 model from local bundle."""

@@ -1,0 +1,32 @@
+# Enforces Conventional-Commits PR titles — release-please depends on this
+name: PR title
+on:
+  pull_request_target:
+    types: [opened, edited, reopened, synchronize]
+    branches: [master, develop]
+permissions:
+  pull-requests: read
+  statuses: write
+jobs:
+  semantic:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            chore
+            docs
+            refactor
+            test
+            perf
+            ci
+            build
+          scopes-regex: "deps"
+          requireScope: false
+          subjectPattern: "^[a-z].+"
+          subjectPatternError: "Subject must start lowercase and describe the change"
+          validateSingleCommit: false

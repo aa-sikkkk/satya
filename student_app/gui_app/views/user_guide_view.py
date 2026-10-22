@@ -89,14 +89,14 @@ class UserGuideView(ctk.CTkFrame):
 
     def _load_guide_content(self):
         try:
-            # Try to find USER_GUIDE.md in project root
+            # USER_GUIDE.md lives in docs/; keep a root fallback for legacy installs
             current_dir = os.path.dirname(os.path.abspath(__file__))
             project_root = os.path.abspath(os.path.join(current_dir, "..", "..", "..", ".."))
-            guide_path = os.path.join(project_root, "USER_GUIDE.md")
-            
+            guide_path = os.path.join(project_root, "docs", "USER_GUIDE.md")
+
             # Fallback
             if not os.path.exists(guide_path):
-                guide_path = "USER_GUIDE.md"
+                guide_path = os.path.join(project_root, "USER_GUIDE.md")
             
             if os.path.exists(guide_path):
                 with open(guide_path, "r", encoding="utf-8") as f:

@@ -1,0 +1,98 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "satya-learning-system"
+version = "2.2.0"
+description = "Offline-first RAG learning companion for Grades 8-12 (NEB curriculum), optimized for 4GB-RAM hardware."
+readme = "readme.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE" }
+authors = [{ name = "Satya Project Contributors" }]
+keywords = ["education", "rag", "offline", "nepal", "llm", "phi-1-5", "chromadb"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Education",
+    "License :: Noncommercial (see LICENSE)",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Education",
+]
+dependencies = [
+    "llama-cpp-python>=0.3.16",
+    "chromadb>=0.4.0",
+    "sentence-transformers>=2.2.0",
+    "torch>=2.0.0",
+    "customtkinter>=5.2.0",
+    "rich>=13.0.0",
+    "prompt_toolkit>=3.0.0",
+    "openai>=1.0.0",
+    "PyMuPDF>=1.23.0",
+    "PyYAML>=6.0",
+    "numpy>=1.26",
+    "psutil>=5.9",
+    "requests>=2.31",
+    "jsonschema>=4.17",
+]
+
+[project.optional-dependencies]
+ocr = ["pytesseract>=0.3.10", "easyocr>=1.7.0", "Pillow>=9.0.0", "opencv-python>=4.8.0"]
+nlp = ["spacy>=3.7.0", "language-tool-python>=2.7.0"]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=5.0.0",
+    "coverage>=7.0.0",
+    "memory-profiler>=0.61",
+    "ruff>=0.6.0",
+    "black>=24.0.0",
+    "isort>=5.13.0",
+    "mypy>=1.8.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/aa-sikkkk/satya"
+Documentation = "https://github.com/aa-sikkkk/satya/docs"
+
+[tool.setuptools.packages.find]
+include = ["student_app*", "system*", "ai_model*", "teacher_tools*", "scripts*"]
+
+[tool.black]
+line-length = 88
+target-version = ["py311"]
+
+[tool.isort]
+profile = "black"
+line_length = 88
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+exclude = ["venv", "dist", "satya_data"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "C4"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+exclude = ["venv", "dist", "satya_data", "tests"]
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+markers = [
+    "requires_model: tests that need downloaded model/binary assets (skipped in CI)",
+]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["system", "student_app", "ai_model", "teacher_tools"]
+omit = ["*/__main__.py", "*/tests/*"]
+
+[tool.coverage.report]
+fail_under = 80

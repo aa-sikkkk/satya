@@ -1,0 +1,28 @@
+# Stale bot — warnings only for PRs (never auto-close someone's work)
+name: Stale
+on:
+  schedule:
+    - cron: "17 3 * * 1"
+permissions:
+  issues: write
+  pull-requests: write
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v10
+        with:
+          days-before-stale: 30
+          days-before-close: 7
+          days-before-pr-close: -1
+          stale-issue-message: >
+            This issue has been inactive for 30 days. It will close if no
+            activity occurs for another 7 days. Remove the `stale` label or
+            comment to keep it open.
+          stale-pr-message: >
+            This pull request has been inactive for 30 days (marked `stale`).
+            It is never auto-closed; push an update or reply to revive it.
+          exempt-issue-labels: "pinned,work-in-progress,security"
+          exempt-pr-labels: "pinned,work-in-progress,security"
+          stale-issue-label: "stale"
+          stale-pr-label: "stale"
