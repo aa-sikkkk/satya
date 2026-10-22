@@ -70,13 +70,13 @@ We maintain zero tolerance for any form of harassment or discrimination.
 ### Key Steps:
 1. **Fork the Repository**
 2. **Clone Locally**
-3. **Create a Feature Branch**: `git checkout -b feature/<branch-name>` (branch from `develop` for routine work, from `master` for hotfixes)
+3. **Create a Feature Branch**: `git checkout -b feature/<branch-name>` (branch from `master`)
 4. **Develop Based on Requirements**
-5. **Write Clear Commit Messages**
+5. **Write Clear Commit Messages** (Conventional Commits)
 6. **Push Changes**
-7. **Open a Pull Request** — merge is PR-only: `master` and `develop` are
+7. **Open a Pull Request** — merge is PR-only: `master` is
    protected on GitHub (no direct pushes, even for the maintainer). Required:
-   green CI (`Lint & type check`, `Tests (py3.11)`, `Tests (py3.12)`,
+   green CI (`Lint`, `Tests (py3.12)`,
    `Dependency audit`), all conversations resolved, linear history.
 
 ### Automated Code Review (CodeRabbit)

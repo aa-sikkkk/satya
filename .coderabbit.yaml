@@ -15,7 +15,6 @@ reviews:
       - "WIP"
     base_branches:
       - master
-      - develop
 
   high_level_summary: true
   sequence_diagrams: true
