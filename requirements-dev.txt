@@ -4,6 +4,7 @@
 # Testing
 pytest>=8.0.0
 pytest-cov>=5.0.0
+pytest-timeout>=2.3.0
 coverage>=7.0.0
 memory-profiler>=0.61
 

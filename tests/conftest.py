@@ -22,6 +22,10 @@ import pytest
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
 
+# Tests must never attempt runtime network calls (offline-first):
+# keep the optional LanguageTool spell checker off unless explicitly enabled
+os.environ.setdefault("SATYA_SPELL_CHECK", "0")
+
 
 def pytest_configure(config: pytest.Config) -> None:
     config.addinivalue_line(

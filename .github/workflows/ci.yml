@@ -3,6 +3,10 @@ name: CI
 on:
   push:
     branches: [master, develop]
+    # push-only skips: PRs must still run required checks even for docs
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
   pull_request:
     branches: [master, develop]
 
@@ -14,6 +18,7 @@ jobs:
   lint:
     name: Lint & type check
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -32,6 +37,7 @@ jobs:
   test:
     name: Tests (py${{ matrix.python-version }})
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -51,11 +57,13 @@ jobs:
       - name: Run tests (skip model-dependent)
         env:
           SATYA_SKIP_HEAVY_TESTS: "1"
-        run: pytest -m "not requires_model" --cov --cov-report=term --cov-fail-under=80
+        # coverage gate lives in pyproject [tool.coverage.report] fail_under
+        run: pytest -m "not requires_model" --cov --cov-report=term
 
   audit:
     name: Dependency audit
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -65,4 +73,16 @@ jobs:
       - name: pip-audit
         run: |
           pip install pip-audit
-          pip-audit -r requirements.txt
+          # Unfixable upstream advisories (latest releases; fix_versions empty as of 2026-10-22):
+          #   chromadb PYSEC-2026-311/3813/3814/3815 — server-side tenancy model and
+          #     trust_remote_code loading paths; Satya is an offline, single-student
+          #     library consumer (no server, no multi-tenant auth). Tracked in
+          #     chroma-core/chroma#7909, re-check on next chromadb release.
+          #   diskcache PYSEC-2026-2447 — pickle RCE requires attacker write access
+          #     to the on-disk cache directory; cache lives in the local user dir.
+          pip-audit -r requirements.txt \
+            --ignore-vuln PYSEC-2026-311 \
+            --ignore-vuln PYSEC-2026-3813 \
+            --ignore-vuln PYSEC-2026-3814 \
+            --ignore-vuln PYSEC-2026-3815 \
+            --ignore-vuln PYSEC-2026-2447

@@ -1,7 +1,7 @@
 # Copyright (C) 2026 Aashik
 #
 # This software is subject to the terms of the PolyForm Noncommercial License 1.0.0.
-# A copy of the license can be found in the LICENSE file or at 
+# A copy of the license can be found in the LICENSE file or at
 # https://polyformproject.org/licenses/noncommercial/1.0.0/
 #
 # USE OF THIS SOFTWARE FOR COMMERCIAL PURPOSES IS STRICTLY PROHIBITED.
@@ -12,27 +12,34 @@ Teacher Analytics CLI
 A command-line interface for teachers to generate and export student/class analytics reports for Satya.
 """
 
+import csv
 import os
 from typing import List
-from rich.console import Console
-from rich.prompt import Prompt, Confirm
-from rich.panel import Panel
-from rich.table import Table
+
 from prompt_toolkit import PromptSession
 from prompt_toolkit.styles import Style
+from rich.console import Console
+from rich.panel import Panel
+from rich.prompt import Confirm, Prompt
+from rich.table import Table
 
-from teacher_tools.analytics.analytics_utils import (
-    generate_student_report, export_report_csv, export_report_json
-)
 from system.data_manager.content_manager import ContentManager
+from teacher_tools.analytics.analytics_utils import (
+    export_report_csv,
+    export_report_json,
+    generate_student_report,
+)
 
 console = Console()
-style = Style.from_dict({
-    'prompt': 'ansicyan bold',
-    'input': 'ansigreen',
-})
+style = Style.from_dict(
+    {
+        "prompt": "ansicyan bold",
+        "input": "ansigreen",
+    }
+)
 
 from rich.prompt import Prompt as _Prompt
+
 
 def patched_confirm_ask(prompt, default=False):
     yes_choices = {"y", "yes"}
@@ -45,7 +52,10 @@ def patched_confirm_ask(prompt, default=False):
         if answer in no_choices:
             return False
         console.print("[red]Please enter 'y' or 'n'.[/red]")
+
+
 Confirm.ask = staticmethod(patched_confirm_ask)
+
 
 class TeacherAnalyticsCLI:
     def __init__(self):
@@ -53,16 +63,17 @@ class TeacherAnalyticsCLI:
         self.session = PromptSession()
 
     def start(self):
-        console.print(Panel("[bold cyan]Welcome to the Satya Teacher Analytics CLI![/bold cyan]", border_style="cyan"))
+        console.print(
+            Panel(
+                "[bold cyan]Welcome to the Satya Teacher Analytics CLI![/bold cyan]",
+                border_style="cyan",
+            )
+        )
         self._load_content_manager()
         while True:
             choice = self._create_menu(
                 "Teacher Analytics Menu",
-                [
-                    "Generate Student Report",
-                    "Generate Class Report",
-                    "Exit"
-                ]
+                ["Generate Student Report", "Generate Class Report", "Exit"],
             )
             if choice == "Generate Student Report":
                 self._student_report()
@@ -70,7 +81,9 @@ class TeacherAnalyticsCLI:
                 self._class_report()
             elif choice == "Exit":
                 if Confirm.ask("Are you sure you want to exit?"):
-                    console.print("[bold green]Thank you for using the Teacher Analytics CLI. Goodbye![/bold green]")
+                    console.print(
+                        "[bold green]Thank you for using the Teacher Analytics CLI. Goodbye![/bold green]"
+                    )
                     break
 
     def _create_menu(self, title: str, options: List[str]) -> str:
@@ -86,15 +99,19 @@ class TeacherAnalyticsCLI:
             choice = Prompt.ask(
                 "Select an option (number or text)",
                 choices=list(valid_choices.keys()),
-                default="1"
+                default="1",
             )
             selected = valid_choices.get(choice.lower())
             if selected:
                 return selected
-            console.print("[red]Invalid choice. Please enter a number or option text.[/red]")
+            console.print(
+                "[red]Invalid choice. Please enter a number or option text.[/red]"
+            )
 
     def _load_content_manager(self):
-        content_dir = Prompt.ask("Enter path to content directory", default="data/content")
+        content_dir = Prompt.ask(
+            "Enter path to content directory", default="data/content"
+        )
         if not os.path.exists(content_dir):
             console.print(f"[red]Content directory not found: {content_dir}[/red]")
             exit(1)
@@ -127,16 +144,22 @@ class TeacherAnalyticsCLI:
             wc_table.add_column("Concept", style="yellow")
             wc_table.add_column("Question", style="white")
             for wc in report["weak_concepts"]:
-                wc_table.add_row(wc["subject"], wc["topic"], wc["concept"], wc["question"])
+                wc_table.add_row(
+                    wc["subject"], wc["topic"], wc["concept"], wc["question"]
+                )
             console.print(wc_table)
 
     def _export_report(self, report, username):
         if Confirm.ask("Export report as CSV?"):
-            filename = Prompt.ask("Enter CSV filename", default=f"{username}_report.csv")
+            filename = Prompt.ask(
+                "Enter CSV filename", default=f"{username}_report.csv"
+            )
             export_report_csv(report, filename)
             console.print(f"[green]Report exported to {filename}[/green]")
         if Confirm.ask("Export report as JSON?"):
-            filename = Prompt.ask("Enter JSON filename", default=f"{username}_report.json")
+            filename = Prompt.ask(
+                "Enter JSON filename", default=f"{username}_report.json"
+            )
             export_report_json(report, filename)
             console.print(f"[green]Report exported to {filename}[/green]")
 
@@ -170,13 +193,14 @@ class TeacherAnalyticsCLI:
         threshold = max(1, int(0.3 * total_students))
         class_weak_concepts = [
             {"subject": s, "topic": t, "concept": c, "count": count}
-            for (s, t, c), count in weak_concept_counter.items() if count >= threshold
+            for (s, t, c), count in weak_concept_counter.items()
+            if count >= threshold
         ]
         return {
             "total_students": total_students,
             "average_mastered_concepts": avg_mastered,
             "average_total_correct": avg_correct,
-            "class_weak_concepts": class_weak_concepts
+            "class_weak_concepts": class_weak_concepts,
         }
 
     def _display_class_report(self, class_report):
@@ -184,41 +208,66 @@ class TeacherAnalyticsCLI:
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="green")
         table.add_row("Total Students", str(class_report["total_students"]))
-        table.add_row("Average Mastered Concepts", f"{class_report['average_mastered_concepts']:.2f}")
-        table.add_row("Average Total Correct", f"{class_report['average_total_correct']:.2f}")
-        table.add_row("Class Weak Concepts", str(len(class_report["class_weak_concepts"])))
+        table.add_row(
+            "Average Mastered Concepts",
+            f"{class_report['average_mastered_concepts']:.2f}",
+        )
+        table.add_row(
+            "Average Total Correct", f"{class_report['average_total_correct']:.2f}"
+        )
+        table.add_row(
+            "Class Weak Concepts", str(len(class_report["class_weak_concepts"]))
+        )
         console.print(table)
         if class_report["class_weak_concepts"]:
-            wc_table = Table(title="Class Weak Concepts (≥30% students)", show_lines=True)
+            wc_table = Table(
+                title="Class Weak Concepts (≥30% students)", show_lines=True
+            )
             wc_table.add_column("Subject", style="cyan")
             wc_table.add_column("Topic", style="magenta")
             wc_table.add_column("Concept", style="yellow")
             wc_table.add_column("# Students", style="white")
             for wc in class_report["class_weak_concepts"]:
-                wc_table.add_row(wc["subject"], wc["topic"], wc["concept"], str(wc["count"]))
+                wc_table.add_row(
+                    wc["subject"], wc["topic"], wc["concept"], str(wc["count"])
+                )
             console.print(wc_table)
 
     def _export_class_report(self, class_report):
         if Confirm.ask("Export class report as CSV?"):
             filename = Prompt.ask("Enter CSV filename", default="class_report.csv")
-            with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
+            with open(filename, "w", newline="", encoding="utf-8") as csvfile:
                 writer = csv.writer(csvfile)
                 writer.writerow(["Total Students", class_report["total_students"]])
-                writer.writerow(["Average Mastered Concepts", f"{class_report['average_mastered_concepts']:.2f}"])
-                writer.writerow(["Average Total Correct", f"{class_report['average_total_correct']:.2f}"])
+                writer.writerow(
+                    [
+                        "Average Mastered Concepts",
+                        f"{class_report['average_mastered_concepts']:.2f}",
+                    ]
+                )
+                writer.writerow(
+                    [
+                        "Average Total Correct",
+                        f"{class_report['average_total_correct']:.2f}",
+                    ]
+                )
                 writer.writerow([])
                 writer.writerow(["Class Weak Concepts"])
                 writer.writerow(["Subject", "Topic", "Concept", "# Students"])
                 for wc in class_report["class_weak_concepts"]:
-                    writer.writerow([wc["subject"], wc["topic"], wc["concept"], wc["count"]])
+                    writer.writerow(
+                        [wc["subject"], wc["topic"], wc["concept"], wc["count"]]
+                    )
             console.print(f"[green]Class report exported to {filename}[/green]")
         if Confirm.ask("Export class report as JSON?"):
             filename = Prompt.ask("Enter JSON filename", default="class_report.json")
-            with open(filename, 'w', encoding='utf-8') as f:
+            with open(filename, "w", encoding="utf-8") as f:
                 import json
+
                 json.dump(class_report, f, indent=2, ensure_ascii=False)
             console.print(f"[green]Class report exported to {filename}[/green]")
 
+
 if __name__ == "__main__":
     cli = TeacherAnalyticsCLI()
-    cli.start() 
+    cli.start()

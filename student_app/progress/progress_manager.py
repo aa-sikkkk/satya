@@ -1,7 +1,7 @@
 # Copyright (C) 2026 Aashik
 #
 # This software is subject to the terms of the PolyForm Noncommercial License 1.0.0.
-# A copy of the license can be found in the LICENSE file or at 
+# A copy of the license can be found in the LICENSE file or at
 # https://polyformproject.org/licenses/noncommercial/1.0.0/
 #
 # USE OF THIS SOFTWARE FOR COMMERCIAL PURPOSES IS STRICTLY PROHIBITED.
@@ -12,9 +12,9 @@ Progress Manager Module
 Handles loading, saving, and updating user progress for the Satya CLI.
 """
 
-import os
 import json
-from typing import Dict, Any
+import os
+from typing import Any, Dict
 
 PROGRESS_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -40,7 +40,7 @@ def load_progress(username: str) -> Dict[str, Any]:
     """
     path = get_progress_path(username)
     if os.path.exists(path):
-        with open(path, 'r', encoding='utf-8') as f:
+        with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
     return {}
 
@@ -53,11 +53,13 @@ def save_progress(username: str, data: Dict[str, Any]) -> None:
         data (dict): Progress data
     """
     path = get_progress_path(username)
-    with open(path, 'w', encoding='utf-8') as f:
+    with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
 
-def update_progress(username: str, subject: str, topic: str, concept: str, question: str, correct: bool) -> None:
+def update_progress(
+    username: str, subject: str, topic: str, concept: str, question: str, correct: bool
+) -> None:
     """
     Update a user's progress after a question attempt.
     Args:
@@ -72,18 +74,16 @@ def update_progress(username: str, subject: str, topic: str, concept: str, quest
     subj = progress.setdefault(subject, {})
     top = subj.setdefault(topic, {})
     conc = top.setdefault(concept, {})
-    qlist = conc.setdefault('questions', [])
+    qlist = conc.setdefault("questions", [])
     # Check if question already exists
     for q in qlist:
-        if q['question'] == question:
-            q['attempts'] += 1
+        if q["question"] == question:
+            q["attempts"] += 1
             if correct:
-                q['correct'] += 1
+                q["correct"] += 1
             break
     else:
-        qlist.append({
-            'question': question,
-            'attempts': 1,
-            'correct': 1 if correct else 0
-        })
-    save_progress(username, progress) 
+        qlist.append(
+            {"question": question, "attempts": 1, "correct": 1 if correct else 0}
+        )
+    save_progress(username, progress)

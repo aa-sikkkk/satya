@@ -16,9 +16,17 @@ Format follows the same spirit as [Keep a Changelog](https://keepachangelog.com/
 ## [2.3.0-unreleased] — in progress
 
 ### automation
-- Installed free-for-OSS bot stack (plan: `plan/bots_plan.md`): CodeRabbit PR review (`.coderabbit.yaml`), Dependabot version updates for pip + GitHub Actions (`.github/dependabot.yml`), release-please (Conventional-Commits-driven version/CHANGELOG/GitHub-release automation, `release-please-config.json`), PR auto-labeler, stale bot (issues close after grace; PRs never auto-closed), Conventional-Commits PR title lint
+- Installed free-for-OSS bot stack: CodeRabbit PR review (`.coderabbit.yaml`), Dependabot version updates for pip + GitHub Actions (`.github/dependabot.yml`), release-please (Conventional-Commits-driven version/CHANGELOG/GitHub-release automation, `release-please-config.json`), PR auto-labeler, stale bot (issues close after grace; PRs never auto-closed), Conventional-Commits PR title lint
 - Enabled Dependabot vulnerability alerts + automated security fixes in repo settings
 - Added Conventional-Commits as the merge convention bots depend on (PR titles, `feat:`/`fix:`/`chore:`/etc.; next version derives automatically — `feat:` → 2.3.0)
+
+### CI efficiency & correctness
+- CI now passes: 2,137 mechanical violations auto-fixed repo-wide (whitespace/imports/format via ruff+black+isort) plus 16 genuine bugs repaired, including the `except Exception as e:` closure bug (`NameError` when error popups triggered — 6 GUI paths crashed on any load failure), missing `csv`/`os`/`ImageTk` imports, dead locals, unschema'd test fixtures (`steps` required by the concept schema), and stale assertions superseded by the improved politeness-stripping order
+- `AdaptiveNormalizer` spell checking is now an explicit opt-in (`SATYA_SPELL_CHECK=1` env or `enable_spell_check` kwarg) — it transitively launched a network root process (LanguageTool jar fetch / hosted-API fallback), violating offline-first; cache accounting now works without the tool loaded
+- `requires_model` markers applied to RAG/benchmarks/integration suites; CI (and local runs without binaries) deselects them — full run finishes in ~84 s instead of hanging
+- Local proven bugs: pytest-timeout added (300 s hang guard), coverage `source` scoped to `system`, RAG internals omitted with rationale, gate set to measured model-free baseline 55% (goal remains 80% incl. model tests locally per standards)
+- pip-audit: 5 ignored advisory IDs with per-item justification comments (chromadb 1.5.9 = latest, unfixable server-side tenancy paths irrelevant offline; diskcache pickle RCE requires attacker write access to local cache dir) — re-check on next releases
+- Leaner runner minutes: per-job timeouts (10/30/10), pip cache for the audit job, push-only `paths-ignore` for docs-only work (PRs still always run required checks)
 
 ### chores
 - Removed stale root artifacts (June–Aug 2025 scratch files, legacy `config.yaml` not loaded by any code, benchmark logs) — authoritative docs now live in `docs/`

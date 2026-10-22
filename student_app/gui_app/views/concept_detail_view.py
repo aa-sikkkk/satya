@@ -1,12 +1,13 @@
 # Copyright (C) 2026 Aashik
 #
 # This software is subject to the terms of the PolyForm Noncommercial License 1.0.0.
-# A copy of the license can be found in the LICENSE file or at 
+# A copy of the license can be found in the LICENSE file or at
 # https://polyformproject.org/licenses/noncommercial/1.0.0/
 #
 # USE OF THIS SOFTWARE FOR COMMERCIAL PURPOSES IS STRICTLY PROHIBITED.
 
 import customtkinter as ctk
+
 
 class ConceptDetailView(ctk.CTkFrame):
     def __init__(self, master, concept, on_start_questions, on_back, *args, **kwargs):
@@ -17,88 +18,90 @@ class ConceptDetailView(ctk.CTkFrame):
 
         # Main Title Area
         self.label = ctk.CTkLabel(
-            self, 
-            text=concept.get('name', 'Concept'), 
+            self,
+            text=concept.get("name", "Concept"),
             font=ctk.CTkFont(family="Segoe UI", size=26, weight="bold"),
-            wraplength=700
+            wraplength=700,
         )
         self.label.pack(pady=(30, 15))
 
         # Summary
-        if concept.get('summary'):
+        if concept.get("summary"):
             summary_frame = ctk.CTkFrame(self, fg_color="transparent")
-            summary_frame.pack(pady=(0, 20), padx=40, fill='x')
+            summary_frame.pack(pady=(0, 20), padx=40, fill="x")
             ctk.CTkLabel(
-                summary_frame, 
-                text=concept['summary'], 
-                font=ctk.CTkFont(family="Segoe UI", size=15), 
-                wraplength=600, 
-                justify='left',
-                text_color=("gray10", "gray85")
+                summary_frame,
+                text=concept["summary"],
+                font=ctk.CTkFont(family="Segoe UI", size=15),
+                wraplength=600,
+                justify="left",
+                text_color=("gray10", "gray85"),
             ).pack()
 
-        # Footer Frame 
+        # Footer Frame
         self.footer_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.footer_frame.pack(side="bottom", fill="x", pady=20)
 
         self.start_btn = ctk.CTkButton(
-            self.footer_frame, 
-            text="Start Questions", 
+            self.footer_frame,
+            text="Start Questions",
             command=self.on_start_questions,
             font=ctk.CTkFont(family="Segoe UI", size=16, weight="bold"),
             height=50,
             width=200,
             corner_radius=25,
-            fg_color="#43A047", # Green 600
-            hover_color="#2E7D32" # Green 800
+            fg_color="#43A047",  # Green 600
+            hover_color="#2E7D32",  # Green 800
         )
         self.start_btn.pack(pady=(0, 10))
-        
+
         self.back_btn = ctk.CTkButton(
-            self.footer_frame, 
-            text="Back", 
-            command=self.on_back, 
-            fg_color="transparent", 
-            border_width=1, 
+            self.footer_frame,
+            text="Back",
+            command=self.on_back,
+            fg_color="transparent",
+            border_width=1,
             border_color="#bdbdbd",
             text_color=("gray10", "#bdbdbd"),
-            hover_color=("gray90", "gray20")
+            hover_color=("gray90", "gray20"),
         )
         self.back_btn.pack(pady=(5, 0))
 
-        self.content_frame = ctk.CTkScrollableFrame(self, fg_color="transparent", width=700)
-        self.content_frame.pack(pady=(0, 10), fill='both', expand=True)
+        self.content_frame = ctk.CTkScrollableFrame(
+            self, fg_color="transparent", width=700
+        )
+        self.content_frame.pack(pady=(0, 10), fill="both", expand=True)
 
-        if concept.get('objectives'):
+        if concept.get("objectives"):
             ctk.CTkLabel(
-                self.content_frame, 
-                text="Learning Objectives", 
+                self.content_frame,
+                text="Learning Objectives",
                 font=ctk.CTkFont(family="Segoe UI", size=18, weight="bold"),
-                text_color="#3949AB"
-            ).pack(pady=(10, 10), padx=20, anchor='w')
-            
-            for obj in concept['objectives']:
+                text_color="#3949AB",
+            ).pack(pady=(10, 10), padx=20, anchor="w")
+
+            for obj in concept["objectives"]:
                 ctk.CTkLabel(
-                    self.content_frame, 
-                    text=f"•  {obj}", 
+                    self.content_frame,
+                    text=f"•  {obj}",
                     font=ctk.CTkFont(family="Segoe UI", size=14),
                     wraplength=650,
-                    justify="left"
-                ).pack(anchor='w', padx=(30, 20), pady=2)
+                    justify="left",
+                ).pack(anchor="w", padx=(30, 20), pady=2)
 
-        if concept.get('key_points'):
+        if concept.get("key_points"):
             ctk.CTkLabel(
-                self.content_frame, 
-                text="Key Points", 
+                self.content_frame,
+                text="Key Points",
                 font=ctk.CTkFont(family="Segoe UI", size=18, weight="bold"),
-                text_color="#3949AB"
-            ).pack(pady=(20, 10), padx=20, anchor='w')
-            
-            for kp in concept['key_points']:
+                text_color="#3949AB",
+            ).pack(pady=(20, 10), padx=20, anchor="w")
+
+            for kp in concept["key_points"]:
                 ctk.CTkLabel(
-                    self.content_frame, 
-                    text=f"•  {kp}", 
+                    self.content_frame,
+                    text=f"•  {kp}",
                     font=ctk.CTkFont(family="Segoe UI", size=14),
                     wraplength=650,
-                    justify="left"
-                ).pack(anchor='w', padx=(30, 20), pady=2) 
+                    justify="left",
+                ).pack(anchor="w", padx=(30, 20), pady=2)
