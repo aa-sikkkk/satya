@@ -50,7 +50,11 @@ class InputNormalizer:
         self.casual_address_patterns = [
             r"^(?:hey|hi|hello|ok|okay|so|yo)\s+(?:bro|dude)\b[,.!:-]?\s*",
             r"^(?:bro|dude)\b[,.!:-]?\s+",
-            r"\s+(?:bro|dude)[,.!?]*\s*$",
+            # Terminal position, but only as address: skip query subjects like
+            # "What is bro?" / "Define dude" via look-behind guards.
+            r"\s+(?<!\bis )(?<!\bwas )(?<!\bof )(?<!\ba )(?<!\ban )"
+            r"(?<!\bthe )(?<!\bmean )(?<!\bdefine )(?<!\bexplain )"
+            r"(?:bro|dude)[,.!?]*\s*$",
             r",\s*(?:bro|dude)\b[,.!:-]?\s*",
         ]
         self.politeness_patterns = [

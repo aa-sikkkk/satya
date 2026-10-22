@@ -62,6 +62,18 @@ class TestFormalization:
         assert "like" not in clean
         assert "basically" not in clean
 
+    def test_vocative_address_removal(self, normalizer):
+        result = normalizer.normalize("hey bro can u explain what is photosynthesis")
+        clean = result["clean_question"].lower()
+        assert "bro" not in clean
+        assert "photosynthesis" in clean
+
+    def test_query_terms_preserved_bro_dude(self, normalizer):
+        # bro/dude used as query subjects must survive normalization
+        for question in ("What is bro?", "define dude", "what does dude mean?"):
+            clean = normalizer.normalize(question)["clean_question"].lower()
+            assert "bro" in clean or "dude" in clean
+
 
 class TestSentenceNormalization:
     def test_question_mark_addition(self, normalizer):
