@@ -70,9 +70,13 @@ class TestFormalization:
 
     def test_query_terms_preserved_bro_dude(self, normalizer):
         # bro/dude used as query subjects must survive normalization
-        for question in ("What is bro?", "define dude", "what does dude mean?"):
+        for question, expected in (
+            ("What is bro?", "bro"),
+            ("define dude", "dude"),
+            ("what does dude mean?", "dude"),
+        ):
             clean = normalizer.normalize(question)["clean_question"].lower()
-            assert "bro" in clean or "dude" in clean
+            assert re.search(rf"\b{re.escape(expected)}\b", clean)
 
 
 class TestSentenceNormalization:
