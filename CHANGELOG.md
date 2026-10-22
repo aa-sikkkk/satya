@@ -19,6 +19,8 @@ Format follows the same spirit as [Keep a Changelog](https://keepachangelog.com/
 - Installed free-for-OSS bot stack: CodeRabbit PR review (`.coderabbit.yaml`), Dependabot version updates for pip + GitHub Actions (`.github/dependabot.yml`), release-please (Conventional-Commits-driven version/CHANGELOG/GitHub-release automation, `release-please-config.json`), PR auto-labeler, stale bot (issues close after grace; PRs never auto-closed), Conventional-Commits PR title lint
 - Enabled Dependabot vulnerability alerts + automated security fixes in repo settings
 - Added Conventional-Commits as the merge convention bots depend on (PR titles, `feat:`/`fix:`/`chore:`/etc.; next version derives automatically — `feat:` → 2.3.0)
+- Created the 11 path labels the labeler configuration expects (rag/gui/cli/model/ingestion/diagrams/teacher-tools/tests/docs/ci/dependencies)
+- Master-only branch policy: `master` is the sole integration branch; feature branches PR directly into it; workflow triggers trimmed to push/PR on master plus a weekly compatibility run
 
 ### CI efficiency & correctness
 - CI now passes: 2,137 mechanical violations auto-fixed repo-wide (whitespace/imports/format via ruff+black+isort) plus 16 genuine bugs repaired, including the `except Exception as e:` closure bug (`NameError` when error popups triggered — 6 GUI paths crashed on any load failure), missing `csv`/`os`/`ImageTk` imports, dead locals, unschema'd test fixtures (`steps` required by the concept schema), and stale assertions superseded by the improved politeness-stripping order
