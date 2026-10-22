@@ -45,6 +45,18 @@ class InputNormalizer:
             r"\bjust\b",
         ]
         self.conversational_starters = [r"^hey\s+", r"^hi\s+", r"^so\s+"]
+        # Vocative-only casual address: "hey bro", "bro, ...", "nice one bro!"
+        # stay removable, but "What does dude mean?" keeps the word (subject).
+        self.casual_address_patterns = [
+            r"^(?:hey|hi|hello|ok|okay|so|yo)\s+(?:bro|dude)\b[,.!:-]?\s*",
+            r"^(?:bro|dude)\b[,.!:-]?\s+",
+            # Terminal position, but only as address: skip query subjects like
+            # "What is bro?" / "Define dude" via look-behind guards.
+            r"\s+(?<!\bis )(?<!\bwas )(?<!\bof )(?<!\ba )(?<!\ban )"
+            r"(?<!\bthe )(?<!\bmean )(?<!\bdefine )(?<!\bexplain )"
+            r"(?:bro|dude)[,.!?]*\s*$",
+            r",\s*(?:bro|dude)\b[,.!:-]?\s*",
+        ]
         self.politeness_patterns = [
             r"^can you (please )?tell me ",
             r"^please (tell me|explain) ",
@@ -175,9 +187,6 @@ class InputNormalizer:
             r"\bu\b": "you",
             r"\bur\b": "your",
             r"\bidk\b": "I do not know",
-            # casual address terms drop out (whitespace collapsed later)
-            r"\bbro\b": "",
-            r"\bdude\b": "",
         }
 
     def _get_abbreviations(self) -> Dict[str, str]:
@@ -221,6 +230,9 @@ class InputNormalizer:
         original = question
 
         for pattern in self.conversational_starters:
+            question = re.sub(pattern, "", question, flags=re.IGNORECASE)
+
+        for pattern in self.casual_address_patterns:
             question = re.sub(pattern, "", question, flags=re.IGNORECASE)
 
         for slang, formal in self.slang_to_formal.items():

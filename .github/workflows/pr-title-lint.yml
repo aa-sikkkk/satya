@@ -25,7 +25,7 @@ jobs:
             perf
             ci
             build
-          scopes-regex: "deps"
+          scopes: "deps"
           requireScope: false
           subjectPattern: "^[a-z].+"
           subjectPatternError: "Subject must start lowercase and describe the change"

@@ -84,7 +84,7 @@ def main():
             model_path = Path(args.model_path)
         else:
             # Use default with resource path resolution
-            model_path = resolve_model_dir("satya_data/models/phi_1_5")
+            model_path = resolve_model_dir("satya_data/models/phi15")
 
         if not model_path.exists():
             logger.error(f"Model directory not found: {model_path}")

@@ -39,7 +39,7 @@ Format follows the same spirit as [Keep a Changelog](https://keepachangelog.com/
 - Added `pyproject.toml` (PEP 621 metadata, Black/isort/ruff/mypy/pytest/coverage config, Python floor >= 3.11)
 
 ### tooling / agentic build
-- Added GitHub Actions CI: lint (ruff+black+isort), tests on Python 3.11/3.12 with coverage gate 80% (`not requires_model`), dependency audit
+- Added GitHub Actions CI: lint (ruff+black+isort), tests on Python 3.11/3.12 with coverage gate (`not requires_model`; gate re-baselined to a measured model-free floor in 2.3.0), dependency audit
 - Added PR template + bug/feature issue templates aligned with `docs/PROJECT_STANDARDS.md`
 - Added repo-level `AGENTS.md` (agent contract incl. codebase-memory graph workflow)
 

@@ -105,3 +105,6 @@ logs/
 
 textbooks/grade_*/
 notes/grade_*/
+
+# Generated per-user progress files (student names/marks; never commit)
+student_app/progress/progress_*.json
