@@ -11,7 +11,7 @@ memory-profiler>=0.61
 # Lint & type check
 ruff==0.17.1
 black==25.9.0
-isort==7.0.0
+isort==9.0.2
 mypy>=1.8.0
 
 # Data pipeline helpers (maintainer use)
