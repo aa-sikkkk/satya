@@ -70,11 +70,29 @@ We maintain zero tolerance for any form of harassment or discrimination.
 ### Key Steps:
 1. **Fork the Repository**
 2. **Clone Locally**
-3. **Create a Feature Branch**: `git checkout -b feature/<branch-name>`
+3. **Create a Feature Branch**: `git checkout -b feature/<branch-name>` (branch from `develop` for routine work, from `master` for hotfixes)
 4. **Develop Based on Requirements**
 5. **Write Clear Commit Messages**
 6. **Push Changes**
-7. **Open a Pull Request**
+7. **Open a Pull Request** — merge is PR-only: `master` and `develop` are
+   protected on GitHub (no direct pushes, even for the maintainer). Required:
+   green CI (`Lint & type check`, `Tests (py3.11)`, `Tests (py3.12)`,
+   `Dependency audit`), all conversations resolved, linear history.
+
+### Automated Code Review (CodeRabbit)
+
+Every pull request is automatically reviewed by [CodeRabbit](https://coderabbit.ai),
+an AI code-review bot that is **free for open-source repositories**:
+
+- On each PR it posts a high-level summary, walk-through, and line-by-line
+  comments (no API key or account required for public repos)
+- It flags violations of our offline-first and low-resource constraints
+  (new runtime network calls, GPU dependencies, unbounded caches)
+- You can reply to its comments (`@coderabbitai ...`) to ask questions or
+  request re-reviews; it never blocks merge on its own
+
+Behavior is configured in `.coderabbit.yaml` at the repository root. Human
+review per `docs/PROJECT_STANDARDS.md` Git-flow remains required for merge.
 
 ### Reporting Issues:
 For issues, include:

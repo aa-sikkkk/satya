@@ -17,23 +17,28 @@
 Bootstrap script for Nuitka
 """
 
-import os
-import sys
-import pathlib
-import traceback
 import ctypes
+import os
+import pathlib
+import sys
+import traceback
 
 log_file = pathlib.Path(os.getcwd()) / "satya_startup_error.log"
 
+
 def show_error(msg):
     try:
-        ctypes.windll.user32.MessageBoxW(0, str(msg), "Satya Startup Error", 0x10 | 0x1000)  # MB_ICONERROR | MB_SYSTEMMODAL
+        ctypes.windll.user32.MessageBoxW(
+            0, str(msg), "Satya Startup Error", 0x10 | 0x1000
+        )  # MB_ICONERROR | MB_SYSTEMMODAL
     except Exception:
-        pass  
+        pass
+
+
 try:
     if "NUITKA_ONEFILE_PARENT" in os.environ:
         app_dir = pathlib.Path(os.environ["NUITKA_ONEFILE_PARENT"]).resolve()
-    elif getattr(sys, 'frozen', False):
+    elif getattr(sys, "frozen", False):
         app_dir = pathlib.Path(sys.executable).parent.resolve()
     else:
         app_dir = pathlib.Path(__file__).parent.resolve()
@@ -42,7 +47,9 @@ try:
         f.write(f"--- Satya Startup {sys.version} ---\n")
         f.write(f"sys.executable: {sys.executable}\n")
         f.write(f"__file__: {__file__ if '__file__' in globals() else 'N/A'}\n")
-        f.write(f"NUITKA_ONEFILE_PARENT: {os.environ.get('NUITKA_ONEFILE_PARENT', 'Not set')}\n")
+        f.write(
+            f"NUITKA_ONEFILE_PARENT: {os.environ.get('NUITKA_ONEFILE_PARENT', 'Not set')}\n"
+        )
         f.write(f"Detected app_dir: {app_dir}\n")
         f.write(f"Current CWD before: {os.getcwd()}\n")
         f.write(f"Files in app_dir: {list(app_dir.glob('*'))}\n")
@@ -62,5 +69,3 @@ except Exception as e:
         f.write(f"CRASH at {os.getcwd()}: {error_msg}\n")
     show_error(error_msg)
     sys.exit(1)
-
-

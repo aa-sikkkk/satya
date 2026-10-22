@@ -1,7 +1,7 @@
 # Copyright (C) 2026 Aashik
 #
 # This software is subject to the terms of the PolyForm Noncommercial License 1.0.0.
-# A copy of the license can be found in the LICENSE file or at 
+# A copy of the license can be found in the LICENSE file or at
 # https://polyformproject.org/licenses/noncommercial/1.0.0/
 #
 # USE OF THIS SOFTWARE FOR COMMERCIAL PURPOSES IS STRICTLY PROHIBITED.
@@ -12,13 +12,14 @@ Provides visual learning aids through text-based diagrams.
 Essential for offline, text-only interface.
 """
 
-from typing import Dict, Optional
+from typing import Optional
+
 
 class ASCIIDiagramLibrary:
     """
     Repository of educational ASCII diagrams.
     """
-    
+
     def __init__(self):
         self._library = {
             # --- BIOLOGY ---
@@ -43,7 +44,6 @@ class ASCIIDiagramLibrary:
      A-------T
       G-----C
     """,
-    
             # --- PHYSICS ---
             "circuit_series": r"""
     + [Battery] -
@@ -51,7 +51,6 @@ class ASCIIDiagramLibrary:
     |           |
     +--[Bulb]--[Bulb]--+
     """,
-    
             "circuit_parallel": r"""
        +--[Bulb]--+
        |          |
@@ -67,7 +66,6 @@ class ASCIIDiagramLibrary:
          e-
     (Bohr Model: P=Proton, N=Neutron, e=Electron)
     """,
-    
             # --- CHEMISTRY ---
             "periodic_table_skeleton": r"""
     H                                                  He
@@ -75,7 +73,6 @@ class ASCIIDiagramLibrary:
     Na Mg                               Al Si P  S  Cl Ar
     K  Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr
     """,
-
             # --- MATH ---
             "triangle_right": r"""
     |\
@@ -91,13 +88,13 @@ class ASCIIDiagramLibrary:
           |
           |
     (Cartesian System)
-    """
+    """,
         }
-        
+
         # Keywords mapping to diagrams for auto-detection
         self._keywords = {
             "plant cell": "cell_plant",
-            "animal cell": "cell_plant", # Fallback approx
+            "animal cell": "cell_plant",  # Fallback approx
             "dna": "dna",
             "gene": "dna",
             "series circuit": "circuit_series",
@@ -109,7 +106,7 @@ class ASCIIDiagramLibrary:
             "triangle": "triangle_right",
             "pythagoras": "triangle_right",
             "graph": "coordinate_plane",
-            "coordinate": "coordinate_plane"
+            "coordinate": "coordinate_plane",
         }
 
     def get_diagram(self, key: str) -> Optional[str]:

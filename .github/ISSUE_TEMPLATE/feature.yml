@@ -1,0 +1,26 @@
+name: Feature request
+description: Suggest an improvement for Satya
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Which student or teacher flow is affected?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: checkboxes
+    id: constraints
+    attributes:
+      label: Constraints acknowledged
+      options:
+        - label: Works fully offline
+        - label: Runs within 4GB RAM on i3-era hardware
+    validations:
+      required: true

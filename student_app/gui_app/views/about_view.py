@@ -1,19 +1,22 @@
 # Copyright (C) 2026 Aashik
 #
 # This software is subject to the terms of the PolyForm Noncommercial License 1.0.0.
-# A copy of the license can be found in the LICENSE file or at 
+# A copy of the license can be found in the LICENSE file or at
 # https://polyformproject.org/licenses/noncommercial/1.0.0/
 #
 # USE OF THIS SOFTWARE FOR COMMERCIAL PURPOSES IS STRICTLY PROHIBITED.
 
 import customtkinter as ctk
 
+
 class AboutView(ctk.CTkFrame):
     def __init__(self, master, on_back, *args, **kwargs):
         super().__init__(master, *args, **kwargs)
         self.on_back = on_back
 
-        self.label = ctk.CTkLabel(self, text="About Satya", font=ctk.CTkFont(size=22, weight="bold"))
+        self.label = ctk.CTkLabel(
+            self, text="About Satya", font=ctk.CTkFont(size=22, weight="bold")
+        )
         self.label.pack(pady=(30, 20))
 
         about_text = """
@@ -31,8 +34,10 @@ class AboutView(ctk.CTkFrame):
         We hope you enjoy your learning experience with Satya!
         """
 
-        self.textbox = ctk.CTkTextbox(self, width=600, height=300, font=ctk.CTkFont(size=16), wrap='word')
-        self.textbox.insert('1.0', about_text)
+        self.textbox = ctk.CTkTextbox(
+            self, width=600, height=300, font=ctk.CTkFont(size=16), wrap="word"
+        )
+        self.textbox.insert("1.0", about_text)
         self.textbox.configure(state="disabled")
         self.textbox.pack(pady=10, padx=20, fill="both", expand=True)
 

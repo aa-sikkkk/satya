@@ -1,7 +1,7 @@
 # Copyright (C) 2026 Aashik
 #
 # This software is subject to the terms of the PolyForm Noncommercial License 1.0.0.
-# A copy of the license can be found in the LICENSE file or at 
+# A copy of the license can be found in the LICENSE file or at
 # https://polyformproject.org/licenses/noncommercial/1.0.0/
 #
 # USE OF THIS SOFTWARE FOR COMMERCIAL PURPOSES IS STRICTLY PROHIBITED.
@@ -15,13 +15,21 @@ Falls back to mock mode if no proxy_url is set.
 """
 import logging
 from typing import Optional
+
 import requests
+
 
 class OpenAIProxyClient:
     """
     Handles communication with a secure OpenAI proxy server.
     """
-    def __init__(self, proxy_url: Optional[str] = None, api_key: Optional[str] = None, default_model: str = "gpt-3.5-turbo"):
+
+    def __init__(
+        self,
+        proxy_url: Optional[str] = None,
+        api_key: Optional[str] = None,
+        default_model: str = "gpt-3.5-turbo",
+    ):
         """
         Initialize the client.
         Args:
@@ -33,11 +41,15 @@ class OpenAIProxyClient:
         self.api_key = api_key
         self.default_model = default_model
         if not proxy_url:
-            logging.info("OpenAIProxyClient initialized in mock mode (no proxy_url provided)")
+            logging.info(
+                "OpenAIProxyClient initialized in mock mode (no proxy_url provided)"
+            )
         else:
             logging.info(f"OpenAIProxyClient will use proxy at: {proxy_url}")
 
-    def ask(self, question: str, user_id: Optional[str] = None, model: Optional[str] = None) -> str:
+    def ask(
+        self, question: str, user_id: Optional[str] = None, model: Optional[str] = None
+    ) -> str:
         """
         Send a question to the OpenAI proxy and return the answer.
         Args:
@@ -57,10 +69,12 @@ class OpenAIProxyClient:
         payload = {
             "question": question,
             "user_id": user_id or "anonymous",
-            "model": model or self.default_model
+            "model": model or self.default_model,
         }
         try:
-            response = requests.post(self.proxy_url, json=payload, headers=headers, timeout=15)
+            response = requests.post(
+                self.proxy_url, json=payload, headers=headers, timeout=15
+            )
             response.raise_for_status()
             data = response.json()
             if "answer" in data and data["answer"]:
@@ -70,4 +84,4 @@ class OpenAIProxyClient:
             else:
                 return "[OpenAI Proxy Error] Unexpected response format."
         except Exception as e:
-            return f"[OpenAI Proxy Error] {e}" 
+            return f"[OpenAI Proxy Error] {e}"

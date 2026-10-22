@@ -1,7 +1,7 @@
 # Copyright (C) 2026 Aashik
 #
 # This software is subject to the terms of the PolyForm Noncommercial License 1.0.0.
-# A copy of the license can be found in the LICENSE file or at 
+# A copy of the license can be found in the LICENSE file or at
 # https://polyformproject.org/licenses/noncommercial/1.0.0/
 #
 # USE OF THIS SOFTWARE FOR COMMERCIAL PURPOSES IS STRICTLY PROHIBITED.
@@ -9,4 +9,11 @@
 Satya AI Learning Companion package.
 """
 
-__version__ = "2.1.1" 
+try:
+    from importlib.metadata import PackageNotFoundError
+    from importlib.metadata import version as _version
+
+    __version__ = _version("satya-learning-system")
+except PackageNotFoundError:
+    # Package metadata not installed (plain source checkout)
+    __version__ = "unknown"

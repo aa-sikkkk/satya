@@ -3,7 +3,7 @@
    <img height="250" width="190" src="https://github.com/user-attachments/assets/1230c5ef-bf67-46e3-a66a-9bc950cbb4e6">
 
    [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
-   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+   [![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/License-PolyForm%20Noncommercial%201.0.0-orange.svg)](LICENSE)
    [![Offline First](https://img.shields.io/badge/Offline-First-green)](https://github.com/aa-sikkkk/Satya)
    [![RAG Powered](https://img.shields.io/badge/RAG-Powered-purple)](https://github.com/aa-sikkkk/Satya)
 </div>
@@ -475,7 +475,7 @@ Download the Phi 1.5 GGUF model:
 
 ```bash
 # Create model directory
-mkdir -p satya_data/models/phi_1_5
+mkdir -p satya_data/models/phi15
 
 # Download model (Q4_K_M quantization)
 # File size: ~800MB
@@ -639,7 +639,7 @@ The system only shows confidence warnings when needed:
 ```python
 from ai_model.model_utils.model_handler import ModelHandler
 
-handler = ModelHandler("satya_data/models/phi_1_5")
+handler = ModelHandler("satya_data/models/phi15")
 answer, confidence = handler.get_answer(
     "What is a computer network?",
     "A computer network connects devices...",
@@ -849,7 +849,7 @@ Special thanks to:
   - Semantic caching for instant repeated queries
 - **Single Phi 1.5 Model** - Optimized for i3 CPU (4GB RAM)
   - Real-time token streaming
-  - Context window: 384 tokens
+  - Context window: 2048 tokens
   - Q4_K_M quantization (~800MB)
 - **Universal Content Ingestion** - Single script for all content types
   - OCR support (Tesseract + EasyOCR)
