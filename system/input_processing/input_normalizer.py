@@ -49,7 +49,8 @@ class InputNormalizer:
         # stay removable, but "What does dude mean?" keeps the word (subject).
         self.casual_address_patterns = [
             r"^(?:hey|hi|hello|ok|okay|so|yo)\s+(?:bro|dude)\b[,.!:-]?\s*",
-            r"^(?:bro|dude)\b[,.!:-]?\s+",
+            # Punctuation may be followed by zero spaces, e.g. "Bro,why is ..."
+            r"^(?:bro|dude)\b(?:\s*[,.!:-]\s*|\s+)",
             # Terminal position, but only as address: skip query subjects like
             # "What is bro?" / "Define dude" via look-behind guards.
             r"\s+(?<!\bis )(?<!\bwas )(?<!\bof )(?<!\ba )(?<!\ban )"
