@@ -6,6 +6,8 @@ on:
 permissions:
   issues: write
   pull-requests: write
+  # lets actions/stale persist its processing-state cache on the Actions cache
+  actions: write
 jobs:
   stale:
     runs-on: ubuntu-latest

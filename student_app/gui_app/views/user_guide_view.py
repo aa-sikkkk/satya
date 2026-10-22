@@ -117,9 +117,7 @@ class UserGuideView(ctk.CTkFrame):
         try:
             # USER_GUIDE.md lives in docs/; keep a root fallback for legacy installs
             current_dir = os.path.dirname(os.path.abspath(__file__))
-            project_root = os.path.abspath(
-                os.path.join(current_dir, "..", "..", "..", "..")
-            )
+            project_root = os.path.abspath(os.path.join(current_dir, "..", "..", ".."))
             guide_path = os.path.join(project_root, "docs", "USER_GUIDE.md")
 
             # Fallback

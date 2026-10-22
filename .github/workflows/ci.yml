@@ -10,6 +10,10 @@ on:
   pull_request:
     branches: [master, develop]
 
+# Pull-request code must never run with a write-capable token
+permissions:
+  contents: read
+
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true

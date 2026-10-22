@@ -72,8 +72,8 @@
 
 ## Solution: Hybrid Metadata Handler
 
-Need to update:
+Completed:
 1. `rag_retrieval_engine.py` - Handle both schemas
 2. `rag_helper.py` - Flexible metadata parsing
-3. `ingest_content.py` - Add `type` field for new content
+3. `ingest_content.py` - Add `type` field for new content (writes `'type': 'neb_curriculum'` before `collection.upsert`)
 4. Keep backup as-is (don't modify)

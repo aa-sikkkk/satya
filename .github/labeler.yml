@@ -31,7 +31,7 @@ teacher-tools:
 
 tests:
   - changed-files:
-      - all-globs-to-all-files: "tests/**"
+      - any-glob-to-any-file: "tests/**"
 
 docs:
   - changed-files:

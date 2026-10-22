@@ -782,7 +782,7 @@ class CLIInterface:
                             weak.append((subject, topic, concept, q["question"]))
 
         # Display overall progress
-        accuracy = (total_correct / total_attempts) if total_attempts else 0.0
+        accuracy = (total_correct / total_attempts) * 100 if total_attempts else 0.0
         CLIRenderer.show_progress_summary(
             total_questions, total_correct, accuracy, len(mastered)
         )

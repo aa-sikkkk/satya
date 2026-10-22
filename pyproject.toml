@@ -43,6 +43,7 @@ ocr = ["pytesseract>=0.3.10", "easyocr>=1.7.0", "Pillow>=9.0.0", "opencv-python>
 nlp = ["spacy>=3.7.0", "language-tool-python>=2.7.0"]
 dev = [
     "pytest>=8.0.0",
+    "pytest-timeout>=2.3.0",
     "pytest-cov>=5.0.0",
     "coverage>=7.0.0",
     "memory-profiler>=0.61",
@@ -54,7 +55,7 @@ dev = [
 
 [project.urls]
 Homepage = "https://github.com/aa-sikkkk/satya"
-Documentation = "https://github.com/aa-sikkkk/satya/docs"
+Documentation = "https://github.com/aa-sikkkk/satya/tree/master/docs"
 
 [tool.setuptools.packages.find]
 include = ["student_app*", "system*", "ai_model*", "teacher_tools*", "scripts*"]

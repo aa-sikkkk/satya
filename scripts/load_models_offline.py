@@ -16,7 +16,7 @@ def load_phi_model():
     try:
         from transformers import AutoModel, AutoTokenizer
 
-        phi_dir = models_dir / "phi_1_5"
+        phi_dir = models_dir / "phi15"
 
         if phi_dir.exists():
             print("Loading Phi 1.5 model from local bundle...")

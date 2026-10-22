@@ -64,7 +64,7 @@ Rules:
 
 Root directory contains only project-level files (readme, LICENSE, requirements*, pyproject, config-era docs live in `docs/`). Do not create scratch files at root; use `plan/` for proposals (one markdown per plan; existing example: `plan/plan.md`, `plan/upgrade_plan.md`).
 
-`plan/` is intentionally untracked: it is excluded via `.git/info/exclude` (local, not in `.gitignore`), so plan documents stay local working notes and never enter commit history. Keep agents' proposal drafts there; reference them in PRs by content, not by file path.
+`plan/` is intentionally untracked: it is excluded via `.git/info/exclude` (local, not in `.gitignore`), so plan documents stay local working notes in this clone. This is a convention, not a history guarantee — never `git add -f` them; keep agents' proposal drafts there; reference them in PRs by content, not by file path.
 
 **Never mention `plan/` in commit messages, PR titles, or PR bodies** — plans are the maintainer's private working notes. **Always ask the user before pushing** any branch or force-update; never push proactively.
 

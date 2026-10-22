@@ -179,7 +179,7 @@ chroma_db/
 ```
 satya_data/
 ├── models/
-│   ├── phi_1_5/           # Cached Phi 1.5 model
+│   ├── phi15/             # Cached Phi 1.5 model
 │   └── clip/              # Cached CLIP model
 ├── chroma_db/             # Vector database
 ├── processed_content/      # Original chunks and images
@@ -265,7 +265,7 @@ satya_data/
 
 ---
 
-**Last Updated**: [Current Date]
+**Last Updated**: 2026-10-22
 **Status**: Design Phase
-**Next Review**: [Next Week]
+**Next Review**: 2026-10-29
 **Team**: Satya Development Team 
