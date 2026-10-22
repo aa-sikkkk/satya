@@ -1,0 +1,30 @@
+# Dependabot version updates — free, GitHub-native
+# Groups minor/patch into one PR per ecosystem to avoid review spam
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    groups:
+      python-deps:
+        update-types:
+          - "minor"
+          - "patch"
+    labels:
+      - "dependencies"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    groups:
+      actions-deps:
+        patterns:
+          - "actions/*"
+    labels:
+      - "dependencies"
+      - "ci"

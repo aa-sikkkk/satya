@@ -1,7 +1,7 @@
 # Copyright (C) 2026 Aashik
 #
 # This software is subject to the terms of the PolyForm Noncommercial License 1.0.0.
-# A copy of the license can be found in the LICENSE file or at 
+# A copy of the license can be found in the LICENSE file or at
 # https://polyformproject.org/licenses/noncommercial/1.0.0/
 #
 # USE OF THIS SOFTWARE FOR COMMERCIAL PURPOSES IS STRICTLY PROHIBITED.
@@ -14,15 +14,14 @@ Provides utility functions for resource path resolution and other system operati
 
 from .resource_path import (
     get_base_path,
+    resolve_chroma_db_dir,
     resolve_content_dir,
     resolve_model_dir,
-    resolve_chroma_db_dir
 )
 
 __all__ = [
-    'get_base_path',
-    'resolve_content_dir',
-    'resolve_model_dir',
-    'resolve_chroma_db_dir',
+    "get_base_path",
+    "resolve_content_dir",
+    "resolve_model_dir",
+    "resolve_chroma_db_dir",
 ]
-

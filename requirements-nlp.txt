@@ -1,0 +1,5 @@
+# Satya — optional NLP extras (lazy-imported; system degrades gracefully without them)
+# Install: pip install -r requirements.txt -r requirements-nlp.txt
+
+spacy>=3.7.0
+language-tool-python>=2.7.0

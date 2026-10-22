@@ -1,7 +1,7 @@
 # Copyright (C) 2026 Aashik
 #
 # This software is subject to the terms of the PolyForm Noncommercial License 1.0.0.
-# A copy of the license can be found in the LICENSE file or at 
+# A copy of the license can be found in the LICENSE file or at
 # https://polyformproject.org/licenses/noncommercial/1.0.0/
 #
 # USE OF THIS SOFTWARE FOR COMMERCIAL PURPOSES IS STRICTLY PROHIBITED.
@@ -10,65 +10,57 @@
 Startup loader for Satya GUI - Preloads all models before showing main window
 """
 
-import customtkinter as ctk
 import tkinter as tk
-import threading
-import time
-from pathlib import Path
+
+import customtkinter as ctk
+
 
 class StartupLoader(tk.Tk):
     """Loading screen shown during model initialization."""
-    
+
     def __init__(self):
         super().__init__()
-        
+
         self.title("Loading Satya...")
         self.geometry("400x250")
         self.resizable(False, False)
-        
+
         self.update_idletasks()
         x = (self.winfo_screenwidth() // 2) - (400 // 2)
         y = (self.winfo_screenheight() // 2) - (250 // 2)
         self.geometry(f"+{x}+{y}")
-        
+
         self.overrideredirect(True)
-        
-        ctk.set_appearance_mode('light')
-        ctk.set_default_color_theme('green')
-        
+
+        ctk.set_appearance_mode("light")
+        ctk.set_default_color_theme("green")
+
         self.frame = ctk.CTkFrame(self, corner_radius=15)
         self.frame.pack(fill="both", expand=True, padx=20, pady=20)
-        
+
         # Title
         self.title_label = ctk.CTkLabel(
-            self.frame,
-            text="🚀 Satya Learning System",
-            font=("Arial", 20, "bold")
+            self.frame, text="🚀 Satya Learning System", font=("Arial", 20, "bold")
         )
         self.title_label.pack(pady=(20, 10))
-        
+
         # Status label
         self.status_label = ctk.CTkLabel(
-            self.frame,
-            text="Initializing...",
-            font=("Arial", 12)
+            self.frame, text="Initializing...", font=("Arial", 12)
         )
         self.status_label.pack(pady=10)
-        
+
         # Progress bar
         self.progress = ctk.CTkProgressBar(self.frame, width=300)
         self.progress.pack(pady=10)
         self.progress.set(0)
-        
+
         # Detail label
         self.detail_label = ctk.CTkLabel(
-            self.frame,
-            text="",
-            font=("Arial", 10),
-            text_color="gray"
+            self.frame, text="", font=("Arial", 10), text_color="gray"
         )
         self.detail_label.pack(pady=5)
-        
+
     def update_status(self, status, detail="", progress=None):
         """Update loading status."""
         self.status_label.configure(text=status)

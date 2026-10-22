@@ -1,7 +1,7 @@
 # Copyright (C) 2026 Aashik
 #
 # This software is subject to the terms of the PolyForm Noncommercial License 1.0.0.
-# A copy of the license can be found in the LICENSE file or at 
+# A copy of the license can be found in the LICENSE file or at
 # https://polyformproject.org/licenses/noncommercial/1.0.0/
 #
 # USE OF THIS SOFTWARE FOR COMMERCIAL PURPOSES IS STRICTLY PROHIBITED.
@@ -12,19 +12,20 @@ Performance Utilities Module
 Provides tools for timing, memory/CPU usage tracking, and logging performance metrics.
 """
 
-import time
 import functools
 import logging
 import os
+import time
+from typing import Callable
+
 import psutil
-from typing import Callable, Any
 
 # Configures performance logger
-PERF_LOG_FILE = os.path.join(os.path.dirname(__file__), 'performance.log')
+PERF_LOG_FILE = os.path.join(os.path.dirname(__file__), "performance.log")
 logging.basicConfig(
     filename=PERF_LOG_FILE,
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    format="%(asctime)s - %(levelname)s - %(message)s",
 )
 
 
@@ -36,6 +37,7 @@ def timeit(func: Callable) -> Callable:
     Returns:
         Callable: Wrapped function
     """
+
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         start = time.perf_counter()
@@ -44,6 +46,7 @@ def timeit(func: Callable) -> Callable:
         elapsed = end - start
         logging.info(f"Function {func.__name__} executed in {elapsed:.4f} seconds.")
         return result
+
     return wrapper
 
 
@@ -57,12 +60,3 @@ def log_resource_usage(note: str = "") -> None:
     mem = process.memory_info().rss / (1024 * 1024)  # MB
     cpu = process.cpu_percent(interval=0.1)
     logging.info(f"{note} Memory usage: {mem:.2f} MB, CPU usage: {cpu:.2f}%.")
-
-
-def log_performance_metric(message: str) -> None:
-    """
-    Log a custom performance metric message.
-    Args:
-        message (str): The message to log
-    """
-    logging.info(message) 

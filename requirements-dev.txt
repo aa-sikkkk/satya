@@ -1,0 +1,19 @@
+# Satya — development, testing, and data-pipeline tooling
+# Install: pip install -r requirements.txt -r requirements-dev.txt
+
+# Testing
+pytest>=8.0.0
+pytest-cov>=5.0.0
+pytest-timeout>=2.3.0
+coverage>=7.0.0
+memory-profiler>=0.61
+
+# Lint & type check
+ruff==0.17.1
+black==25.9.0
+isort==7.0.0
+mypy>=1.8.0
+
+# Data pipeline helpers (maintainer use)
+tqdm>=4.65
+pandas>=2.0.0

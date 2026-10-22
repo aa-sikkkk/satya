@@ -45,7 +45,7 @@
 
 ### 3.1 Directory Organization
 ```
-NEBedu/
+Satya/
 ├── scripts/              # Data collection and processing scripts
 ├── ai_model/            # AI model implementation
 ├── student_app/         # Student-facing application
@@ -299,7 +299,7 @@ def test_process_student_response():
 ```python
 class ContentManager:
     """
-    Manages educational content for the NEBedu system.
+    Manages educational content for the Satya system.
 
     This class handles loading, validating, and managing educational
     content in JSON format. It ensures content integrity and provides

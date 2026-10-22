@@ -1,7 +1,7 @@
 # Copyright (C) 2026 Aashik
 #
 # This software is subject to the terms of the PolyForm Noncommercial License 1.0.0.
-# A copy of the license can be found in the LICENSE file or at 
+# A copy of the license can be found in the LICENSE file or at
 # https://polyformproject.org/licenses/noncommercial/1.0.0/
 #
 # USE OF THIS SOFTWARE FOR COMMERCIAL PURPOSES IS STRICTLY PROHIBITED.
@@ -13,8 +13,10 @@ Provides tools for teachers to load, edit, add, and remove topics, subtopics, co
 """
 
 import json
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict
+
 from jsonschema import ValidationError
+
 from system.data_manager.content_manager import ContentManager
 from system.security.security_utils import validate_content_input
 
@@ -27,7 +29,7 @@ def load_content_file(filepath: str) -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: Content data
     """
-    with open(filepath, 'r', encoding='utf-8') as f:
+    with open(filepath, "r", encoding="utf-8") as f:
         return json.load(f)
 
 
@@ -38,7 +40,7 @@ def save_content_file(content: Dict[str, Any], filepath: str) -> None:
         content (Dict[str, Any]): Content data
         filepath (str): Path to save the content JSON
     """
-    with open(filepath, 'w', encoding='utf-8') as f:
+    with open(filepath, "w", encoding="utf-8") as f:
         json.dump(content, f, indent=2, ensure_ascii=False)
 
 
@@ -68,7 +70,7 @@ def add_topic(content: Dict[str, Any], topic: Dict[str, Any]) -> None:
     if not validate_content_input(topic):
         print("Error: Invalid topic input (too large).")
         return
-    content.setdefault('topics', []).append(topic)
+    content.setdefault("topics", []).append(topic)
 
 
 def remove_topic(content: Dict[str, Any], topic_name: str) -> None:
@@ -78,11 +80,18 @@ def remove_topic(content: Dict[str, Any], topic_name: str) -> None:
         content (Dict[str, Any]): Content data
         topic_name (str): Name of the topic to remove
     """
-    if 'topics' in content:
-        content['topics'] = [t for t in content['topics'] if t.get('name') != topic_name]
+    if "topics" in content:
+        content["topics"] = [
+            t for t in content["topics"] if t.get("name") != topic_name
+        ]
 
 
-def add_concept(content: Dict[str, Any], topic_name: str, subtopic_name: str, concept: Dict[str, Any]) -> bool:
+def add_concept(
+    content: Dict[str, Any],
+    topic_name: str,
+    subtopic_name: str,
+    concept: Dict[str, Any],
+) -> bool:
     """
     Add a concept to a subtopic in a topic, searching recursively. Maximally flexible.
     Args:
@@ -99,23 +108,26 @@ def add_concept(content: Dict[str, Any], topic_name: str, subtopic_name: str, co
 
     def add_to_subtopic(subtopics):
         for subtopic in subtopics:
-            if subtopic.get('name') == subtopic_name:
-                subtopic.setdefault('concepts', []).append(concept)
+            if subtopic.get("name") == subtopic_name:
+                subtopic.setdefault("concepts", []).append(concept)
                 return True
-            if add_to_subtopic(subtopic.get('subtopics', [])):
+            if add_to_subtopic(subtopic.get("subtopics", [])):
                 return True
         return False
-    for topic in content.get('topics', []):
-        if topic.get('name') == topic_name:
-            if add_to_subtopic(topic.get('subtopics', [])):
+
+    for topic in content.get("topics", []):
+        if topic.get("name") == topic_name:
+            if add_to_subtopic(topic.get("subtopics", [])):
                 return True
-            if topic.get('name') == subtopic_name:
-                topic.setdefault('concepts', []).append(concept)
+            if topic.get("name") == subtopic_name:
+                topic.setdefault("concepts", []).append(concept)
                 return True
     return False
 
 
-def remove_concept(content: Dict[str, Any], topic_name: str, subtopic_name: str, concept_name: str) -> bool:
+def remove_concept(
+    content: Dict[str, Any], topic_name: str, subtopic_name: str, concept_name: str
+) -> bool:
     """
     Remove a concept by name from a subtopic in a topic, searching recursively. Maximally flexible.
     Args:
@@ -126,27 +138,43 @@ def remove_concept(content: Dict[str, Any], topic_name: str, subtopic_name: str,
     Returns:
         bool: True if removed, False if not found
     """
+
     def remove_from_subtopic(subtopics):
         for subtopic in subtopics:
-            if subtopic.get('name') == subtopic_name:
-                before = len(subtopic.get('concepts', []))
-                subtopic['concepts'] = [c for c in subtopic.get('concepts', []) if c.get('name') != concept_name]
-                return len(subtopic['concepts']) < before
-            if remove_from_subtopic(subtopic.get('subtopics', [])):
+            if subtopic.get("name") == subtopic_name:
+                before = len(subtopic.get("concepts", []))
+                subtopic["concepts"] = [
+                    c
+                    for c in subtopic.get("concepts", [])
+                    if c.get("name") != concept_name
+                ]
+                return len(subtopic["concepts"]) < before
+            if remove_from_subtopic(subtopic.get("subtopics", [])):
                 return True
         return False
-    for topic in content.get('topics', []):
-        if topic.get('name') == topic_name:
-            if remove_from_subtopic(topic.get('subtopics', [])):
+
+    for topic in content.get("topics", []):
+        if topic.get("name") == topic_name:
+            if remove_from_subtopic(topic.get("subtopics", [])):
                 return True
-            if topic.get('name') == subtopic_name:
-                before = len(topic.get('concepts', []))
-                topic['concepts'] = [c for c in topic.get('concepts', []) if c.get('name') != concept_name]
-                return len(topic['concepts']) < before
+            if topic.get("name") == subtopic_name:
+                before = len(topic.get("concepts", []))
+                topic["concepts"] = [
+                    c
+                    for c in topic.get("concepts", [])
+                    if c.get("name") != concept_name
+                ]
+                return len(topic["concepts"]) < before
     return False
 
 
-def add_question(content: Dict[str, Any], topic_name: str, subtopic_name: str, concept_name: str, question: Dict[str, Any]) -> bool:
+def add_question(
+    content: Dict[str, Any],
+    topic_name: str,
+    subtopic_name: str,
+    concept_name: str,
+    question: Dict[str, Any],
+) -> bool:
     """
     Add a question to a concept, searching recursively. Maximally flexible.
     Args:
@@ -164,30 +192,37 @@ def add_question(content: Dict[str, Any], topic_name: str, subtopic_name: str, c
 
     def add_to_concept(subtopics):
         for subtopic in subtopics:
-            if subtopic.get('name') == subtopic_name:
-                for concept in subtopic.get('concepts', []):
-                    if concept.get('name') == concept_name:
-                        concept.setdefault('questions', []).append(question)
+            if subtopic.get("name") == subtopic_name:
+                for concept in subtopic.get("concepts", []):
+                    if concept.get("name") == concept_name:
+                        concept.setdefault("questions", []).append(question)
                         return True
-                if add_to_concept(subtopic.get('subtopics', [])):
+                if add_to_concept(subtopic.get("subtopics", [])):
                     return True
             else:
-                if add_to_concept(subtopic.get('subtopics', [])):
+                if add_to_concept(subtopic.get("subtopics", [])):
                     return True
         return False
-    for topic in content.get('topics', []):
-        if topic.get('name') == topic_name:
-            if add_to_concept(topic.get('subtopics', [])):
+
+    for topic in content.get("topics", []):
+        if topic.get("name") == topic_name:
+            if add_to_concept(topic.get("subtopics", [])):
                 return True
-            if topic.get('name') == subtopic_name:
-                for concept in topic.get('concepts', []):
-                    if concept.get('name') == concept_name:
-                        concept.setdefault('questions', []).append(question)
+            if topic.get("name") == subtopic_name:
+                for concept in topic.get("concepts", []):
+                    if concept.get("name") == concept_name:
+                        concept.setdefault("questions", []).append(question)
                         return True
     return False
 
 
-def remove_question(content: Dict[str, Any], topic_name: str, subtopic_name: str, concept_name: str, question_text: str) -> bool:
+def remove_question(
+    content: Dict[str, Any],
+    topic_name: str,
+    subtopic_name: str,
+    concept_name: str,
+    question_text: str,
+) -> bool:
     """
     Remove a question by text from a concept, searching recursively. Maximally flexible.
     Args:
@@ -199,28 +234,38 @@ def remove_question(content: Dict[str, Any], topic_name: str, subtopic_name: str
     Returns:
         bool: True if removed, False if not found
     """
+
     def remove_from_concept(subtopics):
         for subtopic in subtopics:
-            if subtopic.get('name') == subtopic_name:
-                for concept in subtopic.get('concepts', []):
-                    if concept.get('name') == concept_name:
-                        before = len(concept.get('questions', []))
-                        concept['questions'] = [q for q in concept.get('questions', []) if q.get('question') != question_text]
-                        return len(concept['questions']) < before
-                if remove_from_concept(subtopic.get('subtopics', [])):
+            if subtopic.get("name") == subtopic_name:
+                for concept in subtopic.get("concepts", []):
+                    if concept.get("name") == concept_name:
+                        before = len(concept.get("questions", []))
+                        concept["questions"] = [
+                            q
+                            for q in concept.get("questions", [])
+                            if q.get("question") != question_text
+                        ]
+                        return len(concept["questions"]) < before
+                if remove_from_concept(subtopic.get("subtopics", [])):
                     return True
             else:
-                if remove_from_concept(subtopic.get('subtopics', [])):
+                if remove_from_concept(subtopic.get("subtopics", [])):
                     return True
         return False
-    for topic in content.get('topics', []):
-        if topic.get('name') == topic_name:
-            if remove_from_concept(topic.get('subtopics', [])):
+
+    for topic in content.get("topics", []):
+        if topic.get("name") == topic_name:
+            if remove_from_concept(topic.get("subtopics", [])):
                 return True
-            if topic.get('name') == subtopic_name:
-                for concept in topic.get('concepts', []):
-                    if concept.get('name') == concept_name:
-                        before = len(concept.get('questions', []))
-                        concept['questions'] = [q for q in concept.get('questions', []) if q.get('question') != question_text]
-                        return len(concept['questions']) < before
-    return False 
+            if topic.get("name") == subtopic_name:
+                for concept in topic.get("concepts", []):
+                    if concept.get("name") == concept_name:
+                        before = len(concept.get("questions", []))
+                        concept["questions"] = [
+                            q
+                            for q in concept.get("questions", [])
+                            if q.get("question") != question_text
+                        ]
+                        return len(concept["questions"]) < before
+    return False
