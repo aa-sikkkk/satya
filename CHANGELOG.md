@@ -3,10 +3,14 @@
 All notable changes to the Satya Learning System are documented here.
 Format follows the same spirit as [Keep a Changelog](https://keepachangelog.com/); project uses calendar-agnostic semantic-ish release numbering.
 
-## Unreleased
+## [2.3.0] — 2026-10-26
 
-- Packaging policy — releases are manual and tag-driven: a maintainer-cut `chore: release vX.Y.Z` PR then a `vX.Y.Z` tag push (protocol documented in CONTRIBUTING.md); automated per-merge release PRs were removed in favour of deliberate, batched cuts
-- Student offline packaging — `feat:` wheel+sdist build, fully offline Windows installer bundle (`Satya_Student_Offline_Win.zip`), `satya`/`satya-gui` console commands, release-assets workflow (runs on the release tag)
+- Student offline packaging — wheel+sdist build, fully offline Windows installer bundle (`Satya_Student_Offline_Win.zip`), `satya`/`satya-gui` console commands, `install_satya.ps1` + QUICKSTART shipped with releases
+- Release process — manual, tag-driven releases (protocol in CONTRIBUTING.md); automated per-merge release PRs removed
+- Resource resolution — `SATYA_BASE_PATH` env override so pip-installed launchers resolve `satya_data/` in the student workspace (with tests)
+- CI hardening — master-only branch flow, trimmed Actions minutes (weekly py3.11 compat instead of per-PR), pinned lint toolstack installed straight from `requirements-dev.txt`, idempotent release-asset uploads
+- Input normalization — vocative-only casual address handling with punctuation separators; query-term preservation for `bro`/`dude` subjects
+- Bot-gated dependency bumps merged: black 25.12.0, ruff 0.17.2 pins, pandas floor 2.3.3, tqdm floor 4.70.1, actions group (checkout v7, setup-python v6, labeler v7, stale v11), release action leftovers (now in repo history channel)
 
 ## [2.2.0] — 2026-02
 
