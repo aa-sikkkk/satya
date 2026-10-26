@@ -155,5 +155,30 @@ Contributors shape educational opportunities for underserved communities while b
 
 ---
 
+## Release Process (maintainer-only, manual)
+
+Releases are deliberately batched - **nothing publishes automatically** when
+PRs are merged. The full protocol:
+
+1. Merge feature/fix PRs into `master` (every merge is CI-gated, releases are
+   not a side effect of merges).
+2. When the maintainer decides it is release time, cut a release PR:
+   `chore: release vX.Y.Z` - bumps the version in `pyproject.toml` and
+   finalizes the `CHANGELOG.md` section for the batch. It goes through the
+   same CI + review as every other PR.
+3. Merge the release PR only when satisfied with the batch.
+4. Push the tag: `git tag vX.Y.Z && git push origin vX.Y.Z`.
+   This is the only trigger for the release pipeline
+   (`release-assets.yml`): it builds the wheel + sdist, assembles the fully
+   offline Windows student installer, creates the GitHub Release with
+   auto-generated notes, and attaches the artifacts.
+5. Verify the release page lists the wheel, sdist, and
+   `Satya_Student_Offline_Win.zip` + `Satya_Student_Installer_Win.zip`.
+
+There is no automated release bot; old release-please config was removed on
+purpose to keep the decision in maintainer hands.
+
+---
+
 ## Get Started
 Start small and build momentum. Contribute by fixing write comments, codes, and reporting in a designated issue tracker or posting constructive inputs to relevant GitHub channels.

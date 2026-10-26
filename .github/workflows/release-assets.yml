@@ -1,12 +1,12 @@
-# Attaches student installable artifacts (wheel, sdist, OFFLINE installer
-# zip, PyPI-only small installer zip) to each GitHub Release created by
-# release-please. All network fetches happen on the runner (dev-time only);
-# the offline zip keeps student install/run fully offline.
+# Manual tag-driven release pipeline. A release is cut ONLY when the
+# maintainer pushes a tag (never automatically after merges). The job
+# creates the GitHub Release for the tag and attaches the student
+# installable artifacts (wheel, sdist, OFFLINE installer zip).
 name: Release assets
 
 on:
-  release:
-    types: [published]
+  push:
+    tags: ["v*"]
 
 permissions:
   contents: write
@@ -61,12 +61,24 @@ jobs:
           Copy-Item dist/satya_learning_system-*.whl pkg_small/
           Compress-Archive -Path pkg_small/* -DestinationPath "Satya_Student_Installer_Win.zip" -Force
 
-      - name: Attach artifacts to release
+      - name: Create release and attach artifacts (idempotent on rerun)
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.event.release.tag_name }}
+          TAG: ${{ github.ref_name }}
         run: |
-          gh release upload "$TAG" \
-            dist/satya_learning_system-*.whl dist/satya_learning_system-*.tar.gz \
-            Satya_Student_Offline_Win.zip Satya_Student_Installer_Win.zip --clobber
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release for $TAG exists - uploading/updating assets"
+            gh release upload "$TAG" \
+              dist/satya_learning_system-*.whl dist/satya_learning_system-*.tar.gz \
+              Satya_Student_Offline_Win.zip Satya_Student_Installer_Win.zip --clobber
+            if gh release view "$TAG" --json isDraft --jq .isDraft | grep -qi true; then
+              echo "Draft release - publishing after assets upload"
+              gh release edit "$TAG" --draft=false
+            fi
+          else
+            gh release create "$TAG" --generate-notes \
+              --title "Satya Learning System $TAG" \
+              dist/satya_learning_system-*.whl dist/satya_learning_system-*.tar.gz \
+              Satya_Student_Offline_Win.zip Satya_Student_Installer_Win.zip
+          fi
