@@ -128,7 +128,12 @@ Comprehensive documentation, encompassing user guides, detailed technical specif
 
 ## License
 
-This project is released under the MIT License, encouraging open access, modification, and distribution.
+This project is licensed under the PolyForm Noncommercial License 1.0.0 (a
+source-available license): the code is public and free for personal,
+educational, and charitable use without commercial exploitation. See the
+[LICENSE](../LICENSE) file for full terms. Contributions are welcome under
+the same terms; upstream content and datasets keep their own licenses as
+credited in the README.
 
 ## Acknowledgments
 

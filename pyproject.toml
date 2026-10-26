@@ -14,7 +14,6 @@ keywords = ["education", "rag", "offline", "nepal", "llm", "phi-1-5", "chromadb"
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Education",
-    "License :: Noncommercial (see LICENSE)",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3.11",
