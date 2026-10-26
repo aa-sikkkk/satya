@@ -9,7 +9,7 @@ coverage>=7.0.0
 memory-profiler>=0.61
 
 # Lint & type check
-ruff==0.17.1
+ruff==0.17.2
 black==25.9.0
 isort==7.0.0
 mypy>=1.8.0

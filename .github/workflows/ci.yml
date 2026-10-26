@@ -37,9 +37,9 @@ jobs:
           python-version: "3.11"
           cache: pip
       - name: Install tooling
-        # pinned to requirements-dev.txt versions so local and CI formatting
-        # tools never disagree (black's newer releases reformat differently)
-        run: pip install ruff==0.17.1 black==25.9.0 isort==7.0.0
+        # Single source of truth: installs the pinned lint/dev tools from
+        # requirements-dev.txt so local and CI never disagree on versions
+        run: pip install -r requirements-dev.txt
       - name: Ruff
         run: ruff check .
       - name: Black
