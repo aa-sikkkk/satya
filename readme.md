@@ -744,6 +744,8 @@ See documentation:
 
 Satya is a nonprofit educational initiative. To ensure this software remains free and accessible to students and educators without commercial exploitation, it is licensed under the **PolyForm Noncommercial License 1.0.0**.
 
+> PolyForm Noncommercial is a **source-available** license: the code is public and free for any noncommercial use, but it is not OSI open-source (that designation would allow commercial reuse). Contributions are welcome under the same terms.
+
 **You are free to:**
 - Use this software for personal, educational, or charitable purposes.
 - Modify and distribute it for non-commercial use.
