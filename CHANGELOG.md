@@ -3,6 +3,10 @@
 All notable changes to the Satya Learning System are documented here.
 Format follows the same spirit as [Keep a Changelog](https://keepachangelog.com/); project uses calendar-agnostic semantic-ish release numbering.
 
+## Unreleased
+
+- Knowledge-base pipeline — vectordb is a reproducible build artifact: deterministic hash-ID flattener (`content_flattener.py`), one-command `build_vectordb.py` (validate/rebuild), `.json` curriculum support in `ingest_content.py`, release pipeline builds + bundles the knowledge base (updates idempotent), content-contribution flow documented
+
 ## [2.3.0] — 2026-10-26
 
 - Student offline packaging — wheel+sdist build, fully offline Windows installer bundle (`Satya_Student_Offline_Win.zip`), `satya`/`satya-gui` console commands, `install_satya.ps1` + QUICKSTART shipped with releases

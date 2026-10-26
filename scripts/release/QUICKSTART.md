@@ -14,8 +14,7 @@ WHAT YOU NEED FIRST (one-time, on any computer with internet):
        - Satya_Student_Offline_Win.zip      (app + libraries, ~2 GB)
        - Student Application + Phi 1.5 Model Download asset (the AI model)
 
-INSTALL with Satya_Student_Offline_Win.zip (no internet needed):
-  1. Unzip Satya_Student_Offline_Win.zip anywhere (e.g. Desktop).
+INSTALL with Satya_Student_Offline_Win.zip (no internet needed):  1. Unzip Satya_Student_Offline_Win.zip anywhere (e.g. Desktop).
   2. Inside the unzipped folder, right-click install_satya.ps1
      -> Run with PowerShell.
      Say "A"/"Yes" if the system asks about scripts.
@@ -24,6 +23,12 @@ INSTALL with Satya_Student_Offline_Win.zip (no internet needed):
 ADD THE MODEL:
   Move the downloaded model folder so this path exists:
     %USERPROFILE%\Satya\satya_data\models\phi15
+
+KNOWLEDGE BASE:
+  The offline zip already contains the current question/answer knowledge
+  base (auto-installed). NEW content released later arrives as
+  'Satya_Knowledge_Base.zip' on the same Releases page - to update:
+  unzip it over   %USERPROFILE%\Satya\satya_data\chroma_db
 
 START:
   Double-click   satya-gui.cmd   (graphical app)
