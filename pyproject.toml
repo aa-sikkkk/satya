@@ -57,6 +57,10 @@ dev = [
 Homepage = "https://github.com/aa-sikkkk/satya"
 Documentation = "https://github.com/aa-sikkkk/satya/tree/master/docs"
 
+[project.scripts]
+satya = "student_app.main:main"
+satya-gui = "student_app.gui_app.main_window:run_gui"
+
 [tool.setuptools.packages.find]
 include = ["student_app*", "system*", "ai_model*", "teacher_tools*", "scripts*"]
 

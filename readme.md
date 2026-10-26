@@ -424,6 +424,20 @@ Satya/
 
 ---
 
+## Install for Students (offline, recommended)
+
+Grab two files from [Releases](https://github.com/aa-sikkkk/satya/releases):
+
+1. **`Satya_Student_Offline_Win.zip`** — app + every library bundled as wheels (no internet needed to install or run)
+2. **the Phi-1.5 model asset** — the AI model binary
+
+Unzip, right-click `install_satya.ps1` → *Run with PowerShell*, move the
+model folder into `%USERPROFILE%\Satya\satya_data\models\phi15`, then
+double-click `satya-gui.cmd`. Full details: `QUICKSTART.md` inside the zip.
+
+Developers/PyPI users can also `pip install satya_learning_system` and run
+the `satya` (CLI) or `satya-gui` (window) console commands.
+
 ## Development Setup
 
 ### Prerequisites

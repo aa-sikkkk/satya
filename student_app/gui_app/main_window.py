@@ -1250,9 +1250,12 @@ class NEBeduApp(ctk.CTk):
         self._loading = False
 
 
-if __name__ == "__main__":
+def run_gui():
+    """Launch the Satya GUI application (console script entry point)."""
     import sys
 
+    # Windows consoles default to a legacy code page that cannot encode
+    # Devanagari/unicode; force UTF-8 for safe logging in GUI callbacks.
     if sys.platform == "win32":
         try:
             sys.stdout.reconfigure(encoding="utf-8")
@@ -1262,3 +1265,7 @@ if __name__ == "__main__":
 
     app = NEBeduApp()
     app.mainloop()
+
+
+if __name__ == "__main__":
+    run_gui()

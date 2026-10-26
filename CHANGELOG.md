@@ -3,6 +3,10 @@
 All notable changes to the Satya Learning System are documented here.
 Format follows the same spirit as [Keep a Changelog](https://keepachangelog.com/); project uses calendar-agnostic semantic-ish release numbering.
 
+## Unreleased
+
+- Student offline packaging — `feat:` wheel+sdist build, fully offline Windows installer bundle (`Satya_Student_Offline_Win.zip`), `satya`/`satya-gui` console commands, release-assets workflow driven by release-please
+
 ## [2.2.0] — 2026-02
 
 - Diagram System Overhaul — modular `system/diagrams` package with grade-aware library (Grades 8–12) and natural triggering logic
