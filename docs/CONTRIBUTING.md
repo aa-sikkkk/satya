@@ -180,5 +180,81 @@ purpose to keep the decision in maintainer hands.
 
 ---
 
+## Attribution & Credits (policy)
+
+Satya gives every contributor proper credit. Nothing publishes without the
+attribution story being accurate.
+
+### Commit authorship (the source of truth)
+
+GitHub credits are derived from commit metadata, so authorship is preserved
+mechanically:
+
+- PRs merged **squash** keep the **PR author as the commit author** - check
+  the collapse box before merging so the author line is not rewritten to
+  your brand-account name.
+- Merge your own commits with `git commit --author="Name <email>"` (or have
+  the contributor push from their git identity) so they land in the commit
+  list, Insights > Contributors, and release-note credit panels.
+- Reviewers, committers after review, and significant helpers go in the
+  README [Contributors table](../readme.md#contributors). Update it in the
+  PR that gives them credit (plain rows, one per line).
+
+### Human work
+
+- Original PR authors and co-authors get credit via squash-merge authorship
+  and the Contributors table on meaningful participation.
+- Non-code contributions (curriculum content, docs, translations, outreach,
+  issue triage) are first-class: add the contributor to the README table
+  with their area, and tag the domain labels on the PR for changelog
+  grouping.
+
+### AI-assisted contributions
+
+- Changes made with AI coding agents MUST disclose it: commit messages carry
+  `Co-authored-by: opencode <opencode@localhost>` (GitHub render this as a
+  co-author panel under the commit). This is a trust requirement, not a
+  formality.
+- The AI agent is never the "author" of a commit; the human who reviews,
+  tests, and pushes is the author and is accountable for correctness.
+
+### Bots
+
+- Automated actors (Dependabot, CodeRabbit, release pipeline) are credited
+  where they act: Dependabot PRs land under their own author credit,
+  CodeRabbit review threads count as reviews by their findings, and the
+  release pipeline shows asset phases in the release workflow run.
+- Bot credits live in the README table as separate, clearly-labelled rows -
+  do not list bot accounts together with humans, and do not list a bot as
+  the maintainer.
+
+### Release notes
+
+Release notes are generated with `gh release create --generate-notes` and
+automatically include (step 4 of the release protocol above):
+
+- a **Contributors** panel naming every committer of the batch plus their
+  `Co-authored-by` trailers;
+- the **Pull requests** list for the batch.
+
+Verify the Contributors panel appears when you check the release page
+(step 5 of the release protocol).
+
+### Third-party content
+
+Curriculum content, models, datasets, and libraries keep the licences
+documented in the README Acknowledgments section - attribution stays with
+the upstream semantic (`OpenStax`, `ScienceQA`, `Phi-1.5`, etc.). When a new
+source is added to the knowledge base, its citation block goes into the
+README and the dataset documentation.
+
+### Citation
+
+The `CITATION.cff` gives academic users a one-click citation export
+(GitHub renders the "Cite this repository" panel from it). Update its
+`version` and `release-date` fields as part of the release PR.
+
+---
+
 ## Get Started
 Start small and build momentum. Contribute by fixing write comments, codes, and reporting in a designated issue tracker or posting constructive inputs to relevant GitHub channels.

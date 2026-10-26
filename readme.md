@@ -758,6 +758,24 @@ See [LICENSE](LICENSE) file for full details.
 
 ---
 
+## Contributors
+
+Credits follow the project's attribution policy
+([CONTRIBUTING.md](docs/CONTRIBUTING.md) - commit authorship and rates land
+the author, bots are disclosed in release notes). Contributions of any kind
+are welcome - code, curriculum content, documentation, translations, bug
+reports, outreach.
+
+| Contributor | Areas | Links |
+| --- | --- | --- |
+| Aashik ([aa-sikkkk](https://github.com/aa-sikkkk)) | Maintainer, code, docs, review, bug fixes | Commits, releases |
+| Dependabot (bot) | Automated dependency PRs | Dependabot PRs, release notes |
+| CodeRabbit (bot) | Automated PR reviews | PR review threads |
+
+Using Satya in research or a classroom? GitHub renders a **Cite this
+repository** panel from `CITATION.cff` - keep its `version`/`release-date`
+fields in sync in every release PR (policy in CONTRIBUTING.md).
+
 ## Acknowledgments
 
 ### Core Technologies
