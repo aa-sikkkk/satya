@@ -5,7 +5,7 @@ Format follows the same spirit as [Keep a Changelog](https://keepachangelog.com/
 
 ## Unreleased
 
-- Student offline packaging — `feat:` wheel+sdist build, fully offline Windows installer bundle (`Satya_Student_Offline_Win.zip`), `satya`/`satya-gui` console commands, release-assets workflow driven by release-please
+- Packaging policy — releases are manual and tag-driven: a maintainer-cut `chore: release vX.Y.Z` PR then a `vX.Y.Z` tag push (protocol documented in CONTRIBUTING.md); the release-please auto-release bot and its workflow were removed
 
 ## [2.2.0] — 2026-02
 
