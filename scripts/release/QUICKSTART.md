@@ -1,6 +1,12 @@
 Satya - Install Guide for Students (Windows, fully offline)
 ============================================================
 
+TWO RELEASE ZIPs - WHICH ONE DO YOU HAVE?
+  Satya_Student_Offline_Win.zip   <- FULLY OFFLINE install (recommended)
+  Satya_Student_Installer_Win.zip <- installer-only zip, needs internet
+     once during "INSTALL" below (it downloads libraries from pip.org);
+     use this only when the offline zip is too large to transfer.
+
 WHAT YOU NEED FIRST (one-time, on any computer with internet):
   1. Python 3.12 (3.11 also works) - python.org/downloads
      IMPORTANT: tick "Add python.exe to PATH" during install.
@@ -8,7 +14,7 @@ WHAT YOU NEED FIRST (one-time, on any computer with internet):
        - Satya_Student_Offline_Win.zip      (app + libraries, ~2 GB)
        - Student Application + Phi 1.5 Model Download asset (the AI model)
 
-INSTALL (no internet needed):
+INSTALL with Satya_Student_Offline_Win.zip (no internet needed):
   1. Unzip Satya_Student_Offline_Win.zip anywhere (e.g. Desktop).
   2. Inside the unzipped folder, right-click install_satya.ps1
      -> Run with PowerShell.

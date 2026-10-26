@@ -13,6 +13,7 @@ Provides PyInstaller-compatible path resolution for resources.
 Handles both development and bundled executable environments.
 """
 
+import os
 import sys
 from pathlib import Path
 
@@ -21,9 +22,21 @@ def get_base_path() -> Path:
     """
     Get the base path for resources, handling both development and PyInstaller environments.
 
+    Priority order:
+    1. ``SATYA_BASE_PATH`` env var - set by the student launcher scripts
+       (install_satya.ps1 written satya.cmd/satya-gui.cmd) so a pip-installed
+       app resolves ``satya_data`` in the student workspace, not in
+       site-packages.
+    2. PyInstaller bundle root (``sys.frozen``).
+    3. Repo root when running from a checkout (package parent).
+
     Returns:
         Path: Base path to the application resources
     """
+    env_base = os.environ.get("SATYA_BASE_PATH")
+    if env_base:
+        return Path(env_base).resolve()
+
     if getattr(sys, "frozen", False):
         base_path = Path(sys._MEIPASS)
     else:
