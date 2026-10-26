@@ -68,10 +68,14 @@ jobs:
           TAG: ${{ github.ref_name }}
         run: |
           if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "Release $TAG already exists - uploading/updating assets only"
+            echo "Release for $TAG exists - uploading/updating assets"
             gh release upload "$TAG" \
               dist/satya_learning_system-*.whl dist/satya_learning_system-*.tar.gz \
               Satya_Student_Offline_Win.zip Satya_Student_Installer_Win.zip --clobber
+            if gh release view "$TAG" --json isDraft --jq .isDraft | grep -qi true; then
+              echo "Draft release - publishing after assets upload"
+              gh release edit "$TAG" --draft=false
+            fi
           else
             gh release create "$TAG" --generate-notes \
               --title "Satya Learning System $TAG" \
