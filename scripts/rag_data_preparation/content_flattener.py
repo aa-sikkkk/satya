@@ -46,6 +46,11 @@ def _walk_concepts(
     child_path = path + [name]
 
     concepts = node.get("concepts")
+    if concepts is not None:
+        _require(
+            isinstance(concepts, list),
+            f"concepts not a list: {path!r}",
+        )
     if isinstance(concepts, list):
         for concept in concepts:
             _require(isinstance(concept, dict), f"concept not object: {child_path!r}")
@@ -59,11 +64,7 @@ def _walk_concepts(
             _require(isinstance(summary, str), f"summary not string: {child_path!r}")
             if summary.strip():
                 parts.append(summary.strip())
-            for step in concept.get("steps", []) or []:
-                _require(
-                    isinstance(step, str) and step.strip(),
-                    f"step not string: {child_path!r}",
-                )
+            for step in _validated_steps(concept, child_path):
                 parts.append(f"- {step.strip()}")
             text = "\n".join(parts)
             full_path = child_path + [cname]
@@ -83,9 +84,29 @@ def _walk_concepts(
             }
 
     subtopics = node.get("subtopics")
+    if subtopics is not None:
+        _require(
+            isinstance(subtopics, list),
+            f"subtopics not a list: {path!r}",
+        )
     if isinstance(subtopics, list):
         for sub in subtopics:
             yield from _walk_concepts(sub, subject, grade, child_path)
+
+
+def _validated_steps(concept: Dict, path: List[str]) -> List[str]:
+    """steps key, when present, must be a list of nonempty strings."""
+    steps = concept.get("steps", [])
+    _require(
+        isinstance(steps, list),
+        f"steps not a list: {path!r}",
+    )
+    for step in steps:
+        _require(
+            isinstance(step, str) and step.strip(),
+            f"step not string: {path!r}",
+        )
+    return steps
 
 
 def flatten_content_json(payload: Dict, source_name: str = "<memory>") -> List[Dict]:
@@ -97,11 +118,15 @@ def flatten_content_json(payload: Dict, source_name: str = "<memory>") -> List[D
     )
     grade = payload.get("grade")
     _require(grade is not None, f"{source_name}: missing top-level grade")
-    grade_str = str(grade)
     _require(
-        grade_str.replace(".", "").isdigit(),
-        f"{source_name}: grade not numeric: {grade!r}",
+        isinstance(grade, int) and not isinstance(grade, bool),
+        f"{source_name}: grade not an integer: {grade!r}",
     )
+    _require(
+        8 <= grade <= 12,
+        f"{source_name}: grade outside NEB range 8-12: {grade!r}",
+    )
+    grade_str = str(grade)
 
     topics = payload.get("topics")
     _require(isinstance(topics, list), f"{source_name}: topics not a list")

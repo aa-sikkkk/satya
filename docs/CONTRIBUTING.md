@@ -180,10 +180,14 @@ Releases.
 ### Revision semantics
 
 Chunk ids are content hashes of
-`subject|grade|topic|subtopic|concept` (`content_flattener.py`), so:
+`subject|grade|topic|subtopic|concept` (`content_flattener.py`), and
+`build_vectordb.py` prunes database entries whose ids are no longer
+produced by the tracked files, so:
 
 - re-ingesting after an edit **replaces** the old chunk - no duplicates;
-- rebuilding is idempotent (verified by the release pipeline rerunning it).
+- re-ingesting after a rename/delete **removes** the obsolete chunk;
+- chunk generation is deterministic (covered by
+  `test_flatten_produces_deterministic_items`).
 
 ### How updates reach students
 
@@ -191,15 +195,16 @@ Chunk ids are content hashes of
   runner, attaches `Satya_Knowledge_Base.zip`, and bundles the same DB
   inside `Satya_Student_Offline_Win.zip` - fresh installs and KB updates
   both come from the release page.
-- Teachers extract the newest `Satya_Knowledge_Base.zip` over
-  `satya_data/chroma_db` on the students' machine (QUICKSTART documents the
-  60-second step). No internet required on student hardware.
+- Teachers unpack the newest `Satya_Knowledge_Base.zip` and copy the
+  `chroma_db` folder from inside `knowledge_base\` over
+  `satya_data/chroma_db` on the students' machine (QUICKSTART documents
+  the 60-second step). No internet required on student hardware.
 
 ### Content quality rules
 
-- One file per topic batch; keep `subject` stable (it keys the collection
-  name `neb_{subject}_grade_{grade}`).
-- Grade must be numeric (NEB 8-12).
+- One file per subject/grade batch; keep `subject` stable (it keys the
+  collection name `neb_{subject}_grade_{grade}`).
+- Grade must be an integer in NEB range 8-12 (enforced by the flattener).
 - Optionally run `python scripts/validation/validate_standards.py` for
   language standards checks.
 - Cultural sensitivity and accuracy per the Content Contributions section

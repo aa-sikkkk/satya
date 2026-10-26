@@ -97,3 +97,39 @@ def test_grade_must_be_numeric():
     bad["grade"] = "nine"
     with pytest.raises(ContentValidationError):
         flatten_content_json(bad)
+
+
+def test_grade_must_be_in_neb_range():
+    for grade in (7, 13, "9", 9.5, True):
+        changed = json.loads(json.dumps(STUDY))
+        changed["grade"] = grade
+        with pytest.raises(ContentValidationError):
+            flatten_content_json(changed)
+
+
+def test_steps_must_be_a_list_of_strings():
+    changed = json.loads(json.dumps(STUDY))
+    concept = changed["topics"][0]["subtopics"][0]["concepts"][0]
+    concept["steps"] = "single string"
+    with pytest.raises(ContentValidationError):
+        flatten_content_json(changed)
+
+
+def test_subtopics_must_be_a_list():
+    changed = {
+        "subject": "x",
+        "grade": 9,
+        "topics": [{"name": "t", "subtopics": "not-a-list"}],
+    }
+    with pytest.raises(ContentValidationError):
+        flatten_content_json(changed)
+
+
+def test_concepts_must_be_a_list():
+    changed = {
+        "subject": "x",
+        "grade": 9,
+        "topics": [{"name": "t", "concepts": "not-a-list"}],
+    }
+    with pytest.raises(ContentValidationError):
+        flatten_content_json(changed)

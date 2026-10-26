@@ -61,7 +61,7 @@ def validate_all(files: list) -> list:
 
 
 def build_db(items: list, db_path: Path) -> dict:
-    """Embed + upsert the validated items (replaces stale revisions)."""
+    """Embed + upsert the validated items and prune stale revisions."""
     import chromadb
     from sentence_transformers import SentenceTransformer
 
@@ -72,6 +72,12 @@ def build_db(items: list, db_path: Path) -> dict:
     for name in sorted({i["collection"] for i in items}):
         group = [i for i in items if i["collection"] == name]
         coll = client.get_or_create_collection(name=name)
+        new_ids = {i["id"] for i in group}
+        existing_ids = set(coll.get(include=[])["ids"])
+        stale = sorted(existing_ids - new_ids)
+        if stale:
+            coll.delete(ids=stale)
+            logger.info(f"    {name}: pruned {len(stale)} stale chunks")
         for start in range(0, len(group), BATCH):
             batch = group[start : start + BATCH]
             coll.upsert(
@@ -135,6 +141,7 @@ def main():
         )
 
     if args.out_manifest:
+        args.out_manifest.parent.mkdir(parents=True, exist_ok=True)
         with open(args.out_manifest, "w", encoding="utf-8") as f:
             json.dump(manifest, f, indent=1)
         logger.info("Manifest written to %s", args.out_manifest)

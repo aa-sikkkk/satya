@@ -100,7 +100,7 @@ if (Test-Path $BundledKB) {
     # Zip layout: knowledge_base/chroma_db/<files> (+ manifest.json)
     $Inner = "$TargetDir\_kb_tmp\knowledge_base\chroma_db"
     if (Test-Path $Inner) {
-        Copy-Item "$Inner\*" $KBRoot -Force
+        Copy-Item "$Inner\*" $KBRoot -Force -Recurse
     }
     Remove-Item -Recurse -Force "$TargetDir\_kb_tmp"
 }

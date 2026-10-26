@@ -28,7 +28,8 @@ KNOWLEDGE BASE:
   The offline zip already contains the current question/answer knowledge
   base (auto-installed). NEW content released later arrives as
   'Satya_Knowledge_Base.zip' on the same Releases page - to update:
-  unzip it over   %USERPROFILE%\Satya\satya_data\chroma_db
+  unzip it anywhere, then copy the chroma_db folder from
+  inside knowledge_base\ over   %USERPROFILE%\Satya\satya_data\chroma_db
 
 START:
   Double-click   satya-gui.cmd   (graphical app)

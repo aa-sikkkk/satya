@@ -59,6 +59,11 @@ def store_structured_items(client, model, items, source_name: str) -> None:
 
     for name, group in by_collection.items():
         collection = client.get_or_create_collection(name=name)
+        new_ids = {i["id"] for i in group}
+        stale = sorted(set(collection.get(include=[])["ids"]) - new_ids)
+        if stale:
+            collection.delete(ids=stale)
+            logger.info(f"Pruned {len(stale)} stale chunks from {name}")
         for start in range(0, len(group), BATCH):
             batch = group[start : start + BATCH]
             collection.upsert(
