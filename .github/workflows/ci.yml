@@ -49,6 +49,7 @@ jobs:
 
   test:
     name: Tests (py3.12)
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     # Size note: torch + sentence-transformers + chromadb install is slow but
@@ -71,6 +72,7 @@ jobs:
 
   audit:
     name: Dependency audit
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
