@@ -74,11 +74,13 @@ Public changes must append a bullet to `CHANGELOG.md` (create if missing, sectio
 
 ## Branch & merge policy (enforced on GitHub)
 
-`master` and `develop` are protected — **even for the maintainer**. Never push
-directly; work on a feature branch (`feature/<name>`, `fix/<name>`) and open a
-PR into `master` (or `develop` for batched integration). Protection requires:
-PR-only merge, green CI (lint/test-matrix/audit), all conversations resolved,
-linear history. CodeRabbit reviews every PR automatically (free for OSS).
+`master` is the only integration branch and is protected — **even for the
+maintainer**. Never push directly; work on a feature branch
+(`feature/<name>`, `fix/<name>`) and open a PR into `master`. Protection
+requires: PR-only merge, green CI (`Lint`, `Tests (py3.12)`,
+`Dependency audit`; py3.11 compatibility runs weekly via schedule), all
+conversations resolved, linear history. CodeRabbit reviews every PR
+automatically (free for OSS).
 
 ## Documentation source-of-truth
 

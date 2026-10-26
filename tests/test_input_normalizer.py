@@ -68,6 +68,13 @@ class TestFormalization:
         assert "bro" not in clean
         assert "photosynthesis" in clean
 
+    def test_vocative_with_punctuation_no_space(self, normalizer):
+        # "Bro,why is ..." must not survive as a leading address
+        result = normalizer.normalize("Bro,why is the sky blue?")
+        clean = result["clean_question"].lower()
+        assert not clean.lstrip().startswith("bro")
+        assert "why" == clean.split(" ", 1)[0]
+
     def test_query_terms_preserved_bro_dude(self, normalizer):
         # bro/dude used as query subjects must survive normalization
         for question, expected in (
