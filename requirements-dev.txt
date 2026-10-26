@@ -10,7 +10,7 @@ memory-profiler>=0.61
 
 # Lint & type check
 ruff==0.17.2
-black==25.9.0
+black==25.12.0
 isort==7.0.0
 mypy>=1.8.0
 
