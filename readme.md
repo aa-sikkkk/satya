@@ -1,6 +1,6 @@
 # Satyá: Learning Companion 
 <div align="center">
-   <img height="180" width="190" src="https://github.com/user-attachments/assets/1230c5ef-bf67-46e3-a66a-9bc950cbb4e6">
+   <img height="180" width="190" src="https://github.com/user-attachments/assets/1230c5ef-bf67-46e3-a66a-9bc950cbb4e6" alt="SatyA Learning Companion">
 
    [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
    [![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/License-PolyForm%20Noncommercial%201.0.0-orange.svg)](LICENSE)
