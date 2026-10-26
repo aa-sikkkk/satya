@@ -1,0 +1,61 @@
+# Attaches student installable artifacts (wheel, sdist, OFFLINE installer
+# zip, PyPI-only small installer zip) to each GitHub Release created by
+# release-please. All network fetches happen on the runner (dev-time only);
+# the offline zip keeps student install/run fully offline.
+name: Release assets
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build-assets:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Build wheel + sdist
+        run: |
+          python -m pip install -U pip build -q
+          python -m build --outdir dist
+
+      - name: Download dependency closure (Windows py3.12 wheels)
+        run: |
+          New-Item -ItemType Directory -Force -Path wheels | Out-Null
+          python -m pip download (Get-ChildItem dist -Filter "satya_learning_system-*.whl").FullName --dest wheels -q
+
+      - name: Assemble OFFLINE student installer zip
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path pkg_offline/wheels | Out-Null
+          Copy-Item scripts/release/install_satya.ps1 pkg_offline/
+          Copy-Item scripts/release/QUICKSTART.md pkg_offline/
+          Copy-Item dist/satya_learning_system-*.whl pkg_offline/
+          Copy-Item wheels/* pkg_offline/wheels/
+          Compress-Archive -Path pkg_offline/* -DestinationPath "Satya_Student_Offline_Win.zip" -Force
+
+      - name: Assemble small installer-only zip (PyPI fallback path)
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path pkg_small | Out-Null
+          Copy-Item scripts/release/install_satya.ps1 pkg_small/
+          Copy-Item scripts/release/QUICKSTART.md pkg_small/
+          Copy-Item dist/satya_learning_system-*.whl pkg_small/
+          Compress-Archive -Path pkg_small/* -DestinationPath "Satya_Student_Installer_Win.zip" -Force
+
+      - name: Attach artifacts to release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "${{ github.event.release.tag_name }}" \
+            dist/satya_learning_system-*.whl dist/satya_learning_system-*.tar.gz \
+            Satya_Student_Offline_Win.zip Satya_Student_Installer_Win.zip --clobber
