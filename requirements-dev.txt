@@ -16,4 +16,4 @@ mypy>=1.8.0
 
 # Data pipeline helpers (maintainer use)
 tqdm>=4.70.1
-pandas>=2.0.0
+pandas>=2.3.3
