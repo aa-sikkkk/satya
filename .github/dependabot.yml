@@ -15,6 +15,15 @@ updates:
           - "patch"
     labels:
       - "dependencies"
+    # Major-version bumps for these are merged deliberately by the maintainer
+    # (they reformat or break the runtime contract), not by automation:
+    ignore:
+      - dependency-name: "black"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "isort"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "pandas"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
