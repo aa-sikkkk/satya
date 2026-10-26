@@ -1,6 +1,7 @@
 """Deterministic curriculum flattener tests (pure logic, no chroma/model)."""
 
 import json
+from pathlib import Path
 
 import pytest
 
@@ -59,9 +60,11 @@ def test_revision_changes_id():
 
 
 def test_nested_topics_via_real_file():
-    items = flatten_content_file(
-        "scripts/data_collection/data/content/English_Grammar.json".replace("/", "\\")
+    seed = (
+        Path(__file__).parent.parent
+        / "scripts/data_collection/data/content/English_Grammar.json"
     )
+    items = flatten_content_file(seed)
     assert items, "tracked seed produced no chunks"
     assert all(i["collection"].startswith("neb_") for i in items)
     assert len({i["id"] for i in items}) == len(items), "ids must be unique"
