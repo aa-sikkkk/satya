@@ -47,6 +47,7 @@ def test_flatten_produces_deterministic_items():
     )
     assert item["collection"] == "neb_science_grade_9"
     assert item["metadata"]["topic"] == "Motion"
+    assert item["metadata"]["source_file"] == "<memory>"
     assert "Total distance over total time." in item["text"]
     assert "- Divide distance by time." in item["text"]
 

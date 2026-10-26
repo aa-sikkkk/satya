@@ -90,6 +90,11 @@ def build_db(items: list, db_path: Path) -> dict:
             )
         per_collection[name] = coll.count()
 
+    for col in client.list_collections():
+        if col.name.startswith("neb_") and col.name not in per_collection:
+            client.delete_collection(col.name)
+            logger.info(f"    pruned empty-source collection: {col.name}")
+
     for name, count in sorted(per_collection.items()):
         logger.info(f"    {name}: {count} chunks")
     return per_collection

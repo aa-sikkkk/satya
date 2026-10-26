@@ -38,7 +38,7 @@ def flattener_item_id(subject: str, grade: str, path: List[str]) -> str:
 
 
 def _walk_concepts(
-    node: Dict, subject: str, grade: str, path: List[str]
+    node: Dict, subject: str, grade: str, path: List[str], source_name: str = ""
 ) -> Iterator[Dict]:
     name = node.get("name")
     _require(isinstance(name, str) and name.strip(), f"node missing name: {path!r}")
@@ -79,6 +79,7 @@ def _walk_concepts(
                     "topic": child_path[0] if child_path else "",
                     "concept": cname,
                     "source_path": "/".join(full_path),
+                    "source_file": source_name,
                     "type": "neb_curriculum",
                 },
             }
@@ -91,7 +92,7 @@ def _walk_concepts(
         )
     if isinstance(subtopics, list):
         for sub in subtopics:
-            yield from _walk_concepts(sub, subject, grade, child_path)
+            yield from _walk_concepts(sub, subject, grade, child_path, source_name)
 
 
 def _validated_steps(concept: Dict, path: List[str]) -> List[str]:
@@ -134,7 +135,7 @@ def flatten_content_json(payload: Dict, source_name: str = "<memory>") -> List[D
     items: List[Dict] = []
     for topic in topics:
         _require(isinstance(topic, dict), f"{source_name}: topic not object: {topic!r}")
-        items.extend(_walk_concepts(topic, subject, grade_str, []))
+        items.extend(_walk_concepts(topic, subject, grade_str, [], source_name))
 
     _require(bool(items), f"{source_name}: produced no concept chunks")
     return items

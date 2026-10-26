@@ -60,7 +60,8 @@ def store_structured_items(client, model, items, source_name: str) -> None:
     for name, group in by_collection.items():
         collection = client.get_or_create_collection(name=name)
         new_ids = {i["id"] for i in group}
-        stale = sorted(set(collection.get(include=[])["ids"]) - new_ids)
+        prior = collection.get(where={"source_file": source_name}, include=[])["ids"]
+        stale = sorted(set(prior) - new_ids)
         if stale:
             collection.delete(ids=stale)
             logger.info(f"Pruned {len(stale)} stale chunks from {name}")
