@@ -38,8 +38,6 @@ from tqdm import tqdm
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from scripts.rag_data_preparation.content_flattener import (  # noqa: E402
     ContentValidationError,
-)
-from scripts.rag_data_preparation.content_flattener import (  # noqa: E402
     flatten_content_file,
 )
 from scripts.rag_data_preparation.enhanced_chunker import EnhancedChunker  # noqa: E402
