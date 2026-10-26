@@ -190,15 +190,18 @@ attribution story being accurate.
 GitHub credits are derived from commit metadata, so authorship is preserved
 mechanically:
 
-- PRs merged **squash** keep the **PR author as the commit author** - check
-  the collapse box before merging so the author line is not rewritten to
-  your brand-account name.
-- Merge your own commits with `git commit --author="Name <email>"` (or have
-  the contributor push from their git identity) so they land in the commit
-  list, Insights > Contributors, and release-note credit panels.
-- Reviewers, committers after review, and significant helpers go in the
-  README [Contributors table](../readme.md#contributors). Update it in the
-  PR that gives them credit (plain rows, one per line).
+- PRs merged **squash** set the squashed commit's author to the **PR author**
+  by default - keep that intact when collapsing so the author line is not
+  rewritten to a different account.
+- GitHub does **not** automatically credit additional human commit authors.
+  Co-authors are credited with one `Co-authored-by: Name <email>` trailer
+  per human, using an email associated with that person's GitHub account
+  (then GitHub renders a co-author panel under the commit). You can also
+  set the commit author explicitly:
+  `git commit --author="Name <email>"`.
+- Reviewers, merge committers, and significant helpers go in the README
+  [Contributors table](../readme.md#contributors). Update it in the PR that
+  gives them credit (plain rows, one per line).
 
 ### Human work
 
@@ -212,9 +215,12 @@ mechanically:
 ### AI-assisted contributions
 
 - Changes made with AI coding agents MUST disclose it: commit messages carry
-  `Co-authored-by: opencode <opencode@localhost>` (GitHub render this as a
-  co-author panel under the commit). This is a trust requirement, not a
-  formality.
+  `Co-authored-by: opencode <opencode@localhost>`. Note the `localhost`
+  email is an **internal disclosure marker** only - GitHub creates a
+  co-author panel exclusively for emails bound to a GitHub account, so this
+  trailer is about honest documentation rather than a visible panel. If the
+  agent's metadata later has an account-bound email, switch the trailer to
+  it.
 - The AI agent is never the "author" of a commit; the human who reviews,
   tests, and pushes is the author and is accountable for correctness.
 
@@ -230,21 +236,22 @@ mechanically:
 
 ### Release notes
 
-Release notes are generated with `gh release create --generate-notes` and
-automatically include (step 4 of the release protocol above):
+Release notes are generated with `gh release create --generate-notes`
+(step 4 of the release protocol above). Per GitHub release-notes behavior:
 
-- a **Contributors** panel naming every committer of the batch plus their
-  `Co-authored-by` trailers;
-- the **Pull requests** list for the batch.
+- the generated **Contributors** panel credits commit authors (incl.
+  `Co-authored-by` trailers) of the commits described in the release;
+- the generated **Pull requests** section lists the merged PRs of the
+  batch.
 
-Verify the Contributors panel appears when you check the release page
+Verify the release page shows the documented contributor information
 (step 5 of the release protocol).
 
 ### Third-party content
 
 Curriculum content, models, datasets, and libraries keep the licences
 documented in the README Acknowledgments section - attribution stays with
-the upstream semantic (`OpenStax`, `ScienceQA`, `Phi-1.5`, etc.). When a new
+the upstream source (`OpenStax`, `ScienceQA`, `Phi-1.5`, etc.). When a new
 source is added to the knowledge base, its citation block goes into the
 README and the dataset documentation.
 
@@ -252,7 +259,7 @@ README and the dataset documentation.
 
 The `CITATION.cff` gives academic users a one-click citation export
 (GitHub renders the "Cite this repository" panel from it). Update its
-`version` and `release-date` fields as part of the release PR.
+`version` and `date-released` fields as part of the release PR.
 
 ---
 

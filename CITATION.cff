@@ -3,18 +3,16 @@ message: If you use Satya in your research or classroom, cite it as below.
 title: Satya Learning System
 type: software
 authors:
-  - name: Aashik
+  - given-names: Aashik
     alias: aa-sikkkk
     website: https://github.com/aa-sikkkk
     affiliation: Satya Project
 identifiers:
   - description: GitHub repository (current releases)
-    relation: isPartOf
     type: url
-    url: https://github.com/aa-sikkkk/satya
+    value: https://github.com/aa-sikkkk/satya
 repository-code: https://github.com/aa-sikkkk/satya
 url: https://github.com/aa-sikkkk/satya
-title-note: Offline-first RAG learning companion for Nepal Grades 8-12
 abstract: Satya is an offline-first retrieval-augmented-generation (RAG)
   learning companion for Nepal (NEB) Grades 8-12, optimized to run on
   4GB-RAM CPU-only hardware. It combines a Phi-1.5 GGUF model runtime, a
@@ -22,7 +20,7 @@ abstract: Satya is an offline-first retrieval-augmented-generation (RAG)
   normalization to give students printable-quality explanations without
   internet access.
 version: 2.3.0
-release-date: 2026-10-26
+date-released: 2026-10-26
 keywords:
   - education
   - rag

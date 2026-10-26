@@ -1,6 +1,6 @@
 # Satyá: Learning Companion 
 <div align="center">
-   <img height="250" width="190" src="https://github.com/user-attachments/assets/1230c5ef-bf67-46e3-a66a-9bc950cbb4e6">
+   <img height="180" width="190" src="https://github.com/user-attachments/assets/1230c5ef-bf67-46e3-a66a-9bc950cbb4e6">
 
    [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
    [![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/License-PolyForm%20Noncommercial%201.0.0-orange.svg)](LICENSE)
@@ -761,8 +761,9 @@ See [LICENSE](LICENSE) file for full details.
 ## Contributors
 
 Credits follow the project's attribution policy
-([CONTRIBUTING.md](docs/CONTRIBUTING.md) - commit authorship and rates land
-the author, bots are disclosed in release notes). Contributions of any kind
+([CONTRIBUTING.md](docs/CONTRIBUTING.md)): commit authorship credits
+contributors in the commit history and release notes, and automated bot
+accounts are disclosed here and in release notes. Contributions of any kind
 are welcome - code, curriculum content, documentation, translations, bug
 reports, outreach.
 
