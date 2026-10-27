@@ -43,6 +43,11 @@ if ($Models.Count -gt 1) {
     $Models | ForEach-Object { Write-Host ("    {0}  ({1:N0} MB)" -f $_.Name, ($_.Length / 1MB)) }
     $Models = $Models | Sort-Object Length -Descending | Select-Object -First 1
 }
+$Shards = @($Models | Where-Object { $_.Name -match "-of-\d+\.gguf$" })
+if ($Shards.Count -gt 0) {
+    Write-Host "[X] Split-shard GGUF found; ship a single-file quant instead." -ForegroundColor Red
+    exit 1
+}
 $Model = $Models
 if ($Model.Length -lt 300MB) {
     Write-Host "[X] File looks too small for a Phi-1.5 GGUF Q4_K_M (expected ~500-1100 MB)." -ForegroundColor Red
@@ -60,9 +65,11 @@ Write-Host ("[1/3] Model: {0}  ({1} MB)" -f $Model.Name, $SizeMB)
 $OutZip = Join-Path $OutDir "Satya_Phi_1_5_Model_Win.zip"
 Write-Host "[2/3] Zipping to $OutZip ..."
 if (Test-Path $OutZip) { Remove-Item -Force $OutZip }
-# Zip ONLY the selected .gguf at the archive root: students unzip it straight
-# into %USERPROFILE%\Satya\satya_data\models\phi15 (QUICKSTART documents this).
-Compress-Archive -Path $Model.FullName -DestinationPath $OutZip -CompressionLevel Fastest
+# Zip ONLY the selected .gguf at the archive root, via its literal path so
+# wildcard characters in the filename cannot swap in another file: students
+# unzip it straight into %USERPROFILE%\Satya\satya_data\models\phi15
+# (QUICKSTART documents this).
+Compress-Archive -LiteralPath $Model.FullName -DestinationPath $OutZip -CompressionLevel Fastest
 Write-Host ("      asset: {0}  ({1:N0} MB)" -f (Split-Path $OutZip -Leaf), ((Get-Item $OutZip).Length / 1MB))
 
 if ($Tag) {
