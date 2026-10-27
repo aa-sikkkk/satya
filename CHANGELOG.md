@@ -3,6 +3,10 @@
 All notable changes to the Satya Learning System are documented here.
 Format follows the same spirit as [Keep a Changelog](https://keepachangelog.com/); project uses calendar-agnostic semantic-ish release numbering.
 
+## Unreleased
+
+- Model asset flow — `scripts/release/package_model.ps1` packages/attaches `Satya_Phi_1_5_Model_Win.zip` per release; QUICKSTART + installer next-steps reference the exact asset name (release checklist step in CONTRIBUTING)
+
 ## [2.4.0] — 2026-10-27
 
 - Knowledge-base pipeline — vectordb is a reproducible build artifact: deterministic hash-ID flattener (`content_flattener.py`), one-command `build_vectordb.py` (validate/rebuild), `.json` curriculum support in `ingest_content.py`, release pipeline builds + bundles the knowledge base (updates idempotent), content-contribution flow documented
