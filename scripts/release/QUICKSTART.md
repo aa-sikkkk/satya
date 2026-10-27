@@ -12,7 +12,7 @@ WHAT YOU NEED FIRST (one-time, on any computer with internet):
      IMPORTANT: tick "Add python.exe to PATH" during install.
   2. From the Satya Releases page, download BOTH:
        - Satya_Student_Offline_Win.zip      (app + libraries, ~2 GB)
-       - Student Application + Phi 1.5 Model Download asset (the AI model)
+       - Satya_Phi_1_5_Model_Win.zip        (the AI model)
 
 INSTALL with Satya_Student_Offline_Win.zip (no internet needed):  1. Unzip Satya_Student_Offline_Win.zip anywhere (e.g. Desktop).
   2. Inside the unzipped folder, right-click install_satya.ps1
@@ -21,7 +21,7 @@ INSTALL with Satya_Student_Offline_Win.zip (no internet needed):  1. Unzip Satya
   3. A folder  %USERPROFILE%\Satya  is created containing everything.
 
 ADD THE MODEL:
-  Move the downloaded model folder so this path exists:
+  Unzip Satya_Phi_1_5_Model_Win.zip so the .gguf file sits directly at
     %USERPROFILE%\Satya\satya_data\models\phi15
 
 KNOWLEDGE BASE:

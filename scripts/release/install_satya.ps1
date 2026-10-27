@@ -106,9 +106,10 @@ if (Test-Path $BundledKB) {
 }
 
 Write-Host "[4/4] Done. Next steps:" -ForegroundColor Green
-Write-Host "  1. Download the Phi-1.5 model asset from the same release you got this zip from"
-Write-Host "     (asset: Student Application + Phi 1.5 Model Download)"
-Write-Host "  2. Put the model folder into   $ModelDir"
+Write-Host "  1. Download the AI model zip from the same release you got this zip from:"
+Write-Host "     asset: Satya_Phi_1_5_Model_Win.zip"
+Write-Host "  2. Unzip it so the .gguf file sits directly in:"
+Write-Host "     $ModelDir"
 Write-Host "  3. Without internet later: get the newest 'Satya_Knowledge_Base.zip'"
 Write-Host "     from the same Releases page and unzip it over $TargetDir\satya_data\chroma_db"
 Write-Host "  3. Launch:  double-click satya-gui.cmd   (or satya.cmd for the CLI)"
