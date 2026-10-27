@@ -36,16 +36,50 @@ from sentence_transformers import SentenceTransformer
 from tqdm import tqdm
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from scripts.rag_data_preparation.enhanced_chunker import EnhancedChunker
+from scripts.rag_data_preparation.content_flattener import (  # noqa: E402
+    ContentValidationError,
+    flatten_content_file,
+)
+from scripts.rag_data_preparation.enhanced_chunker import EnhancedChunker  # noqa: E402
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
+
 logger = logging.getLogger(__name__)
+
+BATCH = 100
+
+
+def store_structured_items(client, model, items, source_name: str) -> None:
+    """Upsert flattened content items (hash-ID, batched, idempotent)."""
+    by_collection = {}
+    for item in sorted(items, key=lambda i: i["id"]):
+        by_collection.setdefault(item["collection"], []).append(item)
+
+    for name, group in by_collection.items():
+        collection = client.get_or_create_collection(name=name)
+        new_ids = {i["id"] for i in group}
+        prior = collection.get(where={"source_file": source_name}, include=[])["ids"]
+        stale = sorted(set(prior) - new_ids)
+        if stale:
+            collection.delete(ids=stale)
+            logger.info(f"Pruned {len(stale)} stale chunks from {name}")
+        for start in range(0, len(group), BATCH):
+            batch = group[start : start + BATCH]
+            collection.upsert(
+                ids=[i["id"] for i in batch],
+                documents=[i["text"] for i in batch],
+                embeddings=model.encode(
+                    [i["text"] for i in batch], convert_to_numpy=True
+                ).tolist(),
+                metadatas=[i["metadata"] for i in batch],
+            )
+        logger.info(f"Ingested {len(group)} chunks into {name} ({source_name})")
+
 
 TESSERACT_AVAILABLE = False
 EASYOCR_AVAILABLE = False
-
 try:
     import pytesseract
     from PIL import Image
@@ -194,6 +228,16 @@ class UniversalContentIngester:
                 logger.error(f"Text file error: {e}")
                 return None
 
+        # Structured curriculum JSON -> deterministic hash-ID chunks
+        if file_path.suffix.lower() == ".json":
+            try:
+                items = flatten_content_file(file_path)
+            except ContentValidationError as e:
+                logger.error(f"Content schema error: {e}")
+                return None
+            store_structured_items(self.client, self.model, items, file_path.name)
+            return None
+
         # PDFs
         if file_path.suffix.lower() == ".pdf":
             # Auto-detect or force OCR
@@ -264,6 +308,7 @@ class UniversalContentIngester:
             + list(input_path.rglob("*.txt"))
             + list(input_path.rglob("*.md"))
             + list(input_path.rglob("*.jsonl"))
+            + list(input_path.rglob("*.json"))
         )
 
         logger.info(f"Found {len(files)} files")

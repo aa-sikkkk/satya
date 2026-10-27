@@ -155,6 +155,63 @@ Contributors shape educational opportunities for underserved communities while b
 
 ---
 
+## Content Contribution Flow (knowledge base)
+
+The vectordb is a **build artifact** - never committed. The repo owns the
+source of truth (content files + pipeline), and releases carry the built DB
+so teachers/students always get the newest version by downloading from
+Releases.
+
+### Adding or revising curriculum content
+
+1. Edit or add a curriculum JSON in
+   `scripts/data_collection/data/content/` - one file per subject/grade
+   batch. Shape (see `English_Grammar.json`):
+   `subject`, numeric `grade`, `topics[].subtopics[].concepts[]` with
+   `name` + `summary` + optional `steps`.
+2. Validate locally (fast, no model downloads):
+   `python -m scripts.build_vectordb --check`
+3. Rebuild locally to verify ingestion (needs `chromadb` +
+   `sentence-transformers`; CPU-only):
+   `python -m scripts.build_vectordb`
+4. Open the PR with the content change. Review by a maintainer merges it
+   into `master`.
+
+### Revision semantics
+
+Chunk ids are content hashes of
+`subject|grade|topic|subtopic|concept` (`content_flattener.py`), and
+`build_vectordb.py` prunes database entries whose ids are no longer
+produced by the tracked files, so:
+
+- re-ingesting after an edit **replaces** the old chunk - no duplicates;
+- re-ingesting after a rename/delete **removes** the obsolete chunk;
+- chunk generation is deterministic (covered by
+  `test_flatten_produces_deterministic_items`).
+
+### How updates reach students
+
+- Each tag/release: `release-assets.yml` runs `build_vectordb.py` on the
+  runner, attaches `Satya_Knowledge_Base.zip`, and bundles the same DB
+  inside `Satya_Student_Offline_Win.zip` - fresh installs and KB updates
+  both come from the release page.
+- Teachers unpack the newest `Satya_Knowledge_Base.zip` and copy the
+  `chroma_db` folder from inside `knowledge_base\` over
+  `satya_data/chroma_db` on the students' machine (QUICKSTART documents
+  the 60-second step). No internet required on student hardware.
+
+### Content quality rules
+
+- One file per subject/grade batch; keep `subject` stable (it keys the
+  collection name `neb_{subject}_grade_{grade}`).
+- Grade must be an integer in NEB range 8-12 (enforced by the flattener).
+- Optionally run `python scripts/validation/validate_standards.py` for
+  language standards checks.
+- Cultural sensitivity and accuracy per the Content Contributions section
+  above still apply.
+
+---
+
 ## Release Process (maintainer-only, manual)
 
 Releases are deliberately batched - **nothing publishes automatically** when

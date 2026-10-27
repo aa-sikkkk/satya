@@ -41,6 +41,14 @@ jobs:
           New-Item -ItemType Directory -Force -Path wheels | Out-Null
           python -m pip download (Get-ChildItem dist -Filter "satya_learning_system-*.whl").FullName --dest wheels -q
 
+      - name: Build offline knowledge base (ChromaDB from tracked content)
+        run: |
+          python -m pip install "chromadb>=0.4.0" "sentence-transformers>=2.2.0" -q
+          python scripts/build_vectordb.py --db kb_build --out-manifest knowledge_base/manifest.json
+          New-Item -ItemType Directory -Force -Path knowledge_base/chroma_db | Out-Null
+          Copy-Item kb_build/* knowledge_base/chroma_db/ -Recurse
+          Compress-Archive -Path knowledge_base -DestinationPath "Satya_Knowledge_Base.zip" -Force
+
       - name: Assemble OFFLINE student installer zip
         shell: pwsh
         run: |
@@ -50,6 +58,7 @@ jobs:
           Copy-Item dist/satya_learning_system-*.whl pkg_offline/
           Copy-Item wheels/* pkg_offline/wheels/
           Copy-Item wheels_prebuilt/* pkg_offline/wheels/
+          Copy-Item Satya_Knowledge_Base.zip pkg_offline/
           Compress-Archive -Path pkg_offline/* -DestinationPath "Satya_Student_Offline_Win.zip" -Force
 
       - name: Assemble small installer-only zip (PyPI fallback path)
@@ -71,7 +80,8 @@ jobs:
             echo "Release for $TAG exists - uploading/updating assets"
             gh release upload "$TAG" \
               dist/satya_learning_system-*.whl dist/satya_learning_system-*.tar.gz \
-              Satya_Student_Offline_Win.zip Satya_Student_Installer_Win.zip --clobber
+              Satya_Student_Offline_Win.zip Satya_Student_Installer_Win.zip \
+              Satya_Knowledge_Base.zip --clobber
             if gh release view "$TAG" --json isDraft --jq .isDraft | grep -qi true; then
               echo "Draft release - publishing after assets upload"
               gh release edit "$TAG" --draft=false
@@ -80,5 +90,6 @@ jobs:
             gh release create "$TAG" --generate-notes \
               --title "Satya Learning System $TAG" \
               dist/satya_learning_system-*.whl dist/satya_learning_system-*.tar.gz \
-              Satya_Student_Offline_Win.zip Satya_Student_Installer_Win.zip
+              Satya_Student_Offline_Win.zip Satya_Student_Installer_Win.zip \
+              Satya_Knowledge_Base.zip
           fi
