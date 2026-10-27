@@ -16,18 +16,6 @@ Format follows the same spirit as [Keep a Changelog](https://keepachangelog.com/
 - Input normalization — vocative-only casual address handling with punctuation separators; query-term preservation for `bro`/`dude` subjects
 - Bot-gated dependency bumps merged: black 25.12.0, ruff 0.17.2 pins, pandas floor 2.3.3, tqdm floor 4.70.1, actions group (checkout v7, setup-python v6, labeler v7, stale v11), release action leftovers (now in repo history channel)
 
-## [2.2.0] — 2026-02
-
-- Diagram System Overhaul — modular `system/diagrams` package with grade-aware library (Grades 8–12) and natural triggering logic
-- CLI/GUI parity — reconciled AI grading logic, robust fallback for missing `correct_answer` fields
-- Input Normalization System — rule-based 4-layer noise removal, pattern mining from production logs
-- Enhanced RAG architecture — 7 HuggingFace datasets, subject/grade-based collection routing, semantic cache
-- Single Phi 1.5 model runtime (Q4_K_M GGUF, CPU-only)
-- Universal content ingestion (`scripts/ingest_content.py`) with OCR support
-- Progressive UX status updates during retrieval
-
-## [2.3.0-unreleased] — in progress
-
 ### automation
 - Installed free-for-OSS bot stack: CodeRabbit PR review (`.coderabbit.yaml`), Dependabot version updates for pip + GitHub Actions (`.github/dependabot.yml`), release-please (Conventional-Commits-driven version/CHANGELOG/GitHub-release automation, `release-please-config.json`), PR auto-labeler, stale bot (issues close after grace; PRs never auto-closed), Conventional-Commits PR title lint
 - Enabled Dependabot vulnerability alerts + automated security fixes in repo settings
@@ -67,3 +55,13 @@ Format follows the same spirit as [Keep a Changelog](https://keepachangelog.com/
 - Fixed version drift — single version source: `pyproject.toml` (2.2.0); `ai_model.__version__` now reads installed metadata (graceful fallback in plain checkouts)
 - Moved `USER_GUIDE.md` → `docs/USER_GUIDE.md` (GUI view updated with root fallback)
 - `docs/PROJECT_STRUCTURE.md` rewritten as the authoritative, graph-verified directory map (adds optional `OpenAi_Proxy/` service, dependency-direction rules, runtime-data layout)
+
+## [2.2.0] — 2026-02
+
+- Diagram System Overhaul — modular `system/diagrams` package with grade-aware library (Grades 8–12) and natural triggering logic
+- CLI/GUI parity — reconciled AI grading logic, robust fallback for missing `correct_answer` fields
+- Input Normalization System — rule-based 4-layer noise removal, pattern mining from production logs
+- Enhanced RAG architecture — 7 HuggingFace datasets, subject/grade-based collection routing, semantic cache
+- Single Phi 1.5 model runtime (Q4_K_M GGUF, CPU-only)
+- Universal content ingestion (`scripts/ingest_content.py`) with OCR support
+- Progressive UX status updates during retrieval
