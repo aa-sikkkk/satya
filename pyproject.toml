@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "satya-learning-system"
-version = "2.3.0"
+version = "2.4.0"
 description = "Offline-first RAG learning companion for Grades 8-12 (NEB curriculum), optimized for 4GB-RAM hardware."
 readme = "readme.md"
 requires-python = ">=3.11"
