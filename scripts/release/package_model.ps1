@@ -44,24 +44,25 @@ if ($Models.Count -gt 1) {
     $Models = $Models | Sort-Object Length -Descending | Select-Object -First 1
 }
 $Model = $Models
-$SizeMB = [math]::Round($Model.Length / 1MB, 0)
-Write-Host ("[1/3] Model: {0}  ({1} MB)" -f $Model.Name, $SizeMB)
-if ($SizeMB -lt 300) {
+if ($Model.Length -lt 300MB) {
     Write-Host "[X] File looks too small for a Phi-1.5 GGUF Q4_K_M (expected ~500-1100 MB)." -ForegroundColor Red
     Write-Host "    Aborting - a partial download would break student installs silently." -ForegroundColor Red
     exit 1
 }
-if ($SizeMB -gt 2048) {
-    Write-Host "[X] File exceeds the ~1 GB inference memory budget; refusing to ship." -ForegroundColor Red
+if ($Model.Length -gt 1GB) {
+    Write-Host "[X] File exceeds the ~1 GB inference memory budget (staying CPU-only);" -ForegroundColor Red
+    Write-Host "    refusing to ship. Ship a lighter quant instead." -ForegroundColor Red
     exit 1
 }
+$SizeMB = [math]::Round($Model.Length / 1MB, 0)
+Write-Host ("[1/3] Model: {0}  ({1} MB)" -f $Model.Name, $SizeMB)
 
 $OutZip = Join-Path $OutDir "Satya_Phi_1_5_Model_Win.zip"
 Write-Host "[2/3] Zipping to $OutZip ..."
 if (Test-Path $OutZip) { Remove-Item -Force $OutZip }
-# Zip the folder CONTENTS at the archive root: students unzip them straight
+# Zip ONLY the selected .gguf at the archive root: students unzip it straight
 # into %USERPROFILE%\Satya\satya_data\models\phi15 (QUICKSTART documents this).
-Compress-Archive -Path (Join-Path $ModelDir "*") -DestinationPath $OutZip -CompressionLevel Fastest
+Compress-Archive -Path $Model.FullName -DestinationPath $OutZip -CompressionLevel Fastest
 Write-Host ("      asset: {0}  ({1:N0} MB)" -f (Split-Path $OutZip -Leaf), ((Get-Item $OutZip).Length / 1MB))
 
 if ($Tag) {
