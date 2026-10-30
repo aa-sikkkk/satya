@@ -49,6 +49,15 @@ if ($Shards.Count -gt 0) {
     exit 1
 }
 $Model = $Models
+$ExpectedName = "phi-1_5.Q4_K_M.gguf"
+$ExpectedSize = 893546944
+$ExpectedSha = "457f510790d7b19358f44ccbaf8bf540556471f3c344c99cc3ef8a74274a98fb"
+if ($Model.Name -ne $ExpectedName -or $Model.Length -ne $ExpectedSize) {
+    Write-Host "[X] Not the pinned canonical model: found $($Model.Name) ($($Model.Length) bytes)." -ForegroundColor Red
+    Write-Host "    Provenance (MODEL_README.txt) documents $ExpectedName / $ExpectedSize bytes." -ForegroundColor Red
+    Write-Host "    To ship a different quant, change the pin consciously in the release workflow AND this script." -ForegroundColor Red
+    exit 1
+}
 if ($Model.Length -lt 300MB) {
     Write-Host "[X] File looks too small for a Phi-1.5 GGUF Q4_K_M (expected ~500-1100 MB)." -ForegroundColor Red
     Write-Host "    Aborting - a partial download would break student installs silently." -ForegroundColor Red
@@ -59,17 +68,25 @@ if ($Model.Length -gt 1GB) {
     Write-Host "    refusing to ship. Ship a lighter quant instead." -ForegroundColor Red
     exit 1
 }
+$ActualSha = (Get-FileHash -LiteralPath $Model.FullName -Algorithm SHA256).Hash.ToLower()
+if ($ActualSha -ne $ExpectedSha) {
+    Write-Host "[X] sha256 mismatch with the pinned provenance: got $ActualSha." -ForegroundColor Red
+    Write-Host "    A re-quantized or repaired file needs its MODEL_README.txt updated consciously." -ForegroundColor Red
+    exit 1
+}
 $SizeMB = [math]::Round($Model.Length / 1MB, 0)
 Write-Host ("[1/3] Model: {0}  ({1} MB)" -f $Model.Name, $SizeMB)
 
 $OutZip = Join-Path $OutDir "Satya_Phi_1_5_Model_Win.zip"
 Write-Host "[2/3] Zipping to $OutZip ..."
 if (Test-Path $OutZip) { Remove-Item -Force $OutZip }
-# Zip ONLY the selected .gguf at the archive root, via its literal path so
+# Zip the selected .gguf at the archive root, via its literal path so
 # wildcard characters in the filename cannot swap in another file: students
 # unzip it straight into %USERPROFILE%\Satya\satya_data\models\phi15
-# (QUICKSTART documents this).
-Compress-Archive -LiteralPath $Model.FullName -DestinationPath $OutZip -CompressionLevel Fastest
+# (QUICKSTART documents this). The shared provenance notice rides along so
+# manually regenerated assets stay equivalent to CI-built ones.
+$Provenance = Join-Path (Split-Path $PSScriptRoot -Parent) "release\MODEL_README.txt"
+Compress-Archive -LiteralPath $Model.FullName, $Provenance -DestinationPath $OutZip -CompressionLevel Fastest
 Write-Host ("      asset: {0}  ({1:N0} MB)" -f (Split-Path $OutZip -Leaf), ((Get-Item $OutZip).Length / 1MB))
 
 if ($Tag) {

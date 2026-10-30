@@ -232,14 +232,18 @@ PRs are merged. The full protocol:
 5. Verify the release page lists the wheel, sdist,
    `Satya_Student_Offline_Win.zip` + `Satya_Student_Installer_Win.zip`,
    and `Satya_Knowledge_Base.zip`.
-6. Attach the AI model asset (a maintainer-owned local file the CI never
-   builds - the GGUF is too large and gitignored):
-   `powershell -File scripts/release/package_model.ps1 -Tag vX.Y.Z`
-   It zips the local `satya_data/models/phi15/*.gguf` and uploads
-   `Satya_Phi_1_5_Model_Win.zip` - the exact asset name QUICKSTART and
-   the installer's next-steps text reference.
-7. Verify the model asset is present on the release page; QUICKSTART
-   breaks without it.
+6. The AI model asset is attached automatically by the pipeline: it
+   downloads the pinned `phi-1_5.Q4_K_M.gguf` (sha256-verified in the
+   workflow), zips it as `Satya_Phi_1_5_Model_Win.zip`, and includes it
+   with the other assets at creation - so GitHub's immutable-release
+   protection is satisfied and QUICKSTART stays truthful for students.
+   `scripts/release/package_model.ps1` remains available for manual
+   regeneration/mirroring when a quant needs changing (CI rejects
+   post-publish asset attachment: releases are immutable once created).
+7. Verify the release page lists the wheel, sdist,
+   `Satya_Student_Offline_Win.zip` + `Satya_Student_Installer_Win.zip`,
+   `Satya_Knowledge_Base.zip`, and `Satya_Phi_1_5_Model_Win.zip`;
+   QUICKSTART breaks without the model asset.
 
 There is no automated release bot; old release-please config was removed on
 purpose to keep the decision in maintainer hands.

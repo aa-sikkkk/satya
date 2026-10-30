@@ -23,6 +23,8 @@ INSTALL with Satya_Student_Offline_Win.zip (no internet needed):  1. Unzip Satya
 ADD THE MODEL:
   Unzip Satya_Phi_1_5_Model_Win.zip so the .gguf file sits directly at
     %USERPROFILE%\Satya\satya_data\models\phi15
+  (Model: Microsoft Phi-1.5, MIT license; see MODEL_README.txt inside the
+  zip for source + provenance.)
 
 KNOWLEDGE BASE:
   The offline zip already contains the current question/answer knowledge
