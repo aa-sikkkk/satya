@@ -19,8 +19,8 @@ abstract: Satya is an offline-first retrieval-augmented-generation (RAG)
   semantic cache, an ASCII diagram engine, and rule-based input
   normalization to give students printable-quality explanations without
   internet access.
-version: 2.4.0
-date-released: 2026-10-27
+version: 2.4.1
+date-released: 2026-10-30
 keywords:
   - education
   - rag
