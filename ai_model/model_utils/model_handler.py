@@ -89,7 +89,7 @@ class ModelHandler:
             yield "I'm having trouble with your question. Please try again."
 
     def generate_response(self, prompt: str, max_tokens: int = 512) -> str:
-        """Video passthrough for raw prompt generation."""
+        """Raw prompt generation with grading-oriented stops."""
         try:
             return self.handler.generate_response(prompt, max_tokens)
         except Exception as e:
@@ -103,7 +103,7 @@ class ModelHandler:
             "format": "GGUF",
             "backend": "llama-cpp-python",
             "optimized_for": "i3_cpu",
-            "context_size": "384 tokens",
+            "context_size": "2048 tokens",
         }
 
     def cleanup(self):

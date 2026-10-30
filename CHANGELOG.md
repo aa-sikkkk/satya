@@ -3,6 +3,11 @@
 All notable changes to the Satya Learning System are documented here.
 Format follows the same spirit as [Keep a Changelog](https://keepachangelog.com/); project uses calendar-agnostic semantic-ish release numbering.
 
+## Unreleased
+
+- Grade-aware RAG pipeline — the engine takes a `grade` parameter end-to-end (GUI/CLI -> engine -> collection selection -> cache key); NEB grade collections are matched exactly first (`neb_<subject>_grade_<g>`), then subject-level, then general sources; offline answer-quality harness added (`scripts/eval/eval_answer_quality.py`, model-gated, local-only) with a curated key-term rubric
+- Core-path fixes — retrieval engine no longer force-enables LanguageTool spell-check (offline-first regression); all LLM calls go through the single `ModelHandler` facade (streaming and non-streaming); unused `system_prompt` removed; model info reports the real 2048-token context
+
 ## [2.4.1] — 2026-10-30
 
 - Model asset flow — release pipeline downloads the pinned `phi-1_5.Q4_K_M.gguf` (immutable mirror revision, sha256 + size verified in CI), zips and attaches `Satya_Phi_1_5_Model_Win.zip` at publish with a provenance notice (`MODEL_README.txt`, MIT attribution) inside; QUICKSTART + installer reference the exact asset name; `package_model.ps1` kept for manual mirroring (refuses any file not matching the pinned provenance); release checklist updated in CONTRIBUTING

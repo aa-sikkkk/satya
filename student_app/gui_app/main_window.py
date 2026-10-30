@@ -1040,6 +1040,7 @@ class NEBeduApp(ctk.CTk):
                     response = self.rag_engine.query(
                         query_text=normalized_question,
                         subject=self.current_subject_filter,
+                        grade=self.selected_grade,
                         stream_callback=on_token,
                     )
 

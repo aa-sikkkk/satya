@@ -519,7 +519,10 @@ class CLIInterface:
             try:
                 # Remove console.status to prevent layout conflicts with RAG prints and streaming
                 response = self.rag_engine.query(
-                    query_text=question, subject="", stream_callback=stream_callback
+                    query_text=question,
+                    subject=self.selected_subject or "",
+                    grade=self.selected_grade or "",
+                    stream_callback=stream_callback,
                 )
 
             finally:
