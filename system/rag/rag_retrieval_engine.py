@@ -45,7 +45,7 @@ class RAGRetrievalEngine:
         self.anti_confusion = AntiConfusionEngine()
         self.diagram_library = ASCIIDiagramLibrary()
         self.cache = RAGCache(max_size=100, ttl_seconds=3600)
-        self.input_normalizer = AdaptiveNormalizer(enable_spell_check=True)
+        self.input_normalizer = AdaptiveNormalizer()
         self.embedding_gen = EmbeddingGenerator(device="cpu")
 
         # ChromaDB init
@@ -94,13 +94,20 @@ class RAGRetrievalEngine:
         except Exception as e:
             logger.warning(f"RAG warm-up failed (non-critical): {e}")
 
-    def _get_relevant_collections(self, subject: str, grade: str) -> List[str]:
+    @staticmethod
+    def _normalize_grade(grade) -> str:
+        """Extracts the numeric grade ('Grade 9'/'grade_9'/9 -> '9')."""
+        digits = "".join(ch for ch in str(grade or "").lower() if ch.isdigit())
+        return digits
+
+    def _get_relevant_collections(self, subject: str, grade: str = "") -> List[str]:
         """
         Selects relevant collections based on subject and grade.
 
-        Strategy:
-        1. NEB collections: Filter by BOTH subject AND grade
-        2. HuggingFace collections: Filter by SUBJECT ONLY (ignore grade)
+        Strategy (grade-aware):
+        1. NEB collections for the EXACT grade: neb_{subject}_grade_{grade}
+        2. Without grade (or no exact match): any NEB collection of the subject
+        3. HuggingFace collections: filter by SUBJECT (grade-agnostic)
 
         Returns max 3 collections for performance.
         """
@@ -110,15 +117,38 @@ class RAGRetrievalEngine:
         all_colls = [c.name for c in self.chroma_client.list_collections()]
         collections = []
 
-        # 1. NEB Collections (grade-specific)
-        # Format: neb_{subject}_grade_{grade}
-        neb_key = f"neb_{subject.lower()}_grade_{grade}"
-        for name in all_colls:
-            if neb_key in name.lower():
-                collections.append(name)
-                logger.info(f"Selected NEB collection (grade {grade}): {name}")
+        # Canonical collection key mirrors the curator convention:
+        # lowercase, spaces -> underscores (scripts/rag_data_preparation/content_flattener.py)
+        subject_key = subject.lower().replace(" ", "_").strip("_")
+        grade_key = self._normalize_grade(grade)
+        # Alias forms so user-facing subjects resolve to curator keys
+        subject_keys = [subject_key]
+        if subject_key == "mathematics":
+            subject_keys.append("math")
+        elif subject_key == "math":
+            subject_keys.append("mathematics")
 
-        # 2. HuggingFace Collections (subject-based, all grades)
+        # 1. NEB Collections (grade-specific): Format: neb_{subject}_grade_{grade}
+        if grade_key:
+            for s_key in subject_keys:
+                neb_key = f"neb_{s_key}_grade_{grade_key}"
+                for name in all_colls:
+                    if neb_key in name.lower() and name not in collections:
+                        collections.append(name)
+                        logger.info(
+                            f"Selected NEB collection (grade {grade_key}): {name}"
+                        )
+
+        # 2. NEB subject-level collections (no grade given, or grade has no exact match)
+        if not collections:
+            for s_key in subject_keys:
+                neb_prefix = f"neb_{s_key}"
+                for name in sorted(all_colls):
+                    if name.lower().startswith(neb_prefix) and name not in collections:
+                        collections.append(name)
+                        logger.info(f"Selected NEB collection (all grades): {name}")
+
+        # 3. HuggingFace Collections (subject-based, all grades)
         # Maps subjects to appropriate general knowledge collections
         subject_map = {
             "biology": ["openstax_science", "scienceqa"],
@@ -147,7 +177,7 @@ class RAGRetrievalEngine:
                     if len(collections) >= 3:  # Max 3 collections for performance
                         break
 
-        # 3. Fallback: General education collections
+        # 4. Fallback: General education collections
         if not collections:
             fallback = ["khanacademy_pedagogy", "fineweb_edu"]
             for fb in fallback:
@@ -161,7 +191,12 @@ class RAGRetrievalEngine:
         return collections[:3]
 
     def query(
-        self, query_text: str, subject: str, n_results: int = 3, stream_callback=None
+        self,
+        query_text: str,
+        subject: str,
+        grade: str = "",
+        n_results: int = 3,
+        stream_callback=None,
     ) -> Dict[str, Any]:
         """Main query method, with streaming support."""
         start_time = time.time()
@@ -195,7 +230,7 @@ class RAGRetrievalEngine:
 
         effective_query = clean_question if clean_question else query_text
 
-        cached_result = self.cache.get(query_text, subject, "")
+        cached_result = self.cache.get(query_text, subject, grade)
         if cached_result:
             logger.info("Cache HIT (exact)")
             if stream_callback:
@@ -215,7 +250,7 @@ class RAGRetrievalEngine:
         query_embedding = self.embedding_gen.generate_embeddings(effective_query)
 
         semantic_hit = self.cache.find_similar(
-            query_embedding, subject, "", threshold=0.88
+            query_embedding, subject, grade, threshold=0.88
         )
         if semantic_hit:
             logger.info("Cache HIT (semantic)")
@@ -226,7 +261,7 @@ class RAGRetrievalEngine:
                     stream_callback(word + (" " if i < len(words) - 1 else ""))
             return {**semantic_hit, "processing_time": time.time() - start_time}
 
-        target_collections = self._get_relevant_collections(subject, "")
+        target_collections = self._get_relevant_collections(subject, grade)
         if not target_collections:
             logger.warning(f"No collections found for {subject}")
 
@@ -294,19 +329,17 @@ class RAGRetrievalEngine:
             try:
                 if stream_callback:
                     answer = ""
-                    token_count = 0
-                    for token in self.llm.handler.get_answer_stream(
+                    for token in self.llm.get_answer_stream(
                         effective_query, full_context_str
                     ):
                         answer += token
                         stream_callback(token)
-                        token_count += 1
 
                     confidence = self._calculate_confidence(
                         answer, effective_query, final_context_chunks
                     )
                 else:
-                    answer, confidence = self.llm.simple_handler.get_answer(
+                    answer, confidence = self.llm.get_answer(
                         effective_query, full_context_str
                     )
             except Exception as e:
@@ -326,7 +359,7 @@ class RAGRetrievalEngine:
             "type": "rag_response",
         }
 
-        self.cache.set(query_text, subject, "", result, embedding=query_embedding)
+        self.cache.set(query_text, subject, grade, result, embedding=query_embedding)
 
         return result
 

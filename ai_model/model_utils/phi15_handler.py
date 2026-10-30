@@ -35,12 +35,6 @@ class SimplePhiHandler:
     def __init__(self, model_path: str):
         self.model_path = model_path
         self.llm = None
-        self.system_prompt = (
-            "You are Satya, a clear and patient educational tutor.\n"
-            "Explain concepts to high-school students.\n"
-            "Provide clear, concise, and complete answers.\n"
-            "Do not include exercises, Q/A echoes, or lists."
-        )
 
     def load_model(self):
         if self.llm is not None:
