@@ -53,8 +53,6 @@ jobs:
         run: |
           New-Item -ItemType Directory -Force -Path model_asset | Out-Null
           $url = "https://huggingface.co/RichardErkhov/microsoft_-_phi-1_5-gguf/resolve/main/phi-1_5.Q4_K_M.gguf"
-          $src = "https://huggingface.co/microsoft/phi-1_5"
-          $conv = "https://huggingface.co/RichardErkhov/microsoft_-_phi-1_5-gguf"
           curl.exe --fail --silent --show-error --retry 3 --retry-delay 2 -L -o model_asset/phi-1_5.Q4_K_M.gguf $url
           $hash = (Get-FileHash model_asset/phi-1_5.Q4_K_M.gguf -Algorithm SHA256).Hash.ToLower()
           if ($hash -ne "457f510790d7b19358f44ccbaf8bf540556471f3c344c99cc3ef8a74274a98fb") {
@@ -65,7 +63,7 @@ jobs:
             Write-Host "[X] Model size mismatch (expected 893546944 bytes)" -ForegroundColor Red
             exit 1
           }
-          Set-Content -Path model_asset/MODEL_README.txt -Encoding utf8 -Value "Phi-1.5 GGUF quantification shipped with Satya`r`n`r`nUpstream model (MIT license): $src`r`nGGUF conversion (community mirror): $conv`r`nFile: phi-1_5.Q4_K_M.gguf, $((Get-Item model_asset/phi-1_5.Q4_K_M.gguf).Length) bytes`r`nSHA-256: $hash`r`n`r`nThe MIT License of the upstream Phi-1.5 model applies and is retained per`r`nthat license - full text: https://huggingface.co/microsoft/phi-1_5/blob/main/LICENSE"
+          Copy-Item scripts/release/MODEL_README.txt model_asset/MODEL_README.txt
           Compress-Archive -Path model_asset/phi-1_5.Q4_K_M.gguf, model_asset/MODEL_README.txt -DestinationPath "Satya_Phi_1_5_Model_Win.zip" -CompressionLevel Fastest
 
       - name: Assemble OFFLINE student installer zip
