@@ -49,6 +49,15 @@ if ($Shards.Count -gt 0) {
     exit 1
 }
 $Model = $Models
+$ExpectedName = "phi-1_5.Q4_K_M.gguf"
+$ExpectedSize = 893546944
+$ExpectedSha = "457f510790d7b19358f44ccbaf8bf540556471f3c344c99cc3ef8a74274a98fb"
+if ($Model.Name -ne $ExpectedName -or $Model.Length -ne $ExpectedSize) {
+    Write-Host "[X] Not the pinned canonical model: found $($Model.Name) ($($Model.Length) bytes)." -ForegroundColor Red
+    Write-Host "    Provenance (MODEL_README.txt) documents $ExpectedName / $ExpectedSize bytes." -ForegroundColor Red
+    Write-Host "    To ship a different quant, change the pin consciously in the release workflow AND this script." -ForegroundColor Red
+    exit 1
+}
 if ($Model.Length -lt 300MB) {
     Write-Host "[X] File looks too small for a Phi-1.5 GGUF Q4_K_M (expected ~500-1100 MB)." -ForegroundColor Red
     Write-Host "    Aborting - a partial download would break student installs silently." -ForegroundColor Red
@@ -57,6 +66,12 @@ if ($Model.Length -lt 300MB) {
 if ($Model.Length -gt 1GB) {
     Write-Host "[X] File exceeds the ~1 GB inference memory budget (staying CPU-only);" -ForegroundColor Red
     Write-Host "    refusing to ship. Ship a lighter quant instead." -ForegroundColor Red
+    exit 1
+}
+$ActualSha = (Get-FileHash -LiteralPath $Model.FullName -Algorithm SHA256).Hash.ToLower()
+if ($ActualSha -ne $ExpectedSha) {
+    Write-Host "[X] sha256 mismatch with the pinned provenance: got $ActualSha." -ForegroundColor Red
+    Write-Host "    A re-quantized or repaired file needs its MODEL_README.txt updated consciously." -ForegroundColor Red
     exit 1
 }
 $SizeMB = [math]::Round($Model.Length / 1MB, 0)

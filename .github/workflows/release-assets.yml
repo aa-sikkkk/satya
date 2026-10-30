@@ -52,7 +52,7 @@ jobs:
       - name: Attach AI model asset (pinned Q4_K_M GGUF)
         run: |
           New-Item -ItemType Directory -Force -Path model_asset | Out-Null
-          $url = "https://huggingface.co/RichardErkhov/microsoft_-_phi-1_5-gguf/resolve/main/phi-1_5.Q4_K_M.gguf"
+          $url = "https://huggingface.co/RichardErkhov/microsoft_-_phi-1_5-gguf/resolve/12788cf67643ac88f3d5cc1144c21ddb50f25a49/phi-1_5.Q4_K_M.gguf"
           curl.exe --fail --silent --show-error --retry 3 --retry-delay 2 -L -o model_asset/phi-1_5.Q4_K_M.gguf $url
           $hash = (Get-FileHash model_asset/phi-1_5.Q4_K_M.gguf -Algorithm SHA256).Hash.ToLower()
           if ($hash -ne "457f510790d7b19358f44ccbaf8bf540556471f3c344c99cc3ef8a74274a98fb") {
