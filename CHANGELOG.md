@@ -5,7 +5,7 @@ Format follows the same spirit as [Keep a Changelog](https://keepachangelog.com/
 
 ## Unreleased
 
-- Model asset flow — `scripts/release/package_model.ps1` packages/attaches `Satya_Phi_1_5_Model_Win.zip` per release; QUICKSTART + installer next-steps reference the exact asset name (release checklist step in CONTRIBUTING)
+- Model asset flow — release pipeline downloads the pinned `phi-1_5.Q4_K_M.gguf` (sha256 + size verified in CI), zips and attaches `Satya_Phi_1_5_Model_Win.zip` at publish (immutable-release safe); QUICKSTART + installer reference the exact asset name; `package_model.ps1` kept for manual mirroring; release checklist updated in CONTRIBUTING
 
 ## [2.4.0] — 2026-10-27
 
