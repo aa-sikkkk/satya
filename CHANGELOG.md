@@ -3,9 +3,10 @@
 All notable changes to the Satya Learning System are documented here.
 Format follows the same spirit as [Keep a Changelog](https://keepachangelog.com/); project uses calendar-agnostic semantic-ish release numbering.
 
-## Unreleased
+## [2.4.1] — 2026-10-30
 
-- Model asset flow — release pipeline downloads the pinned `phi-1_5.Q4_K_M.gguf` (sha256 + size verified in CI), zips and attaches `Satya_Phi_1_5_Model_Win.zip` at publish (immutable-release safe); QUICKSTART + installer reference the exact asset name; `package_model.ps1` kept for manual mirroring; release checklist updated in CONTRIBUTING
+- Model asset flow — release pipeline downloads the pinned `phi-1_5.Q4_K_M.gguf` (immutable mirror revision, sha256 + size verified in CI), zips and attaches `Satya_Phi_1_5_Model_Win.zip` at publish with a provenance notice (`MODEL_README.txt`, MIT attribution) inside; QUICKSTART + installer reference the exact asset name; `package_model.ps1` kept for manual mirroring (refuses any file not matching the pinned provenance); release checklist updated in CONTRIBUTING
+- Release renumbering — the `v2.4.0` tag was consumed by its published immutable release and is permanently unavailable for re-tagging on this repo, so the model-asset shipping change lands as 2.4.1 (2026-10-27 content unchanged)
 
 ## [2.4.0] — 2026-10-27
 
